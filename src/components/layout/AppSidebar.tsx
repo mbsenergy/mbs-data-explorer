@@ -66,11 +66,14 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <img 
-          src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
-          alt="MBS Logo" 
-          className="h-8 w-auto object-contain"
-        />
+        <div className="flex flex-col items-start">
+          <img 
+            src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
+            alt="MBS Logo" 
+            className="h-8 w-auto object-contain"
+          />
+          <span className="text-sm text-muted-foreground mt-1">Flux Data Platform</span>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
