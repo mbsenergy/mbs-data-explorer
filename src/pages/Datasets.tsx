@@ -165,6 +165,7 @@ const Datasets = () => {
         tables={tables || []}
         onPreview={handlePreview}
         onDownload={handleDownload}
+        onToggleFavorite={toggleFavorite}
       />
 
       <DatasetSearch
