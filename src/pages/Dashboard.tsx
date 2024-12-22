@@ -19,6 +19,41 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
+const chartConfig = {
+  value: {
+    label: "Value",
+    color: "var(--primary)",
+  },
+  gdp: {
+    label: "GDP",
+    theme: {
+      light: "hsl(var(--primary))",
+      dark: "hsl(var(--primary))",
+    },
+  },
+  employment: {
+    label: "Employment Rate",
+    theme: {
+      light: "hsl(var(--primary))",
+      dark: "hsl(var(--primary))",
+    },
+  },
+  energy: {
+    label: "Energy Price",
+    theme: {
+      light: "hsl(var(--primary))",
+      dark: "hsl(var(--primary))",
+    },
+  },
+  generation: {
+    label: "Generation",
+    theme: {
+      light: "hsl(var(--primary))",
+      dark: "hsl(var(--primary))",
+    },
+  },
+};
+
 const Dashboard = () => {
   const { data: gdpData, isLoading: gdpLoading } = useQuery({
     queryKey: ["gdp"],
@@ -88,6 +123,9 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
+      <p className="text-muted-foreground">
+        Visualize datasets stored in the Supabase database, including:
+      </p>
       
       {/* Economics Section */}
       <div className="space-y-2">
@@ -104,14 +142,20 @@ const Dashboard = () => {
             {gdpLoading ? (
               <Skeleton className="h-[200px] w-full" />
             ) : (
-              <ChartContainer className="h-[200px]">
+              <ChartContainer className="h-[200px]" config={chartConfig}>
                 <ResponsiveContainer>
                   <LineChart data={gdpData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="DATE" />
                     <YAxis />
                     <Tooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="VALUE" stroke="var(--primary)" strokeWidth={2} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="VALUE" 
+                      name="gdp"
+                      stroke="var(--primary)" 
+                      strokeWidth={2} 
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -129,14 +173,20 @@ const Dashboard = () => {
             {employmentLoading ? (
               <Skeleton className="h-[200px] w-full" />
             ) : (
-              <ChartContainer className="h-[200px]">
+              <ChartContainer className="h-[200px]" config={chartConfig}>
                 <ResponsiveContainer>
                   <LineChart data={employmentData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="DATE" />
                     <YAxis />
                     <Tooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="VALUE" stroke="var(--primary)" strokeWidth={2} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="VALUE" 
+                      name="employment"
+                      stroke="var(--primary)" 
+                      strokeWidth={2} 
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -160,14 +210,20 @@ const Dashboard = () => {
             {pricesITLoading ? (
               <Skeleton className="h-[200px] w-full" />
             ) : (
-              <ChartContainer className="h-[200px]">
+              <ChartContainer className="h-[200px]" config={chartConfig}>
                 <ResponsiveContainer>
                   <LineChart data={energyPricesIT}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="DATE" />
                     <YAxis />
                     <Tooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="VALUE" stroke="var(--primary)" strokeWidth={2} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="VALUE" 
+                      name="energy"
+                      stroke="var(--primary)" 
+                      strokeWidth={2} 
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -185,14 +241,20 @@ const Dashboard = () => {
             {pricesEULoading ? (
               <Skeleton className="h-[200px] w-full" />
             ) : (
-              <ChartContainer className="h-[200px]">
+              <ChartContainer className="h-[200px]" config={chartConfig}>
                 <ResponsiveContainer>
                   <LineChart data={energyPricesEU}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="DATE" />
                     <YAxis />
                     <Tooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="VALUE" stroke="var(--primary)" strokeWidth={2} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="VALUE" 
+                      name="energy"
+                      stroke="var(--primary)" 
+                      strokeWidth={2} 
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -216,14 +278,20 @@ const Dashboard = () => {
             {generationLoading ? (
               <Skeleton className="h-[200px] w-full" />
             ) : (
-              <ChartContainer className="h-[200px]">
+              <ChartContainer className="h-[200px]" config={chartConfig}>
                 <ResponsiveContainer>
                   <LineChart data={energyGeneration}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="DATE" />
                     <YAxis />
                     <Tooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="VALUE" stroke="var(--primary)" strokeWidth={2} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="VALUE" 
+                      name="generation"
+                      stroke="var(--primary)" 
+                      strokeWidth={2} 
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -244,6 +312,10 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+
+      <p className="text-sm text-muted-foreground italic">
+        Note: All filtered datasets are downloadable
+      </p>
     </div>
   );
 };
