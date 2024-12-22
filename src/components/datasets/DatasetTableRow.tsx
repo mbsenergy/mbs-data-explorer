@@ -27,12 +27,12 @@ export const DatasetTableRow = ({
     <TableRow>
       <TableCell>{name}</TableCell>
       <TableCell>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F97316] text-white">
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium field-pill-${field}`}>
           {field}
         </span>
       </TableCell>
       <TableCell>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEC6A1] text-gray-900">
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium type-pill-${type}`}>
           {type}
         </span>
       </TableCell>

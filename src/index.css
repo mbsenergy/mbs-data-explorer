@@ -47,6 +47,40 @@
   }
 }
 
+/* Field type pills */
+.field-pill-EC {
+  @apply bg-[#1EAEDB] text-white;
+}
+
+.field-pill-MS {
+  @apply bg-[#F97316] text-white;
+}
+
+.field-pill-TS {
+  @apply bg-[#8B5CF6] text-white;
+}
+
+.field-pill-ME {
+  @apply bg-[#D946EF] text-white;
+}
+
+.field-pill-SC {
+  @apply bg-[#0EA5E9] text-white;
+}
+
+/* Dataset type pills */
+.type-pill-01 {
+  @apply bg-[#F2FCE2] text-gray-900;
+}
+
+.type-pill-02 {
+  @apply bg-[#FEF7CD] text-gray-900;
+}
+
+.type-pill-03 {
+  @apply bg-[#FEC6A1] text-gray-900;
+}
+
 .glass-panel {
   @apply bg-opacity-20 backdrop-blur-lg bg-white/10 border border-white/20;
 }
