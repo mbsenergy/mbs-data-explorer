@@ -196,9 +196,10 @@ const Datasets = () => {
         <PreviewDialog
           isOpen={!!previewData}
           onClose={() => setPreviewData(null)}
-          filePath={previewData.data}
+          filePath=""
           fileName={previewData.tableName}
           section="datasets"
+          directData={previewData.data}
         />
       )}
     </div>

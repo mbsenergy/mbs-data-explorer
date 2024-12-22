@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,56 +7,44 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFileContent } from "@/hooks/useFileContent";
-import { Button } from "@/components/ui/button";
-import { Copy, Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 
 interface PreviewDialogProps {
   isOpen: boolean;
   onClose: () => void;
   filePath: string;
   fileName: string;
-  section: string;
+  section?: string;
+  directData?: string;
 }
 
-export const PreviewDialog = ({ isOpen, onClose, filePath, fileName, section }: PreviewDialogProps) => {
-  const fullPath = `${section}/${filePath}`;
-  const { data: content, isLoading } = useFileContent(fullPath);
-  const { toast } = useToast();
-
-  const handleCopy = async () => {
-    if (content) {
-      await navigator.clipboard.writeText(content);
-      toast({
-        title: "Copied to clipboard",
-        description: "The file content has been copied to your clipboard.",
-      });
-    }
-  };
+export const PreviewDialog = ({ 
+  isOpen, 
+  onClose, 
+  filePath, 
+  fileName,
+  section,
+  directData 
+}: PreviewDialogProps) => {
+  const { data: fileContent, isLoading, error } = useFileContent(directData ? '' : filePath);
+  
+  const displayContent = directData || fileContent;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh]">
-        <DialogHeader className="flex flex-row items-center justify-between">
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
           <DialogTitle>{fileName}</DialogTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopy}
-            className="ml-auto bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 text-white"
-          >
-            <Copy className="h-4 w-4 mr-2" />
-            Copy
-          </Button>
         </DialogHeader>
-        <ScrollArea className="flex-1 h-full">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-40">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : (
-            <pre className="p-4 text-sm bg-muted rounded-md overflow-x-auto">
-              <code>{content}</code>
+        <ScrollArea className="flex-1 p-4">
+          {isLoading && !directData && (
+            <div className="text-center">Loading...</div>
+          )}
+          {error && !directData && (
+            <div className="text-red-500">Error loading file content</div>
+          )}
+          {displayContent && (
+            <pre className="whitespace-pre-wrap font-mono text-sm">
+              {displayContent}
             </pre>
           )}
         </ScrollArea>
