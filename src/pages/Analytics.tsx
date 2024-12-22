@@ -49,7 +49,8 @@ const Analytics = () => {
       const { data, error } = await supabase
         .from("EC01_eurostat_employment")
         .select("COUNTRY")
-        .distinct();
+        .eq("COUNTRY", "IT")
+        .or("COUNTRY.eq.FR,COUNTRY.eq.DE,COUNTRY.eq.ES,COUNTRY.eq.UK");
 
       if (error) throw error;
       return data;

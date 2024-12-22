@@ -15,6 +15,10 @@ import { Download, Search } from "lucide-react";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+type TableInfo = {
+  tablename: string;
+};
+
 const Datasets = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
@@ -23,13 +27,12 @@ const Datasets = () => {
     queryKey: ["tables"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("information_schema.tables")
-        .select("table_name")
-        .eq("table_schema", "public")
-        .neq("table_name", "profiles");
+        .rpc('get_available_tables') // We'll create this function
+        .select('tablename')
+        .neq('tablename', 'profiles');
 
       if (error) throw error;
-      return data;
+      return data as TableInfo[];
     },
   });
 
@@ -38,7 +41,7 @@ const Datasets = () => {
     queryFn: async () => {
       if (!selectedTable) return null;
       const { data, error } = await supabase
-        .from(selectedTable)
+        .from(selectedTable as any)
         .select("*")
         .limit(10);
 
@@ -49,7 +52,7 @@ const Datasets = () => {
   });
 
   const filteredTables = tables?.filter((table) =>
-    table.table_name.toLowerCase().includes(searchQuery.toLowerCase())
+    table.tablename.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -85,12 +88,12 @@ const Datasets = () => {
               <div className="space-y-2">
                 {filteredTables?.map((table) => (
                   <Button
-                    key={table.table_name}
-                    variant={selectedTable === table.table_name ? "default" : "ghost"}
+                    key={table.tablename}
+                    variant={selectedTable === table.tablename ? "default" : "ghost"}
                     className="w-full justify-start"
-                    onClick={() => setSelectedTable(table.table_name)}
+                    onClick={() => setSelectedTable(table.tablename)}
                   >
-                    {table.table_name}
+                    {table.tablename}
                   </Button>
                 ))}
               </div>
