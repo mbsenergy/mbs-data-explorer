@@ -37,7 +37,7 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
-export function useSidebarContext() {
+function useSidebarContext() {
   const context = React.useContext(SidebarContext)
   if (!context) {
     throw new Error("useSidebarContext must be used within a SidebarProvider.")
