@@ -1,74 +1,89 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 
 const Company = () => {
-  const sections = [
-    {
-      title: "Energy Services",
-      items: [
-        "Strategy & Asset Valuation",
-        "Osservatorio energia",
-        "Scenario",
-        "Data & Modelling",
-        "Due Dilligence",
-        "PPA"
-      ]
-    },
-    {
-      title: "MBS Consulting",
-      items: [
-        "Insurance",
-        "Banking",
-        "Energy",
-        "Risk Advisory",
-        "Financial Services",
-        "Innovation Team",
-        "Public Administration",
-        "EGS",
-        "More"
-      ]
-    },
-    {
-      title: "Cerved Group",
-      items: [
-        "Cerved",
-        "Rating Agency",
-        "Data & AI",
-        "Spazio Dati",
-        "ProWeb"
-      ]
-    },
-    {
-      title: "ION Group",
-      items: [
-        "Market Analytics",
-        "Core Banking",
-        "Analytics",
-        "Corporate",
-        "Credit Information",
-        "Other"
-      ]
-    }
-  ];
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Company</h1>
+      
       <div className="grid gap-6">
-        {sections.map((section) => (
-          <Card key={section.title} className="p-6">
-            <h2 className="text-xl font-semibold mb-4">{section.title}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {section.items.map((item) => (
-                <div
-                  key={item}
-                  className="glass-panel p-4 rounded-lg hover:bg-white/5 transition-colors"
-                >
-                  <p className="text-sm font-medium">{item}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        ))}
+        <Card className="p-6 bg-card">
+          <h2 className="text-2xl font-semibold mb-4">Energy Services</h2>
+          <p className="text-muted-foreground mb-4">
+            Our Energy Services division provides comprehensive solutions for energy management,
+            efficiency, and sustainability. We help organizations optimize their energy usage
+            and reduce their environmental impact through innovative technologies and expert consulting.
+          </p>
+          <Button variant="outline" asChild>
+            <a 
+              href="https://www.example.com/energy-services" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center"
+            >
+              Learn More <ExternalLink className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        </Card>
+
+        <Card className="p-6 bg-card">
+          <h2 className="text-2xl font-semibold mb-4">MBS Consulting</h2>
+          <p className="text-muted-foreground mb-4">
+            MBS Consulting delivers strategic business solutions across various sectors.
+            Our team of experts provides insights and guidance to help organizations
+            navigate complex challenges and achieve their business objectives.
+          </p>
+          <Button variant="outline" asChild>
+            <a 
+              href="https://www.example.com/mbs-consulting" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center"
+            >
+              Learn More <ExternalLink className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        </Card>
+
+        <Card className="p-6 bg-card">
+          <h2 className="text-2xl font-semibold mb-4">Cerved Group</h2>
+          <p className="text-muted-foreground mb-4">
+            As part of the Cerved Group, we leverage comprehensive data and analytics
+            capabilities to provide business information services, credit management
+            solutions, and marketing strategies to our clients.
+          </p>
+          <Button variant="outline" asChild>
+            <a 
+              href="https://www.example.com/cerved-group" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center"
+            >
+              Learn More <ExternalLink className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        </Card>
+
+        <Card className="p-6 bg-card">
+          <h2 className="text-2xl font-semibold mb-4">ION Group</h2>
+          <p className="text-muted-foreground mb-4">
+            ION Group is a global provider of trading, analytics, and risk management
+            solutions for capital markets, commodities, and treasury management.
+            We deliver innovative technology that empowers our clients to make
+            more informed decisions.
+          </p>
+          <Button variant="outline" asChild>
+            <a 
+              href="https://www.example.com/ion-group" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center"
+            >
+              Learn More <ExternalLink className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        </Card>
       </div>
     </div>
   );
