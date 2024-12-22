@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DatasetTableRow } from "./DatasetTableRow";
 import type { TableInfo } from "./types";
@@ -23,7 +24,8 @@ export const DatasetTable = ({
   favorites
 }: DatasetTableProps) => {
   const [currentPage, setCurrentPage] = React.useState(0);
-  const itemsPerPage = 10;
+  const [pageInput, setPageInput] = React.useState("");
+  const itemsPerPage = 7;
   const totalPages = Math.ceil(tables.length / itemsPerPage);
   
   const startIndex = currentPage * itemsPerPage;
@@ -32,14 +34,34 @@ export const DatasetTable = ({
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(prev => prev + 1);
+      setPageInput((currentPage + 2).toString());
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(prev => prev - 1);
+      setPageInput((currentPage).toString());
     }
   };
+
+  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPageInput(value);
+  };
+
+  const handlePageInputBlur = () => {
+    const pageNumber = parseInt(pageInput) - 1;
+    if (!isNaN(pageNumber) && pageNumber >= 0 && pageNumber < totalPages) {
+      setCurrentPage(pageNumber);
+    } else {
+      setPageInput((currentPage + 1).toString());
+    }
+  };
+
+  React.useEffect(() => {
+    setPageInput((currentPage + 1).toString());
+  }, [currentPage]);
 
   return (
     <div className="space-y-4">
@@ -69,7 +91,6 @@ export const DatasetTable = ({
         </Table>
       </div>
       
-      {/* Pagination Controls */}
       <div className="flex items-center justify-between px-2">
         <div className="text-sm text-muted-foreground">
           Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, tables.length)} of {tables.length} entries
@@ -84,8 +105,16 @@ export const DatasetTable = ({
             <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
-          <div className="text-sm text-muted-foreground">
-            Page {currentPage + 1} of {totalPages}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Page</span>
+            <Input
+              className="w-16 text-center"
+              value={pageInput}
+              onChange={handlePageInputChange}
+              onBlur={handlePageInputBlur}
+              onKeyDown={(e) => e.key === 'Enter' && handlePageInputBlur()}
+            />
+            <span className="text-sm">of {totalPages}</span>
           </div>
           <Button
             variant="outline"

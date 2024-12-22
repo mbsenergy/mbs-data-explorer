@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import DatasetFilters from "@/components/datasets/DatasetFilters";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { DatasetTable } from "@/components/datasets/DatasetTable";
+import { DatasetOverview } from "@/components/datasets/DatasetOverview";
 import type { TableInfo } from "@/components/datasets/types";
 
 const Datasets = () => {
@@ -30,7 +31,6 @@ const Datasets = () => {
     },
   });
 
-  // Extract unique fields and types from table names
   useEffect(() => {
     if (tables) {
       const fields = [...new Set(tables.map(table => {
@@ -48,7 +48,6 @@ const Datasets = () => {
     }
   }, [tables]);
 
-  // Filter tables based on search term, selected field, and selected type
   const filteredTables = tables?.filter(table => {
     const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
@@ -159,6 +158,11 @@ const Datasets = () => {
       <h1 className="text-3xl font-bold">Datasets</h1>
       
       <Card className="p-6">
+        <DatasetOverview 
+          favorites={favorites}
+          tables={tables || []}
+        />
+
         <DatasetFilters
           onSearchChange={setSearchTerm}
           onFieldChange={setSelectedField}
