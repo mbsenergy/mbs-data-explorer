@@ -15,11 +15,12 @@ export const NotificationBell = () => {
   const [hasNewItems, setHasNewItems] = useState(false);
   const [lastCheck, setLastCheck] = useState(Date.now());
   const [notificationCount, setNotificationCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { data: notifications } = useNotifications(lastCheck);
 
   useEffect(() => {
-    if (notifications?.length) {
+    if (notifications?.length && !isOpen) {
       const newItems = notifications.filter(
         item => new Date(item.created_at).getTime() > lastCheck
       );
@@ -33,20 +34,24 @@ export const NotificationBell = () => {
         });
       }
     }
-  }, [notifications, lastCheck, toast]);
+  }, [notifications, lastCheck, toast, isOpen]);
 
-  const handleOpen = () => {
-    setHasNewItems(false);
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      setHasNewItems(false);
+    }
   };
 
   const clearNotifications = () => {
     setLastCheck(Date.now());
     setHasNewItems(false);
     setNotificationCount(0);
+    setIsOpen(false);
   };
 
   return (
-    <DropdownMenu onOpenChange={handleOpen}>
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
