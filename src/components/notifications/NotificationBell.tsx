@@ -16,13 +16,17 @@ export const NotificationBell = () => {
   const [lastCheck, setLastCheck] = useState(Date.now());
   const [notificationCount, setNotificationCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [clearedTimestamp, setClearedTimestamp] = useState<number | null>(null);
 
   const { data: notifications } = useNotifications(lastCheck);
 
   useEffect(() => {
     if (notifications?.length && !isOpen) {
       const newItems = notifications.filter(
-        item => new Date(item.created_at).getTime() > lastCheck
+        item => {
+          const itemTime = new Date(item.created_at).getTime();
+          return itemTime > lastCheck && (!clearedTimestamp || itemTime > clearedTimestamp);
+        }
       );
       
       if (newItems.length > 0) {
@@ -34,7 +38,7 @@ export const NotificationBell = () => {
         });
       }
     }
-  }, [notifications, lastCheck, toast, isOpen]);
+  }, [notifications, lastCheck, toast, isOpen, clearedTimestamp]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -45,9 +49,14 @@ export const NotificationBell = () => {
 
   const clearNotifications = () => {
     setLastCheck(Date.now());
+    setClearedTimestamp(Date.now());
     setHasNewItems(false);
     setNotificationCount(0);
   };
+
+  const filteredNotifications = notifications?.filter(
+    item => !clearedTimestamp || new Date(item.created_at).getTime() > clearedTimestamp
+  );
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
@@ -68,7 +77,7 @@ export const NotificationBell = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <NotificationList 
-          notifications={notifications} 
+          notifications={filteredNotifications} 
           onClear={clearNotifications}
         />
       </DropdownMenuContent>
