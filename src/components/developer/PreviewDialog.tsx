@@ -26,7 +26,9 @@ export const PreviewDialog = ({
   section,
   directData 
 }: PreviewDialogProps) => {
-  const { data: fileContent, isLoading, error } = useFileContent(directData ? '' : filePath);
+  // Construct the full path including the section
+  const fullPath = section ? `${section}/${filePath}` : filePath;
+  const { data: fileContent, isLoading, error } = useFileContent(directData ? '' : fullPath);
   
   const displayContent = directData || fileContent;
   let parsedData: any[] = [];

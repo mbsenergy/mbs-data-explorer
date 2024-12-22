@@ -7,9 +7,15 @@ export const useFileContent = (path: string) => {
     queryFn: async () => {
       try {
         console.log('Fetching file:', path);
+        
+        // Split the path to get the section and filename
+        const pathParts = path.split('/');
+        const section = pathParts[0];
+        const filename = pathParts[1];
+        
         const { data, error } = await supabase.storage
           .from("developer")
-          .download(path);
+          .download(`${section}/${filename}`);
 
         if (error) {
           console.error("Error fetching file content:", error);
