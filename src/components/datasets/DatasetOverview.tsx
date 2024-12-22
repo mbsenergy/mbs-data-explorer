@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -15,9 +15,16 @@ interface DatasetOverviewProps {
   tables: TableInfo[];
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
+  onToggleFavorite: (tableName: string) => void;
 }
 
-export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: DatasetOverviewProps) => {
+export const DatasetOverview = ({ 
+  favorites, 
+  tables, 
+  onPreview, 
+  onDownload,
+  onToggleFavorite 
+}: DatasetOverviewProps) => {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(0);
   const [downloadingDataset, setDownloadingDataset] = useState<string | null>(null);
@@ -108,7 +115,7 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
                         onClick={() => handleDownload(table.tablename)}
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Download
+                        Sample
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -181,7 +188,15 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
                         onClick={() => handleDownload(download.dataset_name)}
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Download
+                        Sample
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onToggleFavorite(download.dataset_name)}
+                        className={favorites.has(download.dataset_name) ? "text-yellow-400" : "text-gray-400"}
+                      >
+                        <Star className="h-4 w-4" fill={favorites.has(download.dataset_name) ? "currentColor" : "none"} />
                       </Button>
                     </div>
                   </div>
