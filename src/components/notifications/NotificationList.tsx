@@ -9,6 +9,12 @@ interface NotificationListProps {
 }
 
 export const NotificationList = ({ notifications, onClear }: NotificationListProps) => {
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClear();
+  };
+
   return (
     <>
       <div className="flex justify-between items-center p-2 border-b">
@@ -17,7 +23,7 @@ export const NotificationList = ({ notifications, onClear }: NotificationListPro
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={onClear}
+            onClick={handleClear}
             className="text-xs"
           >
             Clear all

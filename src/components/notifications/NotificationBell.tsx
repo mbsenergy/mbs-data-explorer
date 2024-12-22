@@ -47,7 +47,6 @@ export const NotificationBell = () => {
     setLastCheck(Date.now());
     setHasNewItems(false);
     setNotificationCount(0);
-    setIsOpen(false);
   };
 
   return (
