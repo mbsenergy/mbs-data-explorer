@@ -780,6 +780,33 @@ export type Database = {
         }
         Relationships: []
       }
+      exports: {
+        Row: {
+          created_at: string | null
+          downloaded_at: string | null
+          export_name: string
+          export_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          downloaded_at?: string | null
+          export_name: string
+          export_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          downloaded_at?: string | null
+          export_name?: string
+          export_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ME01_gme_mb_altriservizi: {
         Row: {
           DATE: string | null

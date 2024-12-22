@@ -15,6 +15,13 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 
+interface ChartDataItem {
+  date: string;
+  'Dataset Samples': number;
+  'Developer Files': number;
+  'Dataset Exports': number;
+}
+
 interface DownloadsChartProps {
   analyticsData: any[];
   developerData: any[];
@@ -30,9 +37,9 @@ export const DownloadsChart = ({
 }: DownloadsChartProps) => {
   const [isOpen, setIsOpen] = useState(true);
   
-  const chartData = Object.entries(
+  const chartData: ChartDataItem[] = Object.entries(
     [...(analyticsData || []), ...(developerData || []), ...(exportsData || [])]
-    .reduce((acc: Record<string, any>, curr) => {
+    .reduce((acc: Record<string, ChartDataItem>, curr) => {
       const date = new Date(curr.downloaded_at).toISOString().split('T')[0];
       if (!acc[date]) {
         acc[date] = {
@@ -43,7 +50,6 @@ export const DownloadsChart = ({
         };
       }
       
-      // Determine the type of download and increment the appropriate counter
       if ('dataset_name' in curr) {
         acc[date]['Dataset Samples']++;
       } else if ('file_name' in curr) {
@@ -53,7 +59,7 @@ export const DownloadsChart = ({
       }
       
       return acc;
-    }, {}),
+    }, {})
   ).map(([date, counts]) => ({
     date,
     ...counts
