@@ -7,6 +7,7 @@ import { Download, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { ConfirmDialog } from "./ConfirmDialog";
 import type { TableInfo } from "./types";
 
 interface DatasetOverviewProps {
@@ -19,6 +20,7 @@ interface DatasetOverviewProps {
 export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: DatasetOverviewProps) => {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(0);
+  const [downloadingDataset, setDownloadingDataset] = useState<string | null>(null);
   const itemsPerPage = 3;
   
   const { data: recentDownloads } = useQuery({
@@ -47,6 +49,17 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
   const getFieldAndType = (tableName: string) => {
     const match = tableName.match(/^([A-Z]{2})(\d+)_(.+)/);
     return match ? { field: match[1], type: match[2] } : { field: "", type: "" };
+  };
+
+  const handleDownload = (datasetName: string) => {
+    setDownloadingDataset(datasetName);
+  };
+
+  const handleConfirmDownload = () => {
+    if (downloadingDataset) {
+      onDownload(downloadingDataset);
+      setDownloadingDataset(null);
+    }
   };
 
   return (
@@ -145,7 +158,7 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onDownload(download.dataset_name)}
+                        onClick={() => handleDownload(download.dataset_name)}
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Download
@@ -160,6 +173,14 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
           <CarouselNext />
         </Carousel>
       </Card>
+
+      <ConfirmDialog
+        isOpen={!!downloadingDataset}
+        onClose={() => setDownloadingDataset(null)}
+        onConfirm={handleConfirmDownload}
+        title="Download Dataset"
+        description="Are you sure you want to download this dataset?"
+      />
     </div>
   );
 };
