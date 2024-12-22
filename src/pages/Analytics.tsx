@@ -186,6 +186,12 @@ const Analytics = () => {
       />
 
       <DownloadsTable
+        title="Dataset Exports History"
+        data={exportsData || []}
+        isLoading={exportsLoading}
+      />
+
+      <DownloadsTable
         title="Dataset Download History"
         data={analyticsData || []}
         isLoading={analyticsLoading}
@@ -196,12 +202,6 @@ const Analytics = () => {
         title="Developer Resources Download History"
         data={developerAnalytics || []}
         isLoading={developerAnalyticsLoading}
-      />
-
-      <DownloadsTable
-        title="Dataset Exports History"
-        data={exportsData || []}
-        isLoading={exportsLoading}
       />
     </div>
   );
