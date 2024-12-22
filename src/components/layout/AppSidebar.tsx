@@ -70,7 +70,6 @@ export function AppSidebar() {
         console.error("Logout error:", error);
       }
       
-      // Always navigate to login page and show success message
       navigate("/login");
       toast({
         title: "Success",
@@ -93,7 +92,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="bg-card border-r border-border/40">
+    <Sidebar className="bg-card border-r border-border/40 transition-all duration-300">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start">
