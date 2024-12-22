@@ -9,6 +9,7 @@ import {
   Building,
   BookOpen,
   Database,
+  ChevronLeft,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,6 +27,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 const mainMenuItems = [
   {
@@ -75,7 +77,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { collapsed } = useSidebarContext();
+  const { collapsed, toggleSidebar } = useSidebarContext();
 
   const isActive = (path: string) => {
     return location.pathname === path || (path !== "/" && location.pathname.startsWith(path));
@@ -112,6 +114,14 @@ export function AppSidebar() {
               />
             </div>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="ml-auto"
+          >
+            <ChevronLeft className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
+          </Button>
         </div>
       </SidebarHeader>
       <SidebarContent>
