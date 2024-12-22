@@ -32,7 +32,7 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
         .select('dataset_name, downloaded_at')
         .eq('user_id', user.id)
         .order('downloaded_at', { ascending: false })
-        .limit(5);
+        .limit(5);  // Updated to show only last 5
       if (error) throw error;
       return data;
     },

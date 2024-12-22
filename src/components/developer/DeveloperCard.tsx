@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, Eye, Star } from "lucide-react";
 import { PreviewDialog } from "./PreviewDialog";
-import { useDeveloperFavorites } from "@/hooks/useDeveloperFavorites";
 
 interface DeveloperCardProps {
   name: string;
@@ -13,11 +12,29 @@ interface DeveloperCardProps {
   extension: string;
   title: string;
   section: string;
+  isFavorite: boolean;
+  onToggleFavorite: (fileName: string) => void;
+  onPreview: (fileName: string, section: string) => void;
+  onDownload: (fileName: string, section: string) => void;
 }
 
-export const DeveloperCard = ({ name, url, field, extension, title, section }: DeveloperCardProps) => {
+export const DeveloperCard = ({ 
+  name, 
+  url, 
+  field, 
+  extension, 
+  title, 
+  section,
+  isFavorite,
+  onToggleFavorite,
+  onPreview,
+  onDownload
+}: DeveloperCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const { favorites, toggleFavorite } = useDeveloperFavorites();
+
+  const handleToggleFavorite = () => {
+    onToggleFavorite(name);
+  };
 
   return (
     <>
@@ -42,7 +59,7 @@ export const DeveloperCard = ({ name, url, field, extension, title, section }: D
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.open(url, '_blank')}
+                onClick={() => onDownload(name, section)}
                 className="shrink-0"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -51,10 +68,10 @@ export const DeveloperCard = ({ name, url, field, extension, title, section }: D
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => toggleFavorite(name)}
-                className={favorites.has(name) ? "text-yellow-400" : "text-gray-400"}
+                onClick={handleToggleFavorite}
+                className={isFavorite ? "text-yellow-400" : "text-gray-400"}
               >
-                <Star className="h-4 w-4" fill={favorites.has(name) ? "currentColor" : "none"} />
+                <Star className="h-4 w-4" fill={isFavorite ? "currentColor" : "none"} />
               </Button>
             </div>
           </div>

@@ -37,7 +37,7 @@ export const DeveloperActivity = ({
         .select('file_name, file_section, downloaded_at')
         .eq('user_id', user.id)
         .order('downloaded_at', { ascending: false })
-        .limit(5);
+        .limit(5);  // Updated to show only last 5
       if (error) throw error;
       return data;
     },
