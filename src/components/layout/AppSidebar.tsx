@@ -9,6 +9,7 @@ import {
   Zap,
   Code,
   LineChart,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,8 +21,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const navigationItems = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/" },
@@ -43,13 +47,29 @@ const infoItems = [
 ];
 
 export function AppSidebar() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+      });
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
         <img 
           src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
           alt="MBS Logo" 
-          className="h-8"
+          className="h-8 w-auto object-contain"
         />
       </SidebarHeader>
       <SidebarContent>
@@ -107,6 +127,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="p-4">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} className="w-full">
+              <LogOut className="h-5 w-5" />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
