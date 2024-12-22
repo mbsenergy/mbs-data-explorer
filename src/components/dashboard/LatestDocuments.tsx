@@ -20,7 +20,7 @@ export const LatestDocuments = () => {
           <Skeleton className="h-[300px] w-full" />
         ) : latestDocs?.length ? (
           <Carousel
-            className="w-full max-w-4xl mx-auto my-6 border border-border rounded-lg p-4"
+            className="w-full mx-auto my-6 border border-card bg-card rounded-lg p-4"
             opts={{
               align: 'start',
               loop: true,
