@@ -16,9 +16,6 @@ interface DeveloperCardProps {
 export const DeveloperCard = ({ name, url, field, extension, title }: DeveloperCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  // Extract the section from the URL (presets, macros, developer, models)
-  const section = url.split('/')[4]; // This gets the section from the URL
-
   return (
     <>
       <Card className="overflow-hidden border shadow-lg h-[200px] flex flex-col">
@@ -53,7 +50,7 @@ export const DeveloperCard = ({ name, url, field, extension, title }: DeveloperC
       <PreviewDialog
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
-        filePath={`${section}/${name}`}
+        filePath={name}
         fileName={name}
       />
     </>
