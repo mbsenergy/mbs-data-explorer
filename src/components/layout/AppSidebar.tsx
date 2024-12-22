@@ -54,26 +54,38 @@ export function AppSidebar() {
   const handleLogout = async () => {
     try {
       console.log("Attempting to sign out...");
-      const { error } = await supabase.auth.signOut();
+      
+      // First, clear any session data from localStorage
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('supabase.auth.expires_at');
+      
+      // Then attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut({
+        scope: 'local' // Only sign out from this tab/window
+      });
+      
       if (error) {
         console.error("Logout error:", error);
+        // Even if there's an error, we'll redirect to login
+        // since the session data has been cleared
+        navigate("/login");
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Failed to sign out. Please try again.",
+          title: "Warning",
+          description: "You've been logged out, but there was an error cleaning up the session.",
         });
       } else {
         console.log("Sign out successful");
-        // Clear any local storage or state if needed
-        localStorage.clear();
         navigate("/login");
       }
     } catch (error) {
       console.error("Caught error during logout:", error);
+      // Still redirect to login since we've cleared the session data
+      navigate("/login");
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Warning",
+        description: "You've been logged out, but there was an error cleaning up the session.",
       });
     }
   };
@@ -171,4 +183,4 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-}
+};
