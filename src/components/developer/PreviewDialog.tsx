@@ -69,12 +69,12 @@ export const PreviewDialog = ({
             variant="outline" 
             size="icon"
             onClick={handleCopy}
-            className="h-8 w-8"
+            className="h-8 w-8 bg-muted hover:bg-muted/80"
           >
             <Copy className="h-4 w-4" />
           </Button>
         </DialogHeader>
-        <ScrollArea className="flex-1 h-[60vh] w-full">
+        <ScrollArea className="flex-1 h-[60vh] w-full scrollbar-custom">
           <div className="p-4">
             {isLoading && !directData && (
               <div className="text-center">Loading...</div>
