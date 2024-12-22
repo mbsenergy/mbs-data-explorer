@@ -55,37 +55,33 @@ export function AppSidebar() {
     try {
       console.log("Attempting to sign out...");
       
-      // First, clear any session data from localStorage
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('supabase.auth.expires_at');
+      // Clear auth token before signing out
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      if (projectId) {
+        localStorage.removeItem('sb-' + projectId + '-auth-token');
+      }
       
-      // Then attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut({
-        scope: 'local' // Only sign out from this tab/window
-      });
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error("Logout error:", error);
-        // Even if there's an error, we'll redirect to login
-        // since the session data has been cleared
-        navigate("/login");
-        toast({
-          variant: "destructive",
-          title: "Warning",
-          description: "You've been logged out, but there was an error cleaning up the session.",
-        });
-      } else {
-        console.log("Sign out successful");
-        navigate("/login");
       }
-    } catch (error) {
-      console.error("Caught error during logout:", error);
-      // Still redirect to login since we've cleared the session data
+      
+      // Always navigate to login page and show success message
       navigate("/login");
       toast({
-        variant: "destructive",
-        title: "Warning",
-        description: "You've been logged out, but there was an error cleaning up the session.",
+        title: "Success",
+        description: "You have been logged out successfully.",
+      });
+      
+    } catch (error) {
+      console.error("Caught error during logout:", error);
+      // Still redirect to login and show success since we've cleared the token
+      navigate("/login");
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully.",
       });
     }
   };

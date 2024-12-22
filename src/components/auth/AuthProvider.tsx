@@ -41,20 +41,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state change:", event, session?.user?.email);
-        setUser(session?.user ?? null);
-        setLoading(false);
-
+        
         if (event === "SIGNED_OUT") {
           console.log("User signed out, clearing state and redirecting...");
           setUser(null);
-          // Only clear specific auth-related items
-          localStorage.removeItem('supabase.auth.token');
-          localStorage.removeItem('supabase.auth.expires_at');
+          // Clear auth-related items from localStorage
+          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
           navigate("/login");
         } else if (event === "SIGNED_IN") {
           console.log("User signed in, updating state...");
           setUser(session?.user ?? null);
         }
+        
+        setLoading(false);
       }
     );
 
