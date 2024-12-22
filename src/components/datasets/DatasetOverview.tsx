@@ -48,35 +48,56 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
     <div className="grid grid-cols-2 gap-6 mb-8">
       <Card className="p-4">
         <h3 className="text-lg font-semibold mb-4">Favorite Datasets</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableCell className="font-bold">Dataset Name</TableCell>
-              <TableCell className="font-bold">Field</TableCell>
-              <TableCell className="font-bold">Type</TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {favoritesList.map((table) => {
-              const { field, type } = getFieldAndType(table.tablename);
-              return (
-                <TableRow key={table.tablename}>
-                  <TableCell>{table.tablename}</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium field-pill-${field}`}>
-                      {field}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium type-pill-${type}`}>
-                      {type}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <div className="space-y-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell className="font-bold">Dataset Name</TableCell>
+                <TableCell className="font-bold">Field</TableCell>
+                <TableCell className="font-bold">Type</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {favoritesList.map((table) => {
+                const { field, type } = getFieldAndType(table.tablename);
+                return (
+                  <TableRow key={table.tablename}>
+                    <TableCell>{table.tablename}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium field-pill-${field}`}>
+                        {field}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium type-pill-${type}`}>
+                        {type}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-end space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Previous
+            </Button>
+            <div className="text-sm">
+              Page 1 of 1
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </Card>
 
       <Card className="p-4">
@@ -87,9 +108,15 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
               const { field, type } = getFieldAndType(download.dataset_name);
               return (
                 <CarouselItem key={download.downloaded_at}>
-                  <div className="p-4">
-                    <p className="font-medium">{download.dataset_name}</p>
-                    <div className="flex gap-2 my-2">
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <p className="font-medium text-lg mb-2">{download.dataset_name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(download.downloaded_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-2 justify-center my-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium field-pill-${field}`}>
                         {field}
                       </span>
@@ -97,10 +124,8 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
                         {type}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {new Date(download.downloaded_at).toLocaleDateString()}
-                    </p>
-                    <div className="flex gap-2">
+
+                    <div className="flex gap-2 justify-end">
                       <Button
                         variant="outline"
                         size="sm"
