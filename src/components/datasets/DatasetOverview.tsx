@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -18,6 +18,8 @@ interface DatasetOverviewProps {
 
 export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: DatasetOverviewProps) => {
   const { user } = useAuth();
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 3;
   
   const { data: recentDownloads } = useQuery({
     queryKey: ['recentDownloads', user?.id],
@@ -36,8 +38,11 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
   });
 
   const favoritesList = tables
-    .filter(table => favorites.has(table.tablename))
-    .slice(0, 3);
+    .filter(table => favorites.has(table.tablename));
+
+  const totalPages = Math.ceil(favoritesList.length / itemsPerPage);
+  const startIndex = currentPage * itemsPerPage;
+  const displayedFavorites = favoritesList.slice(startIndex, startIndex + itemsPerPage);
 
   const getFieldAndType = (tableName: string) => {
     const match = tableName.match(/^([A-Z]{2})(\d+)_(.+)/);
@@ -58,7 +63,7 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
               </TableRow>
             </TableHeader>
             <TableBody>
-              {favoritesList.map((table) => {
+              {displayedFavorites.map((table) => {
                 const { field, type } = getFieldAndType(table.tablename);
                 return (
                   <TableRow key={table.tablename}>
@@ -82,17 +87,19 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
             <Button
               variant="outline"
               size="sm"
-              disabled
+              onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+              disabled={currentPage === 0}
             >
               Previous
             </Button>
             <div className="text-sm">
-              Page 1 of 1
+              Page {currentPage + 1} of {Math.max(1, totalPages)}
             </div>
             <Button
               variant="outline"
               size="sm"
-              disabled
+              onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+              disabled={currentPage >= totalPages - 1}
             >
               Next
             </Button>
@@ -109,14 +116,14 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
               return (
                 <CarouselItem key={download.downloaded_at}>
                   <div className="p-4 space-y-4">
-                    <div>
+                    <div className="text-left">
                       <p className="font-medium text-lg mb-2">{download.dataset_name}</p>
                       <p className="text-sm text-muted-foreground">
                         {new Date(download.downloaded_at).toLocaleDateString()}
                       </p>
                     </div>
                     
-                    <div className="flex gap-2 justify-center my-4">
+                    <div className="flex gap-2 my-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium field-pill-${field}`}>
                         {field}
                       </span>
@@ -125,7 +132,7 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
                       </span>
                     </div>
 
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
