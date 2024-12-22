@@ -41,7 +41,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className={`fixed bg-card border-r border-border/40 transition-[width] duration-300 ease-in-out ${
+      className={`fixed inset-y-0 left-0 z-30 bg-card border-r border-border/40 transition-[width] duration-300 ease-in-out ${
         collapsed ? "w-[70px]" : "w-[240px]"
       }`}
     >
