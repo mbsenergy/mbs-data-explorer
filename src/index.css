@@ -68,3 +68,18 @@
   background-color: theme('colors.corporate.teal');
   border-radius: 20px;
 }
+
+/* Toast customization */
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] {
+  background: theme('colors.corporate.navy');
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="error"] {
+  background: hsl(var(--destructive));
+}
+
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="warning"] {
+  background: theme('colors.corporate.orange');
+}
