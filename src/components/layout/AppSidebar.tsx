@@ -10,7 +10,6 @@ import {
   Code,
   LineChart,
   LogOut,
-  Menu,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,7 +22,6 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,9 +102,6 @@ export function AppSidebar() {
             />
             <span className="text-sm font-bold mt-3 text-muted-foreground">Flux Data Platform</span>
           </div>
-          <SidebarTrigger>
-            <Menu className="h-5 w-5" />
-          </SidebarTrigger>
         </div>
       </SidebarHeader>
       <SidebarContent>
