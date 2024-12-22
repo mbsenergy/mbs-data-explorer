@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,6 +8,7 @@ import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { DatasetActivity } from "@/components/datasets/DatasetActivity";
 import { DatasetSearch } from "@/components/datasets/DatasetSearch";
 import { DatasetExplore } from "@/components/datasets/DatasetExplore";
+import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
 
 const Datasets = () => {
@@ -19,7 +20,7 @@ const Datasets = () => {
   const [availableFields, setAvailableFields] = useState<string[]>([]);
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const { favorites, toggleFavorite } = useFavorites();
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
@@ -140,18 +141,6 @@ const Datasets = () => {
     });
   };
 
-  const handleToggleFavorite = (tableName: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(tableName)) {
-        newFavorites.delete(tableName);
-      } else {
-        newFavorites.add(tableName);
-      }
-      return newFavorites;
-    });
-  };
-
   if (tablesLoading) {
     return (
       <div className="space-y-6">
@@ -181,7 +170,7 @@ const Datasets = () => {
         onPreview={handlePreview}
         onDownload={handleDownload}
         onSelect={handleSelect}
-        onToggleFavorite={handleToggleFavorite}
+        onToggleFavorite={toggleFavorite}
         favorites={favorites}
         onSearchChange={setSearchTerm}
         onFieldChange={setSelectedField}
