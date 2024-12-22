@@ -23,7 +23,7 @@ import { SystemMenuItems } from "./sidebar/SystemMenuItems"
 export function AppSidebar() {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { collapsed, toggleSidebar } = useSidebarContext()
+  const { collapsed, setOpen } = useSidebarContext()
 
   const handleLogout = async () => {
     try {
@@ -37,6 +37,10 @@ export function AppSidebar() {
         description: "Failed to log out. Please try again.",
       })
     }
+  }
+
+  const toggleSidebar = () => {
+    setOpen(!collapsed)
   }
 
   return (
