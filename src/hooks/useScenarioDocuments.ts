@@ -5,7 +5,7 @@ export const useScenarioDocuments = () => {
   return useQuery({
     queryKey: ["scenario-documents"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: files, error } = await supabase
         .storage
         .from('report-scenario')
         .list('', {
@@ -18,11 +18,30 @@ export const useScenarioDocuments = () => {
         throw error;
       }
 
-      return data.map(file => ({
-        name: file.name,
-        previewUrl: supabase.storage.from('report-scenario').getPublicUrl(file.name).data.publicUrl,
-        pdfUrl: supabase.storage.from('report-scenario').getPublicUrl(file.name).data.publicUrl,
+      // Filter for PNG files (PDF previews)
+      const pngFiles = files?.filter(file => file.name.toLowerCase().endsWith('.png')) || [];
+      
+      // For each PNG, check if there's a corresponding PDF
+      const filesWithPdfs = await Promise.all(pngFiles.map(async (pngFile) => {
+        const pdfName = pngFile.name.replace('.png', '.pdf');
+        const { data: pdfExists } = await supabase
+          .storage
+          .from('report-scenario')
+          .list('', {
+            search: pdfName
+          });
+        
+        if (pdfExists?.length) {
+          return {
+            name: pngFile.name,
+            previewUrl: supabase.storage.from('report-scenario').getPublicUrl(pngFile.name).data.publicUrl,
+            pdfUrl: supabase.storage.from('report-scenario').getPublicUrl(pdfName).data.publicUrl
+          };
+        }
+        return null;
       }));
+
+      return filesWithPdfs.filter(Boolean);
     },
   });
 };
