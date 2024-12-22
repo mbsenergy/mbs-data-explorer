@@ -52,15 +52,29 @@ export function AppSidebar() {
   const location = useLocation();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      console.log("Attempting to sign out...");
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to sign out. Please try again.",
+        });
+      } else {
+        console.log("Sign out successful");
+        // Clear any local storage or state if needed
+        localStorage.clear();
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Caught error during logout:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to sign out. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
       });
-    } else {
-      navigate("/login");
     }
   };
 
