@@ -58,41 +58,48 @@ export const LatestDocuments = () => {
   });
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-xl font-semibold">Latest Documents</h2>
-      <Card className="p-6">
+    <div className="space-y-4">
+      <h2 className="text-2xl font-semibold">Latest Documents</h2>
+      <Card className="p-8">
         {docsLoading ? (
-          <Skeleton className="h-[300px] w-full" />
+          <Skeleton className="h-[500px] w-full" />
         ) : latestDocs?.length ? (
-          <Carousel className="w-full max-w-4xl mx-auto">
+          <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
               {latestDocs.map((file) => (
-                <CarouselItem key={file.name}>
-                  <div className="p-1">
-                    <Card className="p-4">
-                      <img
-                        src={file.previewUrl}
-                        alt={file.name}
-                        className="w-full h-[400px] object-contain"
-                      />
-                      <div className="mt-2 flex justify-between items-center">
-                        <p className="text-sm text-muted-foreground">{file.name.replace('.png', '')}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(file.pdfUrl, '_blank')}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download PDF
-                        </Button>
+                <CarouselItem key={file.name} className="flex items-center justify-center">
+                  <div className="w-full p-2">
+                    <Card className="overflow-hidden border-0 shadow-lg">
+                      <div className="aspect-[4/3] relative">
+                        <img
+                          src={file.previewUrl}
+                          alt={file.name}
+                          className="w-full h-full object-contain bg-black/5"
+                        />
+                      </div>
+                      <div className="p-4 bg-card/50 backdrop-blur-sm">
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground font-medium truncate mr-4">
+                            {file.name.replace('.png', '')}
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(file.pdfUrl, '_blank')}
+                            className="shrink-0"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
                       </div>
                     </Card>
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
           </Carousel>
         ) : (
           <p className="text-center text-muted-foreground">No documents available</p>
