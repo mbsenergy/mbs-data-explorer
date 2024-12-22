@@ -1,14 +1,7 @@
 import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useAuth } from "@supabase/auth-helpers-react";
 import {
   LineChart,
   Line,
@@ -18,94 +11,168 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Analytics = () => {
-  const [selectedCountry, setSelectedCountry] = useState("IT");
+  const { user } = useAuth();
 
-  const { data: countries, isLoading: countriesLoading } = useQuery({
-    queryKey: ["countries"],
+  const { data: lastConnection, isLoading: lastConnectionLoading } = useQuery({
+    queryKey: ["lastConnection"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("EC01_eurostat_employment")
-        .select("COUNTRY")
-        .in("COUNTRY", ["IT", "FR", "DE", "ES", "UK"]);
-
+      const { data, error } = await supabase.rpc('get_last_connection', {
+        user_uuid: user?.id
+      });
       if (error) throw error;
       return data;
     },
+    enabled: !!user,
   });
 
-  const { data: employmentData, isLoading: dataLoading } = useQuery({
-    queryKey: ["employment", selectedCountry],
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
+    queryKey: ["analytics"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("EC01_eurostat_employment")
+        .from("analytics")
         .select("*")
-        .eq("COUNTRY", selectedCountry)
-        .order("DATE", { ascending: true });
-
+        .eq("user_id", user?.id)
+        .order("downloaded_at", { ascending: true });
       if (error) throw error;
       return data;
     },
+    enabled: !!user,
   });
 
-  const uniqueCountries = Array.from(
-    new Set(countries?.map((c) => c.COUNTRY) || [])
-  );
+  const currentYear = new Date().getFullYear();
+  const connectionsThisYear = analyticsData?.filter(
+    (item) => new Date(item.downloaded_at).getFullYear() === currentYear
+  ).length || 0;
+
+  const totalDownloads = analyticsData?.length || 0;
+
+  // Prepare data for the line chart
+  const dailyDownloads = analyticsData?.reduce((acc: any, curr) => {
+    const date = format(new Date(curr.downloaded_at), 'yyyy-MM-dd');
+    acc[date] = (acc[date] || 0) + 1;
+    return acc;
+  }, {});
+
+  const chartData = Object.entries(dailyDownloads || {}).map(([date, count]) => ({
+    date,
+    downloads: count,
+  }));
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Analytics</h1>
-      <Card className="p-6 glass-panel">
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold">Employment Analysis</h2>
-            <Select
-              value={selectedCountry}
-              onValueChange={(value) => setSelectedCountry(value)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent>
-                {uniqueCountries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
-          <div className="h-[400px]">
-            {dataLoading ? (
-              <Skeleton className="w-full h-full" />
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="p-6">
+          <h3 className="text-sm font-medium text-muted-foreground">Last Connection</h3>
+          <div className="mt-2 text-2xl font-bold">
+            {lastConnectionLoading ? (
+              <Skeleton className="h-8 w-32" />
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={employmentData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="DATE" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="VALUE"
-                    stroke="#8884d8"
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              lastConnection ? format(new Date(lastConnection), 'dd MMM yyyy HH:mm') : 'Never'
             )}
           </div>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="text-sm font-medium text-muted-foreground">Connections This Year</h3>
+          <div className="mt-2 text-2xl font-bold">
+            {analyticsLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              connectionsThisYear
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="text-sm font-medium text-muted-foreground">Total Downloads</h3>
+          <div className="mt-2 text-2xl font-bold">
+            {analyticsLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              totalDownloads
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Downloads Chart */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Daily Downloads</h2>
+        <div className="h-[400px]">
+          {analyticsLoading ? (
+            <Skeleton className="w-full h-full" />
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="downloads"
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </Card>
+
+      {/* Downloads Table */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Download History</h2>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Dataset</TableHead>
+                <TableHead>Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {analyticsLoading ? (
+                <TableRow>
+                  <TableCell colSpan={2}>
+                    <Skeleton className="h-8 w-full" />
+                  </TableCell>
+                </TableRow>
+              ) : analyticsData?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center">
+                    No downloads yet
+                  </TableCell>
+                </TableRow>
+              ) : (
+                analyticsData?.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      {item.is_custom_query ? "Custom Query" : item.dataset_name}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(item.downloaded_at), 'dd MMM yyyy HH:mm')}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
       </Card>
     </div>

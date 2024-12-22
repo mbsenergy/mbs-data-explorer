@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics: {
+        Row: {
+          created_at: string | null
+          dataset_name: string
+          downloaded_at: string | null
+          id: string
+          is_custom_query: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dataset_name: string
+          downloaded_at?: string | null
+          id?: string
+          is_custom_query?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          dataset_name?: string
+          downloaded_at?: string | null
+          id?: string
+          is_custom_query?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       EC01_eurostat_electricity: {
         Row: {
           COUNTRY: string | null
@@ -1432,6 +1459,12 @@ export type Database = {
         Returns: {
           tablename: string
         }[]
+      }
+      get_last_connection: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: string
       }
     }
     Enums: {
