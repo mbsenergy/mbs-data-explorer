@@ -24,24 +24,19 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <RequireAuth>
-                  <Layout>
-                    <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="datasets" element={<Datasets />} />
-                      <Route path="analytics" element={<Analytics />} />
-                      <Route path="user" element={<User />} />
-                      <Route path="company" element={<Company />} />
-                      <Route path="settings" element={<Settings />} />
-                      <Route path="guide" element={<Guide />} />
-                    </Routes>
-                  </Layout>
-                </RequireAuth>
-              }
-            />
+            <Route element={
+              <RequireAuth>
+                <Layout />
+              </RequireAuth>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="datasets" element={<Datasets />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="user" element={<User />} />
+              <Route path="company" element={<Company />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="guide" element={<Guide />} />
+            </Route>
           </Routes>
         </AuthProvider>
       </BrowserRouter>
