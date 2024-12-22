@@ -1,4 +1,4 @@
-import { Bell, HelpCircle, Menu, User, Settings } from "lucide-react";
+import { Bell, HelpCircle, Menu, User, Settings, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Link } from "react-router-dom";
@@ -75,6 +75,12 @@ export const Navbar = () => {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <Link to="/" className="flex items-center">
+                <Home className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/user" className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
