@@ -63,7 +63,7 @@ export const DeveloperCard = ({
                 className="shrink-0"
               >
                 <Download className="h-4 w-4 mr-2" />
-                Download
+                Sample
               </Button>
               <Button
                 variant="ghost"

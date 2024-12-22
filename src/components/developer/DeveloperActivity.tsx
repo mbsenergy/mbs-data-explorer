@@ -37,7 +37,7 @@ export const DeveloperActivity = ({
         .select('file_name, file_section, downloaded_at')
         .eq('user_id', user.id)
         .order('downloaded_at', { ascending: false })
-        .limit(5);  // Updated to show only last 5
+        .limit(5);
       if (error) throw error;
       return data;
     },
@@ -60,6 +60,7 @@ export const DeveloperActivity = ({
                 <TableCell className="font-bold">Name</TableCell>
                 <TableCell className="font-bold">Field</TableCell>
                 <TableCell className="font-bold">Extension</TableCell>
+                <TableCell className="font-bold">Actions</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -75,6 +76,25 @@ export const DeveloperActivity = ({
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-corporate-blue text-white">
                       {file.extension}
                     </span>
+                  </TableCell>
+                  <TableCell className="space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onPreview(file.name, file.section)}
+                      className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDownload(file.name, file.section)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Sample
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -147,7 +167,7 @@ export const DeveloperActivity = ({
                         onClick={() => onDownload(download.file_name, download.file_section)}
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Download
+                        Sample
                       </Button>
                       <Button
                         variant="ghost"
