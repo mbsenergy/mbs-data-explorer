@@ -1,18 +1,74 @@
 import { Card } from "@/components/ui/card";
 
 const Company = () => {
+  const sections = [
+    {
+      title: "Energy Services",
+      items: [
+        "Strategy & Asset Valuation",
+        "Osservatorio energia",
+        "Scenario",
+        "Data & Modelling",
+        "Due Dilligence",
+        "PPA"
+      ]
+    },
+    {
+      title: "MBS Consulting",
+      items: [
+        "Insurance",
+        "Banking",
+        "Energy",
+        "Risk Advisory",
+        "Financial Services",
+        "Innovation Team",
+        "Public Administration",
+        "EGS",
+        "More"
+      ]
+    },
+    {
+      title: "Cerved Group",
+      items: [
+        "Cerved",
+        "Rating Agency",
+        "Data & AI",
+        "Spazio Dati",
+        "ProWeb"
+      ]
+    },
+    {
+      title: "ION Group",
+      items: [
+        "Market Analytics",
+        "Core Banking",
+        "Analytics",
+        "Corporate",
+        "Credit Information",
+        "Other"
+      ]
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Company</h1>
-      <div className="grid gap-4 md:grid-cols-1">
-        <Card className="p-6">
-          <h3 className="text-sm font-medium text-muted-foreground mb-4">Company Details</h3>
-          <div className="mt-2">
-            <p className="text-muted-foreground">
-              Connect to Supabase to view company information...
-            </p>
-          </div>
-        </Card>
+      <div className="grid gap-6">
+        {sections.map((section) => (
+          <Card key={section.title} className="p-6">
+            <h2 className="text-xl font-semibold mb-4">{section.title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {section.items.map((item) => (
+                <div
+                  key={item}
+                  className="glass-panel p-4 rounded-lg hover:bg-white/5 transition-colors"
+                >
+                  <p className="text-sm font-medium">{item}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );

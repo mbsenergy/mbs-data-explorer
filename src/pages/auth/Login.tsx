@@ -20,9 +20,9 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 glass-panel rounded-lg shadow-xl">
-        <h1 className="text-2xl font-bold text-center mb-8">Welcome to FLUX</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#1A1F2C]">
+      <div className="w-full max-w-md p-8 glass-panel rounded-lg shadow-xl bg-[#221F26]/80">
+        <h1 className="text-2xl font-bold text-center mb-8 text-white">Welcome to FLUX</h1>
         <Auth
           supabaseClient={supabase}
           appearance={{
@@ -33,6 +33,12 @@ const Login = () => {
                   brand: 'rgb(0, 169, 157)',
                   brandAccent: 'rgb(77, 195, 215)',
                   brandButtonText: 'white',
+                  defaultButtonBackground: '#333333',
+                  defaultButtonBackgroundHover: '#444444',
+                  inputBackground: '#222222',
+                  inputBorder: '#333333',
+                  inputBorderHover: '#444444',
+                  inputBorderFocus: 'rgb(0, 169, 157)',
                 },
               },
             },
