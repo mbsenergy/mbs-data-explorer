@@ -43,7 +43,7 @@ export const PasswordSection = () => {
       toast({
         title: "Success",
         description: "Password updated successfully!",
-        className: "bg-primary text-white"
+        style: { backgroundColor: "#57D7E2", color: "white" }
       });
 
       // Clear password fields

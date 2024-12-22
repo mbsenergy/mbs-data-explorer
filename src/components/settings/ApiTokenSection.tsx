@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Key } from "lucide-react";
+import { Key, Copy } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -14,6 +14,14 @@ export const ApiTokenSection = () => {
   const { user } = useAuth();
   const [tokenName, setTokenName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleCopyToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    toast({
+      description: "Token copied to clipboard",
+      style: { backgroundColor: "#57D7E2", color: "white" }
+    });
+  };
 
   const handleGenerateToken = async () => {
     if (!tokenName.trim()) {
@@ -48,13 +56,24 @@ export const ApiTokenSection = () => {
       toast({
         title: "Success",
         description: "API token generated successfully!",
-        className: "bg-primary text-white"
+        style: { backgroundColor: "#57D7E2", color: "white" }
       });
 
-      // Show token to user
+      // Show token to user with copy button
       toast({
         title: "Your API Token",
-        description: token,
+        description: (
+          <div className="flex items-center gap-2">
+            <code className="bg-black/10 p-1 rounded">{token}</code>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => handleCopyToken(token)}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        ),
         duration: 10000
       });
 
