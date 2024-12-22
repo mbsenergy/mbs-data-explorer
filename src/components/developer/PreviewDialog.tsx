@@ -6,7 +6,9 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFileContent } from "@/hooks/useFileContent";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Copy, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PreviewDialogProps {
   isOpen: boolean;
@@ -19,12 +21,32 @@ interface PreviewDialogProps {
 export const PreviewDialog = ({ isOpen, onClose, filePath, fileName, section }: PreviewDialogProps) => {
   const fullPath = `${section}/${filePath}`;
   const { data: content, isLoading } = useFileContent(fullPath);
+  const { toast } = useToast();
+
+  const handleCopy = async () => {
+    if (content) {
+      await navigator.clipboard.writeText(content);
+      toast({
+        title: "Copied to clipboard",
+        description: "The file content has been copied to your clipboard.",
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[80vh]">
-        <DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>{fileName}</DialogTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopy}
+            className="ml-auto"
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copy
+          </Button>
         </DialogHeader>
         <ScrollArea className="flex-1 h-full">
           {isLoading ? (

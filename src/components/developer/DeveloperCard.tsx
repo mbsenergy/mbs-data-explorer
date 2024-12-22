@@ -31,7 +31,7 @@ export const DeveloperCard = ({ name, url, field, extension, title, section }: D
               variant="ghost" 
               size="sm"
               onClick={() => setIsPreviewOpen(true)}
-              className="shrink-0"
+              className="shrink-0 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 text-white"
             >
               <Eye className="h-4 w-4 mr-2" />
               Preview
