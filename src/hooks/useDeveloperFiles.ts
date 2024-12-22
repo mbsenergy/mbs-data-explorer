@@ -28,9 +28,14 @@ export const useDeveloperFiles = (section: string) => {
         const extension = file.name.split('.').pop() || '';
         const title = file.name.substring(field.length + 1).replace(`.${extension}`, '');
 
+        // Construct the full URL with the section path
+        const publicUrl = supabase.storage
+          .from('developer')
+          .getPublicUrl(`${section}/${file.name}`).data.publicUrl;
+
         return {
           name: file.name,
-          url: supabase.storage.from('developer').getPublicUrl(`${section}/${file.name}`).data.publicUrl,
+          url: publicUrl,
           field,
           extension,
           title

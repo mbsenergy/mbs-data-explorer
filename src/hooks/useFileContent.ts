@@ -8,14 +8,13 @@ export const useFileContent = (path: string) => {
       try {
         console.log('Fetching file:', path);
         
-        // Split the path to get the section and filename
-        const pathParts = path.split('/');
-        const section = pathParts[0];
-        const filename = pathParts[1];
-        
+        if (!path) {
+          throw new Error("No file path provided");
+        }
+
         const { data, error } = await supabase.storage
           .from("developer")
-          .download(`${section}/${filename}`);
+          .download(path);
 
         if (error) {
           console.error("Error fetching file content:", error);
