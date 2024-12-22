@@ -60,7 +60,7 @@ export const LatestDocuments = () => {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-semibold">Latest Documents</h2>
-      <Card className="p-8">
+      <Card className="p-4">
         {docsLoading ? (
           <Skeleton className="h-[500px] w-full" />
         ) : latestDocs?.length ? (
