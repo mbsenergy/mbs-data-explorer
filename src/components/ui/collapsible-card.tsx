@@ -31,10 +31,15 @@ export const CollapsibleCard = ({
           {icon}
           <h3 className="text-lg font-medium">{title}</h3>
         </div>
-        <Button variant="ghost" size="icon" onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          type="button" // Add type="button" to prevent form submission
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+        >
           {isOpen ? (
             <ChevronUp className="h-4 w-4" />
           ) : (
