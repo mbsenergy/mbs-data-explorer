@@ -33,22 +33,36 @@
     --ring: 186 77% 61%;
  
     --radius: 0.5rem;
-
-    /* New darker colors for navbar and sidebar */
-    --navbar-bg: 222 47% 11%;
-    --sidebar-bg: 222 47% 11%;
   }
 }
  
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 .glass-panel {
   @apply bg-opacity-20 backdrop-blur-lg bg-white/10 border border-white/20;
 }
 
-/* Add new utility classes for navbar and sidebar */
-.navbar-dark {
-  @apply bg-[#1A1F2C] border-border/40;
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.corporate.teal') transparent;
 }
 
-.sidebar-dark {
-  @apply bg-[#1A1F2C];
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: theme('colors.corporate.teal');
+  border-radius: 20px;
 }

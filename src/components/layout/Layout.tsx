@@ -7,9 +7,7 @@ export const Layout = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <div className="sidebar-dark">
-          <AppSidebar />
-        </div>
+        <AppSidebar />
         <div className="flex-1 flex flex-col">
           <Navbar />
           <main className="flex-1 container py-6">
