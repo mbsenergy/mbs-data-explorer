@@ -30,10 +30,12 @@ const Analytics = () => {
   const { data: lastConnection, isLoading: lastConnectionLoading } = useQuery({
     queryKey: ["lastConnection", user?.id],
     queryFn: async () => {
+      console.log("Fetching last connection for user:", user?.id);
       const { data, error } = await supabase.rpc('get_last_connection', {
         user_uuid: user?.id
       });
       if (error) {
+        console.error("Last connection error:", error);
         toast({
           variant: "destructive",
           title: "Error",
@@ -41,6 +43,7 @@ const Analytics = () => {
         });
         throw error;
       }
+      console.log("Last connection data:", data);
       return data;
     },
     enabled: !!user?.id,
@@ -49,6 +52,7 @@ const Analytics = () => {
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ["analytics", user?.id],
     queryFn: async () => {
+      console.log("Fetching analytics for user:", user?.id);
       const { data, error } = await supabase
         .from("analytics")
         .select("*")
@@ -56,6 +60,7 @@ const Analytics = () => {
         .order("downloaded_at", { ascending: true });
       
       if (error) {
+        console.error("Analytics error:", error);
         toast({
           variant: "destructive",
           title: "Error",
@@ -63,7 +68,7 @@ const Analytics = () => {
         });
         throw error;
       }
-      console.log("Analytics data:", data); // Debug log
+      console.log("Analytics data:", data);
       return data || [];
     },
     enabled: !!user?.id,
@@ -88,7 +93,9 @@ const Analytics = () => {
     downloads: count,
   }));
 
-  console.log("Chart data:", chartData); // Debug log
+  console.log("Chart data:", chartData);
+  console.log("Connections this year:", connectionsThisYear);
+  console.log("Total downloads:", totalDownloads);
 
   return (
     <div className="space-y-6">
