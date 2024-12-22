@@ -26,10 +26,7 @@ const Datasets = () => {
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_available_tables') // We'll create this function
-        .select('tablename')
-        .neq('tablename', 'profiles');
+      const { data, error } = await supabase.rpc("get_available_tables");
 
       if (error) throw error;
       return data as TableInfo[];
