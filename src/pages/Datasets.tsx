@@ -15,6 +15,7 @@ import {
 import { Download, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/components/auth/AuthProvider";
 import DatasetFilters from "@/components/datasets/DatasetFilters";
 import SqlEditor from "@/components/datasets/SqlEditor";
 
@@ -24,6 +25,7 @@ type TableInfo = {
 
 const Datasets = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -46,8 +48,6 @@ const Datasets = () => {
       let query = supabase.from(selectedTable as any).select("*");
 
       if (customQuery) {
-        // For custom SQL queries, we would need a backend function to safely execute them
-        // For now, we'll just show a toast message
         toast({
           title: "Custom SQL queries",
           description: "Custom SQL query execution is not yet implemented for security reasons.",
@@ -55,7 +55,6 @@ const Datasets = () => {
         return null;
       }
 
-      // Apply filters
       Object.entries(filters).forEach(([column, value]) => {
         if (value) {
           query = query.ilike(column, `%${value}%`);
@@ -80,8 +79,36 @@ const Datasets = () => {
     }));
   };
 
+  const trackDownload = async () => {
+    if (!user?.id || !selectedTable) return;
+
+    console.log("Tracking download for user:", user.id, "table:", selectedTable);
+    
+    const { error } = await supabase
+      .from("analytics")
+      .insert({
+        user_id: user.id,
+        dataset_name: selectedTable,
+        is_custom_query: !!customQuery,
+      });
+
+    if (error) {
+      console.error("Error tracking download:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to track download activity.",
+      });
+    } else {
+      console.log("Download tracked successfully");
+    }
+  };
+
   const handleDownload = async () => {
     if (!tableData) return;
+    
+    // Track the download
+    await trackDownload();
     
     const csv = tableData.map((row) => 
       Object.values(row).join(',')
@@ -96,6 +123,11 @@ const Datasets = () => {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: "Dataset downloaded successfully.",
+    });
   };
 
   return (
