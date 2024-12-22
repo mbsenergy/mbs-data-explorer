@@ -18,6 +18,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { useToast } from "@/components/ui/use-toast";
 
 const chartConfig = {
   value: {
@@ -55,6 +63,28 @@ const chartConfig = {
 };
 
 const Dashboard = () => {
+  const { toast } = useToast();
+
+  // Fetch latest documents from storage
+  const { data: latestDocs, isLoading: docsLoading } = useQuery({
+    queryKey: ["latest-docs"],
+    queryFn: async () => {
+      const { data: files, error } = await supabase
+        .storage
+        .from('latest')
+        .list();
+
+      if (error) throw error;
+      return files.filter(file => 
+        file.name.toLowerCase().endsWith('.png') || 
+        file.name.toLowerCase().endsWith('.jpg') ||
+        file.name.toLowerCase().endsWith('.jpeg') ||
+        file.name.toLowerCase().endsWith('.pdf')
+      );
+    },
+  });
+
+  // Existing data fetching queries
   const { data: gdpData, isLoading: gdpLoading } = useQuery({
     queryKey: ["gdp"],
     queryFn: async () => {
@@ -120,21 +150,80 @@ const Dashboard = () => {
     },
   });
 
+  const handleDownload = async (tableName: string, data: any[]) => {
+    if (!data?.length) return;
+
+    const csv = [
+      Object.keys(data[0]).join(','),
+      ...data.map(row => Object.values(row).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${tableName}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: "Data downloaded successfully",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
-      <p className="text-muted-foreground">
-        Visualize datasets stored in the Supabase database, including:
-      </p>
-      
-      {/* Economics Section */}
+
+      {/* Latest Documents Carousel */}
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Economics</h2>
+        <h2 className="text-xl font-semibold">Latest Documents</h2>
+        <Card className="p-6">
+          {docsLoading ? (
+            <Skeleton className="h-[300px] w-full" />
+          ) : latestDocs?.length ? (
+            <Carousel className="w-full max-w-4xl mx-auto">
+              <CarouselContent>
+                {latestDocs.map((file) => (
+                  <CarouselItem key={file.id}>
+                    <div className="p-1">
+                      <Card className="p-4">
+                        <img
+                          src={`${supabase.storage.from('latest').getPublicUrl(file.name).data.publicUrl}`}
+                          alt={file.name}
+                          className="w-full h-[300px] object-contain"
+                        />
+                        <p className="mt-2 text-center text-sm text-muted-foreground">{file.name}</p>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          ) : (
+            <p className="text-center text-muted-foreground">No documents available</p>
+          )}
+        </Card>
+      </div>
+
+      {/* Market Overview Section */}
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Market Overview</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">GDP by Country</h3>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleDownload('gdp', gdpData)}
+                disabled={!gdpData?.length}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </Button>
@@ -165,7 +254,12 @@ const Dashboard = () => {
           <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Employment by Country</h3>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleDownload('employment', employmentData)}
+                disabled={!employmentData?.length}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </Button>
@@ -195,127 +289,36 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Energy Spot Prices Section */}
+      {/* Scenario Section */}
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Energy Spot Prices</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h2 className="text-xl font-semibold">Scenario</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Italian Zonal Prices</h3>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-            </div>
-            {pricesITLoading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : (
-              <ChartContainer className="h-[200px]" config={chartConfig}>
-                <ResponsiveContainer>
-                  <LineChart data={energyPricesIT}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="DATE" />
-                    <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="VALUE" 
-                      name="energy"
-                      stroke="var(--primary)" 
-                      strokeWidth={2} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            )}
+            <h3 className="text-lg font-semibold mb-4">Scenario</h3>
+            <p className="text-muted-foreground">
+              Access our scenario analysis and forecasting tools
+            </p>
           </Card>
-
           <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">European Prices</h3>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-            </div>
-            {pricesEULoading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : (
-              <ChartContainer className="h-[200px]" config={chartConfig}>
-                <ResponsiveContainer>
-                  <LineChart data={energyPricesEU}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="DATE" />
-                    <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="VALUE" 
-                      name="energy"
-                      stroke="var(--primary)" 
-                      strokeWidth={2} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            )}
+            <h3 className="text-lg font-semibold mb-4">Scenario 2</h3>
+            <p className="text-muted-foreground">
+              Description for scenario 2.
+            </p>
+          </Card>
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Scenario 3</h3>
+            <p className="text-muted-foreground">
+              Description for scenario 3.
+            </p>
+          </Card>
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Scenario 4</h3>
+            <p className="text-muted-foreground">
+              Description for scenario 4.
+            </p>
           </Card>
         </div>
       </div>
-
-      {/* Fundamentals Section */}
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Fundamentals</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Energy Generation in Europe</h3>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-            </div>
-            {generationLoading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : (
-              <ChartContainer className="h-[200px]" config={chartConfig}>
-                <ResponsiveContainer>
-                  <LineChart data={energyGeneration}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="DATE" />
-                    <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="VALUE" 
-                      name="generation"
-                      stroke="var(--primary)" 
-                      strokeWidth={2} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            )}
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Scenario Projections</h3>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-            </div>
-            <div className="flex items-center justify-center h-[200px] text-muted-foreground">
-              Coming soon...
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      <p className="text-sm text-muted-foreground italic">
-        Note: All filtered datasets are downloadable
-      </p>
     </div>
   );
 };
