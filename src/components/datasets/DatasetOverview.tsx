@@ -32,7 +32,7 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
         .select('dataset_name, downloaded_at')
         .eq('user_id', user.id)
         .order('downloaded_at', { ascending: false })
-        .limit(5);  // Updated to show only last 5
+        .limit(5);
       if (error) throw error;
       return data;
     },
@@ -73,6 +73,7 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
                 <TableCell className="font-bold">Dataset Name</TableCell>
                 <TableCell className="font-bold">Field</TableCell>
                 <TableCell className="font-bold">Type</TableCell>
+                <TableCell className="font-bold">Actions</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,6 +91,25 @@ export const DatasetOverview = ({ favorites, tables, onPreview, onDownload }: Da
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium type-pill-${type}`}>
                         {type}
                       </span>
+                    </TableCell>
+                    <TableCell className="space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPreview(table.tablename)}
+                        className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(table.tablename)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
