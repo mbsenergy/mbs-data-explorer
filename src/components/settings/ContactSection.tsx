@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +7,7 @@ import { Mail } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 
 export const ContactSection = () => {
   const { toast } = useToast();
@@ -66,12 +66,7 @@ export const ContactSection = () => {
   };
 
   return (
-    <Card className="p-6 bg-card">
-      <div className="flex items-center gap-2 mb-4">
-        <Mail className="h-5 w-5" />
-        <h3 className="text-lg font-medium">Contact Support</h3>
-      </div>
-
+    <CollapsibleCard title="Contact Support" icon={<Mail className="h-5 w-5" />}>
       <form onSubmit={handleContactSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="subject">Subject</Label>
@@ -101,6 +96,6 @@ export const ContactSection = () => {
           {isLoading ? "Sending..." : "Send Message"}
         </Button>
       </form>
-    </Card>
+    </CollapsibleCard>
   );
 };

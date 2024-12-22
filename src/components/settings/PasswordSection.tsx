@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Lock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 
 export const PasswordSection = () => {
   const { toast } = useToast();
@@ -63,12 +64,7 @@ export const PasswordSection = () => {
   };
 
   return (
-    <Card className="p-6 bg-card">
-      <div className="flex items-center gap-2 mb-4">
-        <Lock className="h-5 w-5" />
-        <h3 className="text-lg font-medium">Change Password</h3>
-      </div>
-
+    <CollapsibleCard title="Change Password" icon={<Lock className="h-5 w-5" />}>
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="current">Current Password</Label>
@@ -107,6 +103,6 @@ export const PasswordSection = () => {
           {isLoading ? "Updating..." : "Update Password"}
         </Button>
       </div>
-    </Card>
+    </CollapsibleCard>
   );
 };
