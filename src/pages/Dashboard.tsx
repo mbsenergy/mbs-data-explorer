@@ -84,17 +84,34 @@ const Dashboard = () => {
         throw error;
       }
 
-      // Filter for image and PDF files
-      return files?.filter(file => 
-        file.name.toLowerCase().endsWith('.png') || 
-        file.name.toLowerCase().endsWith('.jpg') ||
-        file.name.toLowerCase().endsWith('.jpeg') ||
-        file.name.toLowerCase().endsWith('.pdf')
-      ) || [];
+      // Filter for PNG files (PDF previews)
+      const pngFiles = files?.filter(file => file.name.toLowerCase().endsWith('.png')) || [];
+      
+      // For each PNG, check if there's a corresponding PDF
+      const filesWithPdfs = await Promise.all(pngFiles.map(async (pngFile) => {
+        const pdfName = pngFile.name.replace('.png', '.pdf');
+        const { data: pdfExists } = await supabase
+          .storage
+          .from('latest')
+          .list('', {
+            search: pdfName
+          });
+        
+        if (pdfExists?.length) {
+          return {
+            ...pngFile,
+            pdfUrl: supabase.storage.from('latest').getPublicUrl(pdfName).data.publicUrl,
+            previewUrl: supabase.storage.from('latest').getPublicUrl(pngFile.name).data.publicUrl
+          };
+        }
+        return null;
+      }));
+
+      return filesWithPdfs.filter(Boolean);
     },
   });
 
-  // Existing data fetching queries
+  // Market Overview Queries
   const { data: gdpData, isLoading: gdpLoading } = useQuery({
     queryKey: ["gdp"],
     queryFn: async () => {
@@ -198,15 +215,25 @@ const Dashboard = () => {
             <Carousel className="w-full max-w-4xl mx-auto">
               <CarouselContent>
                 {latestDocs.map((file) => (
-                  <CarouselItem key={file.id}>
+                  <CarouselItem key={file.name}>
                     <div className="p-1">
                       <Card className="p-4">
                         <img
-                          src={`${supabase.storage.from('latest').getPublicUrl(file.name).data.publicUrl}`}
+                          src={file.previewUrl}
                           alt={file.name}
                           className="w-full h-[300px] object-contain"
                         />
-                        <p className="mt-2 text-center text-sm text-muted-foreground">{file.name}</p>
+                        <div className="mt-2 flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground">{file.name.replace('.png', '')}</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(file.pdfUrl, '_blank')}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
                       </Card>
                     </div>
                   </CarouselItem>
@@ -224,6 +251,8 @@ const Dashboard = () => {
       {/* Market Overview Section */}
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Market Overview</h2>
+        
+        {/* First Row: Economics */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
@@ -297,59 +326,67 @@ const Dashboard = () => {
             )}
           </Card>
         </div>
-      </div>
 
-      {/* Know More Section */}
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Know More</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link to="/scenario">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Scenario</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Access our scenario analysis and forecasting tools
-              </p>
-            </Card>
-          </Link>
-          
-          <Link to="/osservatorio">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Osservatorio</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Explore energy market insights and analysis
-              </p>
-            </Card>
-          </Link>
+        {/* Know More Section */}
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Know More</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex flex-col">
+              <Link to="/scenario" className="flex-1">
+                <Card className="p-6 h-full hover:bg-muted/50 transition-colors cursor-pointer">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Scenario</h3>
+                    <ArrowRight className="h-5 w-5" />
+                  </div>
+                  <p className="text-muted-foreground mt-2">
+                    Access our scenario analysis and forecasting tools
+                  </p>
+                </Card>
+              </Link>
+            </div>
+            
+            <div className="flex flex-col">
+              <Link to="/osservatorio" className="flex-1">
+                <Card className="p-6 h-full hover:bg-muted/50 transition-colors cursor-pointer">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Osservatorio</h3>
+                    <ArrowRight className="h-5 w-5" />
+                  </div>
+                  <p className="text-muted-foreground mt-2">
+                    Explore energy market insights and analysis
+                  </p>
+                </Card>
+              </Link>
+            </div>
 
-          <Link to="/datasets">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Datasets</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Browse and download our comprehensive datasets
-              </p>
-            </Card>
-          </Link>
+            <div className="flex flex-col">
+              <Link to="/datasets" className="flex-1">
+                <Card className="p-6 h-full hover:bg-muted/50 transition-colors cursor-pointer">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Datasets</h3>
+                    <ArrowRight className="h-5 w-5" />
+                  </div>
+                  <p className="text-muted-foreground mt-2">
+                    Browse and download our comprehensive datasets
+                  </p>
+                </Card>
+              </Link>
+            </div>
 
-          <Link to="/company">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Company Products</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Discover our suite of professional solutions
-              </p>
-            </Card>
-          </Link>
+            <div className="flex flex-col">
+              <Link to="/company" className="flex-1">
+                <Card className="p-6 h-full hover:bg-muted/50 transition-colors cursor-pointer">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Company Products</h3>
+                    <ArrowRight className="h-5 w-5" />
+                  </div>
+                  <p className="text-muted-foreground mt-2">
+                    Discover our suite of professional solutions
+                  </p>
+                </Card>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
