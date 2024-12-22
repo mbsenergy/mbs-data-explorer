@@ -17,15 +17,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link } from "react-router-dom";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/" },
-  { title: "Datasets", icon: Database, url: "/datasets" },
-  { title: "Analytics", icon: BarChart3, url: "/analytics" },
-  { title: "User", icon: User, url: "/user" },
-  { title: "Company", icon: Building2, url: "/company" },
-  { title: "Settings", icon: Settings, url: "/settings" },
-  { title: "Guide", icon: HelpCircle, url: "/guide" },
+  { title: "Datasets", icon: Database, url: "datasets" },
+  { title: "Analytics", icon: BarChart3, url: "analytics" },
+  { title: "User", icon: User, url: "user" },
+  { title: "Company", icon: Building2, url: "company" },
+  { title: "Settings", icon: Settings, url: "settings" },
+  { title: "Guide", icon: HelpCircle, url: "guide" },
 ];
 
 export function AppSidebar() {
@@ -39,10 +40,10 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-2">
+                    <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
