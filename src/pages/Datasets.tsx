@@ -1,26 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Download, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import DatasetFilters from "@/components/datasets/DatasetFilters";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
-
-type TableInfo = {
-  tablename: string;
-};
+import { DatasetTable } from "@/components/datasets/DatasetTable";
+import type { TableInfo } from "@/components/datasets/types";
 
 const Datasets = () => {
   const { toast } = useToast();
@@ -31,6 +19,7 @@ const Datasets = () => {
   const [availableFields, setAvailableFields] = useState<string[]>([]);
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
@@ -138,7 +127,6 @@ const Datasets = () => {
       return;
     }
 
-    // Get first and last 15 rows
     const previewRows = [...data.slice(0, 15), ...data.slice(-15)];
     setPreviewData({
       tableName,
@@ -147,11 +135,22 @@ const Datasets = () => {
   };
 
   const handleSelect = async (tableName: string) => {
-    // Copy the table name to clipboard
     await navigator.clipboard.writeText(tableName);
     toast({
       title: "Success",
       description: "Table name copied to clipboard.",
+    });
+  };
+
+  const handleToggleFavorite = (tableName: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(tableName)) {
+        newFavorites.delete(tableName);
+      } else {
+        newFavorites.add(tableName);
+      }
+      return newFavorites;
     });
   };
 
@@ -175,58 +174,14 @@ const Datasets = () => {
             <Skeleton className="h-8 w-full" />
           </div>
         ) : (
-          <div className="overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Dataset Name</TableHead>
-                  <TableHead>Field</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTables?.map((table) => {
-                  const match = table.tablename.match(/^([A-Z]{2})(\d+)_(.+)/);
-                  const [_, field, type, name] = match || ["", "", "", table.tablename];
-                  
-                  return (
-                    <TableRow key={table.tablename}>
-                      <TableCell>{name}</TableCell>
-                      <TableCell>{field}</TableCell>
-                      <TableCell>{type}</TableCell>
-                      <TableCell className="space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSelect(table.tablename)}
-                        >
-                          Select
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePreview(table.tablename)}
-                          className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownload(table.tablename)}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+          <DatasetTable
+            tables={filteredTables || []}
+            onPreview={handlePreview}
+            onDownload={handleDownload}
+            onSelect={handleSelect}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
+          />
         )}
       </Card>
 
