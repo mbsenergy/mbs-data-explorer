@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,12 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Search } from "lucide-react";
+import { Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import DatasetFilters from "@/components/datasets/DatasetFilters";
-import SqlEditor from "@/components/datasets/SqlEditor";
 
 type TableInfo = {
   tablename: string;
@@ -26,10 +24,9 @@ type TableInfo = {
 const Datasets = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Record<string, string>>({});
-  const [customQuery, setCustomQuery] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedField, setSelectedField] = useState("all");
+  const [availableFields, setAvailableFields] = useState<string[]>([]);
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
@@ -40,85 +37,72 @@ const Datasets = () => {
     },
   });
 
-  const { data: tableData, isLoading: dataLoading } = useQuery({
-    queryKey: ["table-data", selectedTable, filters, customQuery],
-    queryFn: async () => {
-      if (!selectedTable) return null;
+  // Extract unique fields from table names
+  useEffect(() => {
+    if (tables) {
+      const fields = [...new Set(tables.map(table => {
+        const match = table.tablename.match(/^([A-Z]{2})\d+_/);
+        return match ? match[1] : null;
+      }).filter(Boolean))];
+      setAvailableFields(fields as string[]);
+    }
+  }, [tables]);
 
-      let query = supabase.from(selectedTable as any).select("*");
-
-      if (customQuery) {
-        toast({
-          title: "Custom SQL queries",
-          description: "Custom SQL query execution is not yet implemented for security reasons.",
-        });
-        return null;
-      }
-
-      Object.entries(filters).forEach(([column, value]) => {
-        if (value) {
-          query = query.ilike(column, `%${value}%`);
-        }
-      });
-
-      const { data, error } = await query.limit(10);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!selectedTable,
+  // Filter tables based on search term and selected field
+  const filteredTables = tables?.filter(table => {
+    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
+    return matchesSearch && matchesField;
   });
 
-  const filteredTables = tables?.filter((table) =>
-    table.tablename.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleDownload = async (tableName: string) => {
+    if (!user?.id) return;
 
-  const handleFilterChange = (column: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [column]: value,
-    }));
-  };
-
-  const trackDownload = async () => {
-    if (!user?.id || !selectedTable) return;
-
-    console.log("Tracking download for user:", user.id, "table:", selectedTable);
-    
-    const { error } = await supabase
+    // Track the download
+    const { error: analyticsError } = await supabase
       .from("analytics")
       .insert({
         user_id: user.id,
-        dataset_name: selectedTable,
-        is_custom_query: !!customQuery,
+        dataset_name: tableName,
+        is_custom_query: false,
       });
 
-    if (error) {
-      console.error("Error tracking download:", error);
+    if (analyticsError) {
+      console.error("Error tracking download:", analyticsError);
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to track download activity.",
       });
-    } else {
-      console.log("Download tracked successfully");
+      return;
     }
-  };
 
-  const handleDownload = async () => {
-    if (!tableData) return;
-    
-    // Track the download
-    await trackDownload();
-    
-    const csv = tableData.map((row) => 
-      Object.values(row).join(',')
-    ).join('\n');
+    // Fetch the data
+    const { data, error } = await supabase
+      .from(tableName)
+      .select("*")
+      .limit(1000);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to download dataset.",
+      });
+      return;
+    }
+
+    // Convert to CSV and download
+    const csv = [
+      Object.keys(data[0]).join(','),
+      ...data.map(row => Object.values(row).join(','))
+    ].join('\n');
     
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${selectedTable}.csv`;
+    a.download = `${tableName}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -133,108 +117,58 @@ const Datasets = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Datasets</h1>
-      <Card className="p-6 glass-panel">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search datasets..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+      
+      <Card className="p-6">
+        <DatasetFilters
+          onSearchChange={setSearchTerm}
+          onFieldChange={setSelectedField}
+          availableFields={availableFields}
+        />
+
+        {tablesLoading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
           </div>
-          <Button variant="outline" onClick={handleDownload} disabled={!selectedTable || !tableData}>
-            <Download className="mr-2 h-4 w-4" />
-            Download
-          </Button>
-        </div>
-
-        <div className="grid md:grid-cols-[300px,1fr] gap-6">
-          <Card className="p-4 glass-panel">
-            <h3 className="font-semibold mb-4">Available Datasets</h3>
-            {tablesLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredTables?.map((table) => (
-                  <Button
-                    key={table.tablename}
-                    variant={selectedTable === table.tablename ? "default" : "ghost"}
-                    className="w-full justify-start"
-                    onClick={() => {
-                      setSelectedTable(table.tablename);
-                      setFilters({});
-                      setCustomQuery(null);
-                    }}
-                  >
-                    {table.tablename}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          <div className="space-y-6">
-            {selectedTable && (
-              <>
-                <Card className="p-4 glass-panel">
-                  <DatasetFilters
-                    columns={tableData?.[0] ? Object.keys(tableData[0]) : []}
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                  />
-                </Card>
-
-                <Card className="p-4 glass-panel">
-                  <SqlEditor onExecute={setCustomQuery} />
-                </Card>
-              </>
-            )}
-
-            <Card className="p-4 glass-panel">
-              <h3 className="font-semibold mb-4">Preview</h3>
-              {dataLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-8 w-full" />
-                  <Skeleton className="h-8 w-full" />
-                  <Skeleton className="h-8 w-full" />
-                </div>
-              ) : tableData ? (
-                <div className="overflow-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        {Object.keys(tableData[0] || {}).map((key) => (
-                          <TableHead key={key}>{key}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {tableData.map((row, i) => (
-                        <TableRow key={i}>
-                          {Object.values(row).map((value: any, j) => (
-                            <TableCell key={j}>
-                              {typeof value === "object" ? JSON.stringify(value) : value}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  Select a dataset to preview its data
-                </p>
-              )}
-            </Card>
+        ) : (
+          <div className="overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Dataset Name</TableHead>
+                  <TableHead>Field</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTables?.map((table) => {
+                  const match = table.tablename.match(/^([A-Z]{2})(\d+)_(.+)/);
+                  const [_, field, type, name] = match || ["", "", "", table.tablename];
+                  
+                  return (
+                    <TableRow key={table.tablename}>
+                      <TableCell>{name}</TableCell>
+                      <TableCell>{field}</TableCell>
+                      <TableCell>{type}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownload(table.tablename)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
-        </div>
+        )}
       </Card>
     </div>
   );
