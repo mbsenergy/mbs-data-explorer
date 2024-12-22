@@ -2,6 +2,9 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import DatasetFilters from "./DatasetFilters";
 import { DatasetTable } from "./DatasetTable";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { TableInfo } from "./types";
 
 interface DatasetSearchProps {
@@ -33,27 +36,44 @@ export const DatasetSearch = ({
   availableFields,
   availableTypes
 }: DatasetSearchProps) => {
+  const [isOpen, setIsOpen] = React.useState(true);
+
   return (
     <Card className="p-6 mb-6">
-      <h2 className="text-2xl font-semibold mb-4">Search on datamart</h2>
-      <DatasetFilters
-        onSearchChange={onSearchChange}
-        onFieldChange={onFieldChange}
-        onTypeChange={onTypeChange}
-        onFavoriteChange={onFavoriteChange}
-        availableFields={availableFields}
-        availableTypes={availableTypes}
-      />
-      <div className="mt-6">
-        <DatasetTable
-          tables={tables}
-          onPreview={onPreview}
-          onDownload={onDownload}
-          onSelect={onSelect}
-          onToggleFavorite={onToggleFavorite}
-          favorites={favorites}
-        />
-      </div>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold">Search on datamart</h2>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm">
+              {isOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+        <CollapsibleContent>
+          <DatasetFilters
+            onSearchChange={onSearchChange}
+            onFieldChange={onFieldChange}
+            onTypeChange={onTypeChange}
+            onFavoriteChange={onFavoriteChange}
+            availableFields={availableFields}
+            availableTypes={availableTypes}
+          />
+          <div className="mt-6">
+            <DatasetTable
+              tables={tables}
+              onPreview={onPreview}
+              onDownload={onDownload}
+              onSelect={onSelect}
+              onToggleFavorite={onToggleFavorite}
+              favorites={favorites}
+            />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 };
