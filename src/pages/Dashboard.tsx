@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, ArrowRight } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -26,6 +26,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useToast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 
 const chartConfig = {
   value: {
@@ -65,22 +66,31 @@ const chartConfig = {
 const Dashboard = () => {
   const { toast } = useToast();
 
-  // Fetch latest documents from storage
+  // Fetch latest documents from storage with public URLs
   const { data: latestDocs, isLoading: docsLoading } = useQuery({
     queryKey: ["latest-docs"],
     queryFn: async () => {
       const { data: files, error } = await supabase
         .storage
         .from('latest')
-        .list();
+        .list('', {
+          limit: 10,
+          offset: 0,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
 
-      if (error) throw error;
-      return files.filter(file => 
+      if (error) {
+        console.error('Error fetching files:', error);
+        throw error;
+      }
+
+      // Filter for image and PDF files
+      return files?.filter(file => 
         file.name.toLowerCase().endsWith('.png') || 
         file.name.toLowerCase().endsWith('.jpg') ||
         file.name.toLowerCase().endsWith('.jpeg') ||
         file.name.toLowerCase().endsWith('.pdf')
-      );
+      ) || [];
     },
   });
 
@@ -289,34 +299,57 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Scenario Section */}
+      {/* Know More Section */}
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Scenario</h2>
+        <h2 className="text-xl font-semibold">Know More</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Scenario</h3>
-            <p className="text-muted-foreground">
-              Access our scenario analysis and forecasting tools
-            </p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Scenario 2</h3>
-            <p className="text-muted-foreground">
-              Description for scenario 2.
-            </p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Scenario 3</h3>
-            <p className="text-muted-foreground">
-              Description for scenario 3.
-            </p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Scenario 4</h3>
-            <p className="text-muted-foreground">
-              Description for scenario 4.
-            </p>
-          </Card>
+          <Link to="/scenario">
+            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Scenario</h3>
+                <ArrowRight className="h-5 w-5" />
+              </div>
+              <p className="text-muted-foreground mt-2">
+                Access our scenario analysis and forecasting tools
+              </p>
+            </Card>
+          </Link>
+          
+          <Link to="/osservatorio">
+            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Osservatorio</h3>
+                <ArrowRight className="h-5 w-5" />
+              </div>
+              <p className="text-muted-foreground mt-2">
+                Explore energy market insights and analysis
+              </p>
+            </Card>
+          </Link>
+
+          <Link to="/datasets">
+            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Datasets</h3>
+                <ArrowRight className="h-5 w-5" />
+              </div>
+              <p className="text-muted-foreground mt-2">
+                Browse and download our comprehensive datasets
+              </p>
+            </Card>
+          </Link>
+
+          <Link to="/company">
+            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Company Products</h3>
+                <ArrowRight className="h-5 w-5" />
+              </div>
+              <p className="text-muted-foreground mt-2">
+                Discover our suite of professional solutions
+              </p>
+            </Card>
+          </Link>
         </div>
       </div>
     </div>
