@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,18 +31,37 @@ const User = () => {
   });
 
   const [formData, setFormData] = useState({
-    first_name: profile?.first_name || "",
-    last_name: profile?.last_name || "",
-    date_of_birth: profile?.date_of_birth || "",
-    country: profile?.country || "",
-    company: profile?.company || "",
-    role: profile?.role || "",
-    linkedin_url: profile?.linkedin_url || "",
-    github_username: profile?.github_username || "",
-    it_skills: profile?.it_skills || [],
-    preferred_data: profile?.preferred_data || [],
-    subscriptions: profile?.subscriptions || [],
+    first_name: "",
+    last_name: "",
+    date_of_birth: "",
+    country: "",
+    company: "",
+    role: "",
+    linkedin_url: "",
+    github_username: "",
+    it_skills: [],
+    preferred_data: [],
+    subscriptions: [],
   });
+
+  // Update form data when profile data is loaded
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        date_of_birth: profile.date_of_birth || "",
+        country: profile.country || "",
+        company: profile.company || "",
+        role: profile.role || "",
+        linkedin_url: profile.linkedin_url || "",
+        github_username: profile.github_username || "",
+        it_skills: profile.it_skills || [],
+        preferred_data: profile.preferred_data || [],
+        subscriptions: profile.subscriptions || [],
+      });
+    }
+  }, [profile]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
