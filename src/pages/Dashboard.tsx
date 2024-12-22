@@ -128,7 +128,7 @@ const Dashboard = () => {
         .from("ME01_gme_mgp_prices")
         .select("*")
         .order("DATE", { ascending: true })
-        .limit(14);
+        .limit(336); // Last 2 weeks hourly data
       if (error) throw error;
       return data;
     },
@@ -159,6 +159,29 @@ const Dashboard = () => {
       return data;
     },
   });
+
+  const renderFilePreview = (file: any) => {
+    const fileType = file.name.split('.').pop()?.toLowerCase();
+    const publicUrl = `${supabase.storage.from('latest').getPublicUrl(file.name).data.publicUrl}`;
+
+    if (fileType === 'pdf') {
+      return (
+        <iframe
+          src={`${publicUrl}#view=FitH`}
+          className="w-full h-[300px]"
+          title={file.name}
+        />
+      );
+    }
+
+    return (
+      <img
+        src={publicUrl}
+        alt={file.name}
+        className="w-full h-[300px] object-contain"
+      />
+    );
+  };
 
   const handleDownload = async (tableName: string, data: any[]) => {
     if (!data?.length) return;
@@ -201,11 +224,7 @@ const Dashboard = () => {
                   <CarouselItem key={file.id}>
                     <div className="p-1">
                       <Card className="p-4">
-                        <img
-                          src={`${supabase.storage.from('latest').getPublicUrl(file.name).data.publicUrl}`}
-                          alt={file.name}
-                          className="w-full h-[300px] object-contain"
-                        />
+                        {renderFilePreview(file)}
                         <p className="mt-2 text-center text-sm text-muted-foreground">{file.name}</p>
                       </Card>
                     </div>
@@ -224,6 +243,8 @@ const Dashboard = () => {
       {/* Market Overview Section */}
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Market Overview</h2>
+        
+        {/* First Row: Economics */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
@@ -297,59 +318,103 @@ const Dashboard = () => {
             )}
           </Card>
         </div>
-      </div>
 
-      {/* Know More Section */}
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Know More</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link to="/scenario">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Scenario</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Access our scenario analysis and forecasting tools
-              </p>
-            </Card>
-          </Link>
-          
-          <Link to="/osservatorio">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Osservatorio</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Explore energy market insights and analysis
-              </p>
-            </Card>
-          </Link>
+        {/* Second Row: Energy Spot Prices */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Energy Prices in Italy by Zone</h3>
+            {pricesITLoading ? (
+              <Skeleton className="h-[200px] w-full" />
+            ) : (
+              <ChartContainer className="h-[200px]" config={chartConfig}>
+                <ResponsiveContainer>
+                  <LineChart data={energyPricesIT}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="DATE" />
+                    <YAxis />
+                    <Tooltip content={<ChartTooltipContent />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="VALUE" 
+                      name="price"
+                      stroke="var(--primary)" 
+                      strokeWidth={2} 
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            )}
+          </Card>
 
-          <Link to="/datasets">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Datasets</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Browse and download our comprehensive datasets
-              </p>
-            </Card>
-          </Link>
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Energy Prices in Europe</h3>
+            {pricesEULoading ? (
+              <Skeleton className="h-[200px] w-full" />
+            ) : (
+              <ChartContainer className="h-[200px]" config={chartConfig}>
+                <ResponsiveContainer>
+                  <LineChart data={energyPricesEU}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="DATE" />
+                    <YAxis />
+                    <Tooltip content={<ChartTooltipContent />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="VALUE" 
+                      name="price"
+                      stroke="var(--primary)" 
+                      strokeWidth={2} 
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            )}
+          </Card>
+        </div>
 
-          <Link to="/company">
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Company Products</h3>
-                <ArrowRight className="h-5 w-5" />
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Discover our suite of professional solutions
-              </p>
-            </Card>
-          </Link>
+        {/* Know More Section with equal heights */}
+        <div className="space-y-2 mt-6">
+          <h2 className="text-xl font-semibold">Know More</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                title: "Scenario",
+                description: "Access our scenario analysis and forecasting tools",
+                link: "/scenario"
+              },
+              {
+                title: "Osservatorio",
+                description: "Explore energy market insights and analysis",
+                link: "/osservatorio"
+              },
+              {
+                title: "Datasets",
+                description: "Browse and download our comprehensive datasets",
+                link: "/datasets"
+              },
+              {
+                title: "Company Products",
+                description: "Discover our suite of professional solutions",
+                link: "/company"
+              }
+            ].map((item) => (
+              <Link 
+                key={item.title} 
+                to={item.link}
+                className="block h-full"
+              >
+                <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer h-full flex flex-col justify-between">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                    <ArrowRight className="h-5 w-5" />
+                  </div>
+                  <p className="text-muted-foreground mt-2">
+                    {item.description}
+                  </p>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

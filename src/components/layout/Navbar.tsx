@@ -25,7 +25,7 @@ export const Navbar = () => {
   });
 
   return (
-    <nav className="h-16 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="h-16 navbar-dark backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container flex h-full items-center">
         <Button variant="ghost" size="icon" className="mr-2 md:hidden">
           <Menu className="h-5 w-5" />
