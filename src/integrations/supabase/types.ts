@@ -1515,6 +1515,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_logins: {
+        Row: {
+          id: string
+          logged_in_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          logged_in_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          logged_in_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1531,6 +1549,12 @@ export type Database = {
           user_uuid: string
         }
         Returns: string
+      }
+      get_login_count_this_year: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: number
       }
     }
     Enums: {
