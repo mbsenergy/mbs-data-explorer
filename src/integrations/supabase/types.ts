@@ -798,6 +798,102 @@ export type Database = {
         }
         Relationships: []
       }
+      ME01_gme_mb_offers: {
+        Row: {
+          ADJ_ENERGY_PRICE_NO: string | null
+          ADJ_QUANTITY_NO: number | null
+          AWARDED_PRICE_NO: number | null
+          AWARDED_QUANTITY_NO: number | null
+          BATYPE: string | null
+          BID_OFFER_DATE_DT: string | null
+          BID_OFFER_DATE_DT_PARSED: string | null
+          BILATERAL_IN: string | null
+          ENERGY_PRICE_NO: number | null
+          GRID_SUPPLY_POINT_NO: string | null
+          INTERVAL_NO: number | null
+          MARKET_CD: string | null
+          md_last_update: string | null
+          md_source: string | null
+          md_table: string | null
+          MERIT_ORDER_NO: number | null
+          OPERATORE: string | null
+          PARTIAL_QTY_ACCEPTED_IN: string | null
+          PURPOSE_CD: string | null
+          QUANTITY_NO: number | null
+          QUARTER_NO: string | null
+          SCOPE: string | null
+          STATUS_CD: string | null
+          SUBMITTED_DT: string | null
+          TIME: string | null
+          TRANSACTION_REFERENCE_NO: string | null
+          TYPE_CD: string | null
+          UNIT_REFERENCE_NO: string | null
+          ZONE_CD: string | null
+        }
+        Insert: {
+          ADJ_ENERGY_PRICE_NO?: string | null
+          ADJ_QUANTITY_NO?: number | null
+          AWARDED_PRICE_NO?: number | null
+          AWARDED_QUANTITY_NO?: number | null
+          BATYPE?: string | null
+          BID_OFFER_DATE_DT?: string | null
+          BID_OFFER_DATE_DT_PARSED?: string | null
+          BILATERAL_IN?: string | null
+          ENERGY_PRICE_NO?: number | null
+          GRID_SUPPLY_POINT_NO?: string | null
+          INTERVAL_NO?: number | null
+          MARKET_CD?: string | null
+          md_last_update?: string | null
+          md_source?: string | null
+          md_table?: string | null
+          MERIT_ORDER_NO?: number | null
+          OPERATORE?: string | null
+          PARTIAL_QTY_ACCEPTED_IN?: string | null
+          PURPOSE_CD?: string | null
+          QUANTITY_NO?: number | null
+          QUARTER_NO?: string | null
+          SCOPE?: string | null
+          STATUS_CD?: string | null
+          SUBMITTED_DT?: string | null
+          TIME?: string | null
+          TRANSACTION_REFERENCE_NO?: string | null
+          TYPE_CD?: string | null
+          UNIT_REFERENCE_NO?: string | null
+          ZONE_CD?: string | null
+        }
+        Update: {
+          ADJ_ENERGY_PRICE_NO?: string | null
+          ADJ_QUANTITY_NO?: number | null
+          AWARDED_PRICE_NO?: number | null
+          AWARDED_QUANTITY_NO?: number | null
+          BATYPE?: string | null
+          BID_OFFER_DATE_DT?: string | null
+          BID_OFFER_DATE_DT_PARSED?: string | null
+          BILATERAL_IN?: string | null
+          ENERGY_PRICE_NO?: number | null
+          GRID_SUPPLY_POINT_NO?: string | null
+          INTERVAL_NO?: number | null
+          MARKET_CD?: string | null
+          md_last_update?: string | null
+          md_source?: string | null
+          md_table?: string | null
+          MERIT_ORDER_NO?: number | null
+          OPERATORE?: string | null
+          PARTIAL_QTY_ACCEPTED_IN?: string | null
+          PURPOSE_CD?: string | null
+          QUANTITY_NO?: number | null
+          QUARTER_NO?: string | null
+          SCOPE?: string | null
+          STATUS_CD?: string | null
+          SUBMITTED_DT?: string | null
+          TIME?: string | null
+          TRANSACTION_REFERENCE_NO?: string | null
+          TYPE_CD?: string | null
+          UNIT_REFERENCE_NO?: string | null
+          ZONE_CD?: string | null
+        }
+        Relationships: []
+      }
       ME01_gme_mb_riservasecondaria: {
         Row: {
           DATE: string | null
@@ -1254,6 +1350,96 @@ export type Database = {
           VALUE?: string | null
           VARIABLE?: string | null
           ZONE?: string | null
+        }
+        Relationships: []
+      }
+      ME01_gme_msd_offers: {
+        Row: {
+          ADJ_ENERGY_PRICE_NO: string | null
+          ADJ_QUANTITY_NO: number | null
+          AWARDED_PRICE_NO: number | null
+          AWARDED_QUANTITY_NO: number | null
+          BID_OFFER_DATE_DT: string | null
+          BID_OFFER_DATE_DT_PARSED: string | null
+          BILATERAL_IN: string | null
+          ENERGY_PRICE_NO: number | null
+          GRID_SUPPLY_POINT_NO: string | null
+          INTERVAL_NO: number | null
+          MARKET_CD: string | null
+          md_last_update: string | null
+          md_source: string | null
+          md_table: string | null
+          MERIT_ORDER_NO: number | null
+          OPERATORE: string | null
+          PARTIAL_QTY_ACCEPTED_IN: string | null
+          PURPOSE_CD: string | null
+          QUANTITY_NO: number | null
+          SCOPE: string | null
+          STATUS_CD: string | null
+          SUBMITTED_DT: string | null
+          TIME: string | null
+          TRANSACTION_REFERENCE_NO: string | null
+          TYPE_CD: string | null
+          UNIT_REFERENCE_NO: string | null
+          ZONE_CD: string | null
+        }
+        Insert: {
+          ADJ_ENERGY_PRICE_NO?: string | null
+          ADJ_QUANTITY_NO?: number | null
+          AWARDED_PRICE_NO?: number | null
+          AWARDED_QUANTITY_NO?: number | null
+          BID_OFFER_DATE_DT?: string | null
+          BID_OFFER_DATE_DT_PARSED?: string | null
+          BILATERAL_IN?: string | null
+          ENERGY_PRICE_NO?: number | null
+          GRID_SUPPLY_POINT_NO?: string | null
+          INTERVAL_NO?: number | null
+          MARKET_CD?: string | null
+          md_last_update?: string | null
+          md_source?: string | null
+          md_table?: string | null
+          MERIT_ORDER_NO?: number | null
+          OPERATORE?: string | null
+          PARTIAL_QTY_ACCEPTED_IN?: string | null
+          PURPOSE_CD?: string | null
+          QUANTITY_NO?: number | null
+          SCOPE?: string | null
+          STATUS_CD?: string | null
+          SUBMITTED_DT?: string | null
+          TIME?: string | null
+          TRANSACTION_REFERENCE_NO?: string | null
+          TYPE_CD?: string | null
+          UNIT_REFERENCE_NO?: string | null
+          ZONE_CD?: string | null
+        }
+        Update: {
+          ADJ_ENERGY_PRICE_NO?: string | null
+          ADJ_QUANTITY_NO?: number | null
+          AWARDED_PRICE_NO?: number | null
+          AWARDED_QUANTITY_NO?: number | null
+          BID_OFFER_DATE_DT?: string | null
+          BID_OFFER_DATE_DT_PARSED?: string | null
+          BILATERAL_IN?: string | null
+          ENERGY_PRICE_NO?: number | null
+          GRID_SUPPLY_POINT_NO?: string | null
+          INTERVAL_NO?: number | null
+          MARKET_CD?: string | null
+          md_last_update?: string | null
+          md_source?: string | null
+          md_table?: string | null
+          MERIT_ORDER_NO?: number | null
+          OPERATORE?: string | null
+          PARTIAL_QTY_ACCEPTED_IN?: string | null
+          PURPOSE_CD?: string | null
+          QUANTITY_NO?: number | null
+          SCOPE?: string | null
+          STATUS_CD?: string | null
+          SUBMITTED_DT?: string | null
+          TIME?: string | null
+          TRANSACTION_REFERENCE_NO?: string | null
+          TYPE_CD?: string | null
+          UNIT_REFERENCE_NO?: string | null
+          ZONE_CD?: string | null
         }
         Relationships: []
       }
