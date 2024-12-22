@@ -1,4 +1,4 @@
-import { LogOut, ChevronLeft } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,7 @@ import { SystemMenuItems } from "./sidebar/SystemMenuItems"
 export function AppSidebar() {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { collapsed, toggleSidebar } = useSidebarContext()
+  const { collapsed } = useSidebarContext()
 
   const handleLogout = async () => {
     try {
@@ -56,14 +56,6 @@ export function AppSidebar() {
               />
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="ml-auto"
-          >
-            <ChevronLeft className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
-          </Button>
         </div>
       </SidebarHeader>
 
