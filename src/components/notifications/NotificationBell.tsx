@@ -18,7 +18,7 @@ export const NotificationBell = () => {
   const [notificationCount, setNotificationCount] = useState(0);
 
   // Query for latest files across all relevant buckets
-  const { data: notifications, refetch } = useQuery({
+  const { data: notifications } = useQuery({
     queryKey: ["notifications", lastCheck],
     queryFn: async () => {
       const buckets = ['latest', 'report-scenario', 'osservatorio-energia'];
@@ -59,6 +59,7 @@ export const NotificationBell = () => {
       const newItems = notifications.filter(
         item => new Date(item.created_at).getTime() > lastCheck
       );
+      
       if (newItems.length > 0) {
         setNotificationCount(newItems.length);
         setHasNewItems(true);
@@ -86,7 +87,7 @@ export const NotificationBell = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="relative"
+          className="relative mr-2"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
