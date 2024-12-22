@@ -1,10 +1,11 @@
-import { Bell, HelpCircle, Menu, Home, User, Settings } from "lucide-react";
+import { HelpCircle, Home, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,9 +54,7 @@ export const Navbar = () => {
         </Button>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="mr-2">
-          <Bell className="h-5 w-5" />
-        </Button>
+        <NotificationBell />
 
         {/* Avatar with Dropdown */}
         <DropdownMenu>
