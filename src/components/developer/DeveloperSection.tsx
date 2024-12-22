@@ -13,15 +13,30 @@ interface DeveloperSectionProps {
   section: string;
   searchTerm?: string;
   selectedTag?: string;
+  showFavorites?: boolean;
+  favorites: Set<string>;
+  onPreview: (fileName: string, section: string) => void;
+  onDownload: (fileName: string, section: string) => void;
+  onToggleFavorite: (fileName: string) => void;
 }
 
-export const DeveloperSection = ({ section, searchTerm = "", selectedTag = "all" }: DeveloperSectionProps) => {
+export const DeveloperSection = ({ 
+  section, 
+  searchTerm = "", 
+  selectedTag = "all",
+  showFavorites = false,
+  favorites,
+  onPreview,
+  onDownload,
+  onToggleFavorite
+}: DeveloperSectionProps) => {
   const { data: files, isLoading } = useDeveloperFiles(section);
 
   const filteredFiles = files?.filter(file => {
     const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTag = selectedTag === "all" || file.field === selectedTag;
-    return matchesSearch && matchesTag;
+    const matchesFavorites = !showFavorites || favorites.has(file.name);
+    return matchesSearch && matchesTag && matchesFavorites;
   });
 
   if (filteredFiles?.length === 0) {
@@ -48,7 +63,14 @@ export const DeveloperSection = ({ section, searchTerm = "", selectedTag = "all"
                   key={file.name} 
                   className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
                 >
-                  <DeveloperCard {...file} section={section} />
+                  <DeveloperCard 
+                    {...file} 
+                    section={section}
+                    isFavorite={favorites.has(file.name)}
+                    onToggleFavorite={onToggleFavorite}
+                    onPreview={onPreview}
+                    onDownload={onDownload}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>

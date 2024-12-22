@@ -12,6 +12,7 @@ const Developer = () => {
   const sections = ['presets', 'macros', 'developer', 'models'];
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
+  const [showFavorites, setShowFavorites] = useState(false);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const { favorites, toggleFavorite } = useDeveloperFavorites();
   const { user } = useAuth();
@@ -100,17 +101,21 @@ const Developer = () => {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Developer Resources</h1>
       
-      <DeveloperActivity
-        favorites={favorites}
-        files={results}
-        onPreview={handlePreview}
-        onDownload={handleDownload}
-        onToggleFavorite={toggleFavorite}
-      />
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Activity</h2>
+        <DeveloperActivity
+          favorites={favorites}
+          files={results}
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          onToggleFavorite={toggleFavorite}
+        />
+      </div>
 
       <DeveloperSearch
         onSearchChange={setSearchTerm}
         onTagChange={setSelectedTag}
+        onFavoriteChange={setShowFavorites}
         availableTags={availableTags}
       />
 
@@ -120,6 +125,11 @@ const Developer = () => {
           section={section}
           searchTerm={searchTerm}
           selectedTag={selectedTag}
+          showFavorites={showFavorites}
+          favorites={favorites}
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          onToggleFavorite={toggleFavorite}
         />
       ))}
     </div>
