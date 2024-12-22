@@ -39,10 +39,10 @@ export const PreviewDialog = ({ isOpen, onClose, filePath, fileName, section }: 
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>{fileName}</DialogTitle>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={handleCopy}
-            className="ml-auto"
+            className="ml-auto bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 text-white"
           >
             <Copy className="h-4 w-4 mr-2" />
             Copy
