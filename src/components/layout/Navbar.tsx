@@ -1,16 +1,10 @@
-import { Bell, HelpCircle, Menu, User, Settings, Home } from "lucide-react";
+import { Bell, HelpCircle, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export const Navbar = () => {
   const { user } = useAuth();
@@ -61,40 +55,16 @@ export const Navbar = () => {
           <Bell className="h-5 w-5" />
         </Button>
 
-        {/* Avatar with Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarImage 
-                src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} 
-                alt="avatar" 
-              />
-              <AvatarFallback>
-                {user?.email?.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem asChild>
-              <Link to="/" className="flex items-center">
-                <Home className="mr-2 h-4 w-4" />
-                Dashboard
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/user" className="flex items-center">
-                <User className="mr-2 h-4 w-4" />
-                User
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/settings" className="flex items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Avatar */}
+        <Avatar className="h-8 w-8">
+          <AvatarImage 
+            src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} 
+            alt="avatar" 
+          />
+          <AvatarFallback>
+            {user?.email?.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
       </div>
     </nav>
   );
