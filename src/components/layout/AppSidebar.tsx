@@ -1,101 +1,43 @@
-import { Link, useLocation } from "react-router-dom";
-import {
-  BarChart3,
-  FileText,
-  Home,
-  LogOut,
-  Settings,
-  User,
-  Building,
-  BookOpen,
-  Database,
-  ChevronLeft,
-} from "lucide-react";
+import { LogOut, ChevronLeft } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useToast } from "@/components/ui/use-toast"
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
   useSidebarContext,
-} from "@/components/ui/sidebar";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-
-const mainMenuItems = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Datasets",
-    url: "/datasets",
-    icon: Database,
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
-    icon: BarChart3,
-  },
-];
-
-const userMenuItems = [
-  {
-    title: "User",
-    url: "/user",
-    icon: User,
-  },
-  {
-    title: "Company",
-    url: "/company",
-    icon: Building,
-  },
-];
-
-const settingsMenuItems = [
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
-  {
-    title: "Guide",
-    url: "/guide",
-    icon: BookOpen,
-  },
-];
+} from "@/components/ui/sidebar"
+import { supabase } from "@/integrations/supabase/client"
+import { MainMenuItems } from "./sidebar/MainMenuItems"
+import { UserMenuItems } from "./sidebar/UserMenuItems"
+import { SystemMenuItems } from "./sidebar/SystemMenuItems"
 
 export function AppSidebar() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { collapsed, toggleSidebar } = useSidebarContext();
-
-  const isActive = (path: string) => {
-    return location.pathname === path || (path !== "/" && location.pathname.startsWith(path));
-  };
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const { collapsed, toggleSidebar } = useSidebarContext()
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate("/login");
+      await supabase.auth.signOut()
+      navigate("/login")
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error("Error during logout:", error)
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to log out. Please try again.",
-      });
+      })
     }
-  };
+  }
 
   return (
     <Sidebar 
@@ -124,28 +66,14 @@ export function AppSidebar() {
           </Button>
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className={collapsed ? "hidden" : ""}>
             Main Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {mainMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    tooltip={collapsed ? item.title : undefined}
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
-                  >
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <MainMenuItems />
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -154,22 +82,7 @@ export function AppSidebar() {
             User
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {userMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    tooltip={collapsed ? item.title : undefined}
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
-                  >
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <UserMenuItems />
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -178,22 +91,7 @@ export function AppSidebar() {
             System
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    tooltip={collapsed ? item.title : undefined}
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
-                  >
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <SystemMenuItems />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -202,7 +100,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              onClick={handleLogout} 
+              onClick={handleLogout}
               tooltip={collapsed ? "Logout" : undefined}
               className="w-full hover:bg-muted/50"
             >
@@ -213,5 +111,5 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

@@ -1,6 +1,3 @@
-import { type VariantProps } from "class-variance-authority"
-import { type sidebarMenuButtonVariants } from "./menu-button"
-
 export type SidebarContext = {
   state: "expanded" | "collapsed"
   open: boolean
@@ -12,7 +9,7 @@ export type SidebarContext = {
   collapsed: boolean
 }
 
-export interface SidebarMenuButtonProps extends React.ComponentProps<"button">, VariantProps<typeof sidebarMenuButtonVariants> {
+export interface SidebarMenuButtonProps extends React.ComponentProps<"button"> {
   asChild?: boolean
   isActive?: boolean
   tooltip?: string | React.ComponentProps<any>
