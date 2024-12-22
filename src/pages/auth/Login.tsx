@@ -26,6 +26,11 @@ const Login = () => {
 
       if (error) throw error;
 
+      // Track the login
+      await supabase.from('user_logins').insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id
+      });
+
       navigate("/");
     } catch (error: any) {
       toast({
@@ -42,7 +47,12 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md p-8 bg-card">
         <div className="space-y-6">
-          <div className="space-y-2 text-center">
+          <div className="flex flex-col items-center space-y-2">
+            <img 
+              src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
+              alt="Company Logo" 
+              className="h-12 mb-4"
+            />
             <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
             <p className="text-sm text-muted-foreground">
               Enter your credentials to access your account

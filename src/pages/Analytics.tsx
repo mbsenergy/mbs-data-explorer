@@ -49,6 +49,29 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
+  // Updated to use the new login count function
+  const { data: connectionsThisYear, isLoading: connectionsLoading } = useQuery({
+    queryKey: ["connectionsThisYear", user?.id],
+    queryFn: async () => {
+      console.log("Fetching login count for user:", user?.id);
+      const { data, error } = await supabase.rpc('get_login_count_this_year', {
+        user_uuid: user?.id
+      });
+      if (error) {
+        console.error("Login count error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch login count data.",
+        });
+        throw error;
+      }
+      console.log("Login count data:", data);
+      return data || 0;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ["analytics", user?.id],
     queryFn: async () => {
@@ -74,11 +97,6 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
-  const currentYear = new Date().getFullYear();
-  const connectionsThisYear = analyticsData?.filter(
-    (item) => new Date(item.downloaded_at).getFullYear() === currentYear
-  ).length || 0;
-
   const totalDownloads = analyticsData?.length || 0;
 
   // Prepare data for the line chart
@@ -92,10 +110,6 @@ const Analytics = () => {
     date,
     downloads: count,
   }));
-
-  console.log("Chart data:", chartData);
-  console.log("Connections this year:", connectionsThisYear);
-  console.log("Total downloads:", totalDownloads);
 
   return (
     <div className="space-y-6">
@@ -117,7 +131,7 @@ const Analytics = () => {
         <Card className="p-6 bg-card">
           <h3 className="text-sm font-medium text-muted-foreground">Connections This Year</h3>
           <div className="mt-2 text-2xl font-bold">
-            {analyticsLoading ? (
+            {connectionsLoading ? (
               <Skeleton className="h-8 w-32" />
             ) : (
               connectionsThisYear
