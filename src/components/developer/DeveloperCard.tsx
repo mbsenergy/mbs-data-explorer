@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Star } from "lucide-react";
 import { PreviewDialog } from "./PreviewDialog";
+import { useDeveloperFavorites } from "@/hooks/useDeveloperFavorites";
 
 interface DeveloperCardProps {
   name: string;
@@ -16,6 +17,7 @@ interface DeveloperCardProps {
 
 export const DeveloperCard = ({ name, url, field, extension, title, section }: DeveloperCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const { favorites, toggleFavorite } = useDeveloperFavorites();
 
   return (
     <>
@@ -36,15 +38,25 @@ export const DeveloperCard = ({ name, url, field, extension, title, section }: D
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.open(url, '_blank')}
-              className="shrink-0"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open(url, '_blank')}
+                className="shrink-0"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleFavorite(name)}
+                className={favorites.has(name) ? "text-yellow-400" : "text-gray-400"}
+              >
+                <Star className="h-4 w-4" fill={favorites.has(name) ? "currentColor" : "none"} />
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
