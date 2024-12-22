@@ -32,7 +32,7 @@ export const DownloadsChart = ({
   const [isOpen, setIsOpen] = useState(true);
   
   const chartData = Object.entries(
-    [...(analyticsData || []), ...(developerData || []), ...(exportsData || [])]
+    [...analyticsData, ...developerData, ...exportsData]
     .reduce((acc: Record<string, any>, curr) => {
       const date = format(new Date(curr.downloaded_at), 'yyyy-MM-dd');
       if (!acc[date]) {

@@ -115,28 +115,37 @@ export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: Downl
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                    />
+                      className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}
+                    >
+                      <PaginationPrevious className="h-4 w-4" />
+                    </Button>
                   </PaginationItem>
                   
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <PaginationItem key={page}>
-                      <PaginationLink
+                      <Button
+                        variant={currentPage === page ? "default" : "ghost"}
+                        size="icon"
                         onClick={() => setCurrentPage(page)}
-                        isActive={currentPage === page}
                       >
                         {page}
-                      </PaginationLink>
+                      </Button>
                     </PaginationItem>
                   ))}
                   
                   <PaginationItem>
-                    <PaginationNext 
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                    />
+                      className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}
+                    >
+                      <PaginationNext className="h-4 w-4" />
+                    </Button>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
