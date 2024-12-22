@@ -68,27 +68,32 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
-  const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
-    queryKey: ["analytics", user?.id],
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", user?.id],
     queryFn: async () => {
-      // First get the user's profile to check if they are a Cerved user
-      const { data: profile, error: profileError } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("is_cerved")
         .eq("id", user?.id)
         .single();
       
-      if (profileError) {
-        console.error("Profile error:", profileError);
+      if (error) {
+        console.error("Profile error:", error);
         toast({
           variant: "destructive",
           title: "Error",
           description: "Failed to fetch profile data.",
         });
-        throw profileError;
+        throw error;
       }
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
-      // Then get the analytics data
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
+    queryKey: ["analytics", user?.id],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("analytics")
         .select("*")
@@ -105,13 +110,13 @@ const Analytics = () => {
         throw error;
       }
 
-      // Combine the data
+      // Combine with profile data
       return data.map(item => ({
         ...item,
-        profiles: { is_cerved: profile.is_cerved }
+        profiles: { is_cerved: profile?.is_cerved }
       }));
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !!profile,
   });
 
   const totalDownloads = analyticsData?.length || 0;
