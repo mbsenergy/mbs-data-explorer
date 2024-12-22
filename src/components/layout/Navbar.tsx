@@ -1,4 +1,4 @@
-import { Bell, HelpCircle, Menu, Home, User, Settings } from "lucide-react";
+import { Bell, HelpCircle, Menu, User, Settings, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Link } from "react-router-dom";
@@ -33,6 +33,10 @@ export const Navbar = () => {
   return (
     <nav className="h-16 border-b border-border/40 bg-card">
       <div className="container flex h-full items-center">
+        <Button variant="ghost" size="icon" className="mr-2 md:hidden">
+          <Menu className="h-5 w-5" />
+        </Button>
+        
         {/* Welcome message */}
         <div className="hidden md:block">
           <span className="text-sm text-muted-foreground">
@@ -72,21 +76,21 @@ export const Navbar = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem asChild>
-              <Link to="/" className="flex items-center gap-2">
-                <Home className="h-4 w-4" />
-                <span>Dashboard</span>
+              <Link to="/" className="flex items-center">
+                <Home className="mr-2 h-4 w-4" />
+                Dashboard
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/user" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>User</span>
+              <Link to="/user" className="flex items-center">
+                <User className="mr-2 h-4 w-4" />
+                User
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
+              <Link to="/settings" className="flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

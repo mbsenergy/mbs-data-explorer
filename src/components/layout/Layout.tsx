@@ -1,12 +1,12 @@
-import { Outlet } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "./AppSidebar";
-import { Navbar } from "./Navbar";
+import { Outlet } from "react-router-dom"
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "./AppSidebar"
+import { Navbar } from "./Navbar"
 
 export const Layout = () => {
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
           <Navbar />
@@ -18,5 +18,5 @@ export const Layout = () => {
         </div>
       </div>
     </SidebarProvider>
-  );
-};
+  )
+}

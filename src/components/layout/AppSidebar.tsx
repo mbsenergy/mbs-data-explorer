@@ -1,183 +1,107 @@
-import {
-  LayoutDashboard,
-  Settings,
-  User,
-  Building2,
-  HelpCircle,
-  Database,
-  BarChart3,
-  Zap,
-  Code,
-  LineChart,
-  LogOut,
-} from "lucide-react";
+import { LogOut } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useToast } from "@/components/ui/use-toast"
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-} from "@/components/ui/sidebar";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-
-const navigationItems = [
-  { title: "Dashboard", icon: LayoutDashboard, url: "/" },
-  { title: "Scenario", icon: LineChart, url: "/scenario" },
-  { title: "Osservatorio", icon: Zap, url: "/osservatorio" },
-  { title: "Datasets", icon: Database, url: "/datasets" },
-  { title: "Developer", icon: Code, url: "/developer" },
-];
-
-const profileItems = [
-  { title: "User", icon: User, url: "/user" },
-  { title: "Analytics", icon: BarChart3, url: "/analytics" },
-];
-
-const infoItems = [
-  { title: "Company", icon: Building2, url: "/company" },
-  { title: "Settings", icon: Settings, url: "/settings" },
-  { title: "Help", icon: HelpCircle, url: "/guide" },
-];
+  SidebarMenuButton,
+  useSidebarContext,
+} from "@/components/ui/sidebar"
+import { supabase } from "@/integrations/supabase/client"
+import { MainMenuItems } from "./sidebar/MainMenuItems"
+import { UserMenuItems } from "./sidebar/UserMenuItems"
+import { SystemMenuItems } from "./sidebar/SystemMenuItems"
 
 export function AppSidebar() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const { collapsed } = useSidebarContext()
 
   const handleLogout = async () => {
     try {
-      console.log("Attempting to sign out...");
-      
-      // Clear auth token before signing out
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      if (projectId) {
-        localStorage.removeItem('sb-' + projectId + '-auth-token');
-      }
-      
-      // Attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Logout error:", error);
-      }
-      
-      // Always navigate to login page and show success message
-      navigate("/login");
-      toast({
-        title: "Success",
-        description: "You have been logged out successfully.",
-      });
-      
+      await supabase.auth.signOut()
+      navigate("/login")
     } catch (error) {
-      console.error("Caught error during logout:", error);
-      navigate("/login");
+      console.error("Error during logout:", error)
       toast({
-        title: "Success",
-        description: "You have been logged out successfully.",
-      });
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+      })
     }
-  };
-
-  const isActive = (url: string) => {
-    return location.pathname === url || 
-           (url !== "/" && location.pathname.startsWith(url));
-  };
+  }
 
   return (
-    <Sidebar className="bg-card border-r border-border/40">
+    <Sidebar 
+      className={`fixed inset-y-0 left-0 z-30 bg-card border-r border-border/40 transition-[width] duration-300 ease-in-out ${
+        collapsed ? "w-[70px]" : "w-[240px]"
+      }`}
+    >
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col items-start">
-            <img 
-              src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
-              alt="MBS Logo" 
-              className="h-8 w-auto object-contain"
-            />
-            <span className="text-sm font-bold mt-3 text-muted-foreground">Flux Data Platform</span>
-          </div>
+          {!collapsed && (
+            <div className="flex flex-col items-start">
+              <img 
+                src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
+                alt="MBS Logo" 
+                className="h-8 w-auto"
+              />
+            </div>
+          )}
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className={collapsed ? "hidden" : ""}>
+            Main Menu
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
-                  >
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <MainMenuItems />
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Profile</SidebarGroupLabel>
+          <SidebarGroupLabel className={collapsed ? "hidden" : ""}>
+            User
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {profileItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
-                  >
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <UserMenuItems />
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Info</SidebarGroupLabel>
+          <SidebarGroupLabel className={collapsed ? "hidden" : ""}>
+            System
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {infoItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
-                  >
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <SystemMenuItems />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout} className="w-full hover:bg-muted/50">
+            <SidebarMenuButton 
+              onClick={handleLogout}
+              tooltip={collapsed ? "Logout" : undefined}
+              className="w-full hover:bg-muted/50"
+            >
               <LogOut className="h-5 w-5" />
-              <span>Log out</span>
+              {!collapsed && <span>Log out</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }
