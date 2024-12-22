@@ -1,3 +1,4 @@
+import React from 'react';
 import { Table, TableBody, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
