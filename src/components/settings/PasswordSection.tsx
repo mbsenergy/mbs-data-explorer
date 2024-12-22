@@ -30,7 +30,7 @@ export const PasswordSection = () => {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {
-        throw new Error("Please log in again to change your password");
+        throw new Error("Your session has expired. Please log in again.");
       }
 
       // Update the password
@@ -54,7 +54,7 @@ export const PasswordSection = () => {
       console.error("Password update error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to update password. Please try logging in again.",
         variant: "destructive"
       });
     } finally {
