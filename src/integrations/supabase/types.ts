@@ -1,3 +1,5 @@
+import { EurostatTables, MarketTables } from './database.types';
+
 export type Json =
   | string
   | number
@@ -261,7 +263,7 @@ export interface Database {
         }
         Relationships: []
       }
-    }
+    } & EurostatTables & MarketTables
     Views: {
       [_ in never]: never
     }

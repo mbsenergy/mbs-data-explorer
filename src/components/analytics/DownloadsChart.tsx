@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
 import {
   LineChart,
   Line,
@@ -32,9 +31,9 @@ export const DownloadsChart = ({
   const [isOpen, setIsOpen] = useState(true);
   
   const chartData = Object.entries(
-    [...analyticsData, ...developerData, ...exportsData]
+    [...(analyticsData || []), ...(developerData || []), ...(exportsData || [])]
     .reduce((acc: Record<string, any>, curr) => {
-      const date = format(new Date(curr.downloaded_at), 'yyyy-MM-dd');
+      const date = new Date(curr.downloaded_at).toISOString().split('T')[0];
       if (!acc[date]) {
         acc[date] = {
           date,
