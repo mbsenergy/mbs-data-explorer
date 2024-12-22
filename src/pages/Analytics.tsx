@@ -57,7 +57,7 @@ const Analytics = () => {
         .from("profiles")
         .select("is_cerved")
         .eq("id", user?.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error("Profile error:", error);
@@ -92,10 +92,7 @@ const Analytics = () => {
         throw error;
       }
 
-      return data.map(item => ({
-        ...item,
-        profiles: { is_cerved: profile?.is_cerved }
-      }));
+      return data;
     },
     enabled: !!user?.id && !!profile,
   });
@@ -115,6 +112,29 @@ const Analytics = () => {
           variant: "destructive",
           title: "Error",
           description: "Failed to fetch developer analytics data.",
+        });
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: exportsData, isLoading: exportsLoading } = useQuery({
+    queryKey: ["exports", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("exports")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("downloaded_at", { ascending: false });
+      
+      if (error) {
+        console.error("Exports error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch exports data.",
         });
         throw error;
       }
@@ -146,17 +166,23 @@ const Analytics = () => {
       <StatsCards
         lastConnection={lastConnection}
         connectionsThisYear={connectionsThisYear}
-        totalDownloads={(analyticsData?.length || 0) + (developerAnalytics?.length || 0)}
+        totalDownloads={
+          (analyticsData?.length || 0) + 
+          (developerAnalytics?.length || 0) + 
+          (exportsData?.length || 0)
+        }
         isLoading={{
           lastConnection: lastConnectionLoading,
           connections: connectionsLoading,
-          analytics: analyticsLoading || developerAnalyticsLoading
+          analytics: analyticsLoading || developerAnalyticsLoading || exportsLoading
         }}
       />
 
       <DownloadsChart 
-        data={analyticsData || []} 
-        isLoading={analyticsLoading}
+        analyticsData={analyticsData || []}
+        developerData={developerAnalytics || []}
+        exportsData={exportsData || []}
+        isLoading={analyticsLoading || developerAnalyticsLoading || exportsLoading}
       />
 
       <DownloadsTable
@@ -170,6 +196,12 @@ const Analytics = () => {
         title="Developer Resources Download History"
         data={developerAnalytics || []}
         isLoading={developerAnalyticsLoading}
+      />
+
+      <DownloadsTable
+        title="Dataset Exports History"
+        data={exportsData || []}
+        isLoading={exportsLoading}
       />
     </div>
   );

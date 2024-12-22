@@ -9,6 +9,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -16,20 +17,47 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useState } from "react";
 
 interface DownloadsChartProps {
-  data: any[];
+  analyticsData: any[];
+  developerData: any[];
+  exportsData: any[];
   isLoading: boolean;
 }
 
-export const DownloadsChart = ({ data, isLoading }: DownloadsChartProps) => {
+export const DownloadsChart = ({ 
+  analyticsData, 
+  developerData,
+  exportsData,
+  isLoading 
+}: DownloadsChartProps) => {
   const [isOpen, setIsOpen] = useState(true);
   
-  const chartData = Object.entries(data?.reduce((acc: Record<string, number>, curr) => {
-    const date = format(new Date(curr.downloaded_at), 'yyyy-MM-dd');
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {}) || {}).map(([date, count]) => ({
+  const chartData = Object.entries(
+    [...(analyticsData || []), ...(developerData || []), ...(exportsData || [])]
+    .reduce((acc: Record<string, any>, curr) => {
+      const date = format(new Date(curr.downloaded_at), 'yyyy-MM-dd');
+      if (!acc[date]) {
+        acc[date] = {
+          date,
+          'Dataset Samples': 0,
+          'Developer Files': 0,
+          'Dataset Exports': 0
+        };
+      }
+      
+      // Determine the type of download and increment the appropriate counter
+      if ('dataset_name' in curr) {
+        acc[date]['Dataset Samples']++;
+      } else if ('file_name' in curr) {
+        acc[date]['Developer Files']++;
+      } else if ('export_name' in curr) {
+        acc[date]['Dataset Exports']++;
+      }
+      
+      return acc;
+    }, {}),
+  ).map(([date, counts]) => ({
     date,
-    downloads: count,
+    ...counts
   }));
 
   return (
@@ -68,10 +96,23 @@ export const DownloadsChart = ({ data, isLoading }: DownloadsChartProps) => {
                       border: '1px solid rgba(255, 255, 255, 0.2)'
                     }}
                   />
+                  <Legend />
                   <Line
                     type="monotone"
-                    dataKey="downloads"
+                    dataKey="Dataset Samples"
                     stroke="#57D7E2"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="Developer Files"
+                    stroke="#FEC6A1"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="Dataset Exports"
+                    stroke="#A78BFA"
                     strokeWidth={2}
                   />
                 </LineChart>
