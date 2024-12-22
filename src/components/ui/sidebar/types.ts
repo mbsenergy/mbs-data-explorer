@@ -13,4 +13,6 @@ export interface SidebarMenuButtonProps extends React.ComponentProps<"button"> {
   asChild?: boolean
   isActive?: boolean
   tooltip?: string | React.ComponentProps<any>
+  variant?: "default" | "outline"
+  size?: "default" | "sm" | "lg"
 }
