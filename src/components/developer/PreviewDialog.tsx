@@ -66,15 +66,15 @@ export const PreviewDialog = ({
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>{fileName}</DialogTitle>
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="icon"
             onClick={handleCopy}
-            className="h-8 w-8 bg-muted hover:bg-muted/80"
+            className="h-8 w-8 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 text-white"
           >
             <Copy className="h-4 w-4" />
           </Button>
         </DialogHeader>
-        <ScrollArea className="flex-1 h-[60vh] w-full scrollbar-custom">
+        <ScrollArea className="flex-1 h-[60vh] w-full overflow-y-auto scrollbar-custom">
           <div className="p-4">
             {isLoading && !directData && (
               <div className="text-center">Loading...</div>
