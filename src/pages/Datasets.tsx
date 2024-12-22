@@ -17,6 +17,7 @@ const Datasets = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedField, setSelectedField] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [availableFields, setAvailableFields] = useState<string[]>([]);
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
@@ -52,7 +53,8 @@ const Datasets = () => {
     const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
     const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
-    return matchesSearch && matchesField && matchesType;
+    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
+    return matchesSearch && matchesField && matchesType && matchesFavorite;
   });
 
   const handleDownload = async (tableName: string) => {
@@ -175,6 +177,7 @@ const Datasets = () => {
         onSearchChange={setSearchTerm}
         onFieldChange={setSelectedField}
         onTypeChange={setSelectedType}
+        onFavoriteChange={setShowOnlyFavorites}
         availableFields={availableFields}
         availableTypes={availableTypes}
       />

@@ -14,6 +14,7 @@ interface DatasetSearchProps {
   onSearchChange: (search: string) => void;
   onFieldChange: (field: string) => void;
   onTypeChange: (type: string) => void;
+  onFavoriteChange: (showFavorites: boolean) => void;
   availableFields: string[];
   availableTypes: string[];
 }
@@ -28,6 +29,7 @@ export const DatasetSearch = ({
   onSearchChange,
   onFieldChange,
   onTypeChange,
+  onFavoriteChange,
   availableFields,
   availableTypes
 }: DatasetSearchProps) => {
@@ -38,6 +40,7 @@ export const DatasetSearch = ({
         onSearchChange={onSearchChange}
         onFieldChange={onFieldChange}
         onTypeChange={onTypeChange}
+        onFavoriteChange={onFavoriteChange}
         availableFields={availableFields}
         availableTypes={availableTypes}
       />
