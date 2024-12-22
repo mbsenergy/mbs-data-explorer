@@ -23,7 +23,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -49,6 +49,7 @@ const infoItems = [
 export function AppSidebar() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const location = useLocation();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -63,6 +64,11 @@ export function AppSidebar() {
     }
   };
 
+  const isActive = (url: string) => {
+    return location.pathname === url || 
+           (url !== "/" && location.pathname.startsWith(url));
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
@@ -72,7 +78,7 @@ export function AppSidebar() {
             alt="MBS Logo" 
             className="h-8 w-auto object-contain"
           />
-          <span className="text-sm text-muted-foreground mt-1">Flux Data Platform</span>
+          <span className="text-sm font-bold mt-3 text-muted-foreground">Flux Data Platform</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -82,7 +88,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    asChild
+                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
+                  >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
@@ -100,7 +109,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {profileItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    asChild
+                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
+                  >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
@@ -118,7 +130,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {infoItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    asChild
+                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
+                  >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
@@ -133,7 +148,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout} className="w-full">
+            <SidebarMenuButton onClick={handleLogout} className="w-full hover:bg-muted/50">
               <LogOut className="h-5 w-5" />
               <span>Log out</span>
             </SidebarMenuButton>
