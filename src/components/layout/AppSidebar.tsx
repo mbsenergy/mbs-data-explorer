@@ -10,6 +10,7 @@ import {
   Code,
   LineChart,
   LogOut,
+  Menu,
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,6 +23,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,7 +79,6 @@ export function AppSidebar() {
       
     } catch (error) {
       console.error("Caught error during logout:", error);
-      // Still redirect to login and show success since we've cleared the token
       navigate("/login");
       toast({
         title: "Success",
@@ -92,15 +93,20 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar className="bg-card border-r border-border/40">
       <SidebarHeader className="p-4">
-        <div className="flex flex-col items-start">
-          <img 
-            src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
-            alt="MBS Logo" 
-            className="h-8 w-auto object-contain"
-          />
-          <span className="text-sm font-bold mt-3 text-muted-foreground">Flux Data Platform</span>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start">
+            <img 
+              src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
+              alt="MBS Logo" 
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-sm font-bold mt-3 text-muted-foreground">Flux Data Platform</span>
+          </div>
+          <SidebarTrigger>
+            <Menu className="h-5 w-5" />
+          </SidebarTrigger>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -179,4 +185,4 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-};
+}

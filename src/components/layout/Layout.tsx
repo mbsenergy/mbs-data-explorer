@@ -5,7 +5,7 @@ import { Navbar } from "./Navbar";
 
 export const Layout = () => {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
