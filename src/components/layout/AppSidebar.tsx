@@ -39,10 +39,6 @@ export function AppSidebar() {
     }
   }
 
-  const toggleSidebar = () => {
-    setOpen(!collapsed)
-  }
-
   return (
     <Sidebar 
       className={`bg-card border-r border-border/40 transition-all duration-300 ${
@@ -63,7 +59,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={toggleSidebar}
+            onClick={() => setOpen(!collapsed)}
             className="ml-auto"
           >
             <ChevronLeft className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
