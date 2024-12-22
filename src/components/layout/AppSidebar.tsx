@@ -95,7 +95,7 @@ export function AppSidebar() {
     <Sidebar className="bg-card border-r border-border/40 transition-all duration-300">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start group-data-[state=collapsed]:hidden">
             <img 
               src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
               alt="MBS Logo" 
@@ -117,11 +117,12 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
+                    tooltip={item.title}
                     className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
                   >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span className="group-data-[state=collapsed]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -138,11 +139,12 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
+                    tooltip={item.title}
                     className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
                   >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span className="group-data-[state=collapsed]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -159,11 +161,12 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
+                    tooltip={item.title}
                     className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
                   >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span className="group-data-[state=collapsed]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -175,9 +178,13 @@ export function AppSidebar() {
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout} className="w-full hover:bg-muted/50">
+            <SidebarMenuButton 
+              onClick={handleLogout} 
+              tooltip="Logout"
+              className="w-full hover:bg-muted/50"
+            >
               <LogOut className="h-5 w-5" />
-              <span>Log out</span>
+              <span className="group-data-[state=collapsed]:hidden">Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
