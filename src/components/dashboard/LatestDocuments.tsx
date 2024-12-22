@@ -22,11 +22,11 @@ export const LatestDocuments = () => {
           <Carousel
             className="w-full max-w-4xl mx-auto"
             opts={{
-              direction: 'rtl',
               align: 'start',
+              loop: true,
             }}
           >
-            <CarouselContent className="-ml-2 md:-ml-4">
+            <CarouselContent>
               {latestDocs.map((file) => (
                 <CarouselItem 
                   key={file.name} 
