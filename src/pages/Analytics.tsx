@@ -71,9 +71,27 @@ const Analytics = () => {
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ["analytics", user?.id],
     queryFn: async () => {
+      // First get the user's profile to check if they are a Cerved user
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_cerved")
+        .eq("id", user?.id)
+        .single();
+      
+      if (profileError) {
+        console.error("Profile error:", profileError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch profile data.",
+        });
+        throw profileError;
+      }
+
+      // Then get the analytics data
       const { data, error } = await supabase
         .from("analytics")
-        .select("*, profiles!analytics_user_id_fkey(is_cerved)")
+        .select("*")
         .eq("user_id", user?.id)
         .order("downloaded_at", { ascending: false });
       
@@ -86,7 +104,12 @@ const Analytics = () => {
         });
         throw error;
       }
-      return data || [];
+
+      // Combine the data
+      return data.map(item => ({
+        ...item,
+        profiles: { is_cerved: profile.is_cerved }
+      }));
     },
     enabled: !!user?.id,
   });
