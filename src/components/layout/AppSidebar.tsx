@@ -23,7 +23,7 @@ import { SystemMenuItems } from "./sidebar/SystemMenuItems"
 export function AppSidebar() {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { collapsed, setOpen } = useSidebarContext()
+  const { collapsed, toggleSidebar } = useSidebarContext()
 
   const handleLogout = async () => {
     try {
@@ -59,7 +59,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setOpen(!collapsed)}
+            onClick={toggleSidebar}
             className="ml-auto"
           >
             <ChevronLeft className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
