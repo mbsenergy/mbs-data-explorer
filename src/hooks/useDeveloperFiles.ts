@@ -19,7 +19,10 @@ export const useDeveloperFiles = (section: string) => {
         throw error;
       }
 
-      return files?.map(file => {
+      // Filter out .emptyFolderPlaceholder files
+      const validFiles = files?.filter(file => !file.name.includes('.emptyFolderPlaceholder')) || [];
+
+      return validFiles.map(file => {
         const nameParts = file.name.split('-');
         const field = nameParts[0];
         const extension = file.name.split('.').pop() || '';
@@ -32,7 +35,7 @@ export const useDeveloperFiles = (section: string) => {
           extension,
           title
         };
-      }) || [];
+      });
     },
   });
 };
