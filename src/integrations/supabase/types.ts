@@ -1242,6 +1242,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_cerved: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          is_cerved?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_cerved?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       TS01_entsoe_actual_generation: {
         Row: {
           ASSET_CATEGORY: string | null

@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import { RequireAuth } from "./components/auth/RequireAuth";
+import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
 import Datasets from "./pages/Datasets";
 import Analytics from "./pages/Analytics";
@@ -18,17 +21,29 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter>
-        <Layout>
+        <AuthProvider>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/datasets" element={<Datasets />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/user" element={<User />} />
-            <Route path="/company" element={<Company />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/guide" element={<Guide />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <RequireAuth>
+                  <Layout>
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/datasets" element={<Datasets />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/user" element={<User />} />
+                      <Route path="/company" element={<Company />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/guide" element={<Guide />} />
+                    </Routes>
+                  </Layout>
+                </RequireAuth>
+              }
+            />
           </Routes>
-        </Layout>
+        </AuthProvider>
       </BrowserRouter>
       <Toaster />
       <Sonner />
