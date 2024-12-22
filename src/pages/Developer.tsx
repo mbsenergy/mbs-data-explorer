@@ -1,7 +1,7 @@
 import { DeveloperSection } from "@/components/developer/DeveloperSection";
 
 const Developer = () => {
-  const sections = ['api', 'database', 'frontend', 'infrastructure'];
+  const sections = ['presets', 'macros', 'developer', 'models'];
 
   return (
     <div className="space-y-8">
