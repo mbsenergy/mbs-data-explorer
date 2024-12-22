@@ -22,6 +22,7 @@ import {
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 const Analytics = () => {
   const { user } = useAuth();
@@ -30,7 +31,6 @@ const Analytics = () => {
   const { data: lastConnection, isLoading: lastConnectionLoading } = useQuery({
     queryKey: ["lastConnection", user?.id],
     queryFn: async () => {
-      console.log("Fetching last connection for user:", user?.id);
       const { data, error } = await supabase.rpc('get_last_connection', {
         user_uuid: user?.id
       });
@@ -43,17 +43,14 @@ const Analytics = () => {
         });
         throw error;
       }
-      console.log("Last connection data:", data);
       return data;
     },
     enabled: !!user?.id,
   });
 
-  // Updated to use the new login count function
   const { data: connectionsThisYear, isLoading: connectionsLoading } = useQuery({
     queryKey: ["connectionsThisYear", user?.id],
     queryFn: async () => {
-      console.log("Fetching login count for user:", user?.id);
       const { data, error } = await supabase.rpc('get_login_count_this_year', {
         user_uuid: user?.id
       });
@@ -66,7 +63,6 @@ const Analytics = () => {
         });
         throw error;
       }
-      console.log("Login count data:", data);
       return data || 0;
     },
     enabled: !!user?.id,
@@ -75,12 +71,11 @@ const Analytics = () => {
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ["analytics", user?.id],
     queryFn: async () => {
-      console.log("Fetching analytics for user:", user?.id);
       const { data, error } = await supabase
         .from("analytics")
-        .select("*")
+        .select("*, profiles!analytics_user_id_fkey(is_cerved)")
         .eq("user_id", user?.id)
-        .order("downloaded_at", { ascending: true });
+        .order("downloaded_at", { ascending: false });
       
       if (error) {
         console.error("Analytics error:", error);
@@ -91,7 +86,6 @@ const Analytics = () => {
         });
         throw error;
       }
-      console.log("Analytics data:", data);
       return data || [];
     },
     enabled: !!user?.id,
@@ -110,6 +104,22 @@ const Analytics = () => {
     date,
     downloads: count,
   }));
+
+  // Helper function to determine dataset type and tags
+  const getDatasetInfo = (datasetName: string) => {
+    const type = datasetName.split('_')[0] || 'Unknown';
+    const tags = [];
+    
+    if (datasetName.includes('electricity')) tags.push('Electricity');
+    if (datasetName.includes('gas')) tags.push('Gas');
+    if (datasetName.includes('price')) tags.push('Price');
+    if (datasetName.includes('production')) tags.push('Production');
+    if (datasetName.includes('efficiency')) tags.push('Efficiency');
+    if (datasetName.includes('employment')) tags.push('Employment');
+    if (datasetName.includes('gdp')) tags.push('GDP');
+    
+    return { type, tags };
+  };
 
   return (
     <div className="space-y-6">
@@ -198,33 +208,46 @@ const Analytics = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Dataset</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Tags</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {analyticsLoading ? (
                 <TableRow>
-                  <TableCell colSpan={2}>
+                  <TableCell colSpan={4}>
                     <Skeleton className="h-8 w-full" />
                   </TableCell>
                 </TableRow>
               ) : analyticsData?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={2} className="text-center text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">
                     No downloads yet
                   </TableCell>
                 </TableRow>
               ) : (
-                analyticsData?.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      {item.is_custom_query ? "Custom Query" : item.dataset_name}
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(item.downloaded_at), 'dd MMM yyyy HH:mm')}
-                    </TableCell>
-                  </TableRow>
-                ))
+                analyticsData?.map((item) => {
+                  const { type, tags } = getDatasetInfo(item.dataset_name);
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.dataset_name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{type}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2 flex-wrap">
+                          {tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">{tag}</Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(item.downloaded_at), 'dd MMM yyyy HH:mm')}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
