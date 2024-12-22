@@ -1485,6 +1485,60 @@ export type Database = {
         }
         Relationships: []
       }
+      ME01_gme_xbid_offers: {
+        Row: {
+          AWARDED_PRICE_NO: number | null
+          AWARDED_QUANTITY_NO: number | null
+          MARKET_CD: string | null
+          md_last_update: string | null
+          md_source: string | null
+          md_table: string | null
+          OPERATORE: string | null
+          PREZZO_UNITARIO: string | null
+          PRODOTTO: string | null
+          PURPOSE_CD: string | null
+          QUANTITY_NO: number | null
+          STATUS_CD: string | null
+          TIMESTAMP: string | null
+          TRANSACTION_REFERENCE_NO: string | null
+          UNIT_REFERENCE_NO: string | null
+        }
+        Insert: {
+          AWARDED_PRICE_NO?: number | null
+          AWARDED_QUANTITY_NO?: number | null
+          MARKET_CD?: string | null
+          md_last_update?: string | null
+          md_source?: string | null
+          md_table?: string | null
+          OPERATORE?: string | null
+          PREZZO_UNITARIO?: string | null
+          PRODOTTO?: string | null
+          PURPOSE_CD?: string | null
+          QUANTITY_NO?: number | null
+          STATUS_CD?: string | null
+          TIMESTAMP?: string | null
+          TRANSACTION_REFERENCE_NO?: string | null
+          UNIT_REFERENCE_NO?: string | null
+        }
+        Update: {
+          AWARDED_PRICE_NO?: number | null
+          AWARDED_QUANTITY_NO?: number | null
+          MARKET_CD?: string | null
+          md_last_update?: string | null
+          md_source?: string | null
+          md_table?: string | null
+          OPERATORE?: string | null
+          PREZZO_UNITARIO?: string | null
+          PRODOTTO?: string | null
+          PURPOSE_CD?: string | null
+          QUANTITY_NO?: number | null
+          STATUS_CD?: string | null
+          TIMESTAMP?: string | null
+          TRANSACTION_REFERENCE_NO?: string | null
+          UNIT_REFERENCE_NO?: string | null
+        }
+        Relationships: []
+      }
       MS01_agsi_gas_raw: {
         Row: {
           CODE_2: string | null

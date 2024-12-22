@@ -13,10 +13,12 @@ interface PreviewDialogProps {
   onClose: () => void;
   filePath: string;
   fileName: string;
+  section: string;
 }
 
-export const PreviewDialog = ({ isOpen, onClose, filePath, fileName }: PreviewDialogProps) => {
-  const { data: content, isLoading } = useFileContent(filePath);
+export const PreviewDialog = ({ isOpen, onClose, filePath, fileName, section }: PreviewDialogProps) => {
+  const fullPath = `${section}/${filePath}`;
+  const { data: content, isLoading } = useFileContent(fullPath);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

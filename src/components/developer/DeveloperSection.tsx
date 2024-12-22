@@ -36,7 +36,7 @@ export const DeveloperSection = ({ section }: DeveloperSectionProps) => {
                   key={file.name} 
                   className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
                 >
-                  <DeveloperCard {...file} />
+                  <DeveloperCard {...file} section={section} />
                 </CarouselItem>
               ))}
             </CarouselContent>

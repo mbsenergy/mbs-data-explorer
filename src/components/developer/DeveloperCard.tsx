@@ -11,9 +11,10 @@ interface DeveloperCardProps {
   field: string;
   extension: string;
   title: string;
+  section: string;
 }
 
-export const DeveloperCard = ({ name, url, field, extension, title }: DeveloperCardProps) => {
+export const DeveloperCard = ({ name, url, field, extension, title, section }: DeveloperCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   return (
@@ -52,6 +53,7 @@ export const DeveloperCard = ({ name, url, field, extension, title }: DeveloperC
         onClose={() => setIsPreviewOpen(false)}
         filePath={name}
         fileName={name}
+        section={section}
       />
     </>
   );
