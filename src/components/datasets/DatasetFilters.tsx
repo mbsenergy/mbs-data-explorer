@@ -5,10 +5,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface DatasetFiltersProps {
   onSearchChange: (search: string) => void;
   onFieldChange: (field: string) => void;
+  onTypeChange: (type: string) => void;
   availableFields: string[];
+  availableTypes: string[];
 }
 
-const DatasetFilters = ({ onSearchChange, onFieldChange, availableFields }: DatasetFiltersProps) => {
+const DatasetFilters = ({ 
+  onSearchChange, 
+  onFieldChange, 
+  onTypeChange,
+  availableFields,
+  availableTypes 
+}: DatasetFiltersProps) => {
   return (
     <div className="flex gap-4 items-center mb-8">
       <div className="relative flex-1">
@@ -27,6 +35,17 @@ const DatasetFilters = ({ onSearchChange, onFieldChange, availableFields }: Data
           <SelectItem value="all">All fields</SelectItem>
           {availableFields.map((field) => (
             <SelectItem key={field} value={field}>{field}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select onValueChange={onTypeChange}>
+        <SelectTrigger className="w-[200px]">
+          <SelectValue placeholder="Select a type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All types</SelectItem>
+          {availableTypes.map((type) => (
+            <SelectItem key={type} value={type}>{type}</SelectItem>
           ))}
         </SelectContent>
       </Select>
