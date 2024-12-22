@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
-import DatasetFilters from "@/components/datasets/DatasetFilters";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
-import { DatasetTable } from "@/components/datasets/DatasetTable";
-import { DatasetOverview } from "@/components/datasets/DatasetOverview";
+import { DatasetActivity } from "@/components/datasets/DatasetActivity";
+import { DatasetSearch } from "@/components/datasets/DatasetSearch";
+import { DatasetExplore } from "@/components/datasets/DatasetExplore";
 import type { TableInfo } from "@/components/datasets/types";
 
 const Datasets = () => {
@@ -153,41 +152,44 @@ const Datasets = () => {
     });
   };
 
+  if (tablesLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Datasets</h1>
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Datasets</h1>
       
-      <Card className="p-6">
-        <DatasetOverview 
-          favorites={favorites}
-          tables={tables || []}
-        />
+      <DatasetActivity 
+        favorites={favorites}
+        tables={tables || []}
+      />
 
-        <DatasetFilters
-          onSearchChange={setSearchTerm}
-          onFieldChange={setSelectedField}
-          onTypeChange={setSelectedType}
-          availableFields={availableFields}
-          availableTypes={availableTypes}
-        />
+      <DatasetSearch
+        onSearchChange={setSearchTerm}
+        onFieldChange={setSelectedField}
+        onTypeChange={setSelectedType}
+        availableFields={availableFields}
+        availableTypes={availableTypes}
+      />
 
-        {tablesLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-          </div>
-        ) : (
-          <DatasetTable
-            tables={filteredTables || []}
-            onPreview={handlePreview}
-            onDownload={handleDownload}
-            onSelect={handleSelect}
-            onToggleFavorite={handleToggleFavorite}
-            favorites={favorites}
-          />
-        )}
-      </Card>
+      <DatasetExplore
+        tables={filteredTables || []}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
+        onSelect={handleSelect}
+        onToggleFavorite={handleToggleFavorite}
+        favorites={favorites}
+      />
 
       {previewData && (
         <PreviewDialog
