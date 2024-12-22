@@ -1,8 +1,16 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import DatasetFilters from "./DatasetFilters";
+import { DatasetTable } from "./DatasetTable";
+import type { TableInfo } from "./types";
 
 interface DatasetSearchProps {
+  tables: TableInfo[];
+  onPreview: (tableName: string) => void;
+  onDownload: (tableName: string) => void;
+  onSelect: (tableName: string) => void;
+  onToggleFavorite: (tableName: string) => void;
+  favorites: Set<string>;
   onSearchChange: (search: string) => void;
   onFieldChange: (field: string) => void;
   onTypeChange: (type: string) => void;
@@ -11,11 +19,17 @@ interface DatasetSearchProps {
 }
 
 export const DatasetSearch = ({ 
-  onSearchChange, 
-  onFieldChange, 
+  tables,
+  onPreview,
+  onDownload,
+  onSelect,
+  onToggleFavorite,
+  favorites,
+  onSearchChange,
+  onFieldChange,
   onTypeChange,
   availableFields,
-  availableTypes 
+  availableTypes
 }: DatasetSearchProps) => {
   return (
     <Card className="p-6 mb-6">
@@ -27,6 +41,16 @@ export const DatasetSearch = ({
         availableFields={availableFields}
         availableTypes={availableTypes}
       />
+      <div className="mt-6">
+        <DatasetTable
+          tables={tables}
+          onPreview={onPreview}
+          onDownload={onDownload}
+          onSelect={onSelect}
+          onToggleFavorite={onToggleFavorite}
+          favorites={favorites}
+        />
+      </div>
     </Card>
   );
 };

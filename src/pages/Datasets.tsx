@@ -172,9 +172,17 @@ const Datasets = () => {
       <DatasetActivity 
         favorites={favorites}
         tables={tables || []}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
       />
 
       <DatasetSearch
+        tables={filteredTables || []}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
+        onSelect={handleSelect}
+        onToggleFavorite={handleToggleFavorite}
+        favorites={favorites}
         onSearchChange={setSearchTerm}
         onFieldChange={setSelectedField}
         onTypeChange={setSelectedType}
@@ -182,14 +190,7 @@ const Datasets = () => {
         availableTypes={availableTypes}
       />
 
-      <DatasetExplore
-        tables={filteredTables || []}
-        onPreview={handlePreview}
-        onDownload={handleDownload}
-        onSelect={handleSelect}
-        onToggleFavorite={handleToggleFavorite}
-        favorites={favorites}
-      />
+      <DatasetExplore />
 
       {previewData && (
         <PreviewDialog
