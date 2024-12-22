@@ -59,10 +59,12 @@ export const DownloadsChart = ({
       }
       
       return acc;
-    }, {})
+    }, {} as Record<string, ChartDataItem>)
   ).map(([date, counts]) => ({
     date,
-    ...counts
+    'Dataset Samples': counts['Dataset Samples'],
+    'Developer Files': counts['Developer Files'],
+    'Dataset Exports': counts['Dataset Exports']
   }));
 
   return (
