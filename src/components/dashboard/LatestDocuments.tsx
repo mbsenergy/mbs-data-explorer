@@ -58,9 +58,9 @@ export const LatestDocuments = () => {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <h2 className="text-2xl font-semibold">Latest Documents</h2>
-      <Card className="p-4">
+      <Card className="p-0">
         {docsLoading ? (
           <Skeleton className="h-[500px] w-full" />
         ) : latestDocs?.length ? (
@@ -68,7 +68,7 @@ export const LatestDocuments = () => {
             <CarouselContent>
               {latestDocs.map((file) => (
                 <CarouselItem key={file.name} className="flex items-center justify-center">
-                  <div className="w-full p-2">
+                  <div className="w-full">
                     <Card className="overflow-hidden border-0 shadow-lg">
                       <div className="aspect-[4/3] relative">
                         <img

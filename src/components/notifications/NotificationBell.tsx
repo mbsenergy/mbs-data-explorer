@@ -1,15 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const NotificationBell = () => {
   const { toast } = useToast();
@@ -24,30 +24,31 @@ export const NotificationBell = () => {
       const buckets = ['latest', 'report-scenario', 'osservatorio-energia'];
       const allFiles = await Promise.all(
         buckets.map(async (bucket) => {
-          const { data: files, error } = await supabase
+          const { data, error } = await supabase
             .storage
             .from(bucket)
             .list('', {
               limit: 10,
-              sortBy: { column: 'created_at', order: 'desc' }
+              sortBy: { column: 'created_at', order: 'desc' },
             });
 
           if (error) {
-            console.error(`Error fetching files from ${bucket}:`, error);
+            console.error(`Error fetching from ${bucket}:`, error);
             return [];
           }
 
-          return files.map(file => ({
+          return data.map(file => ({
             ...file,
             bucket,
-            type: file.name.split('.').pop()?.toLowerCase()
           }));
         })
       );
 
-      return allFiles.flat().sort((a, b) => {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
+      return allFiles
+        .flat()
+        .sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
     },
     refetchInterval: 30000, // Check every 30 seconds
   });
@@ -58,13 +59,12 @@ export const NotificationBell = () => {
       const newItems = notifications.filter(
         item => new Date(item.created_at).getTime() > lastCheck
       );
-      const count = newItems.length;
-      setNotificationCount(count);
-      if (count > 0) {
+      if (newItems.length > 0) {
+        setNotificationCount(newItems.length);
         setHasNewItems(true);
         toast({
           title: "New Content Available",
-          description: `${count} new item${count === 1 ? '' : 's'} added.`,
+          description: `${newItems.length} new item${newItems.length === 1 ? '' : 's'} added.`,
         });
       }
     }
@@ -78,17 +78,16 @@ export const NotificationBell = () => {
     setLastCheck(Date.now());
     setHasNewItems(false);
     setNotificationCount(0);
-    refetch();
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleOpen}>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="mr-2 relative" 
-          onClick={handleOpen}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="relative"
+          aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
           {hasNewItems && (
@@ -116,7 +115,7 @@ export const NotificationBell = () => {
           <DropdownMenuItem key={`${file.bucket}-${file.name}`} className="flex flex-col items-start">
             <span className="font-medium">{file.name}</span>
             <span className="text-xs text-muted-foreground">
-              Added to {file.bucket} - {new Date(file.created_at).toLocaleString()}
+              Added to {file.bucket.replace(/-/g, ' ')}
             </span>
           </DropdownMenuItem>
         ))}
