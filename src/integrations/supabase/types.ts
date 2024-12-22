@@ -1271,24 +1271,60 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          company: string | null
+          country: string | null
           created_at: string
+          date_of_birth: string | null
           email: string | null
+          first_name: string | null
+          github_username: string | null
           id: string
           is_cerved: boolean | null
+          it_skills: string[] | null
+          last_name: string | null
+          linkedin_url: string | null
+          preferred_data: string[] | null
+          role: string | null
+          subscriptions: string[] | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
+          company?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
+          first_name?: string | null
+          github_username?: string | null
           id: string
           is_cerved?: boolean | null
+          it_skills?: string[] | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          preferred_data?: string[] | null
+          role?: string | null
+          subscriptions?: string[] | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
+          company?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
+          first_name?: string | null
+          github_username?: string | null
           id?: string
           is_cerved?: boolean | null
+          it_skills?: string[] | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          preferred_data?: string[] | null
+          role?: string | null
+          subscriptions?: string[] | null
           updated_at?: string
         }
         Relationships: []
