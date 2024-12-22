@@ -1266,6 +1266,69 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_path: string
+          format: string
+          id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_path: string
+          format: string
+          id?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          format?: string
+          id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scripts: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_path: string
+          id: string
+          language: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_path: string
+          id?: string
+          language: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          id?: string
+          language?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       TS01_entsoe_actual_generation: {
         Row: {
           ASSET_CATEGORY: string | null
