@@ -14,6 +14,8 @@ import User from "./pages/User";
 import Company from "./pages/Company";
 import Settings from "./pages/Settings";
 import Guide from "./pages/Guide";
+import Scenario from "./pages/Scenario";
+import Osservatorio from "./pages/Osservatorio";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ const App = () => (
               </RequireAuth>
             }>
               <Route index element={<Dashboard />} />
+              <Route path="scenario" element={<Scenario />} />
+              <Route path="osservatorio" element={<Osservatorio />} />
               <Route path="datasets" element={<Datasets />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="user" element={<User />} />
