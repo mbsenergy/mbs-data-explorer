@@ -1916,12 +1916,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      execute_query: {
-        Args: {
-          query_text: string
-        }
-        Returns: Record<string, unknown>[]
-      }
       get_available_tables: {
         Args: Record<PropertyKey, never>
         Returns: {
