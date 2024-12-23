@@ -56,8 +56,8 @@ export const DatasetTableRow = ({
             variant="outline"
             size="sm"
             className={isSelected ? 
-              "bg-corporate-navy text-white hover:bg-corporate-navy/90" : 
-              "bg-corporate-blue hover:bg-corporate-blue/90 text-white"}
+              "bg-[#1E293B] text-white hover:bg-[#1E293B]/90" : 
+              "bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white"}
             onClick={() => onSelect(table.tablename)}
           >
             {isSelected ? "Selected" : "Select"}
