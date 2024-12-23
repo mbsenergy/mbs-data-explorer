@@ -3,19 +3,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
+import { Download } from "lucide-react";
 
 interface DatasetExportProps {
   selectedDataset: string | null;
   selectedColumns: string[];
   isLoading?: boolean;
   onLoad?: (tableName: string) => void;
+  onSample?: (tableName: string) => void;
 }
 
 export const DatasetExport = ({ 
   selectedDataset, 
   selectedColumns, 
   isLoading,
-  onLoad 
+  onLoad,
+  onSample
 }: DatasetExportProps) => {
   const { toast } = useToast();
   
@@ -74,6 +77,18 @@ export const DatasetExport = ({
           >
             Export Dataset
           </Button>
+          
+          {onSample && selectedDataset && (
+            <Button
+              onClick={() => onSample(selectedDataset)}
+              variant="outline"
+              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+              disabled={isLoading}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Sample
+            </Button>
+          )}
           
           {onLoad && selectedDataset && (
             <Button

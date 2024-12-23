@@ -75,6 +75,7 @@ export const DatasetTableRow = ({
             variant="outline"
             size="sm"
             onClick={handleDownload}
+            className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
           >
             <Download className="h-4 w-4 mr-2" />
             Sample

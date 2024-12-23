@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 interface DatasetHeaderProps {
   selectedDataset: string | null;
   onLoad?: (tableName: string) => void;
+  onSample?: (tableName: string) => void;
 }
 
-export const DatasetHeader = ({ selectedDataset, onLoad }: DatasetHeaderProps) => {
+export const DatasetHeader = ({ selectedDataset, onLoad, onSample }: DatasetHeaderProps) => {
   return (
     <div className="flex justify-between items-center">
       <div className="space-y-2">
@@ -25,13 +27,16 @@ export const DatasetHeader = ({ selectedDataset, onLoad }: DatasetHeaderProps) =
             Load
           </Button>
         )}
-        <Button 
-          variant="outline"
-          onClick={() => window.location.href = '#sample'}
-          className="bg-[#F97316]/20 hover:bg-[#F97316]/30"
-        >
-          Sample
-        </Button>
+        {onSample && selectedDataset && (
+          <Button 
+            variant="outline"
+            onClick={() => onSample(selectedDataset)}
+            className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Sample
+          </Button>
+        )}
       </div>
     </div>
   );
