@@ -29,6 +29,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [columns, setColumns] = useState<string[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [data, setData] = useState<any[]>([]);
+  const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
   const { toast } = useToast();
   const itemsPerPage = 10;
@@ -38,12 +39,31 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       if (!selectedDataset) {
         setData([]);
         setColumns([]);
+        setTotalRowCount(0);
         return;
       }
 
+      // Fetch total count first
+      const { count, error: countError } = await supabase
+        .from(selectedDataset)
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        toast({
+          title: "Error fetching count",
+          description: countError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setTotalRowCount(count || 0);
+
+      // Then fetch the actual data
       const { data: tableData, error } = await supabase
         .from(selectedDataset)
-        .select("*");
+        .select("*")
+        .limit(1000); // Keep limit for actual data display
 
       if (error) {
         toast({
@@ -58,7 +78,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             col => !col.startsWith('md_')
           );
           setColumns(filteredColumns);
-          setSelectedColumns(filteredColumns); // Initially select all columns
+          setSelectedColumns(filteredColumns);
         }
       }
     };
@@ -140,7 +160,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       </div>
       
       <DatasetStats 
-        totalRows={data.length} // Original dataset total rows
+        totalRows={totalRowCount} // Now using the accurate total count
         columnsCount={columns.length}
         filteredRows={filteredData.length}
         lastUpdate={data[0]?.md_last_update || null}
