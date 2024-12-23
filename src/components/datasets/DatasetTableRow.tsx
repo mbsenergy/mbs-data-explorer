@@ -61,7 +61,7 @@ export const DatasetTableRow = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Fetch sample data
+      // Fetch first 1000 rows
       const { data, error } = await supabase
         .from(table.tablename as any)
         .select('*')

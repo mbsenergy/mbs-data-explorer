@@ -81,22 +81,17 @@ export const DatasetExplore = ({
   };
 
   const handleSample = async () => {
-    if (!selectedDataset || !user?.id || !selectedColumns.length) {
+    if (!selectedDataset || !user?.id) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select at least one column to download.",
+        description: "Please select a dataset to download.",
       });
       return;
     }
 
     try {
-      console.log('Starting sample download with:', {
-        filteredDataCount: filteredData.length,
-        selectedColumns,
-        searchTerm,
-        selectedColumn
-      });
+      console.log('Starting sample download for:', selectedDataset);
 
       // Track analytics first
       const { error: analyticsError } = await supabase
@@ -111,27 +106,38 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Create CSV content from the filtered data
-      const headers = selectedColumns.join(',');
-      const rows = filteredData.map(row => {
-        console.log('Processing row for CSV:', row);
-        return selectedColumns.map(col => {
-          const value = row[col];
-          // Handle special cases like numbers, nulls, and strings with commas
-          if (value === null) return '';
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value;
-        }).join(',');
+      // Fetch first 1000 rows
+      const { data, error } = await supabase
+        .from(selectedDataset)
+        .select('*')
+        .limit(1000);
+
+      if (error) throw error;
+
+      if (!data || !data.length) {
+        throw new Error("No data available for download");
+      }
+
+      console.log('Generated data:', {
+        rowCount: data.length,
+        sampleFirstRow: data[0]
+      });
+
+      // Create CSV content
+      const headers = Object.keys(data[0]).filter(key => !key.startsWith('md_')).join(',');
+      const rows = data.map(row => {
+        return Object.entries(row)
+          .filter(([key]) => !key.startsWith('md_'))
+          .map(([_, value]) => {
+            if (value === null) return '';
+            if (typeof value === 'string' && value.includes(',')) {
+              return `"${value}"`;
+            }
+            return value;
+          })
+          .join(',');
       });
       const csv = [headers, ...rows].join('\n');
-
-      console.log('Generated CSV:', {
-        headerCount: headers.split(',').length,
-        rowCount: rows.length,
-        sampleFirstRow: rows[0]
-      });
 
       // Create and trigger download
       const blob = new Blob([csv], { type: 'text/csv' });

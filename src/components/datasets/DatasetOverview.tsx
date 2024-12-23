@@ -90,10 +90,84 @@ export const DatasetOverview = ({
     setDownloadingDataset(datasetName);
   };
 
-  const handleConfirmDownload = () => {
+  const handleConfirmDownload = async () => {
     if (downloadingDataset) {
-      onDownload(downloadingDataset);
-      setDownloadingDataset(null);
+      if (!user?.id) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "You must be logged in to download datasets.",
+        });
+        return;
+      }
+
+      try {
+        // Track analytics first
+        const { error: analyticsError } = await supabase
+          .from("analytics")
+          .insert({
+            user_id: user.id,
+            dataset_name: downloadingDataset,
+            is_custom_query: false,
+          });
+
+        if (analyticsError) {
+          console.error("Error tracking download:", analyticsError);
+        }
+
+        // Fetch first 1000 rows
+        const { data, error } = await supabase
+          .from(downloadingDataset)
+          .select('*')
+          .limit(1000);
+
+        if (error) throw error;
+
+        if (!data || !data.length) {
+          throw new Error("No data available for download");
+        }
+
+        // Create CSV content
+        const headers = Object.keys(data[0]).filter(key => !key.startsWith('md_')).join(',');
+        const rows = data.map(row => {
+          return Object.entries(row)
+            .filter(([key]) => !key.startsWith('md_'))
+            .map(([_, value]) => {
+              if (value === null) return '';
+              if (typeof value === 'string' && value.includes(',')) {
+                return `"${value}"`;
+              }
+              return value;
+            })
+            .join(',');
+        });
+        const csv = [headers, ...rows].join('\n');
+
+        // Create and trigger download
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${downloadingDataset}_sample.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast({
+          title: "Success",
+          description: "Dataset sample downloaded successfully.",
+        });
+      } catch (error: any) {
+        console.error("Error downloading dataset:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to download dataset.",
+        });
+      } finally {
+        setDownloadingDataset(null);
+      }
     }
   };
 

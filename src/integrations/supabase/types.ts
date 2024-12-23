@@ -1920,7 +1920,7 @@ export type Database = {
         Args: {
           query_text: string
         }
-        Returns: Record<string, unknown>[]
+        Returns: Json
       }
       get_available_tables: {
         Args: Record<PropertyKey, never>
