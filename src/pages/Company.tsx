@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowUpRight, Strategy, Sun, FileText, Database, ShieldCheck, Briefcase } from "lucide-react";
+import { ArrowUpRight, LineChart, Sun, FileText, Database, ShieldCheck, Briefcase } from "lucide-react";
 
 const companies = [
   {
@@ -8,7 +8,7 @@ const companies = [
     description: "Explore our comprehensive energy market data and analytics platform, designed to help businesses make informed decisions in the evolving energy landscape.",
     link: "https://www.cerved.com/en/offering/energy/",
     services: [
-      { name: "Strategy & Asset Valuation", icon: Strategy },
+      { name: "Strategy & Asset Valuation", icon: LineChart },
       { name: "Osservatorio energia", icon: Sun },
       { name: "Scenario", icon: FileText },
       { name: "Data & Modelling", icon: Database },
