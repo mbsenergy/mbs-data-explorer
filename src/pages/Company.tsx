@@ -1,6 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowUpRight, LineChart, Sun, FileText, Database, ShieldCheck, Briefcase } from "lucide-react";
+import { 
+  ArrowUpRight, 
+  LineChart, 
+  Sun, 
+  FileText, 
+  Database, 
+  ShieldCheck, 
+  Briefcase,
+  Building,
+  Users,
+  Bank,
+  Shield,
+  Banknote,
+  Globe,
+  ChartBar,
+  Monitor,
+  ChartLine
+} from "lucide-react";
 
 const companies = [
   {
@@ -19,17 +36,42 @@ const companies = [
   {
     name: "MBS Consulting",
     description: "Discover how our consulting services can help transform your business through strategic insights and innovative solutions.",
-    link: "https://www.cerved.com/en/about-us/companies/mbs/"
+    link: "https://www.cerved.com/en/about-us/companies/mbs/",
+    services: [
+      { name: "Insurance", icon: Shield },
+      { name: "Banking", icon: Bank },
+      { name: "Energy", icon: Sun },
+      { name: "Risk Advisory", icon: ShieldCheck },
+      { name: "Financial Services", icon: Banknote },
+      { name: "Innovation Team", icon: Users },
+      { name: "Public Administration", icon: Building },
+      { name: "EGS", icon: Users },
+    ]
   },
   {
     name: "Cerved Group",
     description: "Learn more about Cerved Group's comprehensive business information services and credit management solutions.",
-    link: "https://company.cerved.com/"
+    link: "https://company.cerved.com/",
+    services: [
+      { name: "Cerved", icon: Globe },
+      { name: "Rating Agency", icon: ChartBar },
+      { name: "Data & AI", icon: Database },
+      { name: "Spazio Dati", icon: Database },
+      { name: "ProWeb", icon: Monitor }
+    ]
   },
   {
     name: "ION Group",
     description: "Explore ION Group's trading and workflow solutions that power financial institutions worldwide.",
-    link: "https://iongroup.com/"
+    link: "https://iongroup.com/",
+    services: [
+      { name: "Market Analytics", icon: ChartLine },
+      { name: "Core Banking", icon: Bank },
+      { name: "Analytics", icon: ChartBar },
+      { name: "Corporate", icon: Users },
+      { name: "Credit Information", icon: Database },
+      { name: "Other", icon: Users }
+    ]
   }
 ];
 
@@ -58,7 +100,7 @@ const Company = () => {
               <p className="text-muted-foreground">{company.description}</p>
               
               {company.services && (
-                <div className="grid grid-cols-2 gap-4 py-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4">
                   {company.services.map((service) => (
                     <div 
                       key={service.name}
