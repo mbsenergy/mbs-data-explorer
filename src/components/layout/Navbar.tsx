@@ -16,21 +16,39 @@ import {
 export const Navbar = () => {
   const { user } = useAuth();
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
+      if (!user?.id) return null;
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("first_name, last_name, avatar_url")
-        .eq("id", user?.id)
+        .eq("id", user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+
       return data;
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    cacheTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    retry: 2,
   });
+
+  if (isLoading) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]">
+        <div className="container flex h-full items-center">
+          <div className="animate-pulse h-4 w-48 bg-muted rounded" />
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]">
