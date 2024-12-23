@@ -25,7 +25,29 @@ const Login = () => {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        if (error.message === "Invalid login credentials") {
+          toast({
+            title: "Login failed",
+            description: "Please check your email and password and try again.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes("Email not confirmed")) {
+          toast({
+            title: "Email not verified",
+            description: "Please check your email and verify your account before logging in.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        return;
+      }
 
       // Track the login
       await supabase.from('user_logins').insert({
@@ -34,9 +56,10 @@ const Login = () => {
 
       navigate("/");
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -81,6 +104,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -92,6 +116,7 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
+                disabled={loading}
               />
             </div>
             <Button
