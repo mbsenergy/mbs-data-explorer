@@ -24,9 +24,9 @@ const Company = () => {
               <ServiceBox title="Due Dilligence" />
               <ServiceBox title="PPA" />
             </div>
-            <Button variant="secondary" className="bg-muted hover:bg-muted/80" asChild>
+            <Button variant="default" className="bg-corporate-teal hover:bg-corporate-teal/90" asChild>
               <a 
-                href="https://www.example.com/energy-services" 
+                href="https://mbsconsulting.ref-e.com/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center"
@@ -50,9 +50,9 @@ const Company = () => {
               <ServiceBox title="EGS" />
               <ServiceBox title="More" />
             </div>
-            <Button variant="secondary" className="bg-muted hover:bg-muted/80" asChild>
+            <Button variant="default" className="bg-corporate-blue hover:bg-corporate-blue/90" asChild>
               <a 
-                href="https://www.example.com/mbs-consulting" 
+                href="https://www.mbsconsulting.com/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center"
@@ -72,9 +72,9 @@ const Company = () => {
               <ServiceBox title="Spazio Dati" />
               <ServiceBox title="ProWeb" />
             </div>
-            <Button variant="secondary" className="bg-muted hover:bg-muted/80" asChild>
+            <Button variant="default" className="bg-corporate-orange hover:bg-corporate-orange/90" asChild>
               <a 
-                href="https://www.example.com/cerved-group" 
+                href="https://www.cerved.com/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center"
@@ -95,9 +95,9 @@ const Company = () => {
               <ServiceBox title="Credit Information" />
               <ServiceBox title="Other" />
             </div>
-            <Button variant="secondary" className="bg-muted hover:bg-muted/80" asChild>
+            <Button variant="default" className="bg-corporate-yellow hover:bg-corporate-yellow/90" asChild>
               <a 
-                href="https://www.example.com/ion-group" 
+                href="https://iongroup.com/markets/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center"
