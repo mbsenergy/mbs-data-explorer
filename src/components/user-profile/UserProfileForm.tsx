@@ -22,12 +22,14 @@ export const UserProfileForm = () => {
     country: "",
   });
 
+  // Update form data when profile is loaded
   useEffect(() => {
     if (profile) {
+      console.log("Setting form data from profile:", profile);
       setFormData({
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
-        date_of_birth: profile.date_of_birth || "",
+        date_of_birth: profile.date_of_birth ? new Date(profile.date_of_birth).toISOString().split('T')[0] : "",
         role: profile.role || "",
         company: profile.company || "",
         country: profile.country || "",
@@ -37,6 +39,7 @@ export const UserProfileForm = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log(`Updating ${name} to:`, value);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -45,9 +48,14 @@ export const UserProfileForm = () => {
     if (!user?.id) return;
 
     try {
+      console.log("Submitting form data:", formData);
       const { error } = await supabase
         .from("profiles")
-        .update(formData)
+        .update({
+          ...formData,
+          // Ensure date is in the correct format for PostgreSQL
+          date_of_birth: formData.date_of_birth || null,
+        })
         .eq("id", user.id);
 
       if (error) throw error;
