@@ -53,7 +53,8 @@ export const DeveloperActivity = ({
   return (
     <Card className="p-4">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-end mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold text-white">Activity</h2>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">
               {isOpen ? (

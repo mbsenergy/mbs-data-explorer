@@ -20,8 +20,8 @@ export const RecentDownloads = ({
   onToggleFavorite,
 }: RecentDownloadsProps) => {
   return (
-    <div className="p-4 border border-corporate-blue/20 rounded-lg bg-card/50">
-      <h2 className="text-2xl font-semibold text-corporate-blue mb-4">Recent Downloads</h2>
+    <div className="p-4 border border-[hsl(217,100%,15%)] rounded-lg bg-card/50">
+      <h2 className="text-2xl font-semibold text-white">Recent Downloads</h2>
       <Carousel className="w-full">
         <CarouselContent>
           {recentDownloads?.map((download) => {

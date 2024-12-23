@@ -20,8 +20,8 @@ export const FavoriteResources = ({
   onPageChange,
 }: FavoriteResourcesProps) => {
   return (
-    <div className="space-y-4 p-4 border border-corporate-blue/20 rounded-lg bg-card/50">
-      <h2 className="text-2xl font-semibold text-corporate-blue">Favorite Resources</h2>
+    <div className="space-y-4 p-4 border border-[hsl(217,100%,15%)] rounded-lg bg-card/50">
+      <h2 className="text-2xl font-semibold text-white">Favorite Resources</h2>
       <Table>
         <TableHeader>
           <TableRow>
