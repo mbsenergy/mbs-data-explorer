@@ -18,7 +18,7 @@ const QueryExport = () => {
       
       toast({
         title: "Query executed successfully",
-        description: `Retrieved ${data?.length || 0} rows`,
+        description: `Retrieved ${Array.isArray(data) ? data.length : 0} rows`,
       });
       
     } catch (error: any) {
