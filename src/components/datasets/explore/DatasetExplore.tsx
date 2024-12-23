@@ -97,36 +97,6 @@ export const DatasetExplore = ({
             </p>
           )}
         </div>
-        <div className="flex gap-2">
-          {onLoad && (
-            <>
-              <Button 
-                variant="outline"
-                onClick={handleLoad}
-                className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30 flex items-center gap-2"
-              >
-                <Database className="h-4 w-4" />
-                Retrieve
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => window.location.href = '#explore'}
-                className="bg-[#3B82F6]/20 hover:bg-[#3B82F6]/30 flex items-center gap-2"
-              >
-                <Eye className="h-4 w-4" />
-                Explore
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => setShowQueryModal(true)}
-                className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 flex items-center gap-2"
-              >
-                <Code className="h-4 w-4" />
-                Show Query
-              </Button>
-            </>
-          )}
-        </div>
       </div>
       
       <DatasetStats 
@@ -135,6 +105,35 @@ export const DatasetExplore = ({
         filteredRows={filteredData.length}
         lastUpdate={data[0]?.md_last_update || null}
       />
+
+      {selectedDataset && (
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleLoad}
+            variant="outline"
+            className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30 flex items-center gap-2"
+          >
+            <Database className="h-4 w-4" />
+            Retrieve
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => window.location.href = '#explore'}
+            className="bg-[#3B82F6]/20 hover:bg-[#3B82F6]/30 flex items-center gap-2"
+          >
+            <Eye className="h-4 w-4" />
+            Explore
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => setShowQueryModal(true)}
+            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 flex items-center gap-2"
+          >
+            <Code className="h-4 w-4" />
+            Show Query
+          </Button>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center h-32">
