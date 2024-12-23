@@ -151,3 +151,18 @@
 [data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="warning"] {
   background: theme('colors.corporate.orange') !important;
 }
+
+/* Card styles */
+.card {
+  @apply metallic-card glass-panel;
+}
+
+/* Button styles */
+.btn-gradient {
+  @apply bg-gradient-to-r from-corporate-blue to-corporate-teal hover:opacity-90 transition-opacity;
+}
+
+/* Input styles */
+.input-glass {
+  @apply bg-background/50 border-white/10 focus:border-corporate-teal transition-colors;
+}
