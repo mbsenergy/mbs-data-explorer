@@ -197,18 +197,21 @@ const Datasets = () => {
         availableFields={availableFields}
         availableTypes={availableTypes}
         selectedDataset={selectedDataset || ""}
+        onLoad={handleLoad}
       />
 
       <div className="space-y-6">
         <DatasetExplore 
           selectedDataset={selectedDataset} 
           onColumnsChange={setSelectedColumns}
+          onLoad={handleLoad}
         />
         
         <DatasetExport 
           selectedDataset={selectedDataset}
           selectedColumns={selectedColumns}
           isLoading={false}
+          onLoad={handleLoad}
         />
       </div>
 

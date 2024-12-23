@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import DatasetFilters from "./DatasetFilters";
 import { DatasetTable } from "./DatasetTable";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TableInfo } from "./types";
 
@@ -41,12 +41,20 @@ export const DatasetSearch = ({
   onLoad
 }: DatasetSearchProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const rowsPerPage = 7;
 
   // Filter tables to only include those matching XX00_ pattern
   const filteredTables = tables.filter(table => {
     const pattern = /^[A-Z]{2}\d{2}_/;
     return pattern.test(table.tablename);
   });
+
+  const totalPages = Math.ceil(filteredTables.length / rowsPerPage);
+  const paginatedTables = filteredTables.slice(
+    currentPage * rowsPerPage,
+    (currentPage + 1) * rowsPerPage
+  );
 
   React.useEffect(() => {
     const handleSelectDataset = (event: CustomEvent<string>) => {
@@ -86,7 +94,7 @@ export const DatasetSearch = ({
           />
           <div className="mt-6">
             <DatasetTable
-              tables={filteredTables}
+              tables={paginatedTables}
               onPreview={onPreview}
               onDownload={onDownload}
               onSelect={onSelect}
@@ -95,6 +103,29 @@ export const DatasetSearch = ({
               selectedDataset={selectedDataset}
               onLoad={onLoad}
             />
+            <div className="flex items-center justify-end space-x-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                disabled={currentPage === 0}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage + 1} of {Math.max(1, totalPages)}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                disabled={currentPage >= totalPages - 1}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
           </div>
         </CollapsibleContent>
       </Collapsible>

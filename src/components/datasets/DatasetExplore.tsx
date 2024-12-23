@@ -14,9 +14,14 @@ type TableNames = keyof Database['public']['Tables'];
 interface DatasetExploreProps {
   selectedDataset: TableNames | null;
   onColumnsChange: (columns: string[]) => void;
+  onLoad?: (tableName: string) => void;
 }
 
-export const DatasetExplore = ({ selectedDataset, onColumnsChange }: DatasetExploreProps) => {
+export const DatasetExplore = ({ 
+  selectedDataset, 
+  onColumnsChange,
+  onLoad 
+}: DatasetExploreProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -84,14 +89,26 @@ export const DatasetExplore = ({ selectedDataset, onColumnsChange }: DatasetExpl
             </p>
           )}
         </div>
-        <Button 
-          variant="outline"
-          size="sm"
-          onClick={() => window.location.href = '#sample'}
-          className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-        >
-          Sample
-        </Button>
+        <div className="space-x-2">
+          {onLoad && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => selectedDataset && onLoad(selectedDataset)}
+              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+            >
+              Load
+            </Button>
+          )}
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.href = '#sample'}
+            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+          >
+            Sample
+          </Button>
+        </div>
       </div>
       
       <DatasetStats 
