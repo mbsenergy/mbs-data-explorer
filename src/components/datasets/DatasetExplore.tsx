@@ -90,7 +90,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
         return;
       }
 
-      // Check which update column exists
+      // Check if md_last_update exists
       const hasLastUpdate = 'md_last_update' in sampleData[0];
 
       if (hasLastUpdate) {
@@ -253,15 +253,15 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           
           {selectedDataset && (
             <div className="grid grid-cols-3 gap-4 mt-2">
-              <div className="p-3 glass-panel rounded-md bg-card">
+              <div className="p-3 rounded-md bg-card border border-border">
                 <p className="text-sm text-muted-foreground">Total Rows</p>
                 <p className="text-lg font-semibold">{totalRows.toLocaleString()}</p>
               </div>
-              <div className="p-3 glass-panel rounded-md bg-card">
+              <div className="p-3 rounded-md bg-card border border-border">
                 <p className="text-sm text-muted-foreground">Total Columns</p>
                 <p className="text-lg font-semibold">{columns.length}</p>
               </div>
-              <div className="p-3 glass-panel rounded-md bg-card">
+              <div className="p-3 rounded-md bg-card border border-border">
                 <p className="text-sm text-muted-foreground">Filtered Rows</p>
                 <p className="text-lg font-semibold">{filteredRows.toLocaleString()}</p>
               </div>
