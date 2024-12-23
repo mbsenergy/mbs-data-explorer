@@ -7,61 +7,52 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      console.log("Attempting login with email:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
       });
 
       if (error) {
-        // Handle specific error cases
+        console.error("Login error:", error);
         if (error.message === "Invalid login credentials") {
-          toast({
-            title: "Login failed",
-            description: "Please check your email and password and try again.",
-            variant: "destructive",
-          });
+          setError("Invalid email or password. Please try again.");
         } else if (error.message.includes("Email not confirmed")) {
-          toast({
-            title: "Email not verified",
-            description: "Please check your email and verify your account before logging in.",
-            variant: "destructive",
-          });
+          setError("Please verify your email address before logging in.");
         } else {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
+          setError(error.message);
         }
         return;
       }
 
-      // Track the login
-      await supabase.from('user_logins').insert({
-        user_id: (await supabase.auth.getUser()).data.user?.id
-      });
+      if (data?.user) {
+        console.log("Login successful for user:", data.user.email);
+        // Track the login
+        await supabase.from('user_logins').insert({
+          user_id: data.user.id
+        });
 
-      navigate("/");
+        navigate("/");
+      }
     } catch (error: any) {
-      console.error("Login error:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Unexpected error during login:", error);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -92,6 +83,12 @@ const Login = () => {
               Enter your credentials to access your account
             </p>
           </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
