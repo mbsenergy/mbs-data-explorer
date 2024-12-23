@@ -26,7 +26,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Checking session...");
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Session check result:", session ? "Session found" : "No session");
-        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setUser(session.user);
+          // Fetch initial profile data
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (profileError) {
+            console.error("Error fetching initial profile:", profileError);
+          } else {
+            console.log("Initial profile data loaded:", profile);
+          }
+        } else {
+          setUser(null);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Error checking session:", error);
@@ -48,9 +65,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Clear auth-related items from localStorage
           localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
           navigate("/login");
-        } else if (event === "SIGNED_IN") {
-          console.log("User signed in, updating state...");
-          setUser(session?.user ?? null);
+        } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          console.log("User signed in or token refreshed, updating state...");
+          if (session?.user) {
+            setUser(session.user);
+            // Fetch profile data on sign in
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (profileError) {
+              console.error("Error fetching profile on sign in:", profileError);
+            } else {
+              console.log("Profile data loaded on sign in:", profile);
+            }
+          }
         }
         
         setLoading(false);
