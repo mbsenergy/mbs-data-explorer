@@ -6,35 +6,35 @@
  
 @layer base {
   :root {
-    --background: 217 100% 11%;
-    --foreground: 0 0% 100%;
+    --background: 220 100% 2%;
+    --foreground: 210 40% 98%;
     
-    --card: 217 100% 8%;
-    --card-foreground: 0 0% 100%;
+    --card: 222 84% 5%;
+    --card-foreground: 210 40% 98%;
  
-    --popover: 217 100% 8%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 222 84% 5%;
+    --popover-foreground: 210 40% 98%;
  
-    --primary: 186 77% 61%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 40% 98%;
  
-    --secondary: 84 36% 55%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 210 40% 98%;
  
     --muted: 217 100% 15%;
-    --muted-foreground: 0 0% 80%;
+    --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 186 77% 61%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 210 40% 98%;
  
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 210 40% 98%;
  
     --border: 217 100% 15%;
     --input: 217 100% 15%;
-    --ring: 186 77% 61%;
+    --ring: 224 76.3% 48%;
  
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 }
  
@@ -83,6 +83,40 @@
 
 .glass-panel {
   @apply bg-opacity-20 backdrop-blur-lg bg-white/10 border border-white/20;
+}
+
+.metallic-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.ai-gradient {
+  background: linear-gradient(135deg, #0c1d3b 0%, #1a365d 50%, #2d4a8a 100%);
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2s infinite;
+  content: '';
 }
 
 .scrollbar-custom {
