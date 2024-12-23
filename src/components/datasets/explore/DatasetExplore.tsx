@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
+import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { useDatasetData } from "@/hooks/useDatasetData";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -22,6 +25,8 @@ export const DatasetExplore = ({
   onColumnsChange,
   onLoad 
 }: DatasetExploreProps) => {
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -47,10 +52,74 @@ export const DatasetExplore = ({
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData(selectedDataset, selectedColumns);
+      await loadData(selectedDataset);
       if (onLoad) {
         onLoad(selectedDataset);
       }
+    }
+  };
+
+  const handleSample = async () => {
+    if (!selectedDataset || !user?.id || !selectedColumns.length) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select at least one column to download.",
+      });
+      return;
+    }
+
+    try {
+      // Track analytics first
+      const { error: analyticsError } = await supabase
+        .from("analytics")
+        .insert({
+          user_id: user.id,
+          dataset_name: selectedDataset,
+          is_custom_query: false,
+        });
+
+      if (analyticsError) {
+        console.error("Error tracking download:", analyticsError);
+      }
+
+      // Create CSV content from the current filtered data
+      const headers = selectedColumns.join(',');
+      const rows = data.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          // Handle special cases like numbers, nulls, and strings with commas
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
+      const csv = [headers, ...rows].join('\n');
+
+      // Create and trigger download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedDataset}_sample.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Dataset sample downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to download dataset.",
+      });
     }
   };
 
@@ -90,28 +159,11 @@ export const DatasetExplore = ({
 
   return (
     <Card className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">Explore</h2>
-          {selectedDataset && (
-            <p className="text-muted-foreground">
-              Selected dataset: <span className="font-medium">{selectedDataset}</span>
-            </p>
-          )}
-        </div>
-        <div className="space-x-2">
-          {onLoad && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleLoad}
-              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-            >
-              Load
-            </Button>
-          )}
-        </div>
-      </div>
+      <DatasetExploreHeader 
+        selectedDataset={selectedDataset}
+        onLoad={handleLoad}
+        onSample={handleSample}
+      />
       
       <DatasetStats 
         totalRows={totalRowCount}
