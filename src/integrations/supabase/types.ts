@@ -1940,6 +1940,12 @@ export type Database = {
         }
         Returns: number
       }
+      get_table_row_count: {
+        Args: {
+          table_name: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
