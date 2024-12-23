@@ -55,8 +55,8 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
       console.log("User ID:", userId);
       console.log("Form data to be sent:", formData);
 
-      // Convert empty strings to null for date_of_birth
       const updateData = {
+        id: userId, // Include ID for upsert
         first_name: formData.first_name || null,
         last_name: formData.last_name || null,
         date_of_birth: formData.date_of_birth || null,
@@ -68,12 +68,12 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
 
       console.log("Formatted update data:", updateData);
       
+      // Use upsert instead of update
       const { error, data } = await supabase
         .from("profiles")
-        .update(updateData)
-        .eq("id", userId)
+        .upsert(updateData)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error updating profile:", error);
