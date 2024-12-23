@@ -21,7 +21,7 @@ export const Navbar = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select("first_name, last_name, avatar_url")
         .eq("id", user?.id)
         .single();
 
@@ -29,10 +29,11 @@ export const Navbar = () => {
       return data;
     },
     enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]"> {/* Added ml-[var(--sidebar-width)] and adjusted z-index */}
+    <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]">
       <div className="container flex h-full items-center">
         {/* Welcome message - always visible */}
         <div className="hidden md:block">
