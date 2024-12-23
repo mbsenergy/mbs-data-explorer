@@ -96,7 +96,7 @@ export function AppSidebar() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start w-full">
             <img 
-              src="/lovable-uploads/a75b418f-ec17-41ab-ae6a-9d9f1301a07e.png" 
+              src="/lovable-uploads/0c6149ce-5bdd-4635-843d-2e8d1e9b325b.png" 
               alt="Flux Logo" 
               className="w-full h-auto object-contain px-2"
             />

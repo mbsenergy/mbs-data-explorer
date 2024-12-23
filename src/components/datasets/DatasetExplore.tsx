@@ -165,27 +165,29 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {selectedColumns.map((col) => (
-                    <TableHead key={col}>{col}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((item, index) => (
-                  <TableRow key={index}>
+          <div className="border rounded-md">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
                     {selectedColumns.map((col) => (
-                      <TableCell key={col} className="whitespace-nowrap">
-                        {String(item[col])}
-                      </TableCell>
+                      <TableHead key={col}>{col}</TableHead>
                     ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((item, index) => (
+                    <TableRow key={index}>
+                      {selectedColumns.map((col) => (
+                        <TableCell key={col} className="whitespace-nowrap">
+                          {String(item[col])}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           <DatasetPagination
