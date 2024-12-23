@@ -1,84 +1,184 @@
-import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/components/auth/AuthProvider";
 import {
-  BarChart3,
-  Database,
-  FileText,
-  Home,
+  LayoutDashboard,
   Settings,
-  Terminal,
+  User,
+  Building2,
+  HelpCircle,
+  Database,
+  BarChart3,
+  Zap,
+  Code,
+  LineChart,
+  LogOut,
 } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
-export const AppSidebar = () => {
-  return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card transition-transform">
-      <div className="flex h-full flex-col overflow-y-auto">
-        <div className="flex h-16 items-center justify-center border-b px-4">
-          <img
-            src="/lovable-uploads/e76c927a-137e-41dd-ad35-6adbe3787d4d.png"
-            alt="Flux Data Platform"
-            className="h-8"
-          />
-        </div>
-        <div className="flex flex-1 flex-col justify-between p-4">
-          <nav className="space-y-1">
-            <NavLink to="/" icon={<Home className="h-4 w-4" />}>
-              Home
-            </NavLink>
-            <NavLink to="/datasets" icon={<Database className="h-4 w-4" />}>
-              Datasets
-            </NavLink>
-            <NavLink to="/analytics" icon={<BarChart3 className="h-4 w-4" />}>
-              Analytics
-            </NavLink>
-            <NavLink to="/developer" icon={<Terminal className="h-4 w-4" />}>
-              Developer
-            </NavLink>
-            <NavLink to="/docs" icon={<FileText className="h-4 w-4" />}>
-              Documentation
-            </NavLink>
-          </nav>
-          <nav className="space-y-1">
-            <NavLink to="/settings" icon={<Settings className="h-4 w-4" />}>
-              Settings
-            </NavLink>
-          </nav>
-        </div>
-      </div>
-    </aside>
-  );
-};
+const navigationItems = [
+  { title: "Dashboard", icon: LayoutDashboard, url: "/" },
+  { title: "Scenario", icon: LineChart, url: "/scenario" },
+  { title: "Osservatorio", icon: Zap, url: "/osservatorio" },
+  { title: "Datasets", icon: Database, url: "/datasets" },
+  { title: "Developer", icon: Code, url: "/developer" },
+];
 
-interface NavLinkProps {
-  to: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}
+const profileItems = [
+  { title: "User", icon: User, url: "/user" },
+  { title: "Analytics", icon: BarChart3, url: "/analytics" },
+];
 
-const NavLink = ({ to, icon, children }: NavLinkProps) => {
+const infoItems = [
+  { title: "Company", icon: Building2, url: "/company" },
+  { title: "Settings", icon: Settings, url: "/settings" },
+  { title: "Help", icon: HelpCircle, url: "/guide" },
+];
+
+export function AppSidebar() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const location = useLocation();
-  const { user } = useAuth();
-  const isActive = location.pathname === to;
 
-  // Protect routes that require authentication
-  if (!user && to !== "/") {
-    return null;
-  }
+  const handleLogout = async () => {
+    try {
+      console.log("Attempting to sign out...");
+      
+      // Clear auth token before signing out
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      if (projectId) {
+        localStorage.removeItem('sb-' + projectId + '-auth-token');
+      }
+      
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Logout error:", error);
+      }
+      
+      // Always navigate to login page and show success message
+      navigate("/login");
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully.",
+      });
+      
+    } catch (error) {
+      console.error("Caught error during logout:", error);
+      navigate("/login");
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully.",
+      });
+    }
+  };
+
+  const isActive = (url: string) => {
+    return location.pathname === url || 
+           (url !== "/" && location.pathname.startsWith(url));
+  };
 
   return (
-    <Link to={to}>
-      <Button
-        variant="ghost"
-        className={cn(
-          "w-full justify-start",
-          isActive && "bg-muted text-foreground"
-        )}
-      >
-        {icon}
-        <span className="ml-2">{children}</span>
-      </Button>
-    </Link>
+    <Sidebar className="bg-card border-r border-border/40">
+      <SidebarHeader className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start w-full">
+            <img 
+              src="/lovable-uploads/4a4029b5-ea41-45f4-aa7b-6ad8181a4f7f.png" 
+              alt="Fluxer Logo" 
+              className="w-full h-auto object-contain"
+            />
+            <span className="text-sm font-bold mt-3 text-muted-foreground">MBS Apps Suite</span>
+          </div>
+        </div>
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild
+                    className={isActive(item.url) ? "bg-muted text-[#4fd9e8] font-medium" : "hover:bg-muted/50"}
+                  >
+                    <Link to={item.url} className="flex items-center gap-2">
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Profile</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {profileItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild
+                    className={isActive(item.url) ? "bg-muted text-[#4fd9e8] font-medium" : "hover:bg-muted/50"}
+                  >
+                    <Link to={item.url} className="flex items-center gap-2">
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Info</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {infoItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild
+                    className={isActive(item.url) ? "bg-muted text-[#4fd9e8] font-medium" : "hover:bg-muted/50"}
+                  >
+                    <Link to={item.url} className="flex items-center gap-2">
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="p-4">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} className="w-full hover:bg-muted/50">
+              <LogOut className="h-5 w-5" />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
-};
+}
