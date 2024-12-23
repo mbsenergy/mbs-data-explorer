@@ -11,7 +11,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const pageSize = 1000;
 
   const fetchWithRetry = async (fn: () => Promise<any>, retries = 3) => {
     try {
@@ -39,7 +38,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     return [];
   };
 
-  const loadData = async (tableName: TableNames) => {
+  const loadData = async (tableName: TableNames, selectedColumns: string[] = []) => {
     setIsLoading(true);
     try {
       // First get total count
@@ -51,47 +50,28 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
 
-      // Get available columns first
-      const availableColumns = await fetchColumns(tableName);
-      setColumns(availableColumns);
-
-      // Calculate number of pages needed
-      const numberOfPages = Math.ceil(totalRows / pageSize);
-      let allData: any[] = [];
-
-      // Fetch data in chunks
-      for (let i = 0; i < numberOfPages; i++) {
-        const from = i * pageSize;
-        const to = from + pageSize - 1;
-
-        const { data: pageData, error } = await fetchWithRetry(async () => {
-          return await supabase
-            .from(tableName)
-            .select(availableColumns.join(','))
-            .range(from, to);
-        });
-
-        if (error) throw error;
-        if (pageData) {
-          allData = [...allData, ...pageData];
-        }
-
-        // Update progress
-        const progress = Math.round((i + 1) / numberOfPages * 100);
-        if (progress % 20 === 0) {
-          toast({
-            title: "Loading data",
-            description: `${progress}% complete...`
-          });
-        }
-      }
-
-      setData(allData);
+      // Get available columns if not provided
+      const columnsToUse = selectedColumns.length > 0 ? 
+        selectedColumns : 
+        await fetchColumns(tableName);
       
-      toast({
-        title: "Success",
-        description: `Loaded ${allData.length} rows successfully`
-      });
+      setColumns(columnsToUse);
+
+      // Fetch data with selected columns
+      const { data: tableData, error } = await supabase
+        .from(tableName)
+        .select(columnsToUse.join(','))
+        .limit(1000);
+
+      if (error) throw error;
+      
+      if (tableData) {
+        setData(tableData);
+        toast({
+          title: "Success",
+          description: `Loaded ${tableData.length} rows successfully`
+        });
+      }
 
     } catch (error: any) {
       console.error("Error loading data:", error);
@@ -134,7 +114,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         const { data: initialData, error: initialError } = await supabase
           .from(selectedDataset)
           .select(availableColumns.join(','))
-          .limit(pageSize);
+          .limit(10);
 
         if (initialError) throw initialError;
         

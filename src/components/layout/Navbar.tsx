@@ -61,7 +61,7 @@ export const Navbar = () => {
           <span className="text-sm text-muted-foreground">
             Welcome back{" "}
             <span className="font-medium text-foreground">
-              {profile?.first_name} {profile?.last_name}
+              {user?.email}
             </span>
           </span>
         </div>
