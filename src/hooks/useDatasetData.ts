@@ -11,7 +11,20 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const initialFetchLimit = 10000;
+  const initialFetchLimit = 1000; // Reduced initial fetch to prevent timeouts
+  const maxRetries = 3;
+
+  const fetchWithRetry = async (fn: () => Promise<any>, retries = maxRetries) => {
+    try {
+      return await fn();
+    } catch (error) {
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+        return fetchWithRetry(fn, retries - 1);
+      }
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,35 +38,45 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       setIsLoading(true);
 
       try {
-        // First fetch total count
-        const { count, error: countError } = await supabase
-          .from(selectedDataset)
-          .select('*', { count: 'exact', head: true });
+        // First fetch total count with retry mechanism
+        const countResult = await fetchWithRetry(async () => {
+          const { count, error } = await supabase
+            .from(selectedDataset)
+            .select('*', { count: 'exact', head: true });
+          
+          if (error) throw error;
+          return count;
+        });
 
-        if (countError) throw countError;
-        setTotalRowCount(count || 0);
+        setTotalRowCount(countResult || 0);
 
-        // Then fetch first 10,000 rows of data
-        const { data: tableData, error } = await supabase
-          .from(selectedDataset)
-          .select("*")
-          .range(0, initialFetchLimit - 1);
+        // Then fetch first chunk of data with retry mechanism
+        const dataResult = await fetchWithRetry(async () => {
+          const { data: tableData, error } = await supabase
+            .from(selectedDataset)
+            .select("*")
+            .range(0, initialFetchLimit - 1);
 
-        if (error) throw error;
+          if (error) throw error;
+          return tableData;
+        });
 
-        if (tableData.length > 0) {
-          const filteredColumns = Object.keys(tableData[0]).filter(
+        if (dataResult && dataResult.length > 0) {
+          const filteredColumns = Object.keys(dataResult[0]).filter(
             col => !col.startsWith('md_')
           );
           setColumns(filteredColumns);
-          setData(tableData);
+          setData(dataResult);
         }
       } catch (error: any) {
+        console.error("Error fetching data:", error);
         toast({
           title: "Error fetching data",
           description: error.message,
           variant: "destructive",
         });
+        setData([]);
+        setColumns([]);
       } finally {
         setIsLoading(false);
       }
@@ -70,12 +93,16 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const start = page * itemsPerPage;
       const end = Math.min(start + itemsPerPage - 1, initialFetchLimit - 1);
       
-      const { data: pageData, error } = await supabase
-        .from(selectedDataset)
-        .select("*")
-        .range(start, end);
+      const { data: pageData, error } = await fetchWithRetry(async () => {
+        const response = await supabase
+          .from(selectedDataset)
+          .select("*")
+          .range(start, end);
+        
+        if (response.error) throw response.error;
+        return response;
+      });
       
-      if (error) throw error;
       return pageData;
     } catch (error: any) {
       toast({
