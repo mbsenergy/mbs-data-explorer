@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Database, Eye, Search } from "lucide-react";
+import { Database, Eye, Code } from "lucide-react";
 import { DatasetStats } from "./DatasetStats";
-import { DatasetHeader } from "./DatasetHeader";
 import { DatasetContent } from "./DatasetContent";
 import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
@@ -37,6 +36,7 @@ export const DatasetExplore = ({
     currentQuery
   } = useDatasetData(selectedDataset);
 
+  // Pre-select all columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -98,31 +98,31 @@ export const DatasetExplore = ({
             </p>
           )}
         </div>
-        <div className="space-x-2">
+        <div className="flex gap-2">
           {onLoad && (
             <>
               <Button 
                 variant="outline"
                 onClick={handleLoad}
-                className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+                className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30 flex items-center gap-2"
               >
-                <Database className="h-4 w-4 mr-2" />
+                <Database className="h-4 w-4" />
                 Retrieve
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => window.location.href = '#explore'}
-                className="bg-[#3B82F6]/20 hover:bg-[#3B82F6]/30"
+                className="bg-[#3B82F6]/20 hover:bg-[#3B82F6]/30 flex items-center gap-2"
               >
-                <Search className="h-4 w-4 mr-2" />
+                <Eye className="h-4 w-4" />
                 Explore
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => setShowQueryModal(true)}
-                className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 flex items-center gap-2"
               >
-                <Eye className="h-4 w-4 mr-2" />
+                <Code className="h-4 w-4" />
                 Show Query
               </Button>
             </>
