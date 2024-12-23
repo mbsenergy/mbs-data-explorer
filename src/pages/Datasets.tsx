@@ -36,13 +36,11 @@ const Datasets = () => {
 
   const handleLoad = async (tableName: string) => {
     try {
-      // First get the row count
       const { data: countData, error: countError } = await supabase
         .rpc('get_table_row_count', { table_name: tableName });
       
       if (countError) throw countError;
       
-      // Check if row count is within limit
       if (countData > 100000) {
         toast({
           variant: "destructive",
@@ -52,7 +50,6 @@ const Datasets = () => {
         return;
       }
 
-      // Fetch the full dataset
       const { data, error } = await supabase
         .from(tableName as any)
         .select("*");
@@ -76,83 +73,107 @@ const Datasets = () => {
   };
 
   const handlePreview = async (tableName: string) => {
-    const { data, error } = await supabase
-      .from(tableName as any)
-      .select("*")
-      .limit(30);
+    try {
+      const { data, error } = await supabase
+        .from(tableName as any)
+        .select("*")
+        .limit(30);
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      const previewRows = [...data.slice(0, 15), ...data.slice(-15)];
+      setPreviewData({
+        tableName,
+        data: JSON.stringify(previewRows, null, 2)
+      });
+    } catch (error: any) {
+      console.error("Error previewing dataset:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to preview dataset.",
+        description: "Failed to preview dataset."
       });
-      return;
     }
-
-    const previewRows = [...data.slice(0, 15), ...data.slice(-15)];
-    setPreviewData({
-      tableName,
-      data: JSON.stringify(previewRows, null, 2)
-    });
   };
 
   const handleDownload = async (tableName: string) => {
-    if (!user?.id) return;
-
-    // Track analytics
-    const { error: analyticsError } = await supabase
-      .from("analytics")
-      .insert({
-        user_id: user.id,
-        dataset_name: tableName,
-        is_custom_query: false,
-      });
-
-    if (analyticsError) {
-      console.error("Error tracking download:", analyticsError);
+    if (!user?.id || !selectedColumns.length) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to track download activity.",
+        description: "Please select at least one column to download.",
       });
       return;
     }
 
-    // Download data with selected columns and filters
-    const { data, error } = await supabase
-      .from(tableName as any)
-      .select(selectedColumns.join(','))
-      .limit(1000);
+    try {
+      // Track analytics first
+      const { error: analyticsError } = await supabase
+        .from("analytics")
+        .insert({
+          user_id: user.id,
+          dataset_name: tableName,
+          is_custom_query: false,
+        });
 
-    if (error) {
+      if (analyticsError) {
+        console.error("Error tracking download:", analyticsError);
+      }
+
+      // Fetch data with selected columns
+      const { data, error } = await supabase
+        .from(tableName as any)
+        .select(selectedColumns.join(','))
+        .limit(1000);
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data || !data.length) {
+        throw new Error("No data available for download");
+      }
+
+      // Create CSV content
+      const headers = selectedColumns.join(',');
+      const rows = data.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          // Handle special cases like numbers, nulls, and strings with commas
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
+      const csv = [headers, ...rows].join('\n');
+
+      // Create and trigger download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${tableName}_sample.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Dataset sample downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading dataset:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to download dataset.",
+        description: error.message || "Failed to download dataset.",
       });
-      return;
     }
-
-    const csv = [
-      selectedColumns.join(','),
-      ...data.map(row => selectedColumns.map(col => row[col]).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${tableName}_sample.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-
-    toast({
-      title: "Success",
-      description: "Dataset sample downloaded successfully.",
-    });
   };
 
   const filteredTables = tables?.filter(table => {
