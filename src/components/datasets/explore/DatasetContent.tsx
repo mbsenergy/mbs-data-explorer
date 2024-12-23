@@ -2,6 +2,7 @@ import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetPagination } from "./DatasetPagination";
+import type { TableNames } from "../types";
 
 interface DatasetContentProps {
   isLoading: boolean;
@@ -16,9 +17,9 @@ interface DatasetContentProps {
   onColumnChange: (value: string) => void;
   onColumnSelect: (column: string) => void;
   onPageChange: (page: number) => void;
-  onLoad?: (tableName: string) => void;
-  onDownload?: (tableName: string) => void;
-  selectedDataset: string | null;
+  onLoad?: (tableName: TableNames) => void;
+  onDownload?: (tableName: TableNames) => void;
+  selectedDataset: TableNames | null;
 }
 
 export const DatasetContent = ({
