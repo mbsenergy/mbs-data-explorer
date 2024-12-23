@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { DatasetActivity } from "@/components/datasets/DatasetActivity";
@@ -50,22 +50,18 @@ const Datasets = () => {
     }
   }, [tables]);
 
-  const filteredTables = tables?.filter(table => {
-    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
-    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
-    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
-    return matchesSearch && matchesField && matchesType && matchesFavorite;
-  });
-
   const handleSelect = (tableName: string) => {
-    setSelectedDataset(prevDataset => prevDataset === tableName ? "" : tableName);
-    
-    toast({
-      title: prevDataset => prevDataset === tableName ? "Dataset Unselected" : "Dataset Selected",
-      description: prevDataset => prevDataset === tableName 
-        ? `${tableName} has been unselected.`
-        : `${tableName} is now selected for exploration.`,
+    setSelectedDataset(prevDataset => {
+      const newDataset = prevDataset === tableName ? "" : tableName;
+      
+      toast({
+        title: newDataset ? "Dataset Selected" : "Dataset Unselected",
+        description: newDataset 
+          ? `${tableName} is now selected for exploration.`
+          : `${tableName} has been unselected.`
+      });
+      
+      return newDataset;
     });
   };
 
@@ -146,6 +142,14 @@ const Datasets = () => {
       data: JSON.stringify(previewRows, null, 2)
     });
   };
+
+  const filteredTables = tables?.filter(table => {
+    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
+    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
+    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
+    return matchesSearch && matchesField && matchesType && matchesFavorite;
+  });
 
   if (tablesLoading) {
     return (
