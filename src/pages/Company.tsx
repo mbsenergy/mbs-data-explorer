@@ -10,13 +10,13 @@ import {
   Briefcase,
   Building,
   Users,
-  Bank,
   Shield,
   Banknote,
   Globe,
   ChartBar,
   Monitor,
-  ChartLine
+  ChartLine,
+  Building2, // Replacement for Bank
 } from "lucide-react";
 
 const companies = [
@@ -39,7 +39,7 @@ const companies = [
     link: "https://www.cerved.com/en/about-us/companies/mbs/",
     services: [
       { name: "Insurance", icon: Shield },
-      { name: "Banking", icon: Bank },
+      { name: "Banking", icon: Building2 },
       { name: "Energy", icon: Sun },
       { name: "Risk Advisory", icon: ShieldCheck },
       { name: "Financial Services", icon: Banknote },
@@ -66,7 +66,7 @@ const companies = [
     link: "https://iongroup.com/",
     services: [
       { name: "Market Analytics", icon: ChartLine },
-      { name: "Core Banking", icon: Bank },
+      { name: "Core Banking", icon: Building2 },
       { name: "Analytics", icon: ChartBar },
       { name: "Corporate", icon: Users },
       { name: "Credit Information", icon: Database },
