@@ -123,7 +123,7 @@ const Developer = () => {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Developer Resources</h1>
+      <h1>Developer Resources</h1>
       
       <DeveloperActivity
         favorites={favorites}
