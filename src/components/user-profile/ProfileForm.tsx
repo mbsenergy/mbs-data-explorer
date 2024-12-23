@@ -22,9 +22,10 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Update form data when profile changes
   useEffect(() => {
+    console.log("Profile data received:", profile);
     if (profile) {
-      console.log("Setting initial form data from profile:", profile);
       setFormData({
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
@@ -34,7 +35,7 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
         country: profile.country || "",
       });
     }
-  }, [profile?.id, profile?.updated_at]); // Add dependencies to ensure form updates when profile changes
+  }, [profile]); // Only depend on profile to avoid unnecessary re-renders
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
