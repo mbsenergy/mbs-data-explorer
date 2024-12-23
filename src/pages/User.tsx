@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { MainInfoSection } from "@/components/user/MainInfoSection";
 import { ITSkillsSection } from "@/components/user/ITSkillsSection";
 import { PreferredDataSection } from "@/components/user/PreferredDataSection";
 import { SubscriptionsSection } from "@/components/user/SubscriptionsSection";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useProfile";
+import type { Profile } from "@/hooks/useProfile";
 
 const User = () => {
   const { user } = useAuth();
@@ -22,51 +23,23 @@ const User = () => {
     subscriptions: [] as string[],
   });
 
-  // Fetch user profile with proper error handling
-  const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['profile', user?.id],
-    queryFn: async () => {
-      console.log("Fetching profile for user:", user?.id);
-      if (!user?.id) throw new Error('No user ID available');
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-      
-      console.log("Fetched profile data:", data);
-      return data;
-    },
-    enabled: !!user?.id,
-    onSuccess: (data) => {
-      console.log("Setting form data with profile:", data);
-      if (data) {
-        setFormData({
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
-          date_of_birth: data.date_of_birth || '',
-          country: data.country || '',
-          company: data.company || '',
-          role: data.role || '',
-          it_skills: data.it_skills || [],
-          preferred_data: data.preferred_data || [],
-          subscriptions: data.subscriptions || [],
-        });
-      }
-    },
-    onError: (error) => {
-      console.error("Error in profile query:", error);
-      toast.error("Failed to load profile data");
-    }
-  });
+  const handleProfileLoaded = (data: Profile) => {
+    console.log("Setting form data with profile:", data);
+    setFormData({
+      first_name: data.first_name || '',
+      last_name: data.last_name || '',
+      date_of_birth: data.date_of_birth || '',
+      country: data.country || '',
+      company: data.company || '',
+      role: data.role || '',
+      it_skills: data.it_skills || [],
+      preferred_data: data.preferred_data || [],
+      subscriptions: data.subscriptions || [],
+    });
+  };
 
-  // Save profile changes
+  const { data: profile, isLoading, error } = useProfile(user?.id, handleProfileLoaded);
+
   const saveProfile = async () => {
     try {
       if (!user?.id) throw new Error('No user ID available');
@@ -108,12 +81,10 @@ const User = () => {
       
       if (uploadError) throw uploadError;
       
-      // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // Update profile with new avatar URL
       if (user?.id) {
         const { error: updateError } = await supabase
           .from('profiles')
