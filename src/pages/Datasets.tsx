@@ -10,6 +10,9 @@ import { DatasetSearch } from "@/components/datasets/DatasetSearch";
 import { DatasetExplore } from "@/components/datasets/DatasetExplore";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 const Datasets = () => {
   const { toast } = useToast();
@@ -21,7 +24,7 @@ const Datasets = () => {
   const [availableFields, setAvailableFields] = useState<string[]>([]);
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
-  const [selectedDataset, setSelectedDataset] = useState<string>("");
+  const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(null);
   const { favorites, toggleFavorite } = useFavorites();
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
@@ -52,7 +55,7 @@ const Datasets = () => {
 
   const handleSelect = (tableName: string) => {
     setSelectedDataset(prevDataset => {
-      const newDataset = prevDataset === tableName ? "" : tableName;
+      const newDataset = prevDataset === tableName ? null : tableName as TableNames;
       
       toast({
         title: newDataset ? "Dataset Selected" : "Dataset Unselected",
@@ -189,7 +192,7 @@ const Datasets = () => {
         onFavoriteChange={setShowOnlyFavorites}
         availableFields={availableFields}
         availableTypes={availableTypes}
-        selectedDataset={selectedDataset}
+        selectedDataset={selectedDataset || ""}
       />
 
       <DatasetExplore selectedDataset={selectedDataset} />

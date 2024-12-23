@@ -13,12 +13,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetExploreProps {
-  tableName: string;
+  selectedDataset: TableNames | null;
 }
 
-export const DatasetExplore = ({ tableName }: DatasetExploreProps) => {
+export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [columns, setColumns] = useState<string[]>([]);
@@ -27,8 +30,14 @@ export const DatasetExplore = ({ tableName }: DatasetExploreProps) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!selectedDataset) {
+        setData([]);
+        setColumns([]);
+        return;
+      }
+
       const { data: tableData, error } = await supabase
-        .from(tableName)
+        .from(selectedDataset)
         .select("*");
 
       if (error) {
@@ -46,7 +55,15 @@ export const DatasetExplore = ({ tableName }: DatasetExploreProps) => {
     };
 
     fetchData();
-  }, [tableName, toast]);
+  }, [selectedDataset, toast]);
+
+  if (!selectedDataset) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        Select a dataset to explore its data
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -90,16 +107,17 @@ export const DatasetExplore = ({ tableName }: DatasetExploreProps) => {
           {data
             .filter((item) =>
               selectedColumn
-                ? item[selectedColumn]
-                    .toString()
+                ? String(item[selectedColumn])
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase())
-                : true
+                : Object.values(item).some(value => 
+                    String(value).toLowerCase().includes(searchTerm.toLowerCase())
+                  )
             )
             .map((item, index) => (
               <TableRow key={index}>
                 {columns.map((col) => (
-                  <TableCell key={col}>{item[col]}</TableCell>
+                  <TableCell key={col}>{String(item[col])}</TableCell>
                 ))}
               </TableRow>
             ))}
