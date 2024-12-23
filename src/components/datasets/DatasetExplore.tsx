@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DatasetPagination } from "./explore/DatasetPagination";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -26,7 +26,9 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [selectedColumn, setSelectedColumn] = useState("");
   const [columns, setColumns] = useState<string[]>([]);
   const [data, setData] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
   const { toast } = useToast();
+  const itemsPerPage = 15;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,13 +51,35 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       } else {
         setData(tableData);
         if (tableData.length > 0) {
-          setColumns(Object.keys(tableData[0]));
+          // Filter out md_ columns
+          const filteredColumns = Object.keys(tableData[0]).filter(
+            col => !col.startsWith('md_')
+          );
+          setColumns(filteredColumns);
         }
       }
     };
 
     fetchData();
   }, [selectedDataset, toast]);
+
+  const filteredData = data.filter((item) =>
+    selectedColumn
+      ? String(item[selectedColumn])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : Object.entries(item)
+          .filter(([key]) => !key.startsWith('md_'))
+          .some(([_, value]) => 
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+          )
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
 
   return (
     <Card className="p-6 space-y-6">
@@ -95,34 +119,32 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((col) => (
-                  <TableHead key={col}>{col}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data
-                .filter((item) =>
-                  selectedColumn
-                    ? String(item[selectedColumn])
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
-                    : Object.values(item).some(value => 
-                        String(value).toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                )
-                .map((item, index) => (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {columns.map((col) => (
+                    <TableHead key={col}>{col}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((item, index) => (
                   <TableRow key={index}>
                     {columns.map((col) => (
                       <TableCell key={col}>{String(item[col])}</TableCell>
                     ))}
                   </TableRow>
                 ))}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
+          </div>
+
+          <DatasetPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </>
       )}
     </Card>
