@@ -94,11 +94,11 @@ export function AppSidebar() {
     <Sidebar className="bg-card border-r border-border/40">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start w-full">
             <img 
-              src="/lovable-uploads/c0a48577-6712-4384-bb87-4ccd77ad1a33.png" 
+              src="/lovable-uploads/3f6141cf-fb6f-44b6-8e3c-3b942c6352af.png" 
               alt="MBS Logo" 
-              className="h-8 w-auto object-contain"
+              className="w-full h-auto object-contain"
             />
             <span className="text-sm font-bold mt-3 text-muted-foreground">MBS Apps Suite</span>
           </div>

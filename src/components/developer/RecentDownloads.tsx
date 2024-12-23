@@ -61,6 +61,7 @@ export const RecentDownloads = ({
                       variant="outline"
                       size="sm"
                       onClick={() => onDownload(download.file_name, download.file_section)}
+                      className="hover:bg-[#4fd9e8]"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Sample
