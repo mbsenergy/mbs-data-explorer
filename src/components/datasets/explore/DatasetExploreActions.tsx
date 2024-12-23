@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Download, Database } from "lucide-react";
+import { Download, Database, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -72,10 +72,20 @@ export const DatasetExploreActions = ({
         size="sm"
         onClick={onExport}
         disabled={isLoading}
-        className="bg-[#F2C94C]/20 hover:bg-[#F2C94C]/30 text-[#F2C94C] hover:text-[#F2C94C] border-[#F2C94C]"
+        className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
       >
         <Download className="h-4 w-4 mr-2" />
         Export
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onShowQuery}
+        disabled={isLoading}
+        className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+      >
+        <Code className="h-4 w-4 mr-2" />
+        Show Query
       </Button>
     </div>
   );

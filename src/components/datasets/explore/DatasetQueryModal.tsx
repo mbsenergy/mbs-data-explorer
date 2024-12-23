@@ -23,12 +23,22 @@ export const DatasetQueryModal = ({
 }: DatasetQueryModalProps) => {
   const { toast } = useToast();
 
-  const handleCopy = async (text: string, type: 'query' | 'api') => {
+  const pythonApiCall = `import os
+from supabase import create_client, Client
+
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_ANON_KEY")
+supabase: Client = create_client(url, key)
+
+${apiCall.replace('await supabase', 'response = supabase').replace(/\n\s+/g, '\n')}
+data = response.execute()`
+
+  const handleCopy = async (text: string, type: 'query' | 'api' | 'python') => {
     try {
       await navigator.clipboard.writeText(text);
       toast({
         title: "Copied!",
-        description: `${type === 'query' ? 'SQL query' : 'API call'} copied to clipboard`,
+        description: `${type === 'query' ? 'SQL query' : type === 'api' ? 'API call' : 'Python code'} copied to clipboard`,
       });
     } catch (err) {
       toast({
@@ -65,7 +75,7 @@ export const DatasetQueryModal = ({
           </div>
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="font-semibold">API Call:</p>
+              <p className="font-semibold">JavaScript API Call:</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -78,6 +88,23 @@ export const DatasetQueryModal = ({
             </div>
             <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
               {apiCall}
+            </pre>
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <p className="font-semibold">Python API Call:</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleCopy(pythonApiCall, 'python')}
+                className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Python Code
+              </Button>
+            </div>
+            <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
+              {pythonApiCall}
             </pre>
           </div>
         </div>
