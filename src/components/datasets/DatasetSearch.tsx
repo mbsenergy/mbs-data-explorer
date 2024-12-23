@@ -21,6 +21,7 @@ interface DatasetSearchProps {
   availableFields: string[];
   availableTypes: string[];
   selectedDataset?: string;
+  onLoad?: (tableName: string) => void;
 }
 
 export const DatasetSearch = ({ 
@@ -36,7 +37,8 @@ export const DatasetSearch = ({
   onFavoriteChange,
   availableFields,
   availableTypes,
-  selectedDataset
+  selectedDataset,
+  onLoad
 }: DatasetSearchProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
 
@@ -91,6 +93,7 @@ export const DatasetSearch = ({
               onToggleFavorite={onToggleFavorite}
               favorites={favorites}
               selectedDataset={selectedDataset}
+              onLoad={onLoad}
             />
           </div>
         </CollapsibleContent>
