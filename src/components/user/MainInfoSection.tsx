@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, LogOut } from "lucide-react";
+import { Camera, LogOut, Save } from "lucide-react";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 
 interface MainInfoSectionProps {
@@ -13,6 +13,8 @@ interface MainInfoSectionProps {
   setFormData: (data: any) => void;
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleLogout: () => void;
+  handleSave: () => void;
+  isSaving?: boolean;
 }
 
 export const MainInfoSection = ({
@@ -21,7 +23,9 @@ export const MainInfoSection = ({
   formData,
   setFormData,
   handleImageUpload,
-  handleLogout
+  handleLogout,
+  handleSave,
+  isSaving = false
 }: MainInfoSectionProps) => {
   return (
     <CollapsibleCard title="Main Information" defaultOpen={true}>
@@ -110,10 +114,16 @@ export const MainInfoSection = ({
           </div>
         </div>
 
-        <Button variant="outline" onClick={handleLogout} type="button">
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={handleLogout} type="button">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            <Save className="mr-2 h-4 w-4" />
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
       </div>
     </CollapsibleCard>
   );

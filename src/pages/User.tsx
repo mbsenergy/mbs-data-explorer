@@ -11,6 +11,7 @@ import type { Profile } from "@/hooks/useProfile";
 
 const User = () => {
   const { user } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -42,6 +43,7 @@ const User = () => {
 
   const saveProfile = async () => {
     try {
+      setIsSaving(true);
       if (!user?.id) throw new Error('No user ID available');
 
       const { error } = await supabase
@@ -64,6 +66,8 @@ const User = () => {
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -73,7 +77,7 @@ const User = () => {
       
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const filePath = `${user?.id}.${fileExt}`;
+      const filePath = `${user?.id}/avatar.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -118,15 +122,10 @@ const User = () => {
         ? currentValues.filter(v => v !== value)
         : [...currentValues, value];
       
-      const newFormData = {
+      return {
         ...prev,
         [field]: newValues
       };
-      
-      // Save changes immediately
-      saveProfile();
-      
-      return newFormData;
     });
   };
 
@@ -157,6 +156,8 @@ const User = () => {
         setFormData={setFormData}
         handleImageUpload={handleImageUpload}
         handleLogout={handleLogout}
+        handleSave={saveProfile}
+        isSaving={isSaving}
       />
       <ITSkillsSection 
         formData={formData}
