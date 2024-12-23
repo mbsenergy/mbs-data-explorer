@@ -36,7 +36,6 @@ export const DatasetExplore = ({
     currentQuery
   } = useDatasetData(selectedDataset);
 
-  // Pre-select all columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -137,22 +136,28 @@ export const DatasetExplore = ({
         lastUpdate={data[0]?.md_last_update || null}
       />
 
-      <DatasetContent
-        isLoading={isLoading}
-        columns={columns}
-        searchTerm={searchTerm}
-        selectedColumn={selectedColumn}
-        selectedColumns={selectedColumns}
-        paginatedData={paginatedData}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onSearchChange={setSearchTerm}
-        onColumnChange={setSelectedColumn}
-        onColumnSelect={handleColumnSelect}
-        onPageChange={handlePageChange}
-        onLoad={onLoad}
-        selectedDataset={selectedDataset}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <p>Loading dataset...</p>
+        </div>
+      ) : (
+        <DatasetContent
+          isLoading={isLoading}
+          columns={columns}
+          searchTerm={searchTerm}
+          selectedColumn={selectedColumn}
+          selectedColumns={selectedColumns}
+          paginatedData={paginatedData}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onSearchChange={setSearchTerm}
+          onColumnChange={setSelectedColumn}
+          onColumnSelect={handleColumnSelect}
+          onPageChange={handlePageChange}
+          onLoad={onLoad}
+          selectedDataset={selectedDataset}
+        />
+      )}
 
       <DatasetQueryModal
         isOpen={showQueryModal}
