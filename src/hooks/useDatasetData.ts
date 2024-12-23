@@ -57,7 +57,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       setColumns(columnsToUse);
 
-      // Fetch data with selected columns - removed 1000 limit
+      console.log('Loading full dataset with columns:', columnsToUse);
+
+      // Fetch all data with selected columns - no limit
       const { data: tableData, error } = await supabase
         .from(tableName)
         .select(columnsToUse.join(','));
@@ -65,6 +67,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (error) throw error;
       
       if (tableData) {
+        console.log(`Loaded ${tableData.length} rows successfully`);
         setData(tableData);
         toast({
           title: "Success",
@@ -109,7 +112,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         const availableColumns = await fetchColumns(selectedDataset);
         setColumns(availableColumns);
 
-        // Fetch initial chunk for preview
+        // Fetch initial preview data
         const { data: initialData, error: initialError } = await supabase
           .from(selectedDataset)
           .select(availableColumns.join(','))
