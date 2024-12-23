@@ -66,8 +66,6 @@ export const DatasetExplore = ({
     });
   };
 
-  const filteredData = filterData(data);
-
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       await loadData(selectedDataset);
@@ -78,11 +76,11 @@ export const DatasetExplore = ({
   };
 
   const handleSample = async () => {
-    if (!selectedDataset || !user?.id) {
+    if (!selectedDataset || !user?.id || !selectedColumns.length) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a dataset to download.",
+        description: "Please select at least one column to download.",
       });
       return;
     }
@@ -154,6 +152,7 @@ export const DatasetExplore = ({
     }
   };
 
+  const filteredData = filterData(data);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
     currentPage * itemsPerPage,

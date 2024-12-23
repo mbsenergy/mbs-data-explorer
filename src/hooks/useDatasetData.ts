@@ -112,11 +112,10 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         const availableColumns = await fetchColumns(selectedDataset);
         setColumns(availableColumns);
 
-        // Fetch initial preview data
+        // Fetch initial data without limit
         const { data: initialData, error: initialError } = await supabase
           .from(selectedDataset)
-          .select(availableColumns.join(','))
-          .limit(10);
+          .select(availableColumns.join(','));
 
         if (initialError) throw initialError;
         
