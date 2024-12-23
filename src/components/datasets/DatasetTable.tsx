@@ -13,6 +13,7 @@ interface DatasetTableProps {
   onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
   favorites: Set<string>;
+  selectedDataset?: string;
 }
 
 export const DatasetTable = ({ 
@@ -21,7 +22,8 @@ export const DatasetTable = ({
   onDownload, 
   onSelect,
   onToggleFavorite,
-  favorites
+  favorites,
+  selectedDataset
 }: DatasetTableProps) => {
   const [currentPage, setCurrentPage] = React.useState(0);
   const [pageInput, setPageInput] = React.useState("");
@@ -85,6 +87,7 @@ export const DatasetTable = ({
                 onSelect={onSelect}
                 onToggleFavorite={onToggleFavorite}
                 isFavorite={favorites.has(table.tablename)}
+                isSelected={selectedDataset === table.tablename}
               />
             ))}
           </TableBody>

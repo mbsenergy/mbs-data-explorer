@@ -12,6 +12,7 @@ interface DatasetTableRowProps {
   onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
   isFavorite: boolean;
+  isSelected?: boolean;
 }
 
 export const DatasetTableRow = ({ 
@@ -20,7 +21,8 @@ export const DatasetTableRow = ({
   onDownload, 
   onSelect,
   onToggleFavorite,
-  isFavorite 
+  isFavorite,
+  isSelected 
 }: DatasetTableRowProps) => {
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
   const match = table.tablename.match(/^([A-Z]{2})(\d+)_(.+)/);
@@ -53,10 +55,12 @@ export const DatasetTableRow = ({
           <Button
             variant="outline"
             size="sm"
-            className="bg-corporate-blue hover:bg-corporate-blue/90 text-white"
+            className={isSelected ? 
+              "bg-corporate-navy text-white hover:bg-corporate-navy/90" : 
+              "bg-corporate-blue hover:bg-corporate-blue/90 text-white"}
             onClick={() => onSelect(table.tablename)}
           >
-            Select
+            {isSelected ? "Selected" : "Select"}
           </Button>
           <Button
             variant="outline"
