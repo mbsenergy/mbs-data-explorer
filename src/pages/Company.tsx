@@ -16,14 +16,14 @@ import {
   ChartBar,
   Monitor,
   ChartLine,
-  Building2, // Replacement for Bank
+  Building2,
 } from "lucide-react";
 
 const companies = [
   {
     name: "Energy",
     description: "Explore our comprehensive energy market data and analytics platform, designed to help businesses make informed decisions in the evolving energy landscape.",
-    link: "https://www.cerved.com/en/offering/energy/",
+    link: "https://mbsconsulting.ref-e.com/",
     services: [
       { name: "Strategy & Asset Valuation", icon: LineChart },
       { name: "Osservatorio energia", icon: Sun },
@@ -36,7 +36,7 @@ const companies = [
   {
     name: "MBS Consulting",
     description: "Discover how our consulting services can help transform your business through strategic insights and innovative solutions.",
-    link: "https://www.cerved.com/en/about-us/companies/mbs/",
+    link: "https://www.mbsconsulting.com/",
     services: [
       { name: "Insurance", icon: Shield },
       { name: "Banking", icon: Building2 },
@@ -51,7 +51,7 @@ const companies = [
   {
     name: "Cerved Group",
     description: "Learn more about Cerved Group's comprehensive business information services and credit management solutions.",
-    link: "https://company.cerved.com/",
+    link: "https://www.cerved.com/",
     services: [
       { name: "Cerved", icon: Globe },
       { name: "Rating Agency", icon: ChartBar },
@@ -63,7 +63,7 @@ const companies = [
   {
     name: "ION Group",
     description: "Explore ION Group's trading and workflow solutions that power financial institutions worldwide.",
-    link: "https://iongroup.com/",
+    link: "https://iongroup.com/markets/",
     services: [
       { name: "Market Analytics", icon: ChartLine },
       { name: "Core Banking", icon: Building2 },
