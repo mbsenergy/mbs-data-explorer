@@ -143,7 +143,7 @@ const User = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">User Profile</h1>
+      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">User Profile</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <MainInfoSection

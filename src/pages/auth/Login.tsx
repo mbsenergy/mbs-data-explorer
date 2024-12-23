@@ -67,12 +67,21 @@ const Login = () => {
       {/* Animated background shapes */}
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-corporate-blue rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" />
       <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-corporate-teal rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ animationDelay: "2s" }} />
+
+      {/* New logo above the card */}
+      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 mb-6">
+        <img 
+          src="/brand/mbs_logo.png" 
+          alt="MBS Logo" 
+          className="h-20"
+        />
+      </div>
       
       <Card className="w-full max-w-md p-8 metallic-card relative z-10 shimmer">
         <div className="space-y-6">
           <div className="flex flex-col items-center space-y-2">
             <img 
-              src="/lovable-uploads/35828a09-e852-4dd8-a4ac-0fa3026f7be4.png" 
+              src="/brand/flux_logo_02.png" 
               alt="Flux Logo" 
               className="h-16 mb-4 animate-float"
             />
@@ -80,7 +89,7 @@ const Login = () => {
               Welcome back
             </h1>
             <p className="text-sm text-muted-foreground">
-              Enter your credentials to access your account
+              Enter your company credentials to access the platform
             </p>
           </div>
 

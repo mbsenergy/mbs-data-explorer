@@ -168,7 +168,7 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Analytics</h1>
+      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-500">Analytics</h1>
 
       <StatsCards
         lastConnection={lastConnection}

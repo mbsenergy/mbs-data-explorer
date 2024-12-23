@@ -17,7 +17,6 @@ type TableNames = keyof SupabaseDatabase['public']['Tables'];
 
 const Datasets = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedField, setSelectedField] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -198,7 +197,7 @@ const Datasets = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Datasets</h1>
+      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">Datasets</h1>
       
       <Tabs defaultValue="explore" className="space-y-6">
         <TabsList>

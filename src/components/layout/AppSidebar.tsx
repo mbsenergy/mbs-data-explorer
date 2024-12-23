@@ -95,10 +95,11 @@ export function AppSidebar() {
           <div className="flex flex-col items-start w-full">
             <img 
               src="/lovable-uploads/88640253-153d-45f4-b40a-7875ad3c91f1.png" 
+              src="/brand/flux_logo_01.png" 
               alt="Flux Logo" 
               className="w-full h-auto object-contain px-2"
             />
-            <span className="text-sm font-bold mt-3 text-muted-foreground">MBS BUSINESS APP SUITES</span>
+            <span className="text-sm font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500">MBS BUSINESS APP SUITES</span>
           </div>
         </div>
       </SidebarHeader>

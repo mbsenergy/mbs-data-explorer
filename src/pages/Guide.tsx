@@ -18,7 +18,7 @@ const Guide = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Guide</h1>
+        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">Guide</h1>
         <Button 
           onClick={handleMailClick}
           variant="outline"

@@ -7,12 +7,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { DocumentCard } from "./DocumentCard";
+import { Card } from "@/components/ui/card";
 import { useLatestDocuments } from "@/hooks/useLatestDocuments";
 
 export const LatestDocuments = () => {
   const { data: latestDocs, isLoading: docsLoading } = useLatestDocuments();
 
   return (
+    <Card className="p-8">
     <div className="space-y-1">
       <h2 className="text-2xl font-semibold">Latest Documents</h2>
       <div className="w-full">
@@ -48,5 +50,6 @@ export const LatestDocuments = () => {
         )}
       </div>
     </div>
+    </Card>
   );
 };
