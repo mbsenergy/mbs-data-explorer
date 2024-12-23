@@ -99,7 +99,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           .select('md_last_update')
           .order('md_last_update', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (!error && data) {
           setLastUpdate(data.md_last_update);
