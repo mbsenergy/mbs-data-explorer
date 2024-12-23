@@ -34,14 +34,42 @@ export const DatasetOverview = ({
     queryKey: ['recentDownloads', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const { data, error } = await supabase
-        .from('analytics')
-        .select('dataset_name, downloaded_at')
-        .eq('user_id', user.id)
-        .order('downloaded_at', { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data;
+      
+      // Get both analytics and exports data
+      const [analyticsResponse, exportsResponse] = await Promise.all([
+        supabase
+          .from('analytics')
+          .select('dataset_name, downloaded_at')
+          .eq('user_id', user.id)
+          .order('downloaded_at', { ascending: false }),
+        supabase
+          .from('exports')
+          .select('export_name, downloaded_at')
+          .eq('user_id', user.id)
+          .order('downloaded_at', { ascending: false })
+      ]);
+
+      if (analyticsResponse.error) throw analyticsResponse.error;
+      if (exportsResponse.error) throw exportsResponse.error;
+
+      // Combine and format the data
+      const combinedData = [
+        ...analyticsResponse.data.map(item => ({
+          dataset_name: item.dataset_name,
+          downloaded_at: item.downloaded_at,
+          type: 'sample'
+        })),
+        ...exportsResponse.data.map(item => ({
+          dataset_name: item.export_name,
+          downloaded_at: item.downloaded_at,
+          type: 'export'
+        }))
+      ];
+
+      // Sort by downloaded_at and take the 5 most recent
+      return combinedData
+        .sort((a, b) => new Date(b.downloaded_at).getTime() - new Date(a.downloaded_at).getTime())
+        .slice(0, 5);
     },
     enabled: !!user?.id,
   });

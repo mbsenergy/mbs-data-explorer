@@ -69,31 +69,17 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     if (!selectedDataset) return;
 
     try {
-      // First try with md_last_update
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from(selectedDataset as TableNames)
         .select('md_last_update')
         .order('md_last_update', { ascending: false })
         .limit(1);
 
-      // If that fails, try with md_update
-      if (error) {
-        const response = await supabase
-          .from(selectedDataset as TableNames)
-          .select('md_update')
-          .order('md_update', { ascending: false })
-          .limit(1);
-          
-        if (!response.error && response.data && response.data.length > 0) {
-          setLastUpdate(response.data[0].md_update);
-          return;
-        }
-      } else if (data && data.length > 0 && data[0].md_last_update) {
+      if (!error && data && data.length > 0 && data[0].md_last_update) {
         setLastUpdate(data[0].md_last_update);
-        return;
+      } else {
+        setLastUpdate(null);
       }
-
-      setLastUpdate(null);
     } catch (error) {
       console.error('Error fetching last update:', error);
       setLastUpdate(null);
