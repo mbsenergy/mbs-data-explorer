@@ -34,7 +34,7 @@ export const Navbar = () => {
   return (
     <nav className="h-16 border-b border-border/40 bg-card">
       <div className="container flex h-full items-center">
-        {/* Welcome message */}
+        {/* Welcome message - now always visible */}
         <div className="hidden md:block">
           <span className="text-sm text-muted-foreground">
             Welcome back{" "}
@@ -46,17 +46,24 @@ export const Navbar = () => {
 
         <div className="flex-1" />
 
-        {/* Help button */}
-        <Button variant="ghost" size="icon" className="mr-2" asChild>
+        {/* Help button - updated hover color */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="mr-2 hover:bg-[#4fd9e8] hover:text-white" 
+          asChild
+        >
           <Link to="/guide">
             <HelpCircle className="h-5 w-5" />
           </Link>
         </Button>
 
-        {/* Notifications */}
-        <NotificationBell />
+        {/* Notifications - updated hover color */}
+        <div className="mr-2">
+          <NotificationBell />
+        </div>
 
-        {/* Avatar with Dropdown */}
+        {/* Avatar with Dropdown - always visible */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 cursor-pointer">
@@ -69,20 +76,23 @@ export const Navbar = () => {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem asChild>
+          <DropdownMenuContent 
+            align="end" 
+            className="w-40 bg-card hover:bg-[#4fd9e8]"
+          >
+            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8]">
               <Link to="/" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8]">
               <Link to="/user" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>User</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8]">
               <Link to="/settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
