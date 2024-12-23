@@ -49,21 +49,17 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
       console.log("User ID:", userId);
       console.log("Form data to be sent:", formData);
       
-      const updateData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        date_of_birth: formData.date_of_birth || null,
-        role: formData.role,
-        company: formData.company,
-        country: formData.country,
-        updated_at: new Date().toISOString(),
-      };
-
-      console.log("Formatted update data:", updateData);
-
       const { data, error } = await supabase
         .from("profiles")
-        .update(updateData)
+        .update({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          date_of_birth: formData.date_of_birth || null,
+          role: formData.role,
+          company: formData.company,
+          country: formData.country,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", userId)
         .select();
 
