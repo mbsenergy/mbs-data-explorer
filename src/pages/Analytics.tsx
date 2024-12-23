@@ -50,6 +50,7 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
+  // Use the same query key and structure as Navbar
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -71,6 +72,12 @@ const Analytics = () => {
       return data;
     },
     enabled: !!user?.id,
+    staleTime: Infinity, // Never mark the data as stale
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    retry: 2,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
