@@ -50,6 +50,27 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange]);
 
+  const filteredData = data.filter((item) => {
+    const matches = selectedColumn
+      ? String(item[selectedColumn])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : Object.entries(item)
+          .filter(([key]) => !key.startsWith('md_'))
+          .some(([_, value]) => 
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+          );
+    
+    console.log('Filtering item:', { 
+      item, 
+      selectedColumn, 
+      searchTerm, 
+      matches 
+    });
+    
+    return matches;
+  });
+
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       await loadData(selectedDataset);
@@ -58,18 +79,6 @@ export const DatasetExplore = ({
       }
     }
   };
-
-  const filteredData = data.filter((item) =>
-    selectedColumn
-      ? String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      : Object.entries(item)
-          .filter(([key]) => !key.startsWith('md_'))
-          .some(([_, value]) => 
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
-          )
-  );
 
   const handleSample = async () => {
     if (!selectedDataset || !user?.id || !selectedColumns.length) {
@@ -82,6 +91,13 @@ export const DatasetExplore = ({
     }
 
     try {
+      console.log('Starting sample download with:', {
+        filteredDataCount: filteredData.length,
+        selectedColumns,
+        searchTerm,
+        selectedColumn
+      });
+
       // Track analytics first
       const { error: analyticsError } = await supabase
         .from("analytics")
@@ -97,8 +113,9 @@ export const DatasetExplore = ({
 
       // Create CSV content from the filtered data
       const headers = selectedColumns.join(',');
-      const rows = filteredData.map(row => 
-        selectedColumns.map(col => {
+      const rows = filteredData.map(row => {
+        console.log('Processing row for CSV:', row);
+        return selectedColumns.map(col => {
           const value = row[col];
           // Handle special cases like numbers, nulls, and strings with commas
           if (value === null) return '';
@@ -106,9 +123,15 @@ export const DatasetExplore = ({
             return `"${value}"`;
           }
           return value;
-        }).join(',')
-      );
+        }).join(',');
+      });
       const csv = [headers, ...rows].join('\n');
+
+      console.log('Generated CSV:', {
+        headerCount: headers.split(',').length,
+        rowCount: rows.length,
+        sampleFirstRow: rows[0]
+      });
 
       // Create and trigger download
       const blob = new Blob([csv], { type: 'text/csv' });
