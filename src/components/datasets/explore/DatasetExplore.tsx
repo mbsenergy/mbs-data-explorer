@@ -37,6 +37,7 @@ export const DatasetExplore = ({
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const itemsPerPage = 10;
 
   const {
@@ -55,6 +56,12 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange]);
 
+  useEffect(() => {
+    // Reset filtered data when raw data changes
+    setFilteredData(data);
+    setShouldApplyFilters(false);
+  }, [data]);
+
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       await loadData(selectedDataset);
@@ -62,19 +69,13 @@ export const DatasetExplore = ({
         onLoad(selectedDataset);
       }
       setShouldApplyFilters(false);
+      setFilteredData(data);
     }
   };
 
   const compareValues = (itemValue: any, filterValue: string, operator: string): boolean => {
-    // Convert to lowercase strings for comparison if they're strings
     const normalizedItemValue = String(itemValue).toLowerCase();
     const normalizedFilterValue = filterValue.toLowerCase();
-
-    console.log('Comparing:', {
-      itemValue: normalizedItemValue,
-      filterValue: normalizedFilterValue,
-      operator
-    });
 
     switch (operator) {
       case '=':
@@ -100,28 +101,15 @@ export const DatasetExplore = ({
     }
   };
 
-  const filterData = (data: any[]) => {
-    if (!shouldApplyFilters) return data;
-
-    console.log('Filtering data with filters:', filters);
-
-    return data.filter((item) =>
+  const applyFilters = (dataToFilter: any[]) => {
+    return dataToFilter.filter((item) =>
       filters.reduce((pass, filter, index) => {
-        // Skip empty filters
         if (!filter.searchTerm || !filter.selectedColumn) {
           return index === 0 ? true : pass;
         }
 
         const itemValue = item[filter.selectedColumn];
         const matches = compareValues(itemValue, filter.searchTerm, filter.comparisonOperator);
-
-        console.log('Filter result:', {
-          column: filter.selectedColumn,
-          itemValue,
-          searchTerm: filter.searchTerm,
-          operator: filter.comparisonOperator,
-          matches
-        });
 
         if (index === 0) return matches;
         return filter.operator === 'AND' ? pass && matches : pass || matches;
@@ -172,11 +160,16 @@ export const DatasetExplore = ({
   };
 
   const handleApplyFilters = () => {
-    console.log('Applying filters:', filters);
+    const newFilteredData = applyFilters(data);
+    setFilteredData(newFilteredData);
     setShouldApplyFilters(true);
+    setCurrentPage(0); // Reset to first page when applying filters
   };
 
-  const filteredData = filterData(data);
+  const paginatedData = filteredData.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
 
   return (
     <Card className="p-6 space-y-6">
@@ -251,10 +244,7 @@ export const DatasetExplore = ({
 
           <DatasetTable
             columns={columns}
-            data={filteredData.slice(
-              currentPage * itemsPerPage,
-              (currentPage + 1) * itemsPerPage
-            )}
+            data={paginatedData}
             selectedColumns={selectedColumns}
           />
 
