@@ -60,7 +60,7 @@ export const DeveloperCard = ({
                 variant="outline" 
                 size="sm"
                 onClick={() => onDownload(name, section)}
-                className="shrink-0"
+                className="shrink-0 hover:bg-[#4fd9e8]"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Sample

@@ -18,7 +18,6 @@ const Developer = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Fetch files from all sections
   const results = sections.map(section => {
     const { data: files } = useDeveloperFiles(section);
     return files || [];
@@ -101,16 +100,13 @@ const Developer = () => {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Developer Resources</h1>
       
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Activity</h2>
-        <DeveloperActivity
-          favorites={favorites}
-          files={results}
-          onPreview={handlePreview}
-          onDownload={handleDownload}
-          onToggleFavorite={toggleFavorite}
-        />
-      </div>
+      <DeveloperActivity
+        favorites={favorites}
+        files={results}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
+        onToggleFavorite={toggleFavorite}
+      />
 
       <DeveloperSearch
         onSearchChange={setSearchTerm}

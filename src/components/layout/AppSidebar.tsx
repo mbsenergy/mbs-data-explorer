@@ -113,7 +113,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
+                    className={isActive(item.url) ? "bg-muted text-[#4fd9e8] font-medium" : "hover:bg-muted/50"}
                   >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
