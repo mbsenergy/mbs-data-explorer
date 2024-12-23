@@ -21,7 +21,7 @@ export const FavoriteResources = ({
 }: FavoriteResourcesProps) => {
   return (
     <div className="space-y-4 p-4 border border-[hsl(217,100%,15%)] rounded-lg bg-card/50">
-      <h2 className="text-2xl font-semibold gradient-heading">Favorite Resources</h2>
+      <h2 className="text-2xl font-semibold text-white">Favorite Resources</h2>
       <Table>
         <TableHeader>
           <TableRow>

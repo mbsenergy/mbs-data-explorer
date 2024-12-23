@@ -7,6 +7,7 @@ const Guide = () => {
   const { toast } = useToast();
 
   const handleMailClick = () => {
+    // Open default mail client with pre-filled subject
     window.location.href = "mailto:support@fluxdataplatform.com?subject=Flux Data Platform Support Request";
     toast({
       title: "Opening mail client",
@@ -17,7 +18,7 @@ const Guide = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold gradient-heading">Guide</h1>
+        <h1 className="text-3xl font-bold">Guide</h1>
         <Button 
           onClick={handleMailClick}
           variant="outline"
@@ -29,10 +30,10 @@ const Guide = () => {
       </div>
 
       <Card className="p-6 bg-card">
-        <h2 className="text-xl font-semibold mb-4 gradient-heading">Documentation</h2>
+        <h2 className="text-xl font-semibold mb-4">Documentation</h2>
         <div className="space-y-6 text-muted-foreground">
           <section className="space-y-4">
-            <h3 className="text-lg font-medium gradient-heading">Overview</h3>
+            <h3 className="text-lg font-medium text-foreground">Overview</h3>
             <p>
               Welcome to the Flux Data Platform! This platform provides comprehensive access to various datasets and analytical tools:
             </p>
@@ -45,7 +46,7 @@ const Guide = () => {
           </section>
 
           <section className="space-y-4">
-            <h3 className="text-lg font-medium gradient-heading">Key Features</h3>
+            <h3 className="text-lg font-medium text-foreground">Key Features</h3>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Interactive Visualizations:</strong> Explore data through dynamic charts and graphs.</li>
               <li><strong>Data Downloads:</strong> Export filtered datasets for further analysis.</li>
@@ -55,7 +56,7 @@ const Guide = () => {
           </section>
 
           <section className="space-y-4">
-            <h3 className="text-lg font-medium gradient-heading">Getting Started</h3>
+            <h3 className="text-lg font-medium text-foreground">Getting Started</h3>
             <p>
               To begin using the platform:
             </p>

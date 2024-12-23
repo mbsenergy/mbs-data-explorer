@@ -53,14 +53,14 @@ data = response.execute()`
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="gradient-heading text-2xl">
+          <DialogTitle className="text-transparent bg-clip-text bg-gradient-to-r from-[#4fd9e8] to-[#4DC3D7] text-2xl font-bold">
             Current Query
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="gradient-heading">
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#4fd9e8] to-[#4DC3D7] font-semibold">
                 SQL Query:
               </p>
               <Button
@@ -79,7 +79,7 @@ data = response.execute()`
           </div>
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="gradient-heading">
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#4fd9e8] to-[#4DC3D7] font-semibold">
                 Python API Call:
               </p>
               <Button

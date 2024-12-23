@@ -5,7 +5,7 @@ import { MarketOverview } from "@/components/dashboard/MarketOverview";
 const Dashboard = () => {
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold gradient-heading">Dashboard</h1>
+      <h1 className="text-3xl font-bold">Dashboard</h1>
       <LatestDocuments />
       <MarketOverview />
       <KnowMoreSection />

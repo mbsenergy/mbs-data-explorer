@@ -45,7 +45,7 @@ export const DeveloperSection = ({
 
   return (
     <div className="space-y-1">
-      <h2 className="text-2xl font-semibold capitalize gradient-heading">{section}</h2>
+      <h2 className="text-2xl font-semibold capitalize">{section}</h2>
       <div className="w-full">
         {isLoading ? (
           <Skeleton className="h-[200px] w-full" />
