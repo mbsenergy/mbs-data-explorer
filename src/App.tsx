@@ -9,6 +9,7 @@ import { RequireAuth } from "./components/auth/RequireAuth";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
 import Datasets from "./pages/Datasets";
+import QueryExport from "./pages/QueryExport";
 import Analytics from "./pages/Analytics";
 import Company from "./pages/Company";
 import Settings from "./pages/Settings";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="scenario" element={<Scenario />} />
               <Route path="osservatorio" element={<Osservatorio />} />
               <Route path="datasets" element={<Datasets />} />
+              <Route path="query-export" element={<QueryExport />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="company" element={<Company />} />
               <Route path="settings" element={<Settings />} />
