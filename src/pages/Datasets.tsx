@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { DatasetOverview } from "@/components/datasets/DatasetOverview";
 import { useFavorites } from "@/hooks/useFavorites";
 import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 const Datasets = () => {
   const { favorites, toggleFavorite } = useFavorites();
@@ -17,7 +20,7 @@ const Datasets = () => {
     },
   });
 
-  const handlePreview = async (tableName: string) => {
+  const handlePreview = async (tableName: TableNames) => {
     try {
       const { data, error } = await supabase
         .from(tableName)
@@ -33,7 +36,7 @@ const Datasets = () => {
     }
   };
 
-  const handleDownload = async (tableName: string) => {
+  const handleDownload = async (tableName: TableNames) => {
     try {
       const { data, error } = await supabase
         .from(tableName)

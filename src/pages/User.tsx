@@ -36,21 +36,23 @@ const User = () => {
       return data;
     },
     enabled: !!user?.id,
-    onSuccess: (data) => {
-      if (data) {
-        setFormData({
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
-          date_of_birth: data.date_of_birth || '',
-          country: data.country || '',
-          company: data.company || '',
-          role: data.role || '',
-          it_skills: data.it_skills || [],
-          preferred_data: data.preferred_data || [],
-          subscriptions: data.subscriptions || [],
-        });
+    meta: {
+      onSettled: (data: any) => {
+        if (data) {
+          setFormData({
+            first_name: data.first_name || '',
+            last_name: data.last_name || '',
+            date_of_birth: data.date_of_birth || '',
+            country: data.country || '',
+            company: data.company || '',
+            role: data.role || '',
+            it_skills: data.it_skills || [],
+            preferred_data: data.preferred_data || [],
+            subscriptions: data.subscriptions || [],
+          });
+        }
       }
-    },
+    }
   });
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -84,7 +84,10 @@ export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: Downl
                   currentData.map((item) => {
                     const info = getDatasetInfo 
                       ? getDatasetInfo(item.dataset_name)
-                      : { type: item.file_section, tags: [item.file_name.split('.').pop()] };
+                      : { 
+                          type: item.file_section, 
+                          tags: item.file_name ? [item.file_name.split('.').pop()] : []
+                        };
                     
                     return (
                       <TableRow key={item.id}>
