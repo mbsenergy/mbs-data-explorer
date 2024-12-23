@@ -61,50 +61,67 @@ export const DatasetExplore = ({
       if (onLoad) {
         onLoad(selectedDataset);
       }
-      // Reset filters application state when loading new data
       setShouldApplyFilters(false);
+    }
+  };
+
+  const compareValues = (itemValue: any, filterValue: string, operator: string): boolean => {
+    // Convert to lowercase strings for comparison if they're strings
+    const normalizedItemValue = String(itemValue).toLowerCase();
+    const normalizedFilterValue = filterValue.toLowerCase();
+
+    console.log('Comparing:', {
+      itemValue: normalizedItemValue,
+      filterValue: normalizedFilterValue,
+      operator
+    });
+
+    switch (operator) {
+      case '=':
+        return normalizedItemValue === normalizedFilterValue;
+      case '>':
+        return Number(itemValue) > Number(filterValue);
+      case '<':
+        return Number(itemValue) < Number(filterValue);
+      case '>=':
+        return Number(itemValue) >= Number(filterValue);
+      case '<=':
+        return Number(itemValue) <= Number(filterValue);
+      case '!=':
+        return normalizedItemValue !== normalizedFilterValue;
+      case 'IN':
+        const inValues = filterValue.split(',').map(v => v.trim().toLowerCase());
+        return inValues.includes(normalizedItemValue);
+      case 'NOT IN':
+        const notInValues = filterValue.split(',').map(v => v.trim().toLowerCase());
+        return !notInValues.includes(normalizedItemValue);
+      default:
+        return normalizedItemValue.includes(normalizedFilterValue);
     }
   };
 
   const filterData = (data: any[]) => {
     if (!shouldApplyFilters) return data;
 
+    console.log('Filtering data with filters:', filters);
+
     return data.filter((item) =>
       filters.reduce((pass, filter, index) => {
-        let matches = false;
-        const value = filter.selectedColumn === "all_columns" || !filter.selectedColumn
-          ? Object.entries(item)
-              .filter(([key]) => !key.startsWith('md_'))
-              .some(([_, value]) => 
-                String(value).toLowerCase().includes(filter.searchTerm.toLowerCase())
-              )
-          : (() => {
-              const itemValue = String(item[filter.selectedColumn]).toLowerCase();
-              const filterValue = filter.searchTerm.toLowerCase();
-              
-              switch (filter.comparisonOperator) {
-                case '=':
-                  return itemValue === filterValue;
-                case '>':
-                  return Number(itemValue) > Number(filterValue);
-                case '<':
-                  return Number(itemValue) < Number(filterValue);
-                case '>=':
-                  return Number(itemValue) >= Number(filterValue);
-                case '<=':
-                  return Number(itemValue) <= Number(filterValue);
-                case '!=':
-                  return itemValue !== filterValue;
-                case 'IN':
-                  const values = filterValue.split(',').map(v => v.trim());
-                  return values.includes(itemValue);
-                case 'NOT IN':
-                  const excludedValues = filterValue.split(',').map(v => v.trim());
-                  return !excludedValues.includes(itemValue);
-                default:
-                  return itemValue.includes(filterValue);
-              }
-            })();
+        // Skip empty filters
+        if (!filter.searchTerm || !filter.selectedColumn) {
+          return index === 0 ? true : pass;
+        }
+
+        const itemValue = item[filter.selectedColumn];
+        const matches = compareValues(itemValue, filter.searchTerm, filter.comparisonOperator);
+
+        console.log('Filter result:', {
+          column: filter.selectedColumn,
+          itemValue,
+          searchTerm: filter.searchTerm,
+          operator: filter.comparisonOperator,
+          matches
+        });
 
         if (index === 0) return matches;
         return filter.operator === 'AND' ? pass && matches : pass || matches;
@@ -155,6 +172,7 @@ export const DatasetExplore = ({
   };
 
   const handleApplyFilters = () => {
+    console.log('Applying filters:', filters);
     setShouldApplyFilters(true);
   };
 
