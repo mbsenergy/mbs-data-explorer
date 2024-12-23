@@ -72,9 +72,9 @@ const Login = () => {
         <div className="space-y-6">
           <div className="flex flex-col items-center space-y-2">
             <img 
-              src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
-              alt="Company Logo" 
-              className="h-12 mb-4 animate-float"
+              src="/lovable-uploads/35828a09-e852-4dd8-a4ac-0fa3026f7be4.png" 
+              alt="Flux Logo" 
+              className="h-16 mb-4 animate-float"
             />
             <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
               Welcome back
