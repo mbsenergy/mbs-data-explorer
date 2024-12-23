@@ -101,11 +101,10 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Fetch all data first
+      // Fetch all data
       const { data, error } = await supabase
         .from(selectedDataset)
-        .select(selectedColumns.join(','))
-        .limit(1000);
+        .select(selectedColumns.join(','));
 
       if (error) throw error;
 
