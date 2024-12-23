@@ -8,6 +8,8 @@ import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetFilters } from "./DatasetFilters";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Filter } from "./types";
 import { v4 as uuidv4 } from 'uuid';
@@ -39,6 +41,8 @@ export const DatasetExplore = ({
   const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const itemsPerPage = 10;
+  const { toast } = useToast();
+  const { user } = useAuth();
 
   const {
     data,
@@ -57,7 +61,6 @@ export const DatasetExplore = ({
   }, [columns, onColumnsChange]);
 
   useEffect(() => {
-    // Reset filtered data when raw data changes
     setFilteredData(data);
     setShouldApplyFilters(false);
   }, [data]);
@@ -163,7 +166,77 @@ export const DatasetExplore = ({
     const newFilteredData = applyFilters(data);
     setFilteredData(newFilteredData);
     setShouldApplyFilters(true);
-    setCurrentPage(0); // Reset to first page when applying filters
+    setCurrentPage(0);
+  };
+
+  const handleSampleDownload = async () => {
+    if (!selectedDataset || !user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a dataset and ensure you're logged in.",
+      });
+      return;
+    }
+
+    try {
+      // Track analytics
+      const { error: analyticsError } = await supabase
+        .from("analytics")
+        .insert({
+          user_id: user.id,
+          dataset_name: selectedDataset,
+          is_custom_query: false,
+        });
+
+      if (analyticsError) {
+        console.error("Error tracking download:", analyticsError);
+      }
+
+      // Use filtered data if filters are applied, otherwise use original data
+      const dataToDownload = shouldApplyFilters ? filteredData : data;
+      
+      if (!dataToDownload || !dataToDownload.length) {
+        throw new Error("No data available for download");
+      }
+
+      // Create CSV content using selected columns
+      const headers = selectedColumns.join(',');
+      const rows = dataToDownload.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
+      const csv = [headers, ...rows].join('\n');
+
+      // Create and trigger download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedDataset}_sample.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Dataset sample downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to download dataset.",
+      });
+    }
   };
 
   const paginatedData = filteredData.slice(
@@ -196,7 +269,7 @@ export const DatasetExplore = ({
           <Button 
             variant="outline"
             size="sm"
-            onClick={() => window.location.href = '#sample'}
+            onClick={handleSampleDownload}
             className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
           >
             Sample
