@@ -1,25 +1,51 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DatasetFilterItem } from "./DatasetFilterItem";
+
+export interface Filter {
+  id: string;
+  searchTerm: string;
+  selectedColumn: string;
+}
 
 interface DatasetFiltersProps {
   columns: string[];
-  filters: Record<string, string>;
-  onFilterChange: (column: string, value: string) => void;
+  filters: Filter[];
+  onFilterChange: (filterId: string, field: "searchTerm" | "selectedColumn", value: string) => void;
+  onAddFilter: () => void;
+  onRemoveFilter: (filterId: string) => void;
 }
 
-export const DatasetFilters = ({ columns, filters, onFilterChange }: DatasetFiltersProps) => {
+export const DatasetFilters = ({
+  columns,
+  filters,
+  onFilterChange,
+  onAddFilter,
+  onRemoveFilter
+}: DatasetFiltersProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {columns.map(column => (
-        <div key={column}>
-          <Label>{column}</Label>
-          <Input
-            placeholder={`Filter by ${column}`}
-            onChange={(e) => onFilterChange(column, e.target.value)}
-            value={filters[column] || ''}
-          />
-        </div>
+    <div className="space-y-4">
+      {filters.map((filter, index) => (
+        <DatasetFilterItem
+          key={filter.id}
+          columns={columns}
+          searchTerm={filter.searchTerm}
+          selectedColumn={filter.selectedColumn}
+          onSearchChange={(value) => onFilterChange(filter.id, "searchTerm", value)}
+          onColumnChange={(value) => onFilterChange(filter.id, "selectedColumn", value)}
+          onRemove={() => onRemoveFilter(filter.id)}
+          showRemove={filters.length > 1}
+        />
       ))}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onAddFilter}
+        className="w-full border-dashed"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Add Filter
+      </Button>
     </div>
   );
 };

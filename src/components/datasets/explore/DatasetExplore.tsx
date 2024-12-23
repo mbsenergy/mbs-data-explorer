@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
-import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
+import { DatasetFilters, Filter } from "./DatasetFilters";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { v4 as uuidv4 } from 'uuid';
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -27,8 +28,9 @@ export const DatasetExplore = ({
 }: DatasetExploreProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedColumn, setSelectedColumn] = useState("");
+  const [filters, setFilters] = useState<Filter[]>([
+    { id: uuidv4(), searchTerm: "", selectedColumn: "" }
+  ]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
@@ -49,21 +51,32 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange]);
 
-  const filterData = (data: any[]) => {
-    return data.filter((item) => {
-      if (!searchTerm) return true;
-      
-      if (selectedColumn) {
-        const value = String(item[selectedColumn]).toLowerCase();
-        return value.includes(searchTerm.toLowerCase());
+  const handleLoad = async () => {
+    if (selectedDataset && loadData) {
+      await loadData(selectedDataset);
+      if (onLoad) {
+        onLoad(selectedDataset);
       }
-      
-      return Object.entries(item)
-        .filter(([key]) => !key.startsWith('md_'))
-        .some(([_, value]) => 
-          String(value).toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    });
+    }
+  };
+
+  const filterData = (data: any[]) => {
+    return data.filter((item) =>
+      filters.every(filter => {
+        if (!filter.searchTerm) return true;
+        
+        if (filter.selectedColumn) {
+          const value = String(item[filter.selectedColumn]).toLowerCase();
+          return value.includes(filter.searchTerm.toLowerCase());
+        }
+        
+        return Object.entries(item)
+          .filter(([key]) => !key.startsWith('md_'))
+          .some(([_, value]) => 
+            String(value).toLowerCase().includes(filter.searchTerm.toLowerCase())
+          );
+      })
+    );
   };
 
   const handleSample = async () => {
@@ -77,7 +90,6 @@ export const DatasetExplore = ({
     }
 
     try {
-      // Track analytics first
       const { error: analyticsError } = await supabase
         .from("analytics")
         .insert({
@@ -90,14 +102,12 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Use the already loaded data instead of making a new query
       const filteredData = filterData(data);
 
       if (!filteredData.length) {
         throw new Error("No data available for download");
       }
 
-      // Create CSV content with only selected columns
       const headers = selectedColumns.join(',');
       const rows = filteredData.map(row => 
         selectedColumns.map(col => {
@@ -111,7 +121,6 @@ export const DatasetExplore = ({
       );
       const csv = [headers, ...rows].join('\n');
 
-      // Create and trigger download
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -136,13 +145,18 @@ export const DatasetExplore = ({
     }
   };
 
-  const handleLoad = async () => {
-    if (selectedDataset && loadData) {
-      await loadData(selectedDataset);
-      if (onLoad) {
-        onLoad(selectedDataset);
-      }
-    }
+  const handleAddFilter = () => {
+    setFilters([...filters, { id: uuidv4(), searchTerm: "", selectedColumn: "" }]);
+  };
+
+  const handleRemoveFilter = (filterId: string) => {
+    setFilters(filters.filter(f => f.id !== filterId));
+  };
+
+  const handleFilterChange = (filterId: string, field: "searchTerm" | "selectedColumn", value: string) => {
+    setFilters(filters.map(f => 
+      f.id === filterId ? { ...f, [field]: value } : f
+    ));
   };
 
   const filteredData = filterData(data);
@@ -214,12 +228,12 @@ export const DatasetExplore = ({
         </div>
       ) : (
         <>
-          <DatasetControls
+          <DatasetFilters
             columns={columns}
-            searchTerm={searchTerm}
-            selectedColumn={selectedColumn}
-            onSearchChange={setSearchTerm}
-            onColumnChange={setSelectedColumn}
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onAddFilter={handleAddFilter}
+            onRemoveFilter={handleRemoveFilter}
           />
 
           <DatasetColumnSelect
