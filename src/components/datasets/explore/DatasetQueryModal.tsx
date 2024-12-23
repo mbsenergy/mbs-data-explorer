@@ -33,12 +33,12 @@ supabase: Client = create_client(url, key)
 ${apiCall.replace('await supabase', 'response = supabase').replace(/\n\s+/g, '\n')}
 data = response.execute()`
 
-  const handleCopy = async (text: string, type: 'query' | 'api' | 'python') => {
+  const handleCopy = async (text: string, type: 'query' | 'python') => {
     try {
       await navigator.clipboard.writeText(text);
       toast({
         title: "Copied!",
-        description: `${type === 'query' ? 'SQL query' : type === 'api' ? 'API call' : 'Python code'} copied to clipboard`,
+        description: `${type === 'query' ? 'SQL query' : 'Python code'} copied to clipboard`,
       });
     } catch (err) {
       toast({
@@ -53,12 +53,16 @@ data = response.execute()`
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Current Query</DialogTitle>
+          <DialogTitle className="text-transparent bg-clip-text bg-gradient-to-r from-[#4fd9e8] to-[#4DC3D7] text-2xl font-bold">
+            Current Query
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="font-semibold">SQL Query:</p>
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#4fd9e8] to-[#4DC3D7] font-semibold">
+                SQL Query:
+              </p>
               <Button
                 variant="outline"
                 size="sm"
@@ -75,24 +79,9 @@ data = response.execute()`
           </div>
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="font-semibold">JavaScript API Call:</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCopy(apiCall, 'api')}
-                className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                Copy API Call
-              </Button>
-            </div>
-            <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
-              {apiCall}
-            </pre>
-          </div>
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <p className="font-semibold">Python API Call:</p>
+              <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#4fd9e8] to-[#4DC3D7] font-semibold">
+                Python API Call:
+              </p>
               <Button
                 variant="outline"
                 size="sm"
