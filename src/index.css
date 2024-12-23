@@ -45,6 +45,18 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1, h2, h3 {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal font-bold tracking-tight;
+  }
+  h1 {
+    @apply text-3xl;
+  }
+  h2 {
+    @apply text-2xl;
+  }
+  h3 {
+    @apply text-xl;
+  }
 }
 
 /* Field type pills */
