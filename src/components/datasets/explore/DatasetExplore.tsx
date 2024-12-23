@@ -42,7 +42,6 @@ export const DatasetExplore = ({
     loadData
   } = useDatasetData(selectedDataset);
 
-  // Pre-select all columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -50,19 +49,24 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange]);
 
-  const filteredData = data.filter((item) => {
-    const matches = selectedColumn
-      ? String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      : Object.entries(item)
-          .filter(([key]) => !key.startsWith('md_'))
-          .some(([_, value]) => 
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
-          );
-    
-    return matches;
-  });
+  const filterData = (data: any[]) => {
+    return data.filter((item) => {
+      if (!searchTerm) return true;
+      
+      if (selectedColumn) {
+        const value = String(item[selectedColumn]).toLowerCase();
+        return value.includes(searchTerm.toLowerCase());
+      }
+      
+      return Object.entries(item)
+        .filter(([key]) => !key.startsWith('md_'))
+        .some(([_, value]) => 
+          String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    });
+  };
+
+  const filteredData = filterData(data);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
@@ -97,7 +101,7 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Fetch data with selected columns
+      // Fetch all data first
       const { data, error } = await supabase
         .from(selectedDataset)
         .select(selectedColumns.join(','))
@@ -109,9 +113,12 @@ export const DatasetExplore = ({
         throw new Error("No data available for download");
       }
 
+      // Apply filters to the data
+      const filteredData = filterData(data);
+
       // Create CSV content
       const headers = selectedColumns.join(',');
-      const rows = data.map(row => 
+      const rows = filteredData.map(row => 
         selectedColumns.map(col => {
           const value = row[col];
           if (value === null) return '';
