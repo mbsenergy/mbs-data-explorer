@@ -85,7 +85,8 @@ const Datasets = () => {
     }
   };
 
-  const handleLoad = async (tableName: string) => {
+  const handleLoad = (tableName: string) => {
+    // Cast the tableName to TableNames since we know it's valid
     setSelectedDataset(tableName as TableNames);
     toast.success(`Dataset ${tableName} selected`);
   };
