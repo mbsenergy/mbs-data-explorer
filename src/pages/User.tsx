@@ -25,7 +25,9 @@ const User = () => {
   });
 
   const handleProfileLoaded = (data: Profile) => {
-    console.log("Setting form data with profile:", data);
+    console.log("Profile data received:", data);
+    if (!data) return;
+
     setFormData({
       first_name: data.first_name || '',
       last_name: data.last_name || '',
@@ -33,9 +35,9 @@ const User = () => {
       country: data.country || '',
       company: data.company || '',
       role: data.role || '',
-      it_skills: data.it_skills || [],
-      preferred_data: data.preferred_data || [],
-      subscriptions: data.subscriptions || [],
+      it_skills: Array.isArray(data.it_skills) ? data.it_skills : [],
+      preferred_data: Array.isArray(data.preferred_data) ? data.preferred_data : [],
+      subscriptions: Array.isArray(data.subscriptions) ? data.subscriptions : [],
     });
   };
 
@@ -58,6 +60,8 @@ const User = () => {
         subscriptions: formData.subscriptions,
         updated_at: new Date().toISOString(),
       };
+
+      console.log("Saving profile with data:", updateData);
 
       const { error } = await supabase
         .from('profiles')

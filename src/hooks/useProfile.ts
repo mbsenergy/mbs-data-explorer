@@ -44,12 +44,15 @@ export const useProfile = (userId: string | undefined, onProfileLoaded?: (data: 
       return data as Profile;
     },
     enabled: !!userId,
-    meta: {
-      onSuccess: onProfileLoaded,
-      onError: (error: Error) => {
-        console.error("Error in profile query:", error);
-        toast.error("Failed to load profile data");
+    onSuccess: (data) => {
+      console.log("Profile query succeeded:", data);
+      if (onProfileLoaded) {
+        onProfileLoaded(data);
       }
+    },
+    onError: (error: Error) => {
+      console.error("Error in profile query:", error);
+      toast.error("Failed to load profile data");
     }
   });
 };
