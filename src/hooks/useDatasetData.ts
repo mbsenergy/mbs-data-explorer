@@ -11,7 +11,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const pageSize = 1000; // Supabase's limit per request
+  const pageSize = 1000;
 
   const fetchWithRetry = async (fn: () => Promise<any>, retries = 3) => {
     try {
@@ -23,6 +23,20 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       }
       throw error;
     }
+  };
+
+  const fetchColumns = async (tableName: string) => {
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('*')
+      .limit(1);
+
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      return Object.keys(data[0]).filter(col => !col.startsWith('md_'));
+    }
+    return [];
   };
 
   const loadData = async (tableName: TableNames) => {
@@ -37,20 +51,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
 
-      // First fetch to get columns
-      const { data: initialData, error: initialError } = await supabase
-        .from(tableName)
-        .select('*')
-        .limit(1);
-
-      if (initialError) throw initialError;
-
-      if (initialData && initialData.length > 0) {
-        const availableColumns = Object.keys(initialData[0]).filter(
-          col => !col.startsWith('md_')
-        );
-        setColumns(availableColumns);
-      }
+      // Get available columns first
+      const availableColumns = await fetchColumns(tableName);
+      setColumns(availableColumns);
 
       // Calculate number of pages needed
       const numberOfPages = Math.ceil(totalRows / pageSize);
@@ -64,7 +67,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         const { data: pageData, error } = await fetchWithRetry(async () => {
           return await supabase
             .from(tableName)
-            .select("*")
+            .select(availableColumns.join(','))
             .range(from, to);
         });
 
@@ -75,7 +78,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
         // Update progress
         const progress = Math.round((i + 1) / numberOfPages * 100);
-        if (progress % 20 === 0) { // Show progress every 20%
+        if (progress % 20 === 0) {
           toast({
             title: "Loading data",
             description: `${progress}% complete...`
@@ -123,19 +126,19 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         if (countError) throw countError;
         setTotalRowCount(countResult || 0);
 
+        // Get available columns first
+        const availableColumns = await fetchColumns(selectedDataset);
+        setColumns(availableColumns);
+
         // Fetch initial chunk for preview
         const { data: initialData, error: initialError } = await supabase
           .from(selectedDataset)
-          .select("*")
+          .select(availableColumns.join(','))
           .limit(pageSize);
 
         if (initialError) throw initialError;
         
-        if (initialData && initialData.length > 0) {
-          const filteredColumns = Object.keys(initialData[0]).filter(
-            col => !col.startsWith('md_')
-          );
-          setColumns(filteredColumns);
+        if (initialData) {
           setData(initialData);
         }
       } catch (error: any) {
@@ -165,7 +168,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const { data: pageData, error } = await fetchWithRetry(async () => {
         return await supabase
           .from(selectedDataset)
-          .select("*")
+          .select(columns.join(','))
           .range(start, end);
       });
       
