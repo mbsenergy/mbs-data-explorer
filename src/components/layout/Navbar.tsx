@@ -28,13 +28,13 @@ export const Navbar = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user?.id,
   });
 
   return (
     <nav className="h-16 border-b border-border/40 bg-card">
       <div className="container flex h-full items-center">
-        {/* Welcome message - now always visible */}
+        {/* Welcome message - always visible */}
         <div className="hidden md:block">
           <span className="text-sm text-muted-foreground">
             Welcome back{" "}
@@ -46,7 +46,7 @@ export const Navbar = () => {
 
         <div className="flex-1" />
 
-        {/* Help button - updated hover color */}
+        {/* Help button */}
         <Button 
           variant="ghost" 
           size="icon" 
@@ -58,18 +58,18 @@ export const Navbar = () => {
           </Link>
         </Button>
 
-        {/* Notifications - updated hover color */}
+        {/* Notifications */}
         <div className="mr-2">
           <NotificationBell />
         </div>
 
-        {/* Avatar with Dropdown - always visible */}
+        {/* Avatar with Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-full p-0 hover:bg-[#4fd9e8]"
+              className="h-8 w-8 rounded-full hover:bg-[#4fd9e8] hover:text-white transition-colors"
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage 
