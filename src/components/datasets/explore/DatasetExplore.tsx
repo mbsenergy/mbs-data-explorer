@@ -29,7 +29,7 @@ export const DatasetExplore = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const [filters, setFilters] = useState<Filter[]>([
-    { id: uuidv4(), searchTerm: "", selectedColumn: "" }
+    { id: uuidv4(), searchTerm: "", selectedColumn: "", operator: "AND" }
   ]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -62,109 +62,52 @@ export const DatasetExplore = ({
 
   const filterData = (data: any[]) => {
     return data.filter((item) =>
-      filters.every(filter => {
-        if (!filter.searchTerm) return true;
+      filters.reduce((pass, filter, index) => {
+        const matches = filter.selectedColumn === "all_columns" || !filter.selectedColumn
+          ? Object.entries(item)
+              .filter(([key]) => !key.startsWith('md_'))
+              .some(([_, value]) => 
+                String(value).toLowerCase().includes(filter.searchTerm.toLowerCase())
+              )
+          : String(item[filter.selectedColumn])
+              .toLowerCase()
+              .includes(filter.searchTerm.toLowerCase());
+
+        // First filter doesn't use operator
+        if (index === 0) return matches;
         
-        if (filter.selectedColumn) {
-          const value = String(item[filter.selectedColumn]).toLowerCase();
-          return value.includes(filter.searchTerm.toLowerCase());
-        }
-        
-        return Object.entries(item)
-          .filter(([key]) => !key.startsWith('md_'))
-          .some(([_, value]) => 
-            String(value).toLowerCase().includes(filter.searchTerm.toLowerCase())
-          );
-      })
+        // Apply AND/OR logic for subsequent filters
+        return filter.operator === 'AND' 
+          ? pass && matches 
+          : pass || matches;
+      }, false)
     );
   };
 
-  const handleSample = async () => {
-    if (!selectedDataset || !user?.id || !selectedColumns.length) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select at least one column to download.",
-      });
-      return;
-    }
-
-    try {
-      const { error: analyticsError } = await supabase
-        .from("analytics")
-        .insert({
-          user_id: user.id,
-          dataset_name: selectedDataset,
-          is_custom_query: false,
-        });
-
-      if (analyticsError) {
-        console.error("Error tracking download:", analyticsError);
-      }
-
-      const filteredData = filterData(data);
-
-      if (!filteredData.length) {
-        throw new Error("No data available for download");
-      }
-
-      const headers = selectedColumns.join(',');
-      const rows = filteredData.map(row => 
-        selectedColumns.map(col => {
-          const value = row[col];
-          if (value === null) return '';
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value;
-        }).join(',')
-      );
-      const csv = [headers, ...rows].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset}_filtered_data.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Success",
-        description: `Downloaded ${filteredData.length} rows successfully.`,
-      });
-    } catch (error: any) {
-      console.error("Error downloading dataset:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to download dataset.",
-      });
-    }
+  const handleFilterChange = (
+    filterId: string,
+    field: "searchTerm" | "selectedColumn" | "operator",
+    value: string
+  ) => {
+    setFilters(filters.map(f =>
+      f.id === filterId
+        ? { ...f, [field]: value }
+        : f
+    ));
   };
 
   const handleAddFilter = () => {
-    setFilters([...filters, { id: uuidv4(), searchTerm: "", selectedColumn: "" }]);
+    setFilters([...filters, { 
+      id: uuidv4(), 
+      searchTerm: "", 
+      selectedColumn: "", 
+      operator: "AND" 
+    }]);
   };
 
   const handleRemoveFilter = (filterId: string) => {
     setFilters(filters.filter(f => f.id !== filterId));
   };
-
-  const handleFilterChange = (filterId: string, field: "searchTerm" | "selectedColumn", value: string) => {
-    setFilters(filters.map(f => 
-      f.id === filterId ? { ...f, [field]: value } : f
-    ));
-  };
-
-  const filteredData = filterData(data);
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = filteredData.slice(
-    currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage
-  );
 
   const handleColumnSelect = (column: string) => {
     const newColumns = selectedColumns.includes(column)
@@ -207,7 +150,7 @@ export const DatasetExplore = ({
           <Button 
             variant="outline"
             size="sm"
-            onClick={handleSample}
+            onClick={() => window.location.href = '#sample'}
             className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
           >
             Sample
@@ -218,7 +161,7 @@ export const DatasetExplore = ({
       <DatasetStats 
         totalRows={totalRowCount}
         columnsCount={columns.length}
-        filteredRows={filteredData.length}
+        filteredRows={filterData(data).length}
         lastUpdate={data[0]?.md_last_update || null}
       />
 
@@ -244,13 +187,16 @@ export const DatasetExplore = ({
 
           <DatasetTable
             columns={columns}
-            data={paginatedData}
+            data={filterData(data).slice(
+              currentPage * itemsPerPage,
+              (currentPage + 1) * itemsPerPage
+            )}
             selectedColumns={selectedColumns}
           />
 
           <DatasetPagination
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={Math.ceil(filterData(data).length / itemsPerPage)}
             onPageChange={handlePageChange}
           />
         </>

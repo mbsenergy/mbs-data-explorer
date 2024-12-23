@@ -8,23 +8,41 @@ interface DatasetFilterItemProps {
   columns: string[];
   searchTerm: string;
   selectedColumn: string;
+  operator: 'AND' | 'OR';
   onSearchChange: (value: string) => void;
   onColumnChange: (value: string) => void;
+  onOperatorChange: (value: 'AND' | 'OR') => void;
   onRemove: () => void;
   showRemove?: boolean;
+  isFirstFilter?: boolean;
 }
 
 export const DatasetFilterItem = ({
   columns,
   searchTerm,
   selectedColumn,
+  operator,
   onSearchChange,
   onColumnChange,
+  onOperatorChange,
   onRemove,
-  showRemove = true
+  showRemove = true,
+  isFirstFilter = false
 }: DatasetFilterItemProps) => {
   return (
     <div className="flex gap-4 items-center">
+      {!isFirstFilter && (
+        <Select value={operator} onValueChange={(value: 'AND' | 'OR') => onOperatorChange(value)}>
+          <SelectTrigger className="w-[100px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="AND">AND</SelectItem>
+            <SelectItem value="OR">OR</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+      
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -34,6 +52,7 @@ export const DatasetFilterItem = ({
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
+      
       <Select 
         value={selectedColumn || "all_columns"} 
         onValueChange={onColumnChange}
@@ -48,6 +67,7 @@ export const DatasetFilterItem = ({
           ))}
         </SelectContent>
       </Select>
+      
       {showRemove && (
         <Button 
           variant="ghost" 

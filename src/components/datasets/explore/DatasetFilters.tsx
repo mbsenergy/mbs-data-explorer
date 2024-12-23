@@ -6,12 +6,13 @@ export interface Filter {
   id: string;
   searchTerm: string;
   selectedColumn: string;
+  operator: 'AND' | 'OR';
 }
 
 interface DatasetFiltersProps {
   columns: string[];
   filters: Filter[];
-  onFilterChange: (filterId: string, field: "searchTerm" | "selectedColumn", value: string) => void;
+  onFilterChange: (filterId: string, field: "searchTerm" | "selectedColumn" | "operator", value: string) => void;
   onAddFilter: () => void;
   onRemoveFilter: (filterId: string) => void;
 }
@@ -31,10 +32,13 @@ export const DatasetFilters = ({
           columns={columns}
           searchTerm={filter.searchTerm}
           selectedColumn={filter.selectedColumn}
+          operator={filter.operator}
           onSearchChange={(value) => onFilterChange(filter.id, "searchTerm", value)}
-          onColumnChange={(value) => onFilterChange(filter.id, "selectedColumn", value === "all_columns" ? "" : value)}
+          onColumnChange={(value) => onFilterChange(filter.id, "selectedColumn", value)}
+          onOperatorChange={(value) => onFilterChange(filter.id, "operator", value)}
           onRemove={() => onRemoveFilter(filter.id)}
           showRemove={filters.length > 1}
+          isFirstFilter={index === 0}
         />
       ))}
       <Button
