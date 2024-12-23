@@ -1,11 +1,12 @@
-import { HelpCircle, Home, User, Settings, Search } from "lucide-react";
+import { HelpCircle, Home, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { DatasetSearchCommand } from "@/components/datasets/DatasetSearchCommand";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,6 @@ import {
 
 export const Navbar = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -44,17 +44,6 @@ export const Navbar = () => {
     refetchOnReconnect: false,
   });
 
-  const handleExplore = () => {
-    navigate('/datasets');
-    // Scroll to explore section after a short delay to ensure navigation is complete
-    setTimeout(() => {
-      const exploreSection = document.querySelector('[data-explore-section]');
-      if (exploreSection) {
-        exploreSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
-  };
-
   if (isLoading) {
     return (
       <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]">
@@ -80,15 +69,8 @@ export const Navbar = () => {
 
         <div className="flex-1" />
 
-        {/* Explore button */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="mr-2 hover:bg-[#4fd9e8] hover:text-white transition-colors"
-          onClick={handleExplore}
-        >
-          <Search className="h-5 w-5" />
-        </Button>
+        {/* Dataset Search Command */}
+        <DatasetSearchCommand />
 
         {/* Help button */}
         <Button 

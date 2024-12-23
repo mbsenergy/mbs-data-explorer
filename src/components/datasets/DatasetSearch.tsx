@@ -40,6 +40,18 @@ export const DatasetSearch = ({
 }: DatasetSearchProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
 
+  React.useEffect(() => {
+    const handleSelectDataset = (event: CustomEvent<string>) => {
+      onSelect(event.detail);
+    };
+
+    window.addEventListener('select-dataset', handleSelectDataset as EventListener);
+    
+    return () => {
+      window.removeEventListener('select-dataset', handleSelectDataset as EventListener);
+    };
+  }, [onSelect]);
+
   return (
     <Card className="p-6 mb-6">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
