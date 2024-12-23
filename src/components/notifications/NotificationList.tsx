@@ -24,14 +24,17 @@ export const NotificationList = ({ notifications, onClear }: NotificationListPro
             variant="ghost" 
             size="sm" 
             onClick={handleClear}
-            className="text-xs"
+            className="text-xs hover:bg-[#4fd9e8] hover:text-white transition-colors"
           >
             Clear all
           </Button>
         )}
       </div>
       {notifications?.slice(0, 5).map((file) => (
-        <DropdownMenuItem key={`${file.bucket}-${file.name}`} className="flex flex-col items-start">
+        <DropdownMenuItem 
+          key={`${file.bucket}-${file.name}`} 
+          className="flex flex-col items-start hover:bg-[#4fd9e8] hover:text-white transition-colors"
+        >
           <span className="font-medium">{file.name}</span>
           <span className="text-xs text-muted-foreground">
             Added to {file.bucket.replace(/-/g, ' ')}

@@ -64,7 +64,7 @@ export const NotificationBell = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="relative mr-2"
+          className="relative mr-2 hover:bg-[#4fd9e8] hover:text-white transition-colors"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
