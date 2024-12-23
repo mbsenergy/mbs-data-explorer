@@ -33,7 +33,11 @@ export function DatasetSearchCommand() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_available_tables");
       if (error) throw error;
-      return data;
+      // Filter tables to only include those matching XX00_ pattern
+      return data.filter((table: { tablename: string }) => {
+        const pattern = /^[A-Z]{2}\d{2}_/;
+        return pattern.test(table.tablename);
+      });
     },
   });
 

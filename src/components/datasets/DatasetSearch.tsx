@@ -40,6 +40,12 @@ export const DatasetSearch = ({
 }: DatasetSearchProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
 
+  // Filter tables to only include those matching XX00_ pattern
+  const filteredTables = tables.filter(table => {
+    const pattern = /^[A-Z]{2}\d{2}_/;
+    return pattern.test(table.tablename);
+  });
+
   React.useEffect(() => {
     const handleSelectDataset = (event: CustomEvent<string>) => {
       onSelect(event.detail);
@@ -78,7 +84,7 @@ export const DatasetSearch = ({
           />
           <div className="mt-6">
             <DatasetTable
-              tables={tables}
+              tables={filteredTables}
               onPreview={onPreview}
               onDownload={onDownload}
               onSelect={onSelect}
