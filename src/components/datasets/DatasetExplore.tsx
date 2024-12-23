@@ -83,14 +83,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
 
   return (
     <Card className="p-6 space-y-6" data-explore-section>
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Explore & Export</h2>
-        {selectedDataset && (
-          <p className="text-muted-foreground">
-            Selected dataset: <span className="font-medium text-foreground">{selectedDataset}</span>
-          </p>
-        )}
-      </div>
+      <h2 className="text-2xl font-semibold mb-4">Explore & Export</h2>
       
       {!selectedDataset ? (
         <div className="text-center py-8 text-muted-foreground">
@@ -126,14 +119,12 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto">
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
                   {columns.map((col) => (
-                    <TableHead key={col} className="whitespace-nowrap">
-                      {col}
-                    </TableHead>
+                    <TableHead key={col}>{col}</TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -141,9 +132,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
                 {paginatedData.map((item, index) => (
                   <TableRow key={index}>
                     {columns.map((col) => (
-                      <TableCell key={col} className="whitespace-nowrap">
-                        {String(item[col])}
-                      </TableCell>
+                      <TableCell key={col}>{String(item[col])}</TableCell>
                     ))}
                   </TableRow>
                 ))}
