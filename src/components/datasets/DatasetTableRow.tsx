@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Download, Eye, Star, Upload } from "lucide-react";
+import { Download, Eye, Star } from "lucide-react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import type { TableInfo } from "./types";
 
@@ -13,7 +13,6 @@ interface DatasetTableRowProps {
   onToggleFavorite: (tableName: string) => void;
   isFavorite: boolean;
   isSelected?: boolean;
-  onLoad?: (tableName: string) => void;
 }
 
 export const DatasetTableRow = ({ 
@@ -24,7 +23,6 @@ export const DatasetTableRow = ({
   onToggleFavorite,
   isFavorite,
   isSelected,
-  onLoad 
 }: DatasetTableRowProps) => {
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
   const match = table.tablename.match(/^([A-Z]{2})(\d+)_(.+)/);
@@ -81,16 +79,6 @@ export const DatasetTableRow = ({
             <Download className="h-4 w-4 mr-2" />
             Sample
           </Button>
-          {onLoad && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onLoad(table.tablename)}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Load
-            </Button>
-          )}
           <Button
             variant="ghost"
             size="sm"

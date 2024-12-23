@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import DatasetFilters from "./DatasetFilters";
 import { DatasetTable } from "./DatasetTable";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { DatasetSearchHeader } from "./search/DatasetSearchHeader";
+import { DatasetSearchPagination } from "./search/DatasetSearchPagination";
 import type { TableInfo } from "./types";
 
 interface DatasetSearchProps {
@@ -21,7 +21,6 @@ interface DatasetSearchProps {
   availableFields: string[];
   availableTypes: string[];
   selectedDataset?: string;
-  onLoad?: (tableName: string) => void;
 }
 
 export const DatasetSearch = ({ 
@@ -38,7 +37,6 @@ export const DatasetSearch = ({
   availableFields,
   availableTypes,
   selectedDataset,
-  onLoad
 }: DatasetSearchProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
   const [currentPage, setCurrentPage] = useState(0);
@@ -71,18 +69,7 @@ export const DatasetSearch = ({
   return (
     <Card className="p-6 mb-6">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold">Search on datamart</h2>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm">
-              {isOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-        </div>
+        <DatasetSearchHeader isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />
         <CollapsibleContent>
           <DatasetFilters
             onSearchChange={onSearchChange}
@@ -101,31 +88,12 @@ export const DatasetSearch = ({
               onToggleFavorite={onToggleFavorite}
               favorites={favorites}
               selectedDataset={selectedDataset}
-              onLoad={onLoad}
             />
-            <div className="flex items-center justify-end space-x-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-                disabled={currentPage === 0}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Page {currentPage + 1} of {Math.max(1, totalPages)}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
-                disabled={currentPage >= totalPages - 1}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
+            <DatasetSearchPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </CollapsibleContent>
       </Collapsible>

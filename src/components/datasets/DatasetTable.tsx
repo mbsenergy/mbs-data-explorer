@@ -17,7 +17,6 @@ interface DatasetTableProps {
   onToggleFavorite: (tableName: string) => void;
   favorites: Set<string>;
   selectedDataset?: string;
-  onLoad?: (tableName: string) => void;
 }
 
 export const DatasetTable = ({
@@ -28,7 +27,6 @@ export const DatasetTable = ({
   onToggleFavorite,
   favorites,
   selectedDataset,
-  onLoad
 }: DatasetTableProps) => {
   return (
     <div className="border rounded-md">
@@ -53,7 +51,6 @@ export const DatasetTable = ({
                 onToggleFavorite={onToggleFavorite}
                 isFavorite={favorites.has(table.tablename)}
                 isSelected={selectedDataset === table.tablename}
-                onLoad={onLoad}
               />
             ))}
           </TableBody>
