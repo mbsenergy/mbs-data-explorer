@@ -22,14 +22,19 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
 
     try {
       setIsUploading(true);
+      
+      // Create a folder structure with user ID
       const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}.${fileExt}`;
+      const filePath = `${user.id}/avatar.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file, { upsert: true });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Error uploading avatar:", uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
@@ -40,7 +45,10 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
         .update({ avatar_url: publicUrl })
         .eq("id", user.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Error updating profile:", updateError);
+        throw updateError;
+      }
 
       toast.success("Avatar updated successfully");
       onAvatarUpdate();
