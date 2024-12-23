@@ -1,0 +1,13 @@
+{
+	"name": "My DevContainer",
+	"image": "alejandrocerved/mbs-data-explorer:v0.1.0",  // Reference your locally built image
+	"extensions": [
+	  "ms-vscode.cpptools",
+	  "ms-python.python"
+	],
+	"postCreateCommand": "echo 'Container is ready!'",
+	"settings": {
+	  "terminal.integrated.shell.linux": "/bin/bash"
+	}
+  }
+  
