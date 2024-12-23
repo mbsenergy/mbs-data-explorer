@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
-import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetFilters } from "./DatasetFilters";
+import { DatasetColumnSelect } from "./DatasetColumnSelect";
+import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -44,6 +45,7 @@ export const DatasetExplore = ({
   const itemsPerPage = 10;
   const { toast } = useToast();
   const { user } = useAuth();
+  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
 
   const {
     data,
@@ -181,7 +183,6 @@ export const DatasetExplore = ({
     }
 
     try {
-      // Track analytics
       const { error: analyticsError } = await supabase
         .from("analytics")
         .insert({
@@ -194,14 +195,12 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Use filtered data if filters are applied, otherwise use original data
       const dataToDownload = shouldApplyFilters ? filteredData : data;
       
       if (!dataToDownload || !dataToDownload.length) {
         throw new Error("No data available for download");
       }
 
-      // Create CSV content using selected columns
       const headers = selectedColumns.join(',');
       const rows = dataToDownload.map(row => 
         selectedColumns.map(col => {
@@ -215,7 +214,6 @@ export const DatasetExplore = ({
       );
       const csv = [headers, ...rows].join('\n');
 
-      // Create and trigger download
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -277,26 +275,7 @@ export const DatasetExplore = ({
   .select('${selectedColumns.join(', ')}')`
     + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "");
 
-    toast({
-      title: "Current Query",
-      description: (
-        <div className="mt-2 space-y-2">
-          <div>
-            <p className="font-semibold mb-1">SQL Query:</p>
-            <pre className="bg-slate-100 p-2 rounded text-sm overflow-x-auto">
-              {query}
-            </pre>
-          </div>
-          <div>
-            <p className="font-semibold mb-1">API Call:</p>
-            <pre className="bg-slate-100 p-2 rounded text-sm overflow-x-auto">
-              {apiCall}
-            </pre>
-          </div>
-        </div>
-      ),
-      duration: 10000,
-    });
+    setIsQueryModalOpen(true);
   };
 
   return (
@@ -392,6 +371,16 @@ export const DatasetExplore = ({
             currentPage={currentPage}
             totalPages={Math.ceil(filteredData.length / itemsPerPage)}
             onPageChange={handlePageChange}
+          />
+
+          <DatasetQueryModal
+            isOpen={isQueryModalOpen}
+            onClose={() => setIsQueryModalOpen(false)}
+            query={generateFilterQuery()}
+            apiCall={`await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.join(', ')}')`
+    + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "")}
           />
         </>
       )}
