@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DatasetPagination } from "./explore/DatasetPagination";
+import { DatasetStats } from "./explore/DatasetStats";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -25,10 +26,11 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [columns, setColumns] = useState<string[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [data, setData] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const { toast } = useToast();
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +58,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             col => !col.startsWith('md_')
           );
           setColumns(filteredColumns);
+          setSelectedColumns(filteredColumns); // Initially select all columns
         }
       }
     };
@@ -81,6 +84,15 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     (currentPage + 1) * itemsPerPage
   );
 
+  const handleColumnSelect = (column: string) => {
+    setSelectedColumns(prev => {
+      if (prev.includes(column)) {
+        return prev.filter(col => col !== column);
+      }
+      return [...prev, column];
+    });
+  };
+
   return (
     <Card className="p-6 space-y-6" data-explore-section>
       <div className="space-y-2">
@@ -98,6 +110,13 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
         </div>
       ) : (
         <>
+          <DatasetStats 
+            totalRows={data.length}
+            columnsCount={columns.length}
+            filteredRows={filteredData.length}
+            lastUpdate={data[0]?.md_last_update || null}
+          />
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="search">Search</Label>
@@ -126,11 +145,31 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label>Columns to display</Label>
+            <div className="flex flex-wrap gap-2">
+              {columns.map((col) => (
+                <label
+                  key={col}
+                  className="inline-flex items-center space-x-2 bg-card border border-border rounded-md px-3 py-1 cursor-pointer hover:bg-accent"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedColumns.includes(col)}
+                    onChange={() => handleColumnSelect(col)}
+                    className="rounded border-gray-300"
+                  />
+                  <span>{col}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {columns.map((col) => (
+                  {selectedColumns.map((col) => (
                     <TableHead key={col}>{col}</TableHead>
                   ))}
                 </TableRow>
@@ -138,7 +177,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
               <TableBody>
                 {paginatedData.map((item, index) => (
                   <TableRow key={index}>
-                    {columns.map((col) => (
+                    {selectedColumns.map((col) => (
                       <TableCell key={col} className="whitespace-nowrap">
                         {String(item[col])}
                       </TableCell>
