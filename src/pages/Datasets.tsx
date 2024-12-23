@@ -58,11 +58,14 @@ const Datasets = () => {
     return matchesSearch && matchesField && matchesType && matchesFavorite;
   });
 
-  const handleSelect = async (tableName: string) => {
-    setSelectedDataset(tableName);
+  const handleSelect = (tableName: string) => {
+    setSelectedDataset(prevDataset => prevDataset === tableName ? "" : tableName);
+    
     toast({
-      title: "Dataset Selected",
-      description: `${tableName} is now selected for exploration.`,
+      title: prevDataset => prevDataset === tableName ? "Dataset Unselected" : "Dataset Selected",
+      description: prevDataset => prevDataset === tableName 
+        ? `${tableName} has been unselected.`
+        : `${tableName} is now selected for exploration.`,
     });
   };
 
@@ -182,6 +185,7 @@ const Datasets = () => {
         onFavoriteChange={setShowOnlyFavorites}
         availableFields={availableFields}
         availableTypes={availableTypes}
+        selectedDataset={selectedDataset}
       />
 
       <DatasetExplore selectedDataset={selectedDataset} />
