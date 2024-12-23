@@ -37,6 +37,7 @@ export const DatasetExplore = ({
     loadData
   } = useDatasetData(selectedDataset);
 
+  // Pre-select all columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);

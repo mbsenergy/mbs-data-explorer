@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Download, ArrowDown } from "lucide-react";
 
 interface DatasetHeaderProps {
   selectedDataset: string | null;
@@ -20,16 +21,18 @@ export const DatasetHeader = ({ selectedDataset, onLoad }: DatasetHeaderProps) =
         {onLoad && selectedDataset && (
           <Button 
             onClick={() => onLoad(selectedDataset)}
-            className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
+            className="bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white"
           >
-            Load
+            <ArrowDown className="h-4 w-4 mr-2" />
+            Retrieve
           </Button>
         )}
         <Button 
           variant="outline"
           onClick={() => window.location.href = '#sample'}
-          className="bg-[#F97316]/20 hover:bg-[#F97316]/30"
+          className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
         >
+          <Download className="h-4 w-4 mr-2" />
           Sample
         </Button>
       </div>
