@@ -37,6 +37,21 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
 
+      // First fetch to get columns
+      const { data: initialData, error: initialError } = await supabase
+        .from(tableName)
+        .select('*')
+        .limit(1);
+
+      if (initialError) throw initialError;
+
+      if (initialData && initialData.length > 0) {
+        const availableColumns = Object.keys(initialData[0]).filter(
+          col => !col.startsWith('md_')
+        );
+        setColumns(availableColumns);
+      }
+
       // Calculate number of pages needed
       const numberOfPages = Math.ceil(totalRows / pageSize);
       let allData: any[] = [];
@@ -56,14 +71,15 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         if (error) throw error;
         if (pageData) {
           allData = [...allData, ...pageData];
-          
-          // Set columns on first chunk
-          if (i === 0 && pageData.length > 0) {
-            const filteredColumns = Object.keys(pageData[0]).filter(
-              col => !col.startsWith('md_')
-            );
-            setColumns(filteredColumns);
-          }
+        }
+
+        // Update progress
+        const progress = Math.round((i + 1) / numberOfPages * 100);
+        if (progress % 20 === 0) { // Show progress every 20%
+          toast({
+            title: "Loading data",
+            description: `${progress}% complete...`
+          });
         }
       }
 
@@ -111,7 +127,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         const { data: initialData, error: initialError } = await supabase
           .from(selectedDataset)
           .select("*")
-          .range(0, pageSize - 1);
+          .limit(pageSize);
 
         if (initialError) throw initialError;
         
@@ -125,9 +141,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       } catch (error: any) {
         console.error("Error fetching data:", error);
         toast({
-          title: "Error fetching data",
-          description: error.message,
           variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to fetch data"
         });
         setData([]);
         setColumns([]);
@@ -157,9 +173,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       return pageData;
     } catch (error: any) {
       toast({
-        title: "Error fetching page",
-        description: error.message,
         variant: "destructive",
+        title: "Error fetching page",
+        description: error.message
       });
     }
   };
