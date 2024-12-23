@@ -2,9 +2,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Database, Filter, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { DatasetActions } from "@/components/datasets/DatasetActions";
+import { DatasetQuery } from "@/components/datasets/query/DatasetQuery";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
 import type { Database } from "@/integrations/supabase/types";
@@ -201,31 +204,50 @@ const Datasets = () => {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Datasets</h1>
       
-      <DatasetActions
-        tables={tables || []}
-        filteredTables={filteredTables || []}
-        favorites={favorites}
-        selectedDataset={selectedDataset}
-        selectedColumns={selectedColumns}
-        previewData={previewData}
-        availableFields={availableFields}
-        availableTypes={availableTypes}
-        searchTerm={searchTerm}
-        selectedField={selectedField}
-        selectedType={selectedType}
-        showOnlyFavorites={showOnlyFavorites}
-        onPreview={handlePreview}
-        onDownload={handleDownload}
-        onSelect={(tableName) => setSelectedDataset(tableName as TableNames)}
-        onToggleFavorite={toggleFavorite}
-        onSearchChange={setSearchTerm}
-        onFieldChange={setSelectedField}
-        onTypeChange={setSelectedType}
-        onFavoriteChange={setShowOnlyFavorites}
-        onColumnsChange={setSelectedColumns}
-        onLoad={handleLoad}
-        onClosePreview={() => setPreviewData(null)}
-      />
+      <Tabs defaultValue="explore" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="explore" className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            Explore
+          </TabsTrigger>
+          <TabsTrigger value="query" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Query
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="explore">
+          <DatasetActions
+            tables={tables || []}
+            filteredTables={filteredTables || []}
+            favorites={favorites}
+            selectedDataset={selectedDataset}
+            selectedColumns={selectedColumns}
+            previewData={previewData}
+            availableFields={availableFields}
+            availableTypes={availableTypes}
+            searchTerm={searchTerm}
+            selectedField={selectedField}
+            selectedType={selectedType}
+            showOnlyFavorites={showOnlyFavorites}
+            onPreview={handlePreview}
+            onDownload={handleDownload}
+            onSelect={(tableName) => setSelectedDataset(tableName as TableNames)}
+            onToggleFavorite={toggleFavorite}
+            onSearchChange={setSearchTerm}
+            onFieldChange={setSelectedField}
+            onTypeChange={setSelectedType}
+            onFavoriteChange={setShowOnlyFavorites}
+            onColumnsChange={setSelectedColumns}
+            onLoad={handleLoad}
+            onClosePreview={() => setPreviewData(null)}
+          />
+        </TabsContent>
+
+        <TabsContent value="query">
+          <DatasetQuery />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
