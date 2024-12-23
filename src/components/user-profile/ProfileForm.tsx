@@ -65,18 +65,16 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
 
       console.log("Formatted update data:", updateData);
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update(updateData)
-        .eq("id", userId)
-        .select();
+        .eq("id", userId);
 
       if (error) {
         console.error("Error updating profile:", error);
         throw error;
       }
 
-      console.log("Update response data:", data);
       toast.success("Profile updated successfully");
       onProfileUpdate();
     } catch (error) {
