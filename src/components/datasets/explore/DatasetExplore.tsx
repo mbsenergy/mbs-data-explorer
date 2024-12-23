@@ -7,7 +7,7 @@ import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { useDatasetData } from "@/hooks/useDatasetData";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -61,13 +61,6 @@ export const DatasetExplore = ({
             String(value).toLowerCase().includes(searchTerm.toLowerCase())
           );
     
-    console.log('Filtering item:', { 
-      item, 
-      selectedColumn, 
-      searchTerm, 
-      matches 
-    });
-    
     return matches;
   });
 
@@ -91,8 +84,6 @@ export const DatasetExplore = ({
     }
 
     try {
-      console.log('Starting sample download for:', selectedDataset);
-
       // Track analytics first
       const { error: analyticsError } = await supabase
         .from("analytics")
@@ -106,10 +97,10 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Fetch first 1000 rows
+      // Fetch data with selected columns
       const { data, error } = await supabase
         .from(selectedDataset)
-        .select('*')
+        .select(selectedColumns.join(','))
         .limit(1000);
 
       if (error) throw error;
@@ -118,25 +109,18 @@ export const DatasetExplore = ({
         throw new Error("No data available for download");
       }
 
-      console.log('Generated data:', {
-        rowCount: data.length,
-        sampleFirstRow: data[0]
-      });
-
       // Create CSV content
-      const headers = Object.keys(data[0]).filter(key => !key.startsWith('md_')).join(',');
-      const rows = data.map(row => {
-        return Object.entries(row)
-          .filter(([key]) => !key.startsWith('md_'))
-          .map(([_, value]) => {
-            if (value === null) return '';
-            if (typeof value === 'string' && value.includes(',')) {
-              return `"${value}"`;
-            }
-            return value;
-          })
-          .join(',');
-      });
+      const headers = selectedColumns.join(',');
+      const rows = data.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
       const csv = [headers, ...rows].join('\n');
 
       // Create and trigger download
