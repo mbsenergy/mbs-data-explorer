@@ -10,7 +10,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [columns, setColumns] = useState<string[]>([]);
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentQuery, setCurrentQuery] = useState("");
   const { toast } = useToast();
   const pageSize = 1000;
 
@@ -40,11 +39,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     return [];
   };
 
-  const generateQuery = (tableName: TableNames, selectedColumns: string[] = []) => {
-    const columnsStr = selectedColumns.length > 0 ? selectedColumns.join(', ') : '*';
-    return `SELECT ${columnsStr} FROM ${tableName}`;
-  };
-
   const loadData = async (tableName: TableNames) => {
     setIsLoading(true);
     try {
@@ -60,10 +54,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       // Get available columns first
       const availableColumns = await fetchColumns(tableName);
       setColumns(availableColumns);
-
-      // Generate and store the query
-      const query = generateQuery(tableName, availableColumns);
-      setCurrentQuery(query);
 
       // Calculate number of pages needed
       const numberOfPages = Math.ceil(totalRows / pageSize);
@@ -121,7 +111,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         setData([]);
         setColumns([]);
         setTotalRowCount(0);
-        setCurrentQuery("");
         return;
       }
 
@@ -140,10 +129,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         // Get available columns first
         const availableColumns = await fetchColumns(selectedDataset);
         setColumns(availableColumns);
-
-        // Generate and store the query
-        const query = generateQuery(selectedDataset, availableColumns);
-        setCurrentQuery(query);
 
         // Fetch initial chunk for preview
         const { data: initialData, error: initialError } = await supabase
@@ -204,7 +189,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     totalRowCount,
     isLoading,
     fetchPage,
-    loadData,
-    currentQuery
+    loadData
   };
 };

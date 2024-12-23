@@ -22,7 +22,7 @@ const Developer = () => {
 
   const results = sections.map(section => {
     const { data: files } = useDeveloperFiles(section);
-    return (files || []).map(file => ({ ...file, section })); // Add section to each file
+    return files || [];
   }).flat();
 
   useEffect(() => {
@@ -32,10 +32,6 @@ const Developer = () => {
 
   const handlePreview = async (fileName: string, section: string) => {
     try {
-      if (!section) {
-        throw new Error("Section is required");
-      }
-
       const { data, error } = await supabase.storage
         .from('developer')
         .download(`${section}/${fileName}`);
@@ -74,31 +70,8 @@ const Developer = () => {
       return;
     }
 
-    if (!section) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid file section.",
-      });
-      return;
-    }
-
     try {
-      // Download the file first to ensure it exists
-      const { data, error: downloadError } = await supabase.storage
-        .from('developer')
-        .download(`${section}/${fileName}`);
-
-      if (downloadError) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to download file.",
-        });
-        return;
-      }
-
-      // Track the download only after successful file download
+      // Track the download
       const { error: analyticsError } = await supabase
         .from("developer_analytics")
         .insert({
@@ -109,6 +82,20 @@ const Developer = () => {
 
       if (analyticsError) {
         console.error("Error tracking download:", analyticsError);
+      }
+
+      // Download the file
+      const { data, error } = await supabase.storage
+        .from('developer')
+        .download(`${section}/${fileName}`);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to download file.",
+        });
+        return;
       }
 
       // Create download link
@@ -136,7 +123,7 @@ const Developer = () => {
 
   return (
     <div className="space-y-8">
-      <h1>Developer Resources</h1>
+      <h1 className="text-3xl font-bold">Developer Resources</h1>
       
       <DeveloperActivity
         favorites={favorites}

@@ -5,13 +5,13 @@ import DatasetFilters from "./DatasetFilters";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetSearchHeader } from "./search/DatasetSearchHeader";
 import { DatasetSearchPagination } from "./search/DatasetSearchPagination";
-import type { TableInfo, TableNames } from "./types";
+import type { TableInfo } from "./types";
 
 interface DatasetSearchProps {
   tables: TableInfo[];
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
-  onSelect: (tableName: TableNames) => void;
+  onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
   favorites: Set<string>;
   onSearchChange: (search: string) => void;
@@ -21,7 +21,7 @@ interface DatasetSearchProps {
   availableFields: string[];
   availableTypes: string[];
   selectedDataset?: string;
-  onLoad?: (tableName: TableNames) => void;
+  onLoad?: (tableName: string) => void;  // Added this line
 }
 
 export const DatasetSearch = ({ 
@@ -58,8 +58,7 @@ export const DatasetSearch = ({
 
   React.useEffect(() => {
     const handleSelectDataset = (event: CustomEvent<string>) => {
-      // Type assertion here since we know these are valid table names
-      onSelect(event.detail as TableNames);
+      onSelect(event.detail);
     };
 
     window.addEventListener('select-dataset', handleSelectDataset as EventListener);

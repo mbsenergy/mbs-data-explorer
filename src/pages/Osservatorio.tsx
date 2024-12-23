@@ -4,8 +4,8 @@ import { KnowMoreSection } from "@/components/dashboard/KnowMoreSection";
 
 const Osservatorio = () => {
   return (
-    <div className="space-y-8">
-      <h1>Osservatorio</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Osservatorio</h1>
       <LatestDocuments />
       <MarketOverview />
       <KnowMoreSection />

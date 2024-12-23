@@ -77,78 +77,65 @@ const Login = () => {
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-corporate-blue rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" />
       <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-corporate-teal rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ animationDelay: "2s" }} />
       
-      <div className="flex flex-col items-center space-y-6 relative z-10">
-        {/* Flux Logo above the login box */}
-        <img 
-          src="/lovable-uploads/88640253-153d-45f4-b40a-7875ad3c91f1.png" 
-          alt="Flux Logo" 
-          className="h-24 w-auto mb-8 animate-float"
-        />
-        
-        <Card className="w-full max-w-md p-8 metallic-card relative shimmer">
-          <div className="space-y-6">
-            <div className="flex flex-col items-center space-y-2">
-              {/* MBS Logo inside the content box */}
-              <img 
-                src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
-                alt="MBS Logo" 
-                className="h-16 w-auto mb-4"
-              />
-              <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
-                Welcome back
-              </h1>
-              <h2 className="text-xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
-                Sign in to your account
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Enter your credentials to access your account
-              </p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground/90">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
-                  disabled={loading}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground/90">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
-                  disabled={loading}
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-corporate-blue to-corporate-teal hover:opacity-90 transition-opacity"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign in"
-                )}
-              </Button>
-            </form>
+      <Card className="w-full max-w-md p-8 metallic-card relative z-10 shimmer">
+        <div className="space-y-6">
+          <div className="flex flex-col items-center space-y-2">
+            <img 
+              src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
+              alt="Company Logo" 
+              className="h-12 mb-4 animate-float"
+            />
+            <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
+              Welcome back
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Enter your credentials to access your account
+            </p>
           </div>
-        </Card>
-      </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-foreground/90">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-foreground/90">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
+                disabled={loading}
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-corporate-blue to-corporate-teal hover:opacity-90 transition-opacity"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
+            </Button>
+          </form>
+        </div>
+      </Card>
     </div>
   );
 };

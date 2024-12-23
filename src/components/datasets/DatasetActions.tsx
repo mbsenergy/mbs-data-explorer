@@ -3,7 +3,10 @@ import { DatasetActivity } from "@/components/datasets/DatasetActivity";
 import { DatasetSearch } from "@/components/datasets/DatasetSearch";
 import { DatasetExplore } from "@/components/datasets/DatasetExplore";
 import { DatasetExport } from "@/components/datasets/export/DatasetExport";
-import type { TableInfo, TableNames } from "@/components/datasets/types";
+import type { TableInfo } from "@/components/datasets/types";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetActionsProps {
   tables: TableInfo[];
@@ -20,14 +23,14 @@ interface DatasetActionsProps {
   showOnlyFavorites: boolean;
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
-  onSelect: (tableName: TableNames) => void;
+  onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
   onSearchChange: (term: string) => void;
   onFieldChange: (field: string) => void;
   onTypeChange: (type: string) => void;
   onFavoriteChange: (show: boolean) => void;
   onColumnsChange: (columns: string[]) => void;
-  onLoad: (tableName: TableNames) => void;
+  onLoad: (tableName: string) => void;
   onClosePreview: () => void;
 }
 
@@ -79,7 +82,7 @@ export const DatasetActions = ({
         onFavoriteChange={onFavoriteChange}
         availableFields={availableFields}
         availableTypes={availableTypes}
-        selectedDataset={selectedDataset}
+        selectedDataset={selectedDataset || ""}
         onLoad={onLoad}
       />
 

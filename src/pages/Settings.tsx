@@ -4,11 +4,14 @@ import { ContactSection } from "@/components/settings/ContactSection";
 
 const Settings = () => {
   return (
-    <div className="space-y-8">
-      <h1>Settings</h1>
-      <PasswordSection />
-      <ApiTokenSection />
-      <ContactSection />
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Settings</h1>
+      
+      <div className="grid gap-6">
+        <PasswordSection />
+        <ApiTokenSection />
+        <ContactSection />
+      </div>
     </div>
   );
 };

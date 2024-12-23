@@ -7,13 +7,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DatasetTableRow } from "./DatasetTableRow";
-import type { TableInfo, TableNames } from "./types";
+import type { TableInfo } from "./types";
 
 interface DatasetTableProps {
   tables: TableInfo[];
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
-  onSelect: (tableName: TableNames) => void;
+  onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
   favorites: Set<string>;
   selectedDataset?: string;

@@ -28,9 +28,10 @@ interface DownloadsTableProps {
   data: any[];
   isLoading: boolean;
   title: string;
+  getDatasetInfo?: (datasetName: string) => { type: string; tags: string[] };
 }
 
-export const DownloadsTable = ({ data, isLoading, title }: DownloadsTableProps) => {
+export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: DownloadsTableProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -39,20 +40,6 @@ export const DownloadsTable = ({ data, isLoading, title }: DownloadsTableProps) 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = data?.slice(startIndex, endIndex) || [];
-
-  const getItemName = (item: any) => {
-    if (item.dataset_name) return item.dataset_name;
-    if (item.file_name) return item.file_name;
-    if (item.export_name) return item.export_name;
-    return "Unknown";
-  };
-
-  const getItemType = (item: any) => {
-    if (item.dataset_name) return "Dataset Sample";
-    if (item.file_name) return item.file_section;
-    if (item.export_name) return "Dataset Export";
-    return "Unknown Type";
-  };
 
   return (
     <Card className="p-6 bg-card">
@@ -74,36 +61,50 @@ export const DownloadsTable = ({ data, isLoading, title }: DownloadsTableProps) 
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>{getDatasetInfo ? "Dataset" : "File"}</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Tags</TableHead>
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={3}>
+                    <TableCell colSpan={4}>
                       <Skeleton className="h-8 w-full" />
                     </TableCell>
                   </TableRow>
                 ) : currentData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">
                       No downloads yet
                     </TableCell>
                   </TableRow>
                 ) : (
-                  currentData.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{getItemName(item)}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{getItemType(item)}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(item.downloaded_at), 'dd MMM yyyy HH:mm')}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  currentData.map((item) => {
+                    const info = getDatasetInfo 
+                      ? getDatasetInfo(item.dataset_name)
+                      : { type: item.file_section, tags: [item.file_name.split('.').pop()] };
+                    
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell>{getDatasetInfo ? item.dataset_name : item.file_name}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{info.type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2 flex-wrap">
+                            {info.tags.map((tag) => (
+                              <Badge key={tag} variant="secondary">{tag}</Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(item.downloaded_at), 'dd MMM yyyy HH:mm')}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>

@@ -1,131 +1,112 @@
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { 
-  ArrowUpRight, 
-  LineChart, 
-  Sun, 
-  FileText, 
-  Database, 
-  ShieldCheck, 
-  Briefcase,
-  Building,
-  Users,
-  Shield,
-  Banknote,
-  Globe,
-  ChartBar,
-  Monitor,
-  ChartLine,
-  Building2,
-} from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
-const companies = [
-  {
-    name: "Energy",
-    description: "Explore our comprehensive energy market data and analytics platform, designed to help businesses make informed decisions in the evolving energy landscape.",
-    link: "https://mbsconsulting.ref-e.com/",
-    services: [
-      { name: "Strategy & Asset Valuation", icon: LineChart },
-      { name: "Osservatorio energia", icon: Sun },
-      { name: "Scenario", icon: FileText },
-      { name: "Data & Modelling", icon: Database },
-      { name: "Due Dilligence", icon: ShieldCheck },
-      { name: "PPA", icon: Briefcase }
-    ]
-  },
-  {
-    name: "MBS Consulting",
-    description: "Discover how our consulting services can help transform your business through strategic insights and innovative solutions.",
-    link: "https://www.mbsconsulting.com/",
-    services: [
-      { name: "Insurance", icon: Shield },
-      { name: "Banking", icon: Building2 },
-      { name: "Energy", icon: Sun },
-      { name: "Risk Advisory", icon: ShieldCheck },
-      { name: "Financial Services", icon: Banknote },
-      { name: "Innovation Team", icon: Users },
-      { name: "Public Administration", icon: Building },
-      { name: "EGS", icon: Users },
-    ]
-  },
-  {
-    name: "Cerved Group",
-    description: "Learn more about Cerved Group's comprehensive business information services and credit management solutions.",
-    link: "https://www.cerved.com/",
-    services: [
-      { name: "Cerved", icon: Globe },
-      { name: "Rating Agency", icon: ChartBar },
-      { name: "Data & AI", icon: Database },
-      { name: "Spazio Dati", icon: Database },
-      { name: "ProWeb", icon: Monitor }
-    ]
-  },
-  {
-    name: "ION Group",
-    description: "Explore ION Group's trading and workflow solutions that power financial institutions worldwide.",
-    link: "https://iongroup.com/markets/",
-    services: [
-      { name: "Market Analytics", icon: ChartLine },
-      { name: "Core Banking", icon: Building2 },
-      { name: "Analytics", icon: ChartBar },
-      { name: "Corporate", icon: Users },
-      { name: "Credit Information", icon: Database },
-      { name: "Other", icon: Users }
-    ]
-  }
-];
+const ServiceBox = ({ title }: { title: string }) => (
+  <div className="p-4 bg-muted rounded-lg">
+    <h4 className="font-medium">{title}</h4>
+  </div>
+);
 
 const Company = () => {
   return (
     <div className="space-y-6">
-      <h1>Company</h1>
+      <h1 className="text-3xl font-bold">Company Products</h1>
       
       <div className="grid gap-6">
-        {companies.map((company) => (
-          <Card key={company.name} className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-start justify-between">
-                <h2 className="text-2xl font-semibold">{company.name}</h2>
-                <Button variant="ghost" size="icon" asChild>
-                  <a 
-                    href={company.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:no-underline"
-                  >
-                    <ArrowUpRight className="h-5 w-5" />
-                  </a>
-                </Button>
-              </div>
-              <p className="text-muted-foreground">{company.description}</p>
-              
-              {company.services && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-4">
-                  {company.services.map((service) => (
-                    <div 
-                      key={service.name}
-                      className="flex items-center gap-2 p-3 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors"
-                    >
-                      <service.icon className="h-5 w-5 text-corporate-teal" />
-                      <span className="text-sm font-medium">{service.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <Button asChild variant="outline">
-                <a 
-                  href={company.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:no-underline"
-                >
-                  Learn More
-                </a>
-              </Button>
+        <CollapsibleCard title="Energy Services">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <ServiceBox title="Strategy & Asset Valuation" />
+              <ServiceBox title="Osservatorio energia" />
+              <ServiceBox title="Scenario" />
+              <ServiceBox title="Data & Modelling" />
+              <ServiceBox title="Due Dilligence" />
+              <ServiceBox title="PPA" />
             </div>
-          </Card>
-        ))}
+            <Button variant="default" className="bg-corporate-teal hover:bg-corporate-teal/90" asChild>
+              <a 
+                href="https://mbsconsulting.ref-e.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center"
+              >
+                Learn More <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="MBS Consulting">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <ServiceBox title="Insurance" />
+              <ServiceBox title="Banking" />
+              <ServiceBox title="Energy" />
+              <ServiceBox title="Risk Advisory" />
+              <ServiceBox title="Financial Services" />
+              <ServiceBox title="Innovation Team" />
+              <ServiceBox title="Public Administration" />
+              <ServiceBox title="EGS" />
+              <ServiceBox title="More" />
+            </div>
+            <Button variant="default" className="bg-corporate-blue hover:bg-corporate-blue/90" asChild>
+              <a 
+                href="https://www.mbsconsulting.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center"
+              >
+                Learn More <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="Cerved Group">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <ServiceBox title="Cerved" />
+              <ServiceBox title="Rating Agency" />
+              <ServiceBox title="Data & AI" />
+              <ServiceBox title="Spazio Dati" />
+              <ServiceBox title="ProWeb" />
+            </div>
+            <Button variant="default" className="bg-corporate-orange hover:bg-corporate-orange/90" asChild>
+              <a 
+                href="https://www.cerved.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center"
+              >
+                Learn More <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </CollapsibleCard>
+
+        <CollapsibleCard title="ION Group">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <ServiceBox title="Market Analytics" />
+              <ServiceBox title="Core Banking" />
+              <ServiceBox title="Analytics" />
+              <ServiceBox title="Corporate" />
+              <ServiceBox title="Credit Information" />
+              <ServiceBox title="Other" />
+            </div>
+            <Button variant="default" className="bg-corporate-yellow hover:bg-corporate-yellow/90" asChild>
+              <a 
+                href="https://iongroup.com/markets/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center"
+              >
+                Learn More <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </CollapsibleCard>
       </div>
     </div>
   );

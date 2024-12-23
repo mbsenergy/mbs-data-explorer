@@ -22,25 +22,26 @@ export const Navbar = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       
-      console.log("Fetching profile for user:", user.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("first_name, last_name, avatar_url")
         .eq("id", user.id)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error("Error fetching profile:", error);
         throw error;
       }
 
-      console.log("Profile fetch result:", data);
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
     retry: 2,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   if (isLoading) {
@@ -60,13 +61,9 @@ export const Navbar = () => {
         <div className="hidden md:block">
           <span className="text-sm text-muted-foreground">
             Welcome back{" "}
-            {profile?.first_name || profile?.last_name ? (
-              <span className="font-medium text-foreground">
-                {[profile.first_name, profile.last_name].filter(Boolean).join(" ")}
-              </span>
-            ) : (
-              <span className="font-medium text-foreground">{user?.email}</span>
-            )}
+            <span className="font-medium text-foreground">
+              {profile?.first_name} {profile?.last_name}
+            </span>
           </span>
         </div>
 

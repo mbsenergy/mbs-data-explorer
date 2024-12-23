@@ -13,7 +13,7 @@ export const LatestDocuments = () => {
   const { data: latestDocs, isLoading: docsLoading } = useOsservatorioDocuments();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-1">
       <h2 className="text-2xl font-semibold">Latest Osservatorio Reports</h2>
       <div className="w-full">
         {docsLoading ? (
@@ -44,9 +44,7 @@ export const LatestDocuments = () => {
             <CarouselNext className="hidden md:flex -right-12" />
           </Carousel>
         ) : (
-          <div className="flex items-center justify-center h-[300px] border border-card bg-card rounded-lg">
-            <p className="text-center text-muted-foreground">No documents available</p>
-          </div>
+          <p className="text-center text-muted-foreground">No documents available</p>
         )}
       </div>
     </div>

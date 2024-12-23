@@ -3,13 +3,13 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Download, Eye, Star } from "lucide-react";
 import { ConfirmDialog } from "./ConfirmDialog";
-import type { TableInfo, TableNames } from "./types";
+import type { TableInfo } from "./types";
 
 interface DatasetTableRowProps {
   table: TableInfo;
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
-  onSelect: (tableName: TableNames) => void;
+  onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
   isFavorite: boolean;
   isSelected?: boolean;
@@ -37,11 +37,6 @@ export const DatasetTableRow = ({
     setIsDownloadDialogOpen(false);
   };
 
-  const handleSelect = () => {
-    // Type assertion since we know these are valid table names from the database
-    onSelect(table.tablename as TableNames);
-  };
-
   return (
     <>
       <TableRow>
@@ -63,7 +58,7 @@ export const DatasetTableRow = ({
             className={isSelected ? 
               "bg-[#1E293B] text-white hover:bg-[#1E293B]/90" : 
               "bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white"}
-            onClick={handleSelect}
+            onClick={() => onSelect(table.tablename)}
           >
             {isSelected ? "Selected" : "Select"}
           </Button>

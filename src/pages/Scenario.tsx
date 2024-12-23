@@ -4,8 +4,8 @@ import { KnowMoreSection } from "@/components/dashboard/KnowMoreSection";
 
 const Scenario = () => {
   return (
-    <div className="space-y-8">
-      <h1>Scenario Analysis</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Scenario Analysis</h1>
       <LatestDocuments />
       <MarketOverview />
       <KnowMoreSection />
