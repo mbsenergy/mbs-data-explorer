@@ -19,17 +19,23 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [columns, setColumns] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [totalRows, setTotalRows] = useState<number>(0);
+  const [filteredRows, setFilteredRows] = useState<number>(0);
   const { toast } = useToast();
   const { user } = useAuth();
 
   React.useEffect(() => {
     if (selectedDataset) {
       fetchColumns();
+      fetchTotalRows();
+      fetchFilteredRows();
     } else {
       setColumns([]);
       setFilters({});
+      setTotalRows(0);
+      setFilteredRows(0);
     }
-  }, [selectedDataset]);
+  }, [selectedDataset, filters]);
 
   const fetchColumns = async () => {
     if (!selectedDataset) return;
@@ -55,6 +61,44 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     }
   };
 
+  const fetchTotalRows = async () => {
+    if (!selectedDataset) return;
+
+    try {
+      const { count, error } = await supabase
+        .from(selectedDataset as TableNames)
+        .select('*', { count: 'exact', head: true });
+
+      if (error) throw error;
+      setTotalRows(count || 0);
+    } catch (error) {
+      console.error('Error fetching total rows:', error);
+    }
+  };
+
+  const fetchFilteredRows = async () => {
+    if (!selectedDataset) return;
+
+    try {
+      let query = supabase
+        .from(selectedDataset as TableNames)
+        .select('*', { count: 'exact', head: true });
+
+      Object.entries(filters).forEach(([column, value]) => {
+        if (value) {
+          query = query.ilike(column, `%${value}%`);
+        }
+      });
+
+      const { count, error } = await query;
+
+      if (error) throw error;
+      setFilteredRows(count || 0);
+    } catch (error) {
+      console.error('Error fetching filtered rows:', error);
+    }
+  };
+
   const handleFilterChange = (column: string, value: string) => {
     setFilters(prev => ({
       ...prev,
@@ -69,7 +113,6 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     try {
       let query = supabase.from(selectedDataset as TableNames).select();
 
-      // Apply filters
       Object.entries(filters).forEach(([column, value]) => {
         if (value) {
           query = query.ilike(column, `%${value}%`);
@@ -88,7 +131,6 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
         return;
       }
 
-      // Track export
       await supabase
         .from('exports')
         .insert({
@@ -97,13 +139,11 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           export_type: 'filtered_dataset'
         });
 
-      // Convert to CSV
       const csv = [
         Object.keys(data[0]).join(','),
         ...data.map(row => Object.values(row).join(','))
       ].join('\n');
 
-      // Download file
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -138,6 +178,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           variant="outline"
           onClick={handleExport}
           disabled={!selectedDataset || loading}
+          className="bg-corporate-orange hover:bg-corporate-orange/90 text-white"
         >
           <Download className="w-4 h-4 mr-2" />
           Export
@@ -145,11 +186,28 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       </div>
 
       <div className="space-y-6">
-        <div>
+        <div className="space-y-4">
           <Label>Selected Dataset</Label>
           <div className="h-10 px-4 py-2 border rounded-md bg-muted">
             {selectedDataset || 'No dataset selected'}
           </div>
+          
+          {selectedDataset && (
+            <div className="grid grid-cols-3 gap-4 mt-2">
+              <div className="p-3 bg-gray-50 rounded-md">
+                <p className="text-sm text-gray-600">Total Rows</p>
+                <p className="text-lg font-semibold">{totalRows.toLocaleString()}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-md">
+                <p className="text-sm text-gray-600">Total Columns</p>
+                <p className="text-lg font-semibold">{columns.length}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-md">
+                <p className="text-sm text-gray-600">Filtered Rows</p>
+                <p className="text-lg font-semibold">{filteredRows.toLocaleString()}</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {selectedDataset && columns.length > 0 && (
