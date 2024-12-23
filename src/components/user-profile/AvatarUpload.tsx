@@ -23,10 +23,26 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
     try {
       setIsUploading(true);
       
+      // First, try to remove the old avatar if it exists
+      if (avatarUrl) {
+        const oldFilePath = avatarUrl.split('/').slice(-2).join('/'); // Get the path from the URL
+        if (oldFilePath) {
+          const { error: deleteError } = await supabase.storage
+            .from("avatars")
+            .remove([oldFilePath]);
+          
+          if (deleteError) {
+            console.error("Error deleting old avatar:", deleteError);
+            // Continue with upload even if delete fails
+          }
+        }
+      }
+
       // Create a folder structure with user ID
       const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/avatar.${fileExt}`;
 
+      // Upload new avatar
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file, { upsert: true });
@@ -36,13 +52,18 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
         throw uploadError;
       }
 
+      // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
 
+      // Update profile with new avatar URL
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ 
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
         .eq("id", user.id);
 
       if (updateError) {
@@ -63,7 +84,10 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
   return (
     <div className="flex flex-col items-center space-y-4">
       <Avatar className="h-24 w-24">
-        <AvatarImage src={avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} />
+        <AvatarImage 
+          src={avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} 
+          alt="avatar" 
+        />
         <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
       <div>
