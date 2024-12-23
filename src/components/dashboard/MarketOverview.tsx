@@ -109,12 +109,12 @@ export const MarketOverview = () => {
   };
 
   return (
-    <div className="space-y-1">
-      <h2 className="text-xl font-semibold">Market Overview</h2>
+    <div className="space-y-3">
+      <h2 className="text-2xl font-semibold">Market Overview</h2>
   
       {/* Economics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-8"> {/* Increased padding from p-6 to p-8 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="p-4"> {/* Increased padding from p-6 to p-8 */}
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">GDP by Country</h3>
             <Button 
@@ -128,9 +128,9 @@ export const MarketOverview = () => {
             </Button>
           </div>
           {gdpLoading ? (
-            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-[125px] w-full" />
           ) : (
-            <div className="h-[200px]">
+            <div className="h-[125px]">
               <HighchartsReact 
                 highcharts={Highcharts}
                 options={{

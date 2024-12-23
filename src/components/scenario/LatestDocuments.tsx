@@ -7,12 +7,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { DocumentCard } from "../dashboard/DocumentCard";
+import { Card } from "@/components/ui/card";
 import { useScenarioDocuments } from "@/hooks/useScenarioDocuments";
 
 export const LatestDocuments = () => {
   const { data: latestDocs, isLoading: docsLoading } = useScenarioDocuments();
 
   return (
+    <Card className="p-6">
     <div className="space-y-1">
       <h2 className="text-2xl font-semibold">Latest Scenario Reports</h2>
       <div className="w-full">
@@ -48,5 +50,6 @@ export const LatestDocuments = () => {
         )}
       </div>
     </div>
+    </Card>
   );
 };

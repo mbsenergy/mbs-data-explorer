@@ -7,7 +7,9 @@ const Osservatorio = () => {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500">Osservatorio</h1>
       <LatestDocuments />
+      <br></br>
       <MarketOverview />
+      <br></br>
       <KnowMoreSection />
     </div>
   );
