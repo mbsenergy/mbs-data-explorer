@@ -44,6 +44,9 @@ export const useProfile = (userId: string | undefined, onProfileLoaded?: (data: 
       return data as Profile;
     },
     enabled: !!userId,
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2,
     meta: {
       onSuccess: (data: Profile) => {
         console.log("Profile query succeeded:", data);

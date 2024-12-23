@@ -33,15 +33,13 @@ export const Navbar = () => {
         throw error;
       }
 
+      console.log("Navbar profile data:", data);
       return data;
     },
     enabled: !!user?.id,
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
     retry: 2,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
   });
 
   if (isLoading) {
@@ -61,9 +59,13 @@ export const Navbar = () => {
         <div className="hidden md:block">
           <span className="text-sm text-muted-foreground">
             Welcome back{" "}
-            <span className="font-medium text-foreground">
-              {profile?.first_name} {profile?.last_name}
-            </span>
+            {profile?.first_name || profile?.last_name ? (
+              <span className="font-medium text-foreground">
+                {[profile.first_name, profile.last_name].filter(Boolean).join(" ")}
+              </span>
+            ) : (
+              <span className="font-medium text-foreground">{user?.email}</span>
+            )}
           </span>
         </div>
 
