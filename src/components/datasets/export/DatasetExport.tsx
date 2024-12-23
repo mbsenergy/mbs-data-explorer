@@ -31,7 +31,7 @@ export const DatasetExport = ({ selectedDataset, selectedColumns, isLoading }: D
   };
 
   return (
-    <Card className="p-6 space-y-6">
+    <Card className="p-6 space-y-6 mt-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Export</h2>
       </div>

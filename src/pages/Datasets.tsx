@@ -26,6 +26,7 @@ const Datasets = () => {
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
   const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(null);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const { favorites, toggleFavorite } = useFavorites();
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
@@ -72,6 +73,7 @@ const Datasets = () => {
   const handleDownload = async (tableName: string) => {
     if (!user?.id) return;
 
+    // Track analytics
     const { error: analyticsError } = await supabase
       .from("analytics")
       .insert({
@@ -90,9 +92,10 @@ const Datasets = () => {
       return;
     }
 
+    // Download data with selected columns and filters
     const { data, error } = await supabase
       .from(tableName as any)
-      .select("*")
+      .select(selectedColumns.join(','))
       .limit(1000);
 
     if (error) {
@@ -105,15 +108,15 @@ const Datasets = () => {
     }
 
     const csv = [
-      Object.keys(data[0]).join(','),
-      ...data.map(row => Object.values(row).join(','))
+      selectedColumns.join(','),
+      ...data.map(row => selectedColumns.map(col => row[col]).join(','))
     ].join('\n');
     
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${tableName}.csv`;
+    a.download = `${tableName}_sample.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -121,7 +124,7 @@ const Datasets = () => {
 
     toast({
       title: "Success",
-      description: "Dataset downloaded successfully.",
+      description: "Dataset sample downloaded successfully.",
     });
   };
 
@@ -196,11 +199,15 @@ const Datasets = () => {
         selectedDataset={selectedDataset || ""}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DatasetExplore selectedDataset={selectedDataset} />
+      <div className="space-y-6">
+        <DatasetExplore 
+          selectedDataset={selectedDataset} 
+          onColumnsChange={setSelectedColumns}
+        />
+        
         <DatasetExport 
           selectedDataset={selectedDataset}
-          selectedColumns={[]} // This will need to be lifted up from DatasetExplore
+          selectedColumns={selectedColumns}
           isLoading={false}
         />
       </div>

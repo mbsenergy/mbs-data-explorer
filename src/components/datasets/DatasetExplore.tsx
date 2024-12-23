@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { DatasetPagination } from "./explore/DatasetPagination";
 import { DatasetStats } from "./explore/DatasetStats";
 import { DatasetTable } from "./explore/DatasetTable";
 import { DatasetControls } from "./explore/DatasetControls";
+import { DatasetColumnSelect } from "./explore/DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -13,9 +13,10 @@ type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetExploreProps {
   selectedDataset: TableNames | null;
+  onColumnsChange: (columns: string[]) => void;
 }
 
-export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
+export const DatasetExplore = ({ selectedDataset, onColumnsChange }: DatasetExploreProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -29,6 +30,14 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     isLoading,
     fetchPage
   } = useDatasetData(selectedDataset);
+
+  // Pre-select all columns when they change
+  useEffect(() => {
+    if (columns.length > 0) {
+      setSelectedColumns(columns);
+      onColumnsChange(columns);
+    }
+  }, [columns, onColumnsChange]);
 
   const filteredData = data.filter((item) =>
     selectedColumn
@@ -49,12 +58,12 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   );
 
   const handleColumnSelect = (column: string) => {
-    setSelectedColumns(prev => {
-      if (prev.includes(column)) {
-        return prev.filter(col => col !== column);
-      }
-      return [...prev, column];
-    });
+    const newColumns = selectedColumns.includes(column)
+      ? selectedColumns.filter(col => col !== column)
+      : [...selectedColumns, column];
+    
+    setSelectedColumns(newColumns);
+    onColumnsChange(newColumns);
   };
 
   const handlePageChange = async (newPage: number) => {
@@ -65,7 +74,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   };
 
   return (
-    <Card className="p-6 space-y-6" data-explore-section>
+    <Card className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">Explore</h2>
@@ -106,25 +115,11 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             onColumnChange={setSelectedColumn}
           />
 
-          <div className="space-y-2">
-            <Label>Columns to display</Label>
-            <div className="flex flex-wrap gap-2">
-              {columns.map((col) => (
-                <label
-                  key={col}
-                  className="inline-flex items-center space-x-2 bg-card border border-border rounded-md px-3 py-1 cursor-pointer hover:bg-accent"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedColumns.includes(col)}
-                    onChange={() => handleColumnSelect(col)}
-                    className="rounded border-gray-300"
-                  />
-                  <span>{col}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <DatasetColumnSelect
+            columns={columns}
+            selectedColumns={selectedColumns}
+            onColumnSelect={handleColumnSelect}
+          />
 
           <DatasetTable
             columns={columns}
