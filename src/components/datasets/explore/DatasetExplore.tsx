@@ -59,6 +59,18 @@ export const DatasetExplore = ({
     }
   };
 
+  const filteredData = data.filter((item) =>
+    selectedColumn
+      ? String(item[selectedColumn])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : Object.entries(item)
+          .filter(([key]) => !key.startsWith('md_'))
+          .some(([_, value]) => 
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+          )
+  );
+
   const handleSample = async () => {
     if (!selectedDataset || !user?.id || !selectedColumns.length) {
       toast({
@@ -83,9 +95,9 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Create CSV content from the current filtered data
+      // Create CSV content from the filtered data
       const headers = selectedColumns.join(',');
-      const rows = data.map(row => 
+      const rows = filteredData.map(row => 
         selectedColumns.map(col => {
           const value = row[col];
           // Handle special cases like numbers, nulls, and strings with commas
@@ -122,18 +134,6 @@ export const DatasetExplore = ({
       });
     }
   };
-
-  const filteredData = data.filter((item) =>
-    selectedColumn
-      ? String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      : Object.entries(item)
-          .filter(([key]) => !key.startsWith('md_'))
-          .some(([_, value]) => 
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
-          )
-  );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
