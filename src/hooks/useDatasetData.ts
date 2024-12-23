@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -11,8 +11,11 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  
+  const pageSize = 1000; // Chunk size for fetching data
+  const maxRetries = 3;
 
-  const fetchWithRetry = async (fn: () => Promise<any>, retries = 3) => {
+  const fetchWithRetry = async (fn: () => Promise<any>, retries = maxRetries) => {
     try {
       return await fn();
     } catch (error) {
@@ -57,23 +60,37 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       setColumns(columnsToUse);
 
-      console.log('Loading full dataset with columns:', columnsToUse);
+      // Calculate number of pages needed
+      const numberOfPages = Math.ceil(totalRows / pageSize);
+      let allData: any[] = [];
 
-      // Fetch all data with selected columns - no limit
-      const { data: tableData, error } = await supabase
-        .from(tableName)
-        .select(columnsToUse.join(','));
+      // Fetch data in chunks
+      for (let i = 0; i < numberOfPages; i++) {
+        const from = i * pageSize;
+        const to = from + pageSize - 1;
 
-      if (error) throw error;
-      
-      if (tableData) {
-        console.log(`Loaded ${tableData.length} rows successfully`);
-        setData(tableData);
-        toast({
-          title: "Success",
-          description: `Loaded ${tableData.length} rows successfully`
+        const { data: pageData, error } = await fetchWithRetry(async () => {
+          return await supabase
+            .from(tableName)
+            .select(columnsToUse.join(','))
+            .range(from, to);
         });
+
+        if (error) throw error;
+        
+        if (pageData) {
+          allData = [...allData, ...pageData];
+          console.log(`Loaded chunk ${i + 1}/${numberOfPages} (${pageData.length} rows)`);
+        }
       }
+
+      setData(allData);
+      console.log(`Loaded ${allData.length} rows successfully`);
+      
+      toast({
+        title: "Success",
+        description: `Loaded ${allData.length} rows successfully`
+      });
 
     } catch (error: any) {
       console.error("Error loading data:", error);
@@ -82,6 +99,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         title: "Error",
         description: error.message || "Failed to load data"
       });
+      setData([]);
+      setColumns([]);
     } finally {
       setIsLoading(false);
     }
@@ -99,16 +118,14 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       setIsLoading(true);
 
       try {
-        // Get initial count
+        // Get total count
         const { data: countResult, error: countError } = await supabase
-          .rpc('get_table_row_count', {
-            table_name: selectedDataset
-          });
+          .rpc('get_table_row_count', { table_name: selectedDataset });
 
         if (countError) throw countError;
         setTotalRowCount(countResult || 0);
 
-        // Get available columns first
+        // Get available columns
         const availableColumns = await fetchColumns(selectedDataset);
         setColumns(availableColumns);
 
