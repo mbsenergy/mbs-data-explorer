@@ -96,7 +96,7 @@ export function AppSidebar() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start w-full">
             <img 
-              src="/lovable-uploads/db951553-22d1-479e-9c94-4fb6cddcd7d0.png" 
+              src="/lovable-uploads/4a4029b5-ea41-45f4-aa7b-6ad8181a4f7f.png" 
               alt="Fluxer Logo" 
               className="w-full h-auto object-contain"
             />
@@ -104,6 +104,7 @@ export function AppSidebar() {
           </div>
         </div>
       </SidebarHeader>
+      
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
