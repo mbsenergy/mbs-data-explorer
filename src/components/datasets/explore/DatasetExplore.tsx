@@ -241,7 +241,8 @@ export const DatasetExplore = ({
   const generateFilterQuery = () => {
     if (!selectedDataset) return "";
     
-    let query = `SELECT ${selectedColumns.join(', ')} FROM ${selectedDataset}`;
+    // Ensure exact case matching by using double quotes for table name
+    let query = `SELECT ${selectedColumns.join(', ')} FROM "${selectedDataset}"`;
     
     if (filters.length > 0) {
       const filterConditions = filters
@@ -252,9 +253,9 @@ export const DatasetExplore = ({
           
           if (comparison === 'IN' || comparison === 'NOT IN') {
             const values = filter.searchTerm.split(',').map(v => `'${v.trim()}'`).join(',');
-            condition = `${filter.selectedColumn} ${comparison} (${values})`;
+            condition = `"${filter.selectedColumn}" ${comparison} (${values})`;
           } else {
-            condition = `${filter.selectedColumn} ${comparison} '${filter.searchTerm}'`;
+            condition = `"${filter.selectedColumn}" ${comparison} '${filter.searchTerm}'`;
           }
           
           return index === 0 ? condition : `${filter.operator} ${condition}`;
