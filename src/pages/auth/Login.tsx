@@ -71,11 +71,19 @@ const Login = () => {
       <Card className="w-full max-w-md p-8 metallic-card relative z-10 shimmer">
         <div className="space-y-6">
           <div className="flex flex-col items-center space-y-2">
-            <img 
-              src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
-              alt="Company Logo" 
-              className="h-12 mb-4 animate-float"
-            />
+            <div className="flex items-center gap-4">
+              <img 
+                src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
+                alt="Company Logo" 
+                className="h-12 mb-4 animate-float"
+              />
+              <img 
+                src="/lovable-uploads/db951553-22d1-479e-9c94-4fb6cddcd7d0.png" 
+                alt="Flux Logo" 
+                className="h-12 mb-4 animate-float"
+                style={{ animationDelay: "1s" }}
+              />
+            </div>
             <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
               Welcome back
             </h1>
