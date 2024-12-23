@@ -1,12 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Strategy, Sun, FileText, Database, ShieldCheck, Briefcase } from "lucide-react";
 
 const companies = [
   {
     name: "Energy",
     description: "Explore our comprehensive energy market data and analytics platform, designed to help businesses make informed decisions in the evolving energy landscape.",
-    link: "https://www.cerved.com/en/offering/energy/"
+    link: "https://www.cerved.com/en/offering/energy/",
+    services: [
+      { name: "Strategy & Asset Valuation", icon: Strategy },
+      { name: "Osservatorio energia", icon: Sun },
+      { name: "Scenario", icon: FileText },
+      { name: "Data & Modelling", icon: Database },
+      { name: "Due Dilligence", icon: ShieldCheck },
+      { name: "PPA", icon: Briefcase }
+    ]
   },
   {
     name: "MBS Consulting",
@@ -48,6 +56,21 @@ const Company = () => {
                 </Button>
               </div>
               <p className="text-muted-foreground">{company.description}</p>
+              
+              {company.services && (
+                <div className="grid grid-cols-2 gap-4 py-4">
+                  {company.services.map((service) => (
+                    <div 
+                      key={service.name}
+                      className="flex items-center gap-2 p-3 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors"
+                    >
+                      <service.icon className="h-5 w-5 text-corporate-teal" />
+                      <span className="text-sm font-medium">{service.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <Button asChild variant="outline">
                 <a 
                   href={company.link} 
