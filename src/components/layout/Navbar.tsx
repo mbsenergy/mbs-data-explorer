@@ -50,7 +50,7 @@ export const Navbar = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="mr-2 hover:bg-[#4fd9e8] hover:text-white" 
+          className="mr-2 hover:bg-[#4fd9e8] hover:text-white transition-colors" 
           asChild
         >
           <Link to="/guide">
@@ -66,33 +66,39 @@ export const Navbar = () => {
         {/* Avatar with Dropdown - always visible */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarImage 
-                src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} 
-                alt="avatar" 
-              />
-              <AvatarFallback>
-                {user?.email?.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full p-0 hover:bg-[#4fd9e8]"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage 
+                  src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} 
+                  alt="avatar" 
+                />
+                <AvatarFallback>
+                  {user?.email?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
-            className="w-40 bg-card hover:bg-[#4fd9e8]"
+            className="w-40"
           >
-            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8]">
+            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8] hover:text-white transition-colors">
               <Link to="/" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8]">
+            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8] hover:text-white transition-colors">
               <Link to="/user" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>User</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8]">
+            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8] hover:text-white transition-colors">
               <Link to="/settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
