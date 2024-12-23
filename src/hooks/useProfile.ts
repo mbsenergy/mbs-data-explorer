@@ -33,7 +33,7 @@ export const useProfile = (userId: string | undefined, onProfileLoaded?: (data: 
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error("Error fetching profile:", error);
@@ -41,16 +41,16 @@ export const useProfile = (userId: string | undefined, onProfileLoaded?: (data: 
       }
       
       console.log("Fetched profile data:", data);
-      return data as Profile;
+      return data as Profile | null;
     },
     enabled: !!userId,
     gcTime: 1000 * 60 * 30, // 30 minutes
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
     meta: {
-      onSuccess: (data: Profile) => {
+      onSuccess: (data: Profile | null) => {
         console.log("Profile query succeeded:", data);
-        if (onProfileLoaded) {
+        if (onProfileLoaded && data) {
           onProfileLoaded(data);
         }
       },
