@@ -34,7 +34,7 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
         country: profile.country || "",
       });
     }
-  }, [profile]);
+  }, [profile?.id, profile?.updated_at]); // Add dependencies to ensure form updates when profile changes
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -56,7 +56,7 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
       console.log("Form data to be sent:", formData);
 
       const updateData = {
-        id: userId, // Include ID for upsert
+        id: userId,
         first_name: formData.first_name || null,
         last_name: formData.last_name || null,
         date_of_birth: formData.date_of_birth || null,
@@ -68,7 +68,6 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
 
       console.log("Formatted update data:", updateData);
       
-      // Use upsert instead of update
       const { error, data } = await supabase
         .from("profiles")
         .upsert(updateData)
