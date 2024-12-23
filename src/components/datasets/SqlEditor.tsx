@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Play } from "lucide-react";
 
 interface SqlEditorProps {
   onExecute: (query: string) => void;
+  defaultValue?: string;
 }
 
-const SqlEditor = ({ onExecute }: SqlEditorProps) => {
-  const [query, setQuery] = useState("");
+const SqlEditor = ({ onExecute, defaultValue = "" }: SqlEditorProps) => {
+  const [query, setQuery] = useState(defaultValue);
+
+  useEffect(() => {
+    setQuery(defaultValue);
+  }, [defaultValue]);
 
   return (
     <div className="space-y-4">
