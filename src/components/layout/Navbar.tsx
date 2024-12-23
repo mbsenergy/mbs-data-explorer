@@ -32,7 +32,7 @@ export const Navbar = () => {
   });
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/40 bg-card">
+    <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]"> {/* Added ml-[var(--sidebar-width)] and adjusted z-index */}
       <div className="container flex h-full items-center">
         {/* Welcome message - always visible */}
         <div className="hidden md:block">

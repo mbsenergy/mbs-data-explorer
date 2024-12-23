@@ -8,9 +8,9 @@ export const Layout = () => {
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col pt-16"> {/* Added pt-16 for navbar height */}
+        <div className="flex-1 flex flex-col">
           <Navbar />
-          <main className="flex-1 container py-6">
+          <main className="flex-1 container py-6 mt-16"> {/* Changed pt-16 to mt-16 */}
             <div className="animate-fade-in">
               <Outlet />
             </div>
