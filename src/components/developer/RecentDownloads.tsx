@@ -21,7 +21,7 @@ export const RecentDownloads = ({
 }: RecentDownloadsProps) => {
   return (
     <div className="p-4 border border-[hsl(217,100%,15%)] rounded-lg bg-card/50">
-      <h2 className="text-2xl font-semibold text-white">Recent Downloads</h2>
+      <h3>Recent Downloads</h3>
       <Carousel className="w-full">
         <CarouselContent>
           {recentDownloads?.map((download) => {
