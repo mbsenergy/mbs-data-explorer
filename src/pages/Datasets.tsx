@@ -10,9 +10,9 @@ import { DatasetActions } from "@/components/datasets/DatasetActions";
 import { DatasetQuery } from "@/components/datasets/query/DatasetQuery";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database as SupabaseDatabase } from "@/integrations/supabase/types";
 
-type TableNames = keyof Database['public']['Tables'];
+type TableNames = keyof SupabaseDatabase['public']['Tables'];
 
 const Datasets = () => {
   const { toast } = useToast();
@@ -54,7 +54,7 @@ const Datasets = () => {
       }
 
       const { data, error } = await supabase
-        .from(tableName as any)
+        .from(tableName as TableNames)
         .select("*");
 
       if (error) throw error;
@@ -78,7 +78,7 @@ const Datasets = () => {
   const handlePreview = async (tableName: string) => {
     try {
       const { data, error } = await supabase
-        .from(tableName as any)
+        .from(tableName as TableNames)
         .select("*")
         .limit(30);
 
@@ -127,7 +127,7 @@ const Datasets = () => {
 
       // Fetch data with selected columns
       const { data, error } = await supabase
-        .from(tableName as any)
+        .from(tableName as TableNames)
         .select(selectedColumns.join(','))
         .limit(1000);
 
