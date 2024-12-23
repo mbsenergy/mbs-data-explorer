@@ -1,6 +1,6 @@
 # Fluxer App
 
-## How can I edit this code?
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a3533c70-08db-4e85-9edb-a40942871206/deploy-status)](https://app.netlify.com/sites/fluxdata/deploys)
 
 **Use your preferred IDE**
 
