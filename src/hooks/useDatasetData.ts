@@ -11,7 +11,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const fetchLimit = 100;
+  const initialFetchLimit = 10000;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,11 +33,11 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         if (countError) throw countError;
         setTotalRowCount(count || 0);
 
-        // Then fetch first page of data
+        // Then fetch first 10,000 rows of data
         const { data: tableData, error } = await supabase
           .from(selectedDataset)
           .select("*")
-          .range(0, fetchLimit - 1);
+          .range(0, initialFetchLimit - 1);
 
         if (error) throw error;
 
@@ -68,7 +68,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     setIsLoading(true);
     try {
       const start = page * itemsPerPage;
-      const end = start + itemsPerPage - 1;
+      const end = Math.min(start + itemsPerPage - 1, initialFetchLimit - 1);
       
       const { data: pageData, error } = await supabase
         .from(selectedDataset)
