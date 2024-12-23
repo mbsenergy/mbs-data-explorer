@@ -7,14 +7,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useProfile } from "@/hooks/useProfile";
 import { format } from "date-fns";
 
 export const UserProfileTable = () => {
-  const { user } = useAuth();
-  const { data: profile, isLoading } = useProfile(user?.id);
+  const { user, profile, loading } = useAuth();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Profile Information</h2>

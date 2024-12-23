@@ -1,14 +1,12 @@
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useProfile } from "@/hooks/useProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AvatarUpload } from "./AvatarUpload";
 import { ProfileForm } from "./ProfileForm";
 
 export const UserProfileForm = () => {
-  const { user } = useAuth();
-  const { data: profile, isLoading, refetch } = useProfile(user?.id);
+  const { user, profile, loading } = useAuth();
 
-  if (isLoading) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
@@ -21,11 +19,15 @@ export const UserProfileForm = () => {
         <div className="space-y-6">
           <AvatarUpload 
             avatarUrl={profile?.avatar_url} 
-            onAvatarUpdate={refetch}
+            onAvatarUpdate={() => {
+              // Profile will be automatically updated through AuthProvider
+            }}
           />
           <ProfileForm 
             profile={profile} 
-            onProfileUpdate={refetch} 
+            onProfileUpdate={() => {
+              // Profile will be automatically updated through AuthProvider
+            }}
             userId={user?.id || ""}
           />
         </div>

@@ -3,12 +3,27 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, AuthError } from "@supabase/supabase-js";
 
+interface Profile {
+  id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  date_of_birth: string | null;
+  role: string | null;
+  company: string | null;
+  country: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AuthContextType {
   user: User | null;
+  profile: Profile | null;
   loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true });
+const AuthContext = createContext<AuthContextType>({ user: null, profile: null, loading: true });
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -16,8 +31,30 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+        
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      console.log("Profile data loaded:", data);
+      return data;
+    } catch (error) {
+      console.error("Error in fetchProfile:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     // Check active sessions
@@ -29,25 +66,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user) {
           setUser(session.user);
-          // Fetch initial profile data
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (profileError) {
-            console.error("Error fetching initial profile:", profileError);
-          } else {
-            console.log("Initial profile data loaded:", profile);
-          }
+          const profileData = await fetchProfile(session.user.id);
+          setProfile(profileData);
         } else {
           setUser(null);
+          setProfile(null);
         }
         setLoading(false);
       } catch (error) {
         console.error("Error checking session:", error);
         setUser(null);
+        setProfile(null);
         setLoading(false);
       }
     };
@@ -62,6 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === "SIGNED_OUT") {
           console.log("User signed out, clearing state and redirecting...");
           setUser(null);
+          setProfile(null);
           // Clear auth-related items from localStorage
           localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
           navigate("/login");
@@ -69,18 +99,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log("User signed in or token refreshed, updating state...");
           if (session?.user) {
             setUser(session.user);
-            // Fetch profile data on sign in
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (profileError) {
-              console.error("Error fetching profile on sign in:", profileError);
-            } else {
-              console.log("Profile data loaded on sign in:", profile);
-            }
+            const profileData = await fetchProfile(session.user.id);
+            setProfile(profileData);
           }
         }
         
@@ -95,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, profile, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
