@@ -35,9 +35,9 @@ const User = () => {
       country: data.country || '',
       company: data.company || '',
       role: data.role || '',
-      it_skills: Array.isArray(data.it_skills) ? data.it_skills : [],
-      preferred_data: Array.isArray(data.preferred_data) ? data.preferred_data : [],
-      subscriptions: Array.isArray(data.subscriptions) ? data.subscriptions : [],
+      it_skills: data.it_skills || [],
+      preferred_data: data.preferred_data || [],
+      subscriptions: data.subscriptions || [],
     });
   };
 
