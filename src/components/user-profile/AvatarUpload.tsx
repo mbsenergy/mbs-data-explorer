@@ -22,10 +22,15 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
 
     try {
       setIsUploading(true);
+      console.log("Starting avatar upload process...");
+      console.log("Current avatar URL:", avatarUrl);
       
       // First, try to remove the old avatar if it exists
       if (avatarUrl) {
-        const oldFilePath = avatarUrl.split('/').slice(-2).join('/'); // Get the path from the URL
+        console.log("Attempting to remove old avatar...");
+        const oldFilePath = avatarUrl.split('/').slice(-2).join('/');
+        console.log("Old file path:", oldFilePath);
+        
         if (oldFilePath) {
           const { error: deleteError } = await supabase.storage
             .from("avatars")
@@ -33,7 +38,8 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
           
           if (deleteError) {
             console.error("Error deleting old avatar:", deleteError);
-            // Continue with upload even if delete fails
+          } else {
+            console.log("Old avatar deleted successfully");
           }
         }
       }
@@ -41,8 +47,10 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
       // Create a folder structure with user ID
       const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/avatar.${fileExt}`;
+      console.log("New file path:", filePath);
 
       // Upload new avatar
+      console.log("Uploading new avatar...");
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file, { upsert: true });
@@ -51,13 +59,17 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
         console.error("Error uploading avatar:", uploadError);
         throw uploadError;
       }
+      console.log("Avatar uploaded successfully");
 
       // Get the public URL
+      console.log("Getting public URL...");
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
+      console.log("Public URL:", publicUrl);
 
       // Update profile with new avatar URL
+      console.log("Updating profile with new avatar URL...");
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ 
@@ -70,11 +82,12 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
         console.error("Error updating profile:", updateError);
         throw updateError;
       }
+      console.log("Profile updated successfully");
 
       toast.success("Avatar updated successfully");
       onAvatarUpdate();
     } catch (error) {
-      console.error("Error uploading avatar:", error);
+      console.error("Error in avatar upload process:", error);
       toast.error("Failed to upload avatar");
     } finally {
       setIsUploading(false);
