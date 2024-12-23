@@ -56,6 +56,7 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
         role: formData.role,
         company: formData.company,
         country: formData.country,
+        updated_at: new Date().toISOString(),
       };
 
       console.log("Formatted update data:", updateData);
