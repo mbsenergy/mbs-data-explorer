@@ -33,7 +33,8 @@ export const DatasetExplore = ({
     columns,
     totalRowCount,
     isLoading,
-    fetchPage
+    fetchPage,
+    loadData
   } = useDatasetData(selectedDataset);
 
   // Pre-select all columns when they change
@@ -43,6 +44,15 @@ export const DatasetExplore = ({
       onColumnsChange(columns);
     }
   }, [columns, onColumnsChange]);
+
+  const handleLoad = async () => {
+    if (selectedDataset && loadData) {
+      await loadData(selectedDataset);
+      if (onLoad) {
+        onLoad(selectedDataset);
+      }
+    }
+  };
 
   const filteredData = data.filter((item) =>
     selectedColumn
@@ -94,7 +104,7 @@ export const DatasetExplore = ({
             <Button 
               variant="outline"
               size="sm"
-              onClick={() => selectedDataset && onLoad(selectedDataset)}
+              onClick={handleLoad}
               className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
             >
               Load

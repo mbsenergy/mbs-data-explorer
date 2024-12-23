@@ -26,6 +26,34 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     }
   };
 
+  const loadData = async (tableName: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select("*");
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const filteredColumns = Object.keys(data[0]).filter(
+          col => !col.startsWith('md_')
+        );
+        setColumns(filteredColumns);
+        setData(data);
+      }
+    } catch (error: any) {
+      console.error("Error loading data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to load data"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (!selectedDataset) {
@@ -49,19 +77,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
         // If count is within limit, fetch all data
         if (countResult <= 100000) {
-          const { data: fullData, error: fullDataError } = await supabase
-            .from(selectedDataset)
-            .select("*");
-
-          if (fullDataError) throw fullDataError;
-          
-          if (fullData && fullData.length > 0) {
-            const filteredColumns = Object.keys(fullData[0]).filter(
-              col => !col.startsWith('md_')
-            );
-            setColumns(filteredColumns);
-            setData(fullData);
-          }
+          await loadData(selectedDataset);
         } else {
           // Fetch initial chunk for larger datasets
           const { data: initialData, error: initialError } = await supabase
@@ -131,6 +147,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     columns,
     totalRowCount,
     isLoading,
-    fetchPage
+    fetchPage,
+    loadData
   };
 };
