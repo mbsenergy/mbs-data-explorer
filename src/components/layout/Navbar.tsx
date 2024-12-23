@@ -1,10 +1,9 @@
-import { HelpCircle, Home, User, Settings } from "lucide-react";
+import { HelpCircle, Home, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { DatasetSearchCommand } from "@/components/datasets/DatasetSearchCommand";
 import {
@@ -24,7 +23,7 @@ export const Navbar = () => {
       
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name, last_name, avatar_url")
+        .select("first_name, last_name")
         .eq("id", user.id)
         .single();
 
@@ -89,23 +88,15 @@ export const Navbar = () => {
           <NotificationBell />
         </div>
 
-        {/* Avatar with Dropdown */}
+        {/* Settings Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-full hover:bg-[#4fd9e8] hover:text-white transition-colors"
+              className="hover:bg-[#4fd9e8] hover:text-white transition-colors"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage 
-                  src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`} 
-                  alt="avatar" 
-                />
-                <AvatarFallback>
-                  {user?.email?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <Settings className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
@@ -116,12 +107,6 @@ export const Navbar = () => {
               <Link to="/" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="hover:bg-[#4fd9e8] hover:text-white transition-colors">
-              <Link to="/user" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>User</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="hover:bg-[#4fd9e8] hover:text-white transition-colors">
