@@ -96,8 +96,8 @@ export function AppSidebar() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start w-full">
             <img 
-              src="/lovable-uploads/3f6141cf-fb6f-44b6-8e3c-3b942c6352af.png" 
-              alt="MBS Logo" 
+              src="/lovable-uploads/db951553-22d1-479e-9c94-4fb6cddcd7d0.png" 
+              alt="Fluxer Logo" 
               className="w-full h-auto object-contain"
             />
             <span className="text-sm font-bold mt-3 text-muted-foreground">MBS Apps Suite</span>

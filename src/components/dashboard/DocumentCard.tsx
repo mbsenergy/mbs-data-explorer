@@ -27,7 +27,7 @@ export const DocumentCard = ({ name, previewUrl, pdfUrl }: DocumentCardProps) =>
             variant="outline" 
             size="sm"
             onClick={() => window.open(pdfUrl, '_blank')}
-            className="shrink-0"
+            className="shrink-0 hover:bg-[#4fd9e8]"
           >
             <Download className="h-4 w-4" />
           </Button>
