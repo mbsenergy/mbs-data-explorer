@@ -21,6 +21,7 @@ interface DatasetSearchProps {
   availableFields: string[];
   availableTypes: string[];
   selectedDataset?: string;
+  onLoad?: (tableName: string) => void;  // Added this line
 }
 
 export const DatasetSearch = ({ 
@@ -37,6 +38,7 @@ export const DatasetSearch = ({
   availableFields,
   availableTypes,
   selectedDataset,
+  onLoad,
 }: DatasetSearchProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
   const [currentPage, setCurrentPage] = useState(0);
