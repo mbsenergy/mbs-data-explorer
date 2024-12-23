@@ -8,9 +8,15 @@ interface DatasetExportProps {
   selectedDataset: string | null;
   selectedColumns: string[];
   isLoading?: boolean;
+  onLoad?: (tableName: string) => void;
 }
 
-export const DatasetExport = ({ selectedDataset, selectedColumns, isLoading }: DatasetExportProps) => {
+export const DatasetExport = ({ 
+  selectedDataset, 
+  selectedColumns, 
+  isLoading,
+  onLoad 
+}: DatasetExportProps) => {
   const { toast } = useToast();
   
   const handleExport = async () => {
@@ -60,13 +66,26 @@ export const DatasetExport = ({ selectedDataset, selectedColumns, isLoading }: D
           </div>
         </div>
 
-        <Button 
-          onClick={handleExport}
-          className="w-full bg-[#F97316] hover:bg-[#F97316]/90 text-white"
-          disabled={!selectedDataset || !selectedColumns.length || isLoading}
-        >
-          Export Dataset
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleExport}
+            className="flex-1 bg-[#F97316] hover:bg-[#F97316]/90 text-white"
+            disabled={!selectedDataset || !selectedColumns.length || isLoading}
+          >
+            Export Dataset
+          </Button>
+          
+          {onLoad && selectedDataset && (
+            <Button
+              onClick={() => onLoad(selectedDataset)}
+              variant="outline"
+              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+              disabled={isLoading}
+            >
+              Load Dataset
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );

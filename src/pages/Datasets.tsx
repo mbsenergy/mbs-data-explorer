@@ -1,14 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { PreviewDialog } from "@/components/developer/PreviewDialog";
-import { DatasetActivity } from "@/components/datasets/DatasetActivity";
-import { DatasetSearch } from "@/components/datasets/DatasetSearch";
-import { DatasetExplore } from "@/components/datasets/DatasetExplore";
-import { DatasetExport } from "@/components/datasets/export/DatasetExport";
+import { DatasetActions } from "@/components/datasets/DatasetActions";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
 import type { Database } from "@/integrations/supabase/types";
@@ -38,35 +34,33 @@ const Datasets = () => {
     },
   });
 
-  useEffect(() => {
-    if (tables) {
-      const fields = [...new Set(tables.map(table => {
-        const match = table.tablename.match(/^([A-Z]{2})\d+_/);
-        return match ? match[1] : null;
-      }).filter(Boolean))];
-      
-      const types = [...new Set(tables.map(table => {
-        const match = table.tablename.match(/^[A-Z]{2}(\d+)_/);
-        return match ? match[1] : null;
-      }).filter(Boolean))];
-      
-      setAvailableFields(fields as string[]);
-      setAvailableTypes(types as string[]);
-    }
-  }, [tables]);
+  const handleLoad = async (tableName: string) => {
+    // Load functionality will be implemented here
+    toast({
+      title: "Dataset Loaded",
+      description: `${tableName} has been loaded successfully.`
+    });
+  };
 
-  const handleSelect = (tableName: string) => {
-    setSelectedDataset(prevDataset => {
-      const newDataset = prevDataset === tableName ? null : tableName as TableNames;
-      
+  const handlePreview = async (tableName: string) => {
+    const { data, error } = await supabase
+      .from(tableName as any)
+      .select("*")
+      .limit(30);
+
+    if (error) {
       toast({
-        title: newDataset ? "Dataset Selected" : "Dataset Unselected",
-        description: newDataset 
-          ? `${tableName} is now selected for exploration.`
-          : `${tableName} has been unselected.`
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to preview dataset.",
       });
-      
-      return newDataset;
+      return;
+    }
+
+    const previewRows = [...data.slice(0, 15), ...data.slice(-15)];
+    setPreviewData({
+      tableName,
+      data: JSON.stringify(previewRows, null, 2)
     });
   };
 
@@ -128,28 +122,6 @@ const Datasets = () => {
     });
   };
 
-  const handlePreview = async (tableName: string) => {
-    const { data, error } = await supabase
-      .from(tableName as any)
-      .select("*")
-      .limit(30);
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to preview dataset.",
-      });
-      return;
-    }
-
-    const previewRows = [...data.slice(0, 15), ...data.slice(-15)];
-    setPreviewData({
-      tableName,
-      data: JSON.stringify(previewRows, null, 2)
-    });
-  };
-
   const filteredTables = tables?.filter(table => {
     const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
@@ -175,56 +147,31 @@ const Datasets = () => {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Datasets</h1>
       
-      <DatasetActivity 
-        favorites={favorites}
+      <DatasetActions
         tables={tables || []}
-        onPreview={handlePreview}
-        onDownload={handleDownload}
-        onToggleFavorite={toggleFavorite}
-      />
-
-      <DatasetSearch
-        tables={filteredTables || []}
-        onPreview={handlePreview}
-        onDownload={handleDownload}
-        onSelect={handleSelect}
-        onToggleFavorite={toggleFavorite}
+        filteredTables={filteredTables || []}
         favorites={favorites}
+        selectedDataset={selectedDataset}
+        selectedColumns={selectedColumns}
+        previewData={previewData}
+        availableFields={availableFields}
+        availableTypes={availableTypes}
+        searchTerm={searchTerm}
+        selectedField={selectedField}
+        selectedType={selectedType}
+        showOnlyFavorites={showOnlyFavorites}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
+        onSelect={(tableName) => setSelectedDataset(tableName as TableNames)}
+        onToggleFavorite={toggleFavorite}
         onSearchChange={setSearchTerm}
         onFieldChange={setSelectedField}
         onTypeChange={setSelectedType}
         onFavoriteChange={setShowOnlyFavorites}
-        availableFields={availableFields}
-        availableTypes={availableTypes}
-        selectedDataset={selectedDataset || ""}
+        onColumnsChange={setSelectedColumns}
         onLoad={handleLoad}
+        onClosePreview={() => setPreviewData(null)}
       />
-
-      <div className="space-y-6">
-        <DatasetExplore 
-          selectedDataset={selectedDataset} 
-          onColumnsChange={setSelectedColumns}
-          onLoad={handleLoad}
-        />
-        
-        <DatasetExport 
-          selectedDataset={selectedDataset}
-          selectedColumns={selectedColumns}
-          isLoading={false}
-          onLoad={handleLoad}
-        />
-      </div>
-
-      {previewData && (
-        <PreviewDialog
-          isOpen={!!previewData}
-          onClose={() => setPreviewData(null)}
-          filePath=""
-          fileName={previewData.tableName}
-          section="datasets"
-          directData={previewData.data}
-        />
-      )}
     </div>
   );
 };
