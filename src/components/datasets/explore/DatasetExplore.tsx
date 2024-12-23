@@ -11,7 +11,7 @@ import type { TableNames } from "@/components/datasets/types";
 interface DatasetExploreProps {
   selectedDataset: TableNames | null;
   onColumnsChange: (columns: string[]) => void;
-  onLoad?: (tableName: TableNames) => void;
+  onLoad?: (tableName: string) => void;
 }
 
 export const DatasetExplore = ({ 
@@ -153,7 +153,6 @@ export const DatasetExplore = ({
           onColumnChange={setSelectedColumn}
           onColumnSelect={handleColumnSelect}
           onPageChange={handlePageChange}
-          onLoad={onLoad}
           selectedDataset={selectedDataset}
         />
       )}
