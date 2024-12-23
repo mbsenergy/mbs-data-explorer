@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { DatasetFilters } from "./explore/DatasetFilters";
+import { DatasetStats } from "./explore/DatasetStats";
+import { VirtualizedTable } from "./explore/VirtualizedTable";
+import type { ColumnDef } from "@tanstack/react-table";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -22,23 +24,32 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [totalRows, setTotalRows] = useState<number>(0);
   const [filteredRows, setFilteredRows] = useState<number>(0);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableColumns, setTableColumns] = useState<ColumnDef<any>[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedDataset) {
       fetchColumns();
       fetchTotalRows();
       fetchFilteredRows();
       fetchLastUpdate();
+      fetchTableData();
     } else {
-      setColumns([]);
-      setFilters({});
-      setTotalRows(0);
-      setFilteredRows(0);
-      setLastUpdate(null);
+      resetState();
     }
   }, [selectedDataset, filters]);
+
+  const resetState = () => {
+    setColumns([]);
+    setFilters({});
+    setTotalRows(0);
+    setFilteredRows(0);
+    setLastUpdate(null);
+    setTableData([]);
+    setTableColumns([]);
+  };
 
   const fetchColumns = async () => {
     if (!selectedDataset) return;
@@ -54,6 +65,14 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       if (data && data.length > 0) {
         const filteredColumns = Object.keys(data[0]).filter(col => !col.startsWith('md_'));
         setColumns(filteredColumns);
+        
+        // Create table columns configuration
+        const tableColumns: ColumnDef<any>[] = filteredColumns.map(col => ({
+          accessorKey: col,
+          header: col,
+          cell: info => info.getValue()?.toString() || '',
+        }));
+        setTableColumns(tableColumns);
       }
     } catch (error) {
       console.error('Error fetching columns:', error);
@@ -151,6 +170,37 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     }
   };
 
+  const fetchTableData = async () => {
+    if (!selectedDataset) return;
+    setLoading(true);
+
+    try {
+      let query = supabase
+        .from(selectedDataset as TableNames)
+        .select('*');
+
+      Object.entries(filters).forEach(([column, value]) => {
+        if (value) {
+          query = query.ilike(column, `%${value}%`);
+        }
+      });
+
+      const { data, error } = await query.range(0, 99);
+
+      if (error) throw error;
+      setTableData(data || []);
+    } catch (error) {
+      console.error('Error fetching table data:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load table data.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFilterChange = (column: string, value: string) => {
     setFilters(prev => ({
       ...prev,
@@ -244,28 +294,12 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             {selectedDataset || 'No dataset selected'}
           </div>
           
-          {lastUpdate && (
-            <div className="text-sm text-muted-foreground">
-              Last updated: {new Date(lastUpdate).toLocaleDateString()}
-            </div>
-          )}
-          
-          {selectedDataset && (
-            <div className="grid grid-cols-3 gap-4 mt-2">
-              <div className="p-3 rounded-md bg-card border border-border">
-                <p className="text-sm text-muted-foreground">Total Rows</p>
-                <p className="text-lg font-semibold">{totalRows.toLocaleString()}</p>
-              </div>
-              <div className="p-3 rounded-md bg-card border border-border">
-                <p className="text-sm text-muted-foreground">Total Columns</p>
-                <p className="text-lg font-semibold">{columns.length}</p>
-              </div>
-              <div className="p-3 rounded-md bg-card border border-border">
-                <p className="text-sm text-muted-foreground">Filtered Rows</p>
-                <p className="text-lg font-semibold">{filteredRows.toLocaleString()}</p>
-              </div>
-            </div>
-          )}
+          <DatasetStats
+            totalRows={totalRows}
+            columnsCount={columns.length}
+            filteredRows={filteredRows}
+            lastUpdate={lastUpdate}
+          />
         </div>
 
         {selectedDataset && columns.length > 0 && (
@@ -274,17 +308,19 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
               <Filter className="w-4 h-4" />
               <h3 className="font-semibold">Filters</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {columns.map(column => (
-                <div key={column}>
-                  <Label>{column}</Label>
-                  <Input
-                    placeholder={`Filter by ${column}`}
-                    onChange={(e) => handleFilterChange(column, e.target.value)}
-                    value={filters[column] || ''}
-                  />
-                </div>
-              ))}
+            
+            <DatasetFilters
+              columns={columns}
+              filters={filters}
+              onFilterChange={handleFilterChange}
+            />
+
+            <div className="mt-6">
+              <VirtualizedTable
+                data={tableData}
+                columns={tableColumns}
+                isLoading={loading}
+              />
             </div>
           </div>
         )}
