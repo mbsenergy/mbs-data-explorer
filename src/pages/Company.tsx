@@ -1,46 +1,67 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ArrowUpRight } from "lucide-react";
+
+const companies = [
+  {
+    name: "Energy",
+    description: "Explore our comprehensive energy market data and analytics platform, designed to help businesses make informed decisions in the evolving energy landscape.",
+    link: "https://www.cerved.com/en/offering/energy/"
+  },
+  {
+    name: "MBS Consulting",
+    description: "Discover how our consulting services can help transform your business through strategic insights and innovative solutions.",
+    link: "https://www.cerved.com/en/about-us/companies/mbs/"
+  },
+  {
+    name: "Cerved Group",
+    description: "Learn more about Cerved Group's comprehensive business information services and credit management solutions.",
+    link: "https://company.cerved.com/"
+  },
+  {
+    name: "ION Group",
+    description: "Explore ION Group's trading and workflow solutions that power financial institutions worldwide.",
+    link: "https://iongroup.com/"
+  }
+];
 
 const Company = () => {
   return (
     <div className="space-y-6">
       <h1>Company</h1>
       
-      <Card className="p-6">
-        <div className="space-y-6">
-          <section>
-            <h2>About Us</h2>
-            <p className="text-muted-foreground">
-              We are a leading provider of energy market data and analytics, helping businesses make informed decisions in the evolving energy landscape.
-            </p>
-          </section>
-
-          <section>
-            <h2>Our Mission</h2>
-            <p className="text-muted-foreground">
-              To empower organizations with comprehensive data and insights, enabling them to navigate the complexities of energy markets and drive sustainable growth.
-            </p>
-          </section>
-
-          <section>
-            <h2>Contact Information</h2>
-            <div className="space-y-2 text-muted-foreground">
-              <p>Email: info@fluxdataplatform.com</p>
-              <p>Phone: +39 02 1234567</p>
-              <p>Address: Via Example 123, 20123 Milan, Italy</p>
+      <div className="grid gap-6">
+        {companies.map((company) => (
+          <Card key={company.name} className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-start justify-between">
+                <h2 className="text-2xl font-semibold">{company.name}</h2>
+                <Button variant="ghost" size="icon" asChild>
+                  <a 
+                    href={company.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:no-underline"
+                  >
+                    <ArrowUpRight className="h-5 w-5" />
+                  </a>
+                </Button>
+              </div>
+              <p className="text-muted-foreground">{company.description}</p>
+              <Button asChild variant="outline">
+                <a 
+                  href={company.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:no-underline"
+                >
+                  Learn More
+                </a>
+              </Button>
             </div>
-          </section>
-
-          <div className="flex justify-end space-x-4">
-            <Button variant="outline">
-              Download Company Profile
-            </Button>
-            <Button>
-              Contact Us
-            </Button>
-          </div>
-        </div>
-      </Card>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
