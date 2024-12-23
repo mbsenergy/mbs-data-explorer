@@ -90,10 +90,8 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
         return;
       }
 
-      // Check if md_last_update exists
-      const hasLastUpdate = 'md_last_update' in sampleData[0];
-
-      if (hasLastUpdate) {
+      // Check if md_last_update exists in the sample data
+      if ('md_last_update' in sampleData[0]) {
         const { data, error } = await supabase
           .from(selectedDataset as TableNames)
           .select('md_last_update')
@@ -101,8 +99,8 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           .limit(1)
           .maybeSingle();
 
-        if (!error && data) {
-          setLastUpdate(data.md_last_update);
+        if (!error && data && 'md_last_update' in data) {
+          setLastUpdate(data.md_last_update as string);
         } else {
           setLastUpdate(null);
         }
