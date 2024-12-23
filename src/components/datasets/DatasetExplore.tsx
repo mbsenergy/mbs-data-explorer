@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import type { Database } from "@/integrations/supabase/types";
@@ -21,6 +21,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [loading, setLoading] = useState(false);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [filteredRows, setFilteredRows] = useState<number>(0);
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -29,11 +30,13 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       fetchColumns();
       fetchTotalRows();
       fetchFilteredRows();
+      fetchLastUpdate();
     } else {
       setColumns([]);
       setFilters({});
       setTotalRows(0);
       setFilteredRows(0);
+      setLastUpdate(null);
     }
   }, [selectedDataset, filters]);
 
@@ -49,7 +52,9 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setColumns(Object.keys(data[0]));
+        // Filter out metadata columns
+        const filteredColumns = Object.keys(data[0]).filter(col => !col.startsWith('md_'));
+        setColumns(filteredColumns);
       }
     } catch (error) {
       console.error('Error fetching columns:', error);
@@ -58,6 +63,26 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
         title: "Error",
         description: "Failed to load dataset columns.",
       });
+    }
+  };
+
+  const fetchLastUpdate = async () => {
+    if (!selectedDataset) return;
+
+    try {
+      const { data, error } = await supabase
+        .from(selectedDataset as TableNames)
+        .select('md_last_update')
+        .order('md_last_update', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setLastUpdate(data[0].md_last_update);
+      }
+    } catch (error) {
+      console.error('Error fetching last update:', error);
     }
   };
 
@@ -192,18 +217,24 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
             {selectedDataset || 'No dataset selected'}
           </div>
           
+          {lastUpdate && (
+            <div className="text-sm text-muted-foreground">
+              Last updated: {new Date(lastUpdate).toLocaleDateString()}
+            </div>
+          )}
+          
           {selectedDataset && (
             <div className="grid grid-cols-3 gap-4 mt-2">
-              <div className="p-3 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-600">Total Rows</p>
+              <div className="p-3 glass-panel rounded-md">
+                <p className="text-sm text-muted-foreground">Total Rows</p>
                 <p className="text-lg font-semibold">{totalRows.toLocaleString()}</p>
               </div>
-              <div className="p-3 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-600">Total Columns</p>
+              <div className="p-3 glass-panel rounded-md">
+                <p className="text-sm text-muted-foreground">Total Columns</p>
                 <p className="text-lg font-semibold">{columns.length}</p>
               </div>
-              <div className="p-3 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-600">Filtered Rows</p>
+              <div className="p-3 glass-panel rounded-md">
+                <p className="text-sm text-muted-foreground">Filtered Rows</p>
                 <p className="text-lg font-semibold">{filteredRows.toLocaleString()}</p>
               </div>
             </div>
