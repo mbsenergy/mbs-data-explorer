@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Filter } from "./types";
 import { v4 as uuidv4 } from 'uuid';
+import { Code } from "lucide-react";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -239,10 +240,64 @@ export const DatasetExplore = ({
     }
   };
 
-  const paginatedData = filteredData.slice(
-    currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage
-  );
+  const generateFilterQuery = () => {
+    if (!selectedDataset) return "";
+    
+    let query = `SELECT ${selectedColumns.join(', ')} FROM ${selectedDataset}`;
+    
+    if (filters.length > 0) {
+      const filterConditions = filters
+        .filter(f => f.searchTerm && f.selectedColumn)
+        .map((filter, index) => {
+          const comparison = filter.comparisonOperator;
+          let condition = "";
+          
+          if (comparison === 'IN' || comparison === 'NOT IN') {
+            const values = filter.searchTerm.split(',').map(v => `'${v.trim()}'`).join(',');
+            condition = `${filter.selectedColumn} ${comparison} (${values})`;
+          } else {
+            condition = `${filter.selectedColumn} ${comparison} '${filter.searchTerm}'`;
+          }
+          
+          return index === 0 ? condition : `${filter.operator} ${condition}`;
+        });
+      
+      if (filterConditions.length > 0) {
+        query += ` WHERE ${filterConditions.join(' ')}`;
+      }
+    }
+    
+    return query;
+  };
+
+  const handleShowQuery = () => {
+    const query = generateFilterQuery();
+    const apiCall = `await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.join(', ')}')`
+    + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "");
+
+    toast({
+      title: "Current Query",
+      description: (
+        <div className="mt-2 space-y-2">
+          <div>
+            <p className="font-semibold mb-1">SQL Query:</p>
+            <pre className="bg-slate-100 p-2 rounded text-sm overflow-x-auto">
+              {query}
+            </pre>
+          </div>
+          <div>
+            <p className="font-semibold mb-1">API Call:</p>
+            <pre className="bg-slate-100 p-2 rounded text-sm overflow-x-auto">
+              {apiCall}
+            </pre>
+          </div>
+        </div>
+      ),
+      duration: 10000,
+    });
+  };
 
   return (
     <Card className="p-6 space-y-6">
@@ -273,6 +328,15 @@ export const DatasetExplore = ({
             className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
           >
             Sample
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShowQuery}
+            className="bg-[#94A3B8]/20 hover:bg-[#94A3B8]/30"
+          >
+            <Code className="h-4 w-4 mr-2" />
+            Show Query
           </Button>
         </div>
       </div>
@@ -317,7 +381,10 @@ export const DatasetExplore = ({
 
           <DatasetTable
             columns={columns}
-            data={paginatedData}
+            data={filteredData.slice(
+              currentPage * itemsPerPage,
+              (currentPage + 1) * itemsPerPage
+            )}
             selectedColumns={selectedColumns}
           />
 
