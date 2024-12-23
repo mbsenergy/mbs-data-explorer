@@ -23,7 +23,7 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
 
   useEffect(() => {
     if (profile) {
-      console.log("Initial profile data:", profile);
+      console.log("Setting initial form data from profile:", profile);
       setFormData({
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
@@ -42,24 +42,32 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
+    if (!userId) {
+      console.error("No user ID available");
+      return;
+    }
 
     try {
       console.log("Starting profile update...");
       console.log("User ID:", userId);
       console.log("Form data to be sent:", formData);
+
+      // Prepare update data with proper date handling
+      const updateData = {
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        date_of_birth: formData.date_of_birth || null,
+        role: formData.role.trim(),
+        company: formData.company.trim(),
+        country: formData.country.trim(),
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log("Formatted update data:", updateData);
       
       const { data, error } = await supabase
         .from("profiles")
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          date_of_birth: formData.date_of_birth || null,
-          role: formData.role,
-          company: formData.company,
-          country: formData.country,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("id", userId)
         .select();
 
