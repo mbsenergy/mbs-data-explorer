@@ -3,6 +3,9 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Download, Eye, Star } from "lucide-react";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 import type { TableInfo } from "./types";
 
 interface DatasetTableRowProps {
@@ -18,13 +21,15 @@ interface DatasetTableRowProps {
 export const DatasetTableRow = ({ 
   table, 
   onPreview, 
-  onDownload, 
+  onDownload,
   onSelect,
   onToggleFavorite,
   isFavorite,
   isSelected,
 }: DatasetTableRowProps) => {
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
   const match = table.tablename.match(/^([A-Z]{2})(\d+)_(.+)/);
   const [_, field, type, name] = match || ["", "", "", table.tablename];
 
@@ -32,9 +37,83 @@ export const DatasetTableRow = ({
     setIsDownloadDialogOpen(true);
   };
 
-  const handleConfirmDownload = () => {
-    onDownload(table.tablename);
-    setIsDownloadDialogOpen(false);
+  const handleConfirmDownload = async () => {
+    if (!user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to download datasets.",
+      });
+      return;
+    }
+
+    try {
+      // Track analytics first
+      const { error: analyticsError } = await supabase
+        .from("analytics")
+        .insert({
+          user_id: user.id,
+          dataset_name: table.tablename,
+          is_custom_query: false,
+        });
+
+      if (analyticsError) {
+        console.error("Error tracking download:", analyticsError);
+      }
+
+      // Fetch sample data
+      const { data, error } = await supabase
+        .from(table.tablename as any)
+        .select('*')
+        .limit(1000);
+
+      if (error) throw error;
+
+      if (!data || !data.length) {
+        throw new Error("No data available for download");
+      }
+
+      // Create CSV content
+      const headers = Object.keys(data[0]).filter(key => !key.startsWith('md_')).join(',');
+      const rows = data.map(row => {
+        return Object.entries(row)
+          .filter(([key]) => !key.startsWith('md_'))
+          .map(([_, value]) => {
+            if (value === null) return '';
+            if (typeof value === 'string' && value.includes(',')) {
+              return `"${value}"`;
+            }
+            return value;
+          })
+          .join(',');
+      });
+      const csv = [headers, ...rows].join('\n');
+
+      // Create and trigger download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${table.tablename}_sample.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Dataset sample downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to download dataset.",
+      });
+    } finally {
+      setIsDownloadDialogOpen(false);
+    }
   };
 
   return (
