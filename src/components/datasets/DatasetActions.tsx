@@ -23,14 +23,14 @@ interface DatasetActionsProps {
   showOnlyFavorites: boolean;
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
-  onSelect: (tableName: string) => void;
+  onSelect: (tableName: TableNames) => void;
   onToggleFavorite: (tableName: string) => void;
   onSearchChange: (term: string) => void;
   onFieldChange: (field: string) => void;
   onTypeChange: (type: string) => void;
   onFavoriteChange: (show: boolean) => void;
   onColumnsChange: (columns: string[]) => void;
-  onLoad: (tableName: string) => void;
+  onLoad: (tableName: TableNames) => void;
   onClosePreview: () => void;
 }
 

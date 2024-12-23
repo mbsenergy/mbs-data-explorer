@@ -50,7 +50,7 @@ const Datasets = () => {
     return matchesSearch && matchesField && matchesType && matchesFavorites;
   });
 
-  const handlePreview = async (tableName: TableNames) => {
+  const handlePreview = async (tableName: string) => {
     try {
       const { data, error } = await supabase
         .from(tableName)
@@ -68,7 +68,7 @@ const Datasets = () => {
     }
   };
 
-  const handleDownload = async (tableName: TableNames) => {
+  const handleDownload = async (tableName: string) => {
     try {
       const { data, error } = await supabase
         .from(tableName)
@@ -86,7 +86,6 @@ const Datasets = () => {
   };
 
   const handleLoad = (tableName: string) => {
-    // Cast the tableName to TableNames since we know it's valid
     setSelectedDataset(tableName as TableNames);
     toast.success(`Dataset ${tableName} selected`);
   };
