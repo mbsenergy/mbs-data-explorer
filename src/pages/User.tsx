@@ -46,17 +46,17 @@ const User = () => {
       setIsSaving(true);
       if (!user?.id) throw new Error('No user ID available');
 
-      // Create update payload, handling the date field
       const updateData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
-        date_of_birth: formData.date_of_birth || null, // Send null instead of empty string
+        date_of_birth: formData.date_of_birth || null,
         country: formData.country,
         company: formData.company,
         role: formData.role,
         it_skills: formData.it_skills,
         preferred_data: formData.preferred_data,
         subscriptions: formData.subscriptions,
+        updated_at: new Date().toISOString(),
       };
 
       const { error } = await supabase

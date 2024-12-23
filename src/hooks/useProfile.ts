@@ -3,26 +3,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface Profile {
-  avatar_url: string;
-  company: string;
-  country: string;
+  avatar_url: string | null;
+  company: string | null;
+  country: string | null;
   created_at: string;
-  date_of_birth: string;
-  email: string;
-  first_name: string;
-  github_username: string;
+  date_of_birth: string | null;
+  email: string | null;
+  first_name: string | null;
+  github_username: string | null;
   id: string;
-  is_cerved: boolean;
-  it_skills: string[];
-  last_name: string;
-  linkedin_url: string;
-  preferred_data: string[];
-  role: string;
-  subscriptions: string[];
+  is_cerved: boolean | null;
+  it_skills: string[] | null;
+  last_name: string | null;
+  linkedin_url: string | null;
+  preferred_data: string[] | null;
+  role: string | null;
+  subscriptions: string[] | null;
   updated_at: string;
 }
 
-export const useProfile = (userId: string | undefined, onProfileLoaded: (data: Profile) => void) => {
+export const useProfile = (userId: string | undefined, onProfileLoaded?: (data: Profile) => void) => {
   return useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
