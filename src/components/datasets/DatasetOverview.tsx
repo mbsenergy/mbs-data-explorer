@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ConfirmDialog } from "./ConfirmDialog";
-import type { TableInfo } from "./types";
+import type { TableInfo, TableNames } from "./types";
 
 interface DatasetOverviewProps {
   favorites: Set<string>;

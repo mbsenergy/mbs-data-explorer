@@ -3,10 +3,7 @@ import { DatasetActivity } from "@/components/datasets/DatasetActivity";
 import { DatasetSearch } from "@/components/datasets/DatasetSearch";
 import { DatasetExplore } from "@/components/datasets/DatasetExplore";
 import { DatasetExport } from "@/components/datasets/export/DatasetExport";
-import type { TableInfo } from "@/components/datasets/types";
-import type { Database } from "@/integrations/supabase/types";
-
-type TableNames = keyof Database['public']['Tables'];
+import type { TableInfo, TableNames } from "@/components/datasets/types";
 
 interface DatasetActionsProps {
   tables: TableInfo[];
@@ -82,7 +79,7 @@ export const DatasetActions = ({
         onFavoriteChange={onFavoriteChange}
         availableFields={availableFields}
         availableTypes={availableTypes}
-        selectedDataset={selectedDataset || ""}
+        selectedDataset={selectedDataset}
         onLoad={onLoad}
       />
 

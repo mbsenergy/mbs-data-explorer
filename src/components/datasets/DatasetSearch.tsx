@@ -5,13 +5,13 @@ import DatasetFilters from "./DatasetFilters";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetSearchHeader } from "./search/DatasetSearchHeader";
 import { DatasetSearchPagination } from "./search/DatasetSearchPagination";
-import type { TableInfo } from "./types";
+import type { TableInfo, TableNames } from "./types";
 
 interface DatasetSearchProps {
   tables: TableInfo[];
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
-  onSelect: (tableName: string) => void;
+  onSelect: (tableName: TableNames) => void;
   onToggleFavorite: (tableName: string) => void;
   favorites: Set<string>;
   onSearchChange: (search: string) => void;
@@ -21,7 +21,7 @@ interface DatasetSearchProps {
   availableFields: string[];
   availableTypes: string[];
   selectedDataset?: string;
-  onLoad?: (tableName: string) => void;  // Added this line
+  onLoad?: (tableName: TableNames) => void;
 }
 
 export const DatasetSearch = ({ 

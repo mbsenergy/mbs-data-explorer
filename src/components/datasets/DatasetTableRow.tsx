@@ -3,13 +3,13 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Download, Eye, Star } from "lucide-react";
 import { ConfirmDialog } from "./ConfirmDialog";
-import type { TableInfo } from "./types";
+import type { TableInfo, TableNames } from "./types";
 
 interface DatasetTableRowProps {
   table: TableInfo;
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
-  onSelect: (tableName: string) => void;
+  onSelect: (tableName: TableNames) => void;
   onToggleFavorite: (tableName: string) => void;
   isFavorite: boolean;
   isSelected?: boolean;
