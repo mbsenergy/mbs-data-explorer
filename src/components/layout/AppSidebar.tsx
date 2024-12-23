@@ -96,11 +96,11 @@ export function AppSidebar() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start">
             <img 
-              src="/lovable-uploads/5c908079-22b4-4807-83e2-573ab0d0f160.png" 
+              src="/lovable-uploads/c0a48577-6712-4384-bb87-4ccd77ad1a33.png" 
               alt="MBS Logo" 
               className="h-8 w-auto object-contain"
             />
-            <span className="text-sm font-bold mt-3 text-muted-foreground">Flux Data Platform</span>
+            <span className="text-sm font-bold mt-3 text-muted-foreground">MBS Apps Suite</span>
           </div>
         </div>
       </SidebarHeader>
@@ -134,7 +134,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
+                    className={isActive(item.url) ? "bg-muted text-[#4fd9e8] font-medium" : "hover:bg-muted/50"}
                   >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
@@ -155,7 +155,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={isActive(item.url) ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"}
+                    className={isActive(item.url) ? "bg-muted text-[#4fd9e8] font-medium" : "hover:bg-muted/50"}
                   >
                     <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
