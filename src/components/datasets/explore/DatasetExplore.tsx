@@ -5,13 +5,14 @@ import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
-import { DatasetFilters, Filter } from "./DatasetFilters";
+import { DatasetFilters } from "./DatasetFilters";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { v4 as uuidv4 } from 'uuid';
+import type { Filter, ComparisonOperator } from "./types";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -26,10 +27,14 @@ export const DatasetExplore = ({
   onColumnsChange,
   onLoad 
 }: DatasetExploreProps) => {
-  const { toast } = useToast();
-  const { user } = useAuth();
   const [filters, setFilters] = useState<Filter[]>([
-    { id: uuidv4(), searchTerm: "", selectedColumn: "", operator: "AND" }
+    { 
+      id: uuidv4(), 
+      searchTerm: "", 
+      selectedColumn: "", 
+      operator: "AND",
+      comparisonOperator: "=" 
+    }
   ]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -63,15 +68,40 @@ export const DatasetExplore = ({
   const filterData = (data: any[]) => {
     return data.filter((item) =>
       filters.reduce((pass, filter, index) => {
-        const matches = filter.selectedColumn === "all_columns" || !filter.selectedColumn
+        let matches = false;
+        const value = filter.selectedColumn === "all_columns" || !filter.selectedColumn
           ? Object.entries(item)
               .filter(([key]) => !key.startsWith('md_'))
               .some(([_, value]) => 
                 String(value).toLowerCase().includes(filter.searchTerm.toLowerCase())
               )
-          : String(item[filter.selectedColumn])
-              .toLowerCase()
-              .includes(filter.searchTerm.toLowerCase());
+          : (() => {
+              const itemValue = String(item[filter.selectedColumn]).toLowerCase();
+              const filterValue = filter.searchTerm.toLowerCase();
+              
+              switch (filter.comparisonOperator) {
+                case '=':
+                  return itemValue === filterValue;
+                case '>':
+                  return Number(itemValue) > Number(filterValue);
+                case '<':
+                  return Number(itemValue) < Number(filterValue);
+                case '>=':
+                  return Number(itemValue) >= Number(filterValue);
+                case '<=':
+                  return Number(itemValue) <= Number(filterValue);
+                case '!=':
+                  return itemValue !== filterValue;
+                case 'IN':
+                  const values = filterValue.split(',').map(v => v.trim());
+                  return values.includes(itemValue);
+                case 'NOT IN':
+                  const excludedValues = filterValue.split(',').map(v => v.trim());
+                  return !excludedValues.includes(itemValue);
+                default:
+                  return itemValue.includes(filterValue);
+              }
+            })();
 
         // First filter doesn't use operator
         if (index === 0) return matches;
@@ -86,8 +116,8 @@ export const DatasetExplore = ({
 
   const handleFilterChange = (
     filterId: string,
-    field: "searchTerm" | "selectedColumn" | "operator",
-    value: string
+    field: keyof Filter,
+    value: string | ComparisonOperator
   ) => {
     setFilters(filters.map(f =>
       f.id === filterId
@@ -101,7 +131,8 @@ export const DatasetExplore = ({
       id: uuidv4(), 
       searchTerm: "", 
       selectedColumn: "", 
-      operator: "AND" 
+      operator: "AND",
+      comparisonOperator: "=" 
     }]);
   };
 
@@ -124,6 +155,8 @@ export const DatasetExplore = ({
       setCurrentPage(newPage);
     }
   };
+
+  const filteredData = filterData(data);
 
   return (
     <Card className="p-6 space-y-6">
@@ -161,7 +194,7 @@ export const DatasetExplore = ({
       <DatasetStats 
         totalRows={totalRowCount}
         columnsCount={columns.length}
-        filteredRows={filterData(data).length}
+        filteredRows={filteredData.length}
         lastUpdate={data[0]?.md_last_update || null}
       />
 
@@ -187,7 +220,7 @@ export const DatasetExplore = ({
 
           <DatasetTable
             columns={columns}
-            data={filterData(data).slice(
+            data={filteredData.slice(
               currentPage * itemsPerPage,
               (currentPage + 1) * itemsPerPage
             )}
@@ -196,7 +229,7 @@ export const DatasetExplore = ({
 
           <DatasetPagination
             currentPage={currentPage}
-            totalPages={Math.ceil(filterData(data).length / itemsPerPage)}
+            totalPages={Math.ceil(filteredData.length / itemsPerPage)}
             onPageChange={handlePageChange}
           />
         </>

@@ -3,15 +3,18 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import type { ComparisonOperator } from "./types";
 
 interface DatasetFilterItemProps {
   columns: string[];
   searchTerm: string;
   selectedColumn: string;
   operator: 'AND' | 'OR';
+  comparisonOperator: ComparisonOperator;
   onSearchChange: (value: string) => void;
   onColumnChange: (value: string) => void;
   onOperatorChange: (value: 'AND' | 'OR') => void;
+  onComparisonOperatorChange: (value: ComparisonOperator) => void;
   onRemove: () => void;
   showRemove?: boolean;
   isFirstFilter?: boolean;
@@ -22,9 +25,11 @@ export const DatasetFilterItem = ({
   searchTerm,
   selectedColumn,
   operator,
+  comparisonOperator,
   onSearchChange,
   onColumnChange,
   onOperatorChange,
+  onComparisonOperatorChange,
   onRemove,
   showRemove = true,
   isFirstFilter = false
@@ -43,16 +48,6 @@ export const DatasetFilterItem = ({
         </Select>
       )}
       
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search in data..."
-          className="pl-10"
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-        />
-      </div>
-      
       <Select 
         value={selectedColumn || "all_columns"} 
         onValueChange={onColumnChange}
@@ -67,6 +62,37 @@ export const DatasetFilterItem = ({
           ))}
         </SelectContent>
       </Select>
+
+      <Select 
+        value={comparisonOperator} 
+        onValueChange={(value: ComparisonOperator) => onComparisonOperatorChange(value)}
+      >
+        <SelectTrigger className="w-[100px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="=">Equal (=)</SelectItem>
+          <SelectItem value=">">Greater than (&gt;)</SelectItem>
+          <SelectItem value="<">Less than (&lt;)</SelectItem>
+          <SelectItem value=">=">Greater or equal (&gt;=)</SelectItem>
+          <SelectItem value="<=">Less or equal (&lt;=)</SelectItem>
+          <SelectItem value="!=">Not equal (!=)</SelectItem>
+          <SelectItem value="IN">IN</SelectItem>
+          <SelectItem value="NOT IN">NOT IN</SelectItem>
+        </SelectContent>
+      </Select>
+      
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={comparisonOperator === 'IN' || comparisonOperator === 'NOT IN' 
+            ? "Enter comma-separated values..." 
+            : "Enter value..."}
+          className="pl-10"
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+      </div>
       
       {showRemove && (
         <Button 

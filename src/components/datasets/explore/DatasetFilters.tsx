@@ -1,18 +1,16 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DatasetFilterItem } from "./DatasetFilterItem";
-
-export interface Filter {
-  id: string;
-  searchTerm: string;
-  selectedColumn: string;
-  operator: 'AND' | 'OR';
-}
+import type { Filter, ComparisonOperator } from "./types";
 
 interface DatasetFiltersProps {
   columns: string[];
   filters: Filter[];
-  onFilterChange: (filterId: string, field: "searchTerm" | "selectedColumn" | "operator", value: string) => void;
+  onFilterChange: (
+    filterId: string, 
+    field: keyof Filter,
+    value: string | ComparisonOperator
+  ) => void;
   onAddFilter: () => void;
   onRemoveFilter: (filterId: string) => void;
 }
@@ -33,9 +31,11 @@ export const DatasetFilters = ({
           searchTerm={filter.searchTerm}
           selectedColumn={filter.selectedColumn}
           operator={filter.operator}
+          comparisonOperator={filter.comparisonOperator}
           onSearchChange={(value) => onFilterChange(filter.id, "searchTerm", value)}
           onColumnChange={(value) => onFilterChange(filter.id, "selectedColumn", value)}
           onOperatorChange={(value) => onFilterChange(filter.id, "operator", value)}
+          onComparisonOperatorChange={(value) => onFilterChange(filter.id, "comparisonOperator", value)}
           onRemove={() => onRemoveFilter(filter.id)}
           showRemove={filters.length > 1}
           isFirstFilter={index === 0}
