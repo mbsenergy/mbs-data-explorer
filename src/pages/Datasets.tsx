@@ -35,11 +35,44 @@ const Datasets = () => {
   });
 
   const handleLoad = async (tableName: string) => {
-    // Load functionality will be implemented here
-    toast({
-      title: "Dataset Loaded",
-      description: `${tableName} has been loaded successfully.`
-    });
+    try {
+      // First get the row count
+      const { data: countData, error: countError } = await supabase
+        .rpc('get_table_row_count', { table_name: tableName });
+      
+      if (countError) throw countError;
+      
+      // Check if row count is within limit
+      if (countData > 100000) {
+        toast({
+          variant: "destructive",
+          title: "Dataset too large",
+          description: "Cannot load datasets with more than 100,000 rows. Please use the sample feature instead."
+        });
+        return;
+      }
+
+      // Fetch the full dataset
+      const { data, error } = await supabase
+        .from(tableName as any)
+        .select("*");
+
+      if (error) throw error;
+
+      if (data) {
+        toast({
+          title: "Dataset Loaded",
+          description: `${tableName} has been loaded successfully with ${data.length} rows.`
+        });
+      }
+    } catch (error: any) {
+      console.error("Error loading dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to load dataset."
+      });
+    }
   };
 
   const handlePreview = async (tableName: string) => {

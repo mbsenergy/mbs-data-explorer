@@ -47,23 +47,37 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         if (countError) throw countError;
         setTotalRowCount(countResult || 0);
 
-        // Then fetch first chunk of data with retry mechanism
-        const dataResult = await fetchWithRetry(async () => {
-          const { data: tableData, error } = await supabase
+        // If count is within limit, fetch all data
+        if (countResult <= 100000) {
+          const { data: fullData, error: fullDataError } = await supabase
+            .from(selectedDataset)
+            .select("*");
+
+          if (fullDataError) throw fullDataError;
+          
+          if (fullData && fullData.length > 0) {
+            const filteredColumns = Object.keys(fullData[0]).filter(
+              col => !col.startsWith('md_')
+            );
+            setColumns(filteredColumns);
+            setData(fullData);
+          }
+        } else {
+          // Fetch initial chunk for larger datasets
+          const { data: initialData, error: initialError } = await supabase
             .from(selectedDataset)
             .select("*")
             .range(0, initialFetchLimit - 1);
 
-          if (error) throw error;
-          return tableData;
-        });
-
-        if (dataResult && dataResult.length > 0) {
-          const filteredColumns = Object.keys(dataResult[0]).filter(
-            col => !col.startsWith('md_')
-          );
-          setColumns(filteredColumns);
-          setData(dataResult);
+          if (initialError) throw initialError;
+          
+          if (initialData && initialData.length > 0) {
+            const filteredColumns = Object.keys(initialData[0]).filter(
+              col => !col.startsWith('md_')
+            );
+            setColumns(filteredColumns);
+            setData(initialData);
+          }
         }
       } catch (error: any) {
         console.error("Error fetching data:", error);
