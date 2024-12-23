@@ -46,7 +46,7 @@
     @apply bg-background text-foreground;
   }
   h1, h2, h3 {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal font-bold tracking-tight;
+    @apply font-bold tracking-tight bg-gradient-to-r from-blue-400 to-corporate-teal bg-clip-text text-transparent;
   }
   h1 {
     @apply text-3xl;
