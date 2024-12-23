@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowDown } from "lucide-react";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
-import { DatasetHeader } from "./DatasetHeader";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -90,10 +91,35 @@ export const DatasetExplore = ({
 
   return (
     <Card className="p-6 space-y-6">
-      <DatasetHeader 
-        selectedDataset={selectedDataset} 
-        onLoad={handleLoad}
-      />
+      <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold">Explore</h2>
+          {selectedDataset && (
+            <p className="text-muted-foreground">
+              Selected dataset: <span className="font-medium">{selectedDataset}</span>
+            </p>
+          )}
+        </div>
+        <div className="space-x-2">
+          {onLoad && (
+            <Button 
+              onClick={handleLoad}
+              className="bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white"
+            >
+              <ArrowDown className="h-4 w-4 mr-2" />
+              Retrieve
+            </Button>
+          )}
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.href = '#sample'}
+            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+          >
+            Sample
+          </Button>
+        </div>
+      </div>
       
       <DatasetStats 
         totalRows={totalRowCount}
