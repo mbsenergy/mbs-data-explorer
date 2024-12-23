@@ -6,8 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
-export const DatasetQuery = () => {
+interface DatasetQueryProps {
+  selectedDataset?: string | null;
+  selectedColumns?: string[];
+}
+
+export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQueryProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
@@ -22,7 +28,6 @@ export const DatasetQuery = () => {
 
       if (error) throw error;
 
-      // Since we know our execute_query function returns a JSONB array
       const results = data as any[];
       setQueryResults(results);
       
@@ -31,7 +36,6 @@ export const DatasetQuery = () => {
         description: `Retrieved ${results.length} rows`
       });
 
-      // Track analytics
       if (user?.id) {
         await supabase.from("analytics").insert({
           user_id: user.id,
@@ -91,6 +95,12 @@ export const DatasetQuery = () => {
     }
   };
 
+  const generateDefaultQuery = () => {
+    if (!selectedDataset) return "";
+    const columns = selectedColumns.length > 0 ? selectedColumns.join(', ') : '*';
+    return `SELECT ${columns} FROM "${selectedDataset}" LIMIT 100`;
+  };
+
   return (
     <Card className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -112,7 +122,25 @@ export const DatasetQuery = () => {
         )}
       </div>
 
-      <SqlEditor onExecute={handleExecuteQuery} />
+      {selectedDataset && (
+        <div className="space-y-2">
+          <Label>Selected Dataset</Label>
+          <div className="p-2 bg-muted rounded-md">
+            {selectedDataset}
+          </div>
+        </div>
+      )}
+
+      {selectedColumns.length > 0 && (
+        <div className="space-y-2">
+          <Label>Selected Columns</Label>
+          <div className="p-2 bg-muted rounded-md">
+            {selectedColumns.join(", ")}
+          </div>
+        </div>
+      )}
+
+      <SqlEditor onExecute={handleExecuteQuery} defaultValue={generateDefaultQuery()} />
 
       {isLoading ? (
         <div className="flex items-center justify-center h-32">

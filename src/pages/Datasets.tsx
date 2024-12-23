@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { DatasetActions } from "@/components/datasets/DatasetActions";
 import { DatasetQuery } from "@/components/datasets/query/DatasetQuery";
+import { DatasetExport } from "@/components/datasets/export/DatasetExport";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
 import type { Database as SupabaseDatabase } from "@/integrations/supabase/types";
@@ -112,7 +113,6 @@ const Datasets = () => {
     }
 
     try {
-      // Track analytics first
       const { error: analyticsError } = await supabase
         .from("analytics")
         .insert({
@@ -125,7 +125,6 @@ const Datasets = () => {
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Fetch data with selected columns
       const { data, error } = await supabase
         .from(tableName as TableNames)
         .select(selectedColumns.join(','))
@@ -139,12 +138,10 @@ const Datasets = () => {
         throw new Error("No data available for download");
       }
 
-      // Create CSV content
       const headers = selectedColumns.join(',');
       const rows = data.map(row => 
         selectedColumns.map(col => {
           const value = row[col];
-          // Handle special cases like numbers, nulls, and strings with commas
           if (value === null) return '';
           if (typeof value === 'string' && value.includes(',')) {
             return `"${value}"`;
@@ -154,7 +151,6 @@ const Datasets = () => {
       );
       const csv = [headers, ...rows].join('\n');
 
-      // Create and trigger download
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -214,6 +210,10 @@ const Datasets = () => {
             <Database className="h-4 w-4" />
             Query
           </TabsTrigger>
+          <TabsTrigger value="export" className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Export
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="explore">
@@ -245,7 +245,20 @@ const Datasets = () => {
         </TabsContent>
 
         <TabsContent value="query">
-          <DatasetQuery />
+          <DatasetQuery 
+            selectedDataset={selectedDataset}
+            selectedColumns={selectedColumns}
+          />
+        </TabsContent>
+
+        <TabsContent value="export">
+          <DatasetExport
+            selectedDataset={selectedDataset}
+            selectedColumns={selectedColumns}
+            isLoading={tablesLoading}
+            onLoad={handleLoad}
+            onSample={handleDownload}
+          />
         </TabsContent>
       </Tabs>
     </div>
