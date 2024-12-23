@@ -57,11 +57,10 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       setColumns(columnsToUse);
 
-      // Fetch data with selected columns
+      // Fetch data with selected columns - removed 1000 limit
       const { data: tableData, error } = await supabase
         .from(tableName)
-        .select(columnsToUse.join(','))
-        .limit(1000);
+        .select(columnsToUse.join(','));
 
       if (error) throw error;
       
