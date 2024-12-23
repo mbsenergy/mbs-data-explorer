@@ -140,7 +140,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
       </div>
       
       <DatasetStats 
-        totalRows={data.length}
+        totalRows={data.length} // Original dataset total rows
         columnsCount={columns.length}
         filteredRows={filteredData.length}
         lastUpdate={data[0]?.md_last_update || null}
