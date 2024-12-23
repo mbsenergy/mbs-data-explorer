@@ -8,7 +8,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { useToast } from "@/hooks/use-toast";
 import type { TableInfo } from "./types";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetOverviewProps {
   favorites: Set<string>;
@@ -25,6 +29,7 @@ export const DatasetOverview = ({
   onDownload,
   onToggleFavorite 
 }: DatasetOverviewProps) => {
+  const { toast } = useToast();
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(0);
   const [downloadingDataset, setDownloadingDataset] = useState<string | null>(null);
@@ -117,7 +122,7 @@ export const DatasetOverview = ({
 
         // Fetch first 1000 rows
         const { data, error } = await supabase
-          .from(downloadingDataset)
+          .from(downloadingDataset as TableNames)
           .select('*')
           .limit(1000);
 

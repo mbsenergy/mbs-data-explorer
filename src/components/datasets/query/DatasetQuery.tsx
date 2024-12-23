@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
@@ -22,10 +22,13 @@ export const DatasetQuery = () => {
 
       if (error) throw error;
 
-      setQueryResults(data);
+      // Since we know our execute_query function returns a JSONB array
+      const results = data as any[];
+      setQueryResults(results);
+      
       toast({
         title: "Query executed successfully",
-        description: `Retrieved ${data.length} rows`
+        description: `Retrieved ${results.length} rows`
       });
 
       // Track analytics
