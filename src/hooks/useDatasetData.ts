@@ -25,7 +25,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     }
   };
 
-  const fetchColumns = async (tableName: string) => {
+  const fetchColumns = async (tableName: TableNames) => {
     const { data, error } = await supabase
       .from(tableName)
       .select('*')
