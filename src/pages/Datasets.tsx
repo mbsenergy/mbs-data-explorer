@@ -52,8 +52,9 @@ const Datasets = () => {
 
   const handlePreview = async (tableName: string) => {
     try {
+      // Cast the tableName to TableNames since we know it's a valid table name
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as TableNames)
         .select('*')
         .limit(10);
       
@@ -70,8 +71,9 @@ const Datasets = () => {
 
   const handleDownload = async (tableName: string) => {
     try {
+      // Cast the tableName to TableNames since we know it's a valid table name
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as TableNames)
         .select('*')
         .limit(100);
       
