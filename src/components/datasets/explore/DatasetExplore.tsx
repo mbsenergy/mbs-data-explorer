@@ -8,11 +8,9 @@ import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetFilters } from "./DatasetFilters";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import type { Filter } from "./types";
 import { v4 as uuidv4 } from 'uuid';
-import type { Filter, ComparisonOperator } from "./types";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -38,6 +36,7 @@ export const DatasetExplore = ({
   ]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
   const itemsPerPage = 10;
 
   const {
@@ -62,10 +61,14 @@ export const DatasetExplore = ({
       if (onLoad) {
         onLoad(selectedDataset);
       }
+      // Reset filters application state when loading new data
+      setShouldApplyFilters(false);
     }
   };
 
   const filterData = (data: any[]) => {
+    if (!shouldApplyFilters) return data;
+
     return data.filter((item) =>
       filters.reduce((pass, filter, index) => {
         let matches = false;
@@ -103,13 +106,8 @@ export const DatasetExplore = ({
               }
             })();
 
-        // First filter doesn't use operator
         if (index === 0) return matches;
-        
-        // Apply AND/OR logic for subsequent filters
-        return filter.operator === 'AND' 
-          ? pass && matches 
-          : pass || matches;
+        return filter.operator === 'AND' ? pass && matches : pass || matches;
       }, false)
     );
   };
@@ -117,7 +115,7 @@ export const DatasetExplore = ({
   const handleFilterChange = (
     filterId: string,
     field: keyof Filter,
-    value: string | ComparisonOperator
+    value: string
   ) => {
     setFilters(filters.map(f =>
       f.id === filterId
@@ -154,6 +152,10 @@ export const DatasetExplore = ({
     if (pageData) {
       setCurrentPage(newPage);
     }
+  };
+
+  const handleApplyFilters = () => {
+    setShouldApplyFilters(true);
   };
 
   const filteredData = filterData(data);
@@ -204,13 +206,24 @@ export const DatasetExplore = ({
         </div>
       ) : (
         <>
-          <DatasetFilters
-            columns={columns}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onAddFilter={handleAddFilter}
-            onRemoveFilter={handleRemoveFilter}
-          />
+          <div className="space-y-4">
+            <DatasetFilters
+              columns={columns}
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onAddFilter={handleAddFilter}
+              onRemoveFilter={handleRemoveFilter}
+            />
+            <div className="flex justify-end">
+              <Button 
+                onClick={handleApplyFilters}
+                variant="default"
+                className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
+              >
+                Apply Filters
+              </Button>
+            </div>
+          </div>
 
           <DatasetColumnSelect
             columns={columns}
