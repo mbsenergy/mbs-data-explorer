@@ -35,11 +35,15 @@ export const Navbar = () => {
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes (renamed from cacheTime)
+    staleTime: Infinity, // Never mark the data as stale
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
     retry: 2,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
+  // Loading state with skeleton
   if (isLoading) {
     return (
       <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]">
