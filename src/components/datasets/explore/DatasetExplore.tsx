@@ -91,7 +91,7 @@ export const DatasetExplore = ({
     <Card className="p-6 space-y-6">
       <DatasetHeader 
         selectedDataset={selectedDataset} 
-        onLoad={handleLoad}
+        onLoad={onLoad} 
       />
       
       <DatasetStats 
