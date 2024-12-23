@@ -21,6 +21,7 @@ const Datasets = () => {
   const [availableFields, setAvailableFields] = useState<string[]>([]);
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
+  const [selectedDataset, setSelectedDataset] = useState<string>("");
   const { favorites, toggleFavorite } = useFavorites();
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
@@ -56,6 +57,14 @@ const Datasets = () => {
     const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
     return matchesSearch && matchesField && matchesType && matchesFavorite;
   });
+
+  const handleSelect = async (tableName: string) => {
+    setSelectedDataset(tableName);
+    toast({
+      title: "Dataset Selected",
+      description: `${tableName} is now selected for exploration.`,
+    });
+  };
 
   const handleDownload = async (tableName: string) => {
     if (!user?.id) return;
@@ -135,14 +144,6 @@ const Datasets = () => {
     });
   };
 
-  const handleSelect = async (tableName: string) => {
-    await navigator.clipboard.writeText(tableName);
-    toast({
-      title: "Success",
-      description: "Table name copied to clipboard.",
-    });
-  };
-
   if (tablesLoading) {
     return (
       <div className="space-y-6">
@@ -183,7 +184,7 @@ const Datasets = () => {
         availableTypes={availableTypes}
       />
 
-      <DatasetExplore />
+      <DatasetExplore selectedDataset={selectedDataset} />
 
       {previewData && (
         <PreviewDialog

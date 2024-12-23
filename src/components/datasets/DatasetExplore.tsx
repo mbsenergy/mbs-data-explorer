@@ -4,24 +4,39 @@ import { Button } from "@/components/ui/button";
 import { Download, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import type { Database } from "@/integrations/supabase/types";
 
-export const DatasetExplore = () => {
-  const [selectedDataset, setSelectedDataset] = useState("");
+type TableNames = keyof Database['public']['Tables'];
+
+interface DatasetExploreProps {
+  selectedDataset?: string;
+}
+
+export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [columns, setColumns] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleDatasetSelect = async (dataset: string) => {
-    setSelectedDataset(dataset);
+  React.useEffect(() => {
+    if (selectedDataset) {
+      fetchColumns();
+    } else {
+      setColumns([]);
+      setFilters({});
+    }
+  }, [selectedDataset]);
+
+  const fetchColumns = async () => {
+    if (!selectedDataset) return;
+    
     try {
       const { data, error } = await supabase
-        .from(dataset)
+        .from(selectedDataset as TableNames)
         .select()
         .limit(1);
 
@@ -52,7 +67,7 @@ export const DatasetExplore = () => {
 
     setLoading(true);
     try {
-      let query = supabase.from(selectedDataset).select();
+      let query = supabase.from(selectedDataset as TableNames).select();
 
       // Apply filters
       Object.entries(filters).forEach(([column, value]) => {
@@ -131,18 +146,10 @@ export const DatasetExplore = () => {
 
       <div className="space-y-6">
         <div>
-          <Label>Select Dataset</Label>
-          <Select onValueChange={handleDatasetSelect} value={selectedDataset}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a dataset" />
-            </SelectTrigger>
-            <SelectContent>
-              {/* Dataset options will be populated from parent component */}
-              <SelectItem value="EC01_eurostat_HICP">Eurostat HICP</SelectItem>
-              <SelectItem value="EC01_eurostat_electricity">Eurostat Electricity</SelectItem>
-              {/* Add more dataset options */}
-            </SelectContent>
-          </Select>
+          <Label>Selected Dataset</Label>
+          <div className="h-10 px-4 py-2 border rounded-md bg-muted">
+            {selectedDataset || 'No dataset selected'}
+          </div>
         </div>
 
         {selectedDataset && columns.length > 0 && (
