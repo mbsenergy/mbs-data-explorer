@@ -37,12 +37,11 @@ const User = () => {
     country: "",
     company: "",
     role: "",
-    it_skills: [],
-    preferred_data: [],
-    subscriptions: [],
+    it_skills: [] as string[],
+    preferred_data: [] as string[],
+    subscriptions: [] as string[],
   });
 
-  // Update form data when profile data is loaded
   useEffect(() => {
     if (profile) {
       setFormData({
