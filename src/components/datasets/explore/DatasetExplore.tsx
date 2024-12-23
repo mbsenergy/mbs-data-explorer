@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, Database, Search } from "lucide-react";
+import { Database, Eye, Search } from "lucide-react";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetHeader } from "./DatasetHeader";
 import { DatasetContent } from "./DatasetContent";
 import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
-import type { Database } from "@/integrations/supabase/types";
-
-type TableNames = keyof Database['public']['Tables'];
+import type { TableNames } from "@/components/datasets/types";
 
 interface DatasetExploreProps {
   selectedDataset: TableNames | null;
   onColumnsChange: (columns: string[]) => void;
-  onLoad?: (tableName: string) => void;
+  onLoad?: (tableName: TableNames) => void;
 }
 
 export const DatasetExplore = ({ 
