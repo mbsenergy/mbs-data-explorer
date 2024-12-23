@@ -63,20 +63,19 @@ export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: Downl
                 <TableRow>
                   <TableHead>{getDatasetInfo ? "Dataset" : "File"}</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Tags</TableHead>
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={4}>
+                    <TableCell colSpan={3}>
                       <Skeleton className="h-8 w-full" />
                     </TableCell>
                   </TableRow>
                 ) : currentData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
                       No downloads yet
                     </TableCell>
                   </TableRow>
@@ -84,23 +83,13 @@ export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: Downl
                   currentData.map((item) => {
                     const info = getDatasetInfo 
                       ? getDatasetInfo(item.dataset_name)
-                      : { 
-                          type: item.file_section, 
-                          tags: item.file_name ? [item.file_name.split('.').pop()] : []
-                        };
+                      : { type: item.file_section };
                     
                     return (
                       <TableRow key={item.id}>
                         <TableCell>{getDatasetInfo ? item.dataset_name : item.file_name}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{info.type}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2 flex-wrap">
-                            {info.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary">{tag}</Badge>
-                            ))}
-                          </div>
                         </TableCell>
                         <TableCell>
                           {format(new Date(item.downloaded_at), 'dd MMM yyyy HH:mm')}
