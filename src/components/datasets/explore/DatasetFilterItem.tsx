@@ -34,12 +34,12 @@ export const DatasetFilterItem = ({
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
-      <Select value={selectedColumn} onValueChange={onColumnChange}>
+      <Select value={selectedColumn || "all_columns"} onValueChange={onColumnChange}>
         <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="Select a column" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All columns</SelectItem>
+          <SelectItem value="all_columns">All columns</SelectItem>
           {columns.map((col) => (
             <SelectItem key={col} value={col}>{col}</SelectItem>
           ))}

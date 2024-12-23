@@ -32,7 +32,7 @@ export const DatasetFilters = ({
           searchTerm={filter.searchTerm}
           selectedColumn={filter.selectedColumn}
           onSearchChange={(value) => onFilterChange(filter.id, "searchTerm", value)}
-          onColumnChange={(value) => onFilterChange(filter.id, "selectedColumn", value)}
+          onColumnChange={(value) => onFilterChange(filter.id, "selectedColumn", value === "all_columns" ? "" : value)}
           onRemove={() => onRemoveFilter(filter.id)}
           showRemove={filters.length > 1}
         />
