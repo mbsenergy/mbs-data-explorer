@@ -20,6 +20,7 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
     company: "",
     country: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -44,9 +45,11 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
     e.preventDefault();
     if (!userId) {
       console.error("No user ID available");
+      toast.error("Unable to update profile: No user ID available");
       return;
     }
 
+    setIsSubmitting(true);
     try {
       console.log("Starting profile update...");
       console.log("User ID:", userId);
@@ -54,32 +57,37 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
 
       // Convert empty strings to null for date_of_birth
       const updateData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
+        first_name: formData.first_name || null,
+        last_name: formData.last_name || null,
         date_of_birth: formData.date_of_birth || null,
-        role: formData.role,
-        company: formData.company,
-        country: formData.country,
+        role: formData.role || null,
+        company: formData.company || null,
+        country: formData.country || null,
         updated_at: new Date().toISOString(),
       };
 
       console.log("Formatted update data:", updateData);
       
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from("profiles")
         .update(updateData)
-        .eq("id", userId);
+        .eq("id", userId)
+        .select()
+        .single();
 
       if (error) {
         console.error("Error updating profile:", error);
         throw error;
       }
 
+      console.log("Profile updated successfully:", data);
       toast.success("Profile updated successfully");
       onProfileUpdate();
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -148,8 +156,8 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
         </div>
       </div>
 
-      <Button type="submit" className="w-full">
-        Save Changes
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Saving..." : "Save Changes"}
       </Button>
     </form>
   );
