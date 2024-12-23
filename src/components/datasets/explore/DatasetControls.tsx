@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, Download } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -13,6 +13,7 @@ interface DatasetControlsProps {
   onSearchChange: (value: string) => void;
   onColumnChange: (value: string) => void;
   onLoad?: (tableName: string) => void;
+  onDownload?: (tableName: string) => void;
   selectedDataset?: TableNames | null;
 }
 
@@ -23,6 +24,7 @@ export const DatasetControls = ({
   onSearchChange,
   onColumnChange,
   onLoad,
+  onDownload,
   selectedDataset,
 }: DatasetControlsProps) => {
   return (
@@ -68,8 +70,9 @@ export const DatasetControls = ({
           <Button
             variant="outline"
             className="flex-1 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-            onClick={() => window.location.href = '#sample'}
+            onClick={() => onDownload && onDownload(selectedDataset)}
           >
+            <Download className="h-4 w-4 mr-2" />
             Sample
           </Button>
         </div>

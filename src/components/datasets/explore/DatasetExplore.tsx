@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, Download } from "lucide-react";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
+import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -38,7 +39,6 @@ export const DatasetExplore = ({
     loadData
   } = useDatasetData(selectedDataset);
 
-  // Pre-select all columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -53,6 +53,54 @@ export const DatasetExplore = ({
         onLoad(selectedDataset);
       }
     }
+  };
+
+  const handleDownload = async () => {
+    if (!selectedDataset || !selectedColumns.length) {
+      toast.error("Please select columns to download");
+      return;
+    }
+
+    // Filter and prepare data for download
+    const filteredData = data.filter((item) =>
+      selectedColumn
+        ? String(item[selectedColumn])
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        : Object.entries(item)
+            .filter(([key]) => !key.startsWith('md_'))
+            .some(([_, value]) => 
+              String(value).toLowerCase().includes(searchTerm.toLowerCase())
+            )
+    );
+
+    // Only include selected columns
+    const processedData = filteredData.map(row => {
+      const processedRow: Record<string, any> = {};
+      selectedColumns.forEach(col => {
+        processedRow[col] = row[col];
+      });
+      return processedRow;
+    });
+
+    // Create and download CSV
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [
+          selectedColumns.join(","),
+          ...processedData.map(row => 
+            selectedColumns.map(col => `"${row[col] || ""}"`).join(",")
+          )
+        ].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${selectedDataset}_sample.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success("Sample data downloaded successfully");
   };
 
   const filteredData = data.filter((item) =>
@@ -113,10 +161,10 @@ export const DatasetExplore = ({
           )}
           <Button 
             variant="outline"
-            size="sm"
-            onClick={() => window.location.href = '#sample'}
+            onClick={handleDownload}
             className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
           >
+            <Download className="h-4 w-4 mr-2" />
             Sample
           </Button>
         </div>
@@ -142,6 +190,7 @@ export const DatasetExplore = ({
             onSearchChange={setSearchTerm}
             onColumnChange={setSelectedColumn}
             onLoad={onLoad}
+            onDownload={handleDownload}
             selectedDataset={selectedDataset}
           />
 
