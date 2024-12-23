@@ -23,6 +23,7 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
 
   useEffect(() => {
     if (profile) {
+      console.log("Initial profile data:", profile);
       setFormData({
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
@@ -44,25 +45,33 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
     if (!userId) return;
 
     try {
-      console.log("Updating profile with data:", formData);
+      console.log("Starting profile update...");
+      console.log("User ID:", userId);
+      console.log("Form data to be sent:", formData);
       
-      const { error } = await supabase
+      const updateData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        date_of_birth: formData.date_of_birth || null,
+        role: formData.role,
+        company: formData.company,
+        country: formData.country,
+      };
+
+      console.log("Formatted update data:", updateData);
+
+      const { data, error } = await supabase
         .from("profiles")
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          date_of_birth: formData.date_of_birth || null,
-          role: formData.role,
-          company: formData.company,
-          country: formData.country,
-        })
-        .eq("id", userId);
+        .update(updateData)
+        .eq("id", userId)
+        .select();
 
       if (error) {
         console.error("Error updating profile:", error);
         throw error;
       }
 
+      console.log("Update response data:", data);
       toast.success("Profile updated successfully");
       onProfileUpdate();
     } catch (error) {
