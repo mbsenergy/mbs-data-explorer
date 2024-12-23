@@ -22,7 +22,7 @@ const Developer = () => {
 
   const results = sections.map(section => {
     const { data: files } = useDeveloperFiles(section);
-    return files || [];
+    return (files || []).map(file => ({ ...file, section })); // Add section to each file
   }).flat();
 
   useEffect(() => {
@@ -31,12 +31,18 @@ const Developer = () => {
   }, [results]);
 
   const handlePreview = async (fileName: string, section: string) => {
+    console.log('Preview requested for:', { fileName, section });
     try {
+      if (!section) {
+        throw new Error('Section is required for preview');
+      }
+
       const { data, error } = await supabase.storage
         .from('developer')
         .download(`${section}/${fileName}`);
 
       if (error) {
+        console.error('Preview error:', error);
         toast({
           variant: "destructive",
           title: "Error",
@@ -48,6 +54,7 @@ const Developer = () => {
       const text = await data.text();
       setPreviewData({ fileName, content: text, section });
     } catch (error) {
+      console.error('Preview error:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -61,6 +68,8 @@ const Developer = () => {
   };
 
   const handleDownload = async (fileName: string, section: string) => {
+    console.log('Download requested for:', { fileName, section });
+    
     if (!user?.id) {
       toast({
         variant: "destructive",
@@ -70,8 +79,32 @@ const Developer = () => {
       return;
     }
 
+    if (!section) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Invalid file section.",
+      });
+      return;
+    }
+
     try {
-      // Track the download
+      // First try to download the file
+      const { data, error: downloadError } = await supabase.storage
+        .from('developer')
+        .download(`${section}/${fileName}`);
+
+      if (downloadError) {
+        console.error('Download error:', downloadError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to download file.",
+        });
+        return;
+      }
+
+      // If download successful, track the analytics
       const { error: analyticsError } = await supabase
         .from("developer_analytics")
         .insert({
@@ -81,21 +114,7 @@ const Developer = () => {
         });
 
       if (analyticsError) {
-        console.error("Error tracking download:", analyticsError);
-      }
-
-      // Download the file
-      const { data, error } = await supabase.storage
-        .from('developer')
-        .download(`${section}/${fileName}`);
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to download file.",
-        });
-        return;
+        console.error("Analytics tracking error:", analyticsError);
       }
 
       // Create download link
@@ -113,6 +132,7 @@ const Developer = () => {
         description: "File downloaded successfully.",
       });
     } catch (error) {
+      console.error('Download process error:', error);
       toast({
         variant: "destructive",
         title: "Error",
