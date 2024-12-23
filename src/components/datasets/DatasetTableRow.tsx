@@ -37,6 +37,11 @@ export const DatasetTableRow = ({
     setIsDownloadDialogOpen(false);
   };
 
+  const handleSelect = () => {
+    // Type assertion since we know these are valid table names from the database
+    onSelect(table.tablename as TableNames);
+  };
+
   return (
     <>
       <TableRow>
@@ -58,7 +63,7 @@ export const DatasetTableRow = ({
             className={isSelected ? 
               "bg-[#1E293B] text-white hover:bg-[#1E293B]/90" : 
               "bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white"}
-            onClick={() => onSelect(table.tablename)}
+            onClick={handleSelect}
           >
             {isSelected ? "Selected" : "Select"}
           </Button>

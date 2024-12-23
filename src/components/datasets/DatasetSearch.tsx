@@ -58,7 +58,8 @@ export const DatasetSearch = ({
 
   React.useEffect(() => {
     const handleSelectDataset = (event: CustomEvent<string>) => {
-      onSelect(event.detail);
+      // Type assertion here since we know these are valid table names
+      onSelect(event.detail as TableNames);
     };
 
     window.addEventListener('select-dataset', handleSelectDataset as EventListener);
