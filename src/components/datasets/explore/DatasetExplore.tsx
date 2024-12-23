@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetFilters } from "./DatasetFilters";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetQueryModal } from "./DatasetQueryModal";
+import { DatasetExploreActions } from "./DatasetExploreActions";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -183,6 +183,21 @@ export const DatasetExplore = ({
     }
 
     try {
+      const dataToDownload = shouldApplyFilters ? filteredData : data;
+      
+      if (!dataToDownload || !dataToDownload.length) {
+        throw new Error("No data available for download");
+      }
+
+      if (dataToDownload.length > 100000) {
+        toast({
+          variant: "destructive",
+          title: "Too many rows",
+          description: "Cannot export more than 100,000 rows. Please apply filters to reduce the dataset size."
+        });
+        return;
+      }
+
       const { error: analyticsError } = await supabase
         .from("analytics")
         .insert({
@@ -193,12 +208,6 @@ export const DatasetExplore = ({
 
       if (analyticsError) {
         console.error("Error tracking download:", analyticsError);
-      }
-
-      const dataToDownload = shouldApplyFilters ? filteredData : data;
-      
-      if (!dataToDownload || !dataToDownload.length) {
-        throw new Error("No data available for download");
       }
 
       const headers = selectedColumns.join(',');
@@ -241,7 +250,6 @@ export const DatasetExplore = ({
   const generateFilterQuery = () => {
     if (!selectedDataset) return "";
     
-    // Ensure exact case matching by using double quotes for table name
     let query = `SELECT ${selectedColumns.join(', ')} FROM "${selectedDataset}"`;
     
     if (filters.length > 0) {
@@ -290,35 +298,13 @@ export const DatasetExplore = ({
             </p>
           )}
         </div>
-        <div className="space-x-2">
-          {onLoad && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleLoad}
-              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-            >
-              Load
-            </Button>
-          )}
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={handleSampleDownload}
-            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-          >
-            Sample
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleShowQuery}
-            className="bg-[#94A3B8]/20 hover:bg-[#94A3B8]/30"
-          >
-            <Code className="h-4 w-4 mr-2" />
-            Show Query
-          </Button>
-        </div>
+        <DatasetExploreActions
+          selectedDataset={selectedDataset}
+          onRetrieve={handleLoad}
+          onExport={handleSampleDownload}
+          onShowQuery={() => setIsQueryModalOpen(true)}
+          isLoading={isLoading}
+        />
       </div>
       
       <DatasetStats 
