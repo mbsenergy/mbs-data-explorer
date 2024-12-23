@@ -25,10 +25,12 @@ export const AvatarUpload = ({ avatarUrl, onAvatarUpdate }: AvatarUploadProps) =
       console.log("Starting avatar upload process...");
       console.log("Current avatar URL:", avatarUrl);
       
-      // First, try to remove the old avatar if it exists
+      // Extract the full path from the URL
       if (avatarUrl) {
         console.log("Attempting to remove old avatar...");
-        const oldFilePath = avatarUrl.split('/').slice(-2).join('/');
+        // Get everything after /public/avatars/
+        const matches = avatarUrl.match(/\/public\/avatars\/(.+)$/);
+        const oldFilePath = matches ? matches[1] : null;
         console.log("Old file path:", oldFilePath);
         
         if (oldFilePath) {
