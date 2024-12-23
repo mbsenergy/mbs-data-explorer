@@ -44,15 +44,24 @@ export const ProfileForm = ({ profile, onProfileUpdate, userId }: ProfileFormPro
     if (!userId) return;
 
     try {
+      console.log("Updating profile with data:", formData);
+      
       const { error } = await supabase
         .from("profiles")
         .update({
-          ...formData,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
           date_of_birth: formData.date_of_birth || null,
+          role: formData.role,
+          company: formData.company,
+          country: formData.country,
         })
         .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating profile:", error);
+        throw error;
+      }
 
       toast.success("Profile updated successfully");
       onProfileUpdate();
