@@ -11,10 +11,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const initialFetchLimit = 1000;
-  const maxRetries = 3;
+  const pageSize = 1000; // Supabase's limit per request
 
-  const fetchWithRetry = async (fn: () => Promise<any>, retries = maxRetries) => {
+  const fetchWithRetry = async (fn: () => Promise<any>, retries = 3) => {
     try {
       return await fn();
     } catch (error) {
@@ -26,22 +25,55 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     }
   };
 
-  const loadData = async (tableName: string) => {
+  const loadData = async (tableName: TableNames) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from(tableName)
-        .select("*");
+      // First get total count
+      const { data: countResult, error: countError } = await supabase
+        .rpc('get_table_row_count', { table_name: tableName });
+      
+      if (countError) throw countError;
+      
+      const totalRows = countResult || 0;
+      setTotalRowCount(totalRows);
 
-      if (error) throw error;
+      // Calculate number of pages needed
+      const numberOfPages = Math.ceil(totalRows / pageSize);
+      let allData: any[] = [];
 
-      if (data && data.length > 0) {
-        const filteredColumns = Object.keys(data[0]).filter(
-          col => !col.startsWith('md_')
-        );
-        setColumns(filteredColumns);
-        setData(data);
+      // Fetch data in chunks
+      for (let i = 0; i < numberOfPages; i++) {
+        const from = i * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data: pageData, error } = await fetchWithRetry(async () => {
+          return await supabase
+            .from(tableName)
+            .select("*")
+            .range(from, to);
+        });
+
+        if (error) throw error;
+        if (pageData) {
+          allData = [...allData, ...pageData];
+          
+          // Set columns on first chunk
+          if (i === 0 && pageData.length > 0) {
+            const filteredColumns = Object.keys(pageData[0]).filter(
+              col => !col.startsWith('md_')
+            );
+            setColumns(filteredColumns);
+          }
+        }
       }
+
+      setData(allData);
+      
+      toast({
+        title: "Success",
+        description: `Loaded ${allData.length} rows successfully`
+      });
+
     } catch (error: any) {
       console.error("Error loading data:", error);
       toast({
@@ -66,7 +98,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       setIsLoading(true);
 
       try {
-        // First fetch total count using our new SQL function
+        // Get initial count
         const { data: countResult, error: countError } = await supabase
           .rpc('get_table_row_count', {
             table_name: selectedDataset
@@ -75,25 +107,20 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         if (countError) throw countError;
         setTotalRowCount(countResult || 0);
 
-        // If count is within limit, fetch all data
-        if (countResult <= 100000) {
-          await loadData(selectedDataset);
-        } else {
-          // Fetch initial chunk for larger datasets
-          const { data: initialData, error: initialError } = await supabase
-            .from(selectedDataset)
-            .select("*")
-            .range(0, initialFetchLimit - 1);
+        // Fetch initial chunk for preview
+        const { data: initialData, error: initialError } = await supabase
+          .from(selectedDataset)
+          .select("*")
+          .range(0, pageSize - 1);
 
-          if (initialError) throw initialError;
-          
-          if (initialData && initialData.length > 0) {
-            const filteredColumns = Object.keys(initialData[0]).filter(
-              col => !col.startsWith('md_')
-            );
-            setColumns(filteredColumns);
-            setData(initialData);
-          }
+        if (initialError) throw initialError;
+        
+        if (initialData && initialData.length > 0) {
+          const filteredColumns = Object.keys(initialData[0]).filter(
+            col => !col.startsWith('md_')
+          );
+          setColumns(filteredColumns);
+          setData(initialData);
         }
       } catch (error: any) {
         console.error("Error fetching data:", error);
@@ -115,21 +142,18 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const fetchPage = async (page: number, itemsPerPage: number) => {
     if (!selectedDataset) return;
     
-    setIsLoading(true);
     try {
       const start = page * itemsPerPage;
       const end = start + itemsPerPage - 1;
       
       const { data: pageData, error } = await fetchWithRetry(async () => {
-        const response = await supabase
+        return await supabase
           .from(selectedDataset)
           .select("*")
           .range(start, end);
-        
-        if (response.error) throw response.error;
-        return response;
       });
       
+      if (error) throw error;
       return pageData;
     } catch (error: any) {
       toast({
@@ -137,8 +161,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
