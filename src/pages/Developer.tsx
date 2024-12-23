@@ -18,14 +18,13 @@ const Developer = () => {
   const { favorites, toggleFavorite } = useDeveloperFavorites();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [previewData, setPreviewData] = useState<{ fileName: string; content: string } | null>(null);
+  const [previewData, setPreviewData] = useState<{ fileName: string; content: string; section: string } | null>(null);
 
   const results = sections.map(section => {
     const { data: files } = useDeveloperFiles(section);
     return files || [];
   }).flat();
 
-  // Extract unique tags
   useEffect(() => {
     const tags = [...new Set(results.map(file => file.field))];
     setAvailableTags(tags);
@@ -47,7 +46,7 @@ const Developer = () => {
       }
 
       const text = await data.text();
-      setPreviewData({ fileName, content: text });
+      setPreviewData({ fileName, content: text, section });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -161,7 +160,7 @@ const Developer = () => {
           onClose={handleClosePreview}
           filePath=""
           fileName={previewData.fileName}
-          section="developer"
+          section={previewData.section}
           directData={previewData.content}
         />
       )}

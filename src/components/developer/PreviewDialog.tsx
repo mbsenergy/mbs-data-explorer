@@ -17,7 +17,7 @@ interface PreviewDialogProps {
   onClose: () => void;
   filePath: string;
   fileName: string;
-  section?: string;
+  section: string;
   directData?: string;
 }
 
@@ -30,7 +30,7 @@ export const PreviewDialog = ({
   directData 
 }: PreviewDialogProps) => {
   const { toast } = useToast();
-  const fullPath = section ? `${section}/${filePath}` : filePath;
+  const fullPath = section ? `${section}/${fileName}` : fileName;
   const { data: fileContent, isLoading, error } = useFileContent(directData ? '' : fullPath);
   
   const displayContent = directData || fileContent;
