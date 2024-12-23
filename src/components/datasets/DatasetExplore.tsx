@@ -82,7 +82,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   );
 
   return (
-    <Card className="p-6 space-y-6">
+    <Card className="p-6 space-y-6" data-explore-section>
       <h2 className="text-2xl font-semibold mb-4">Explore & Export</h2>
       
       {!selectedDataset ? (
