@@ -8,6 +8,7 @@ import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { DatasetActivity } from "@/components/datasets/DatasetActivity";
 import { DatasetSearch } from "@/components/datasets/DatasetSearch";
 import { DatasetExplore } from "@/components/datasets/DatasetExplore";
+import { DatasetExport } from "@/components/datasets/export/DatasetExport";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
 import type { Database } from "@/integrations/supabase/types";
@@ -195,7 +196,14 @@ const Datasets = () => {
         selectedDataset={selectedDataset || ""}
       />
 
-      <DatasetExplore selectedDataset={selectedDataset} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DatasetExplore selectedDataset={selectedDataset} />
+        <DatasetExport 
+          selectedDataset={selectedDataset}
+          selectedColumns={[]} // This will need to be lifted up from DatasetExplore
+          isLoading={false}
+        />
+      </div>
 
       {previewData && (
         <PreviewDialog

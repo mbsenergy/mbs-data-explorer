@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -8,7 +7,6 @@ import { DatasetStats } from "./explore/DatasetStats";
 import { DatasetTable } from "./explore/DatasetTable";
 import { DatasetControls } from "./explore/DatasetControls";
 import { useDatasetData } from "@/hooks/useDatasetData";
-import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -22,7 +20,6 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const { toast } = useToast();
   const itemsPerPage = 10;
 
   const {
@@ -60,59 +57,6 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     });
   };
 
-  const handleExport = async () => {
-    if (!selectedDataset || !data.length) return;
-    
-    try {
-      // For export, fetch all data in chunks
-      const chunkSize = 1000;
-      let allData = [];
-      let currentOffset = 0;
-      
-      while (true) {
-        const { data: chunk, error } = await supabase
-          .from(selectedDataset)
-          .select(selectedColumns.join(','))
-          .range(currentOffset, currentOffset + chunkSize - 1);
-        
-        if (error) throw error;
-        if (!chunk.length) break;
-        
-        allData = [...allData, ...chunk];
-        if (chunk.length < chunkSize) break;
-        currentOffset += chunkSize;
-      }
-
-      const csv = [
-        selectedColumns.join(','),
-        ...allData.map(row => 
-          selectedColumns.map(col => String(row[col])).join(',')
-        )
-      ].join('\n');
-      
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Success",
-        description: "Dataset exported successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error exporting data",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   const handlePageChange = async (newPage: number) => {
     const pageData = await fetchPage(newPage, itemsPerPage);
     if (pageData) {
@@ -124,7 +68,7 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     <Card className="p-6 space-y-6" data-explore-section>
       <div className="flex justify-between items-center">
         <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">Explore & Export</h2>
+          <h2 className="text-2xl font-semibold">Explore</h2>
           {selectedDataset && (
             <p className="text-muted-foreground">
               Selected dataset: <span className="font-medium">{selectedDataset}</span>
@@ -132,11 +76,12 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           )}
         </div>
         <Button 
-          onClick={handleExport}
-          className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
-          disabled={!selectedDataset || !data.length}
+          variant="outline"
+          size="sm"
+          onClick={() => window.location.href = '#sample'}
+          className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
         >
-          Export Dataset
+          Sample
         </Button>
       </div>
       
