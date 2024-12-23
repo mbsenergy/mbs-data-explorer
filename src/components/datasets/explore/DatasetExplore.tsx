@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
@@ -66,15 +67,6 @@ export const DatasetExplore = ({
     });
   };
 
-  const handleLoad = async () => {
-    if (selectedDataset && loadData) {
-      await loadData(selectedDataset);
-      if (onLoad) {
-        onLoad(selectedDataset);
-      }
-    }
-  };
-
   const handleSample = async () => {
     if (!selectedDataset || !user?.id || !selectedColumns.length) {
       toast({
@@ -99,19 +91,19 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Fetch all data
-      const { data, error } = await supabase
+      // Get all data with selected columns
+      const { data: allData, error } = await supabase
         .from(selectedDataset)
         .select(selectedColumns.join(','));
 
       if (error) throw error;
 
-      if (!data || !data.length) {
+      if (!allData || !allData.length) {
         throw new Error("No data available for download");
       }
 
       // Apply filters to the data
-      const filteredData = filterData(data);
+      const filteredData = filterData(allData);
 
       // Create CSV content
       const headers = selectedColumns.join(',');
@@ -132,7 +124,7 @@ export const DatasetExplore = ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${selectedDataset}_sample.csv`;
+      a.download = `${selectedDataset}_filtered_data.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -140,7 +132,7 @@ export const DatasetExplore = ({
 
       toast({
         title: "Success",
-        description: "Dataset sample downloaded successfully.",
+        description: `Downloaded ${filteredData.length} rows successfully.`,
       });
     } catch (error: any) {
       console.error("Error downloading dataset:", error);
@@ -149,6 +141,15 @@ export const DatasetExplore = ({
         title: "Error",
         description: error.message || "Failed to download dataset.",
       });
+    }
+  };
+
+  const handleLoad = async () => {
+    if (selectedDataset && loadData) {
+      await loadData(selectedDataset);
+      if (onLoad) {
+        onLoad(selectedDataset);
+      }
     }
   };
 
