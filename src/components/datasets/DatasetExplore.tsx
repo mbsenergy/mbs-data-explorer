@@ -69,14 +69,42 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
     if (!selectedDataset) return;
 
     try {
-      const { data, error } = await supabase
+      // First check if the table has any rows
+      const { count } = await supabase
         .from(selectedDataset as TableNames)
-        .select('md_last_update')
-        .order('md_last_update', { ascending: false })
+        .select('*', { count: 'exact', head: true });
+
+      if (!count) {
+        setLastUpdate(null);
+        return;
+      }
+
+      // Get the first row to check available columns
+      const { data: sampleData, error: sampleError } = await supabase
+        .from(selectedDataset as TableNames)
+        .select('*')
         .limit(1);
 
-      if (!error && data && data.length > 0 && data[0].md_last_update) {
-        setLastUpdate(data[0].md_last_update);
+      if (sampleError || !sampleData || !sampleData.length) {
+        setLastUpdate(null);
+        return;
+      }
+
+      // Check which update column exists
+      const hasLastUpdate = 'md_last_update' in sampleData[0];
+
+      if (hasLastUpdate) {
+        const { data, error } = await supabase
+          .from(selectedDataset as TableNames)
+          .select('md_last_update')
+          .order('md_last_update', { ascending: false })
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          setLastUpdate(data[0].md_last_update);
+        } else {
+          setLastUpdate(null);
+        }
       } else {
         setLastUpdate(null);
       }
@@ -225,15 +253,15 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           
           {selectedDataset && (
             <div className="grid grid-cols-3 gap-4 mt-2">
-              <div className="p-3 glass-panel rounded-md">
+              <div className="p-3 glass-panel rounded-md bg-card">
                 <p className="text-sm text-muted-foreground">Total Rows</p>
                 <p className="text-lg font-semibold">{totalRows.toLocaleString()}</p>
               </div>
-              <div className="p-3 glass-panel rounded-md">
+              <div className="p-3 glass-panel rounded-md bg-card">
                 <p className="text-sm text-muted-foreground">Total Columns</p>
                 <p className="text-lg font-semibold">{columns.length}</p>
               </div>
-              <div className="p-3 glass-panel rounded-md">
+              <div className="p-3 glass-panel rounded-md bg-card">
                 <p className="text-sm text-muted-foreground">Filtered Rows</p>
                 <p className="text-lg font-semibold">{filteredRows.toLocaleString()}</p>
               </div>
