@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Settings,
-  User,
   Building2,
   HelpCircle,
   Database,
@@ -36,7 +35,6 @@ const navigationItems = [
 ];
 
 const profileItems = [
-  { title: "User", icon: User, url: "/user" },
   { title: "Analytics", icon: BarChart3, url: "/analytics" },
 ];
 

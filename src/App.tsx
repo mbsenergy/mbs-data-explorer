@@ -10,7 +10,6 @@ import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
 import Datasets from "./pages/Datasets";
 import Analytics from "./pages/Analytics";
-import User from "./pages/User";
 import Company from "./pages/Company";
 import Settings from "./pages/Settings";
 import Guide from "./pages/Guide";
@@ -37,7 +36,6 @@ const App = () => (
               <Route path="osservatorio" element={<Osservatorio />} />
               <Route path="datasets" element={<Datasets />} />
               <Route path="analytics" element={<Analytics />} />
-              <Route path="user" element={<User />} />
               <Route path="company" element={<Company />} />
               <Route path="settings" element={<Settings />} />
               <Route path="guide" element={<Guide />} />
