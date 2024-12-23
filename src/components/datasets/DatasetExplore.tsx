@@ -98,10 +98,11 @@ export const DatasetExplore = ({ selectedDataset }: DatasetExploreProps) => {
           .from(selectedDataset as TableNames)
           .select('md_last_update')
           .order('md_last_update', { ascending: false })
-          .limit(1);
+          .limit(1)
+          .single();
 
-        if (!error && data && data.length > 0) {
-          setLastUpdate(data[0].md_last_update);
+        if (!error && data) {
+          setLastUpdate(data.md_last_update);
         } else {
           setLastUpdate(null);
         }
