@@ -6,7 +6,6 @@ import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
-import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -91,21 +90,14 @@ export const DatasetExplore = ({
         console.error("Error tracking download:", analyticsError);
       }
 
-      // Get all data with selected columns
-      const { data: allData, error } = await supabase
-        .from(selectedDataset)
-        .select(selectedColumns.join(','));
+      // Use the already loaded data instead of making a new query
+      const filteredData = filterData(data);
 
-      if (error) throw error;
-
-      if (!allData || !allData.length) {
+      if (!filteredData.length) {
         throw new Error("No data available for download");
       }
 
-      // Apply filters to the data
-      const filteredData = filterData(allData);
-
-      // Create CSV content
+      // Create CSV content with only selected columns
       const headers = selectedColumns.join(',');
       const rows = filteredData.map(row => 
         selectedColumns.map(col => {
@@ -178,11 +170,36 @@ export const DatasetExplore = ({
 
   return (
     <Card className="p-6 space-y-6">
-      <DatasetExploreHeader 
-        selectedDataset={selectedDataset}
-        onLoad={handleLoad}
-        onSample={handleSample}
-      />
+      <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold">Explore</h2>
+          {selectedDataset && (
+            <p className="text-muted-foreground">
+              Selected dataset: <span className="font-medium">{selectedDataset}</span>
+            </p>
+          )}
+        </div>
+        <div className="space-x-2">
+          {onLoad && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleLoad}
+              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+            >
+              Load
+            </Button>
+          )}
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={handleSample}
+            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+          >
+            Sample
+          </Button>
+        </div>
+      </div>
       
       <DatasetStats 
         totalRows={totalRowCount}
