@@ -1,8 +1,7 @@
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { DatasetActivity } from "@/components/datasets/DatasetActivity";
 import { DatasetSearch } from "@/components/datasets/DatasetSearch";
-import { DatasetExplore } from "@/components/datasets/DatasetExplore";
-import { DatasetExport } from "@/components/datasets/export/DatasetExport";
+import { DatasetExplore } from "@/components/datasets/explore/DatasetExplore";
 import type { TableInfo } from "@/components/datasets/types";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -86,20 +85,11 @@ export const DatasetActions = ({
         onLoad={onLoad}
       />
 
-      <div className="space-y-6">
-        <DatasetExplore 
-          selectedDataset={selectedDataset} 
-          onColumnsChange={onColumnsChange}
-          onLoad={onLoad}
-        />
-        
-        <DatasetExport 
-          selectedDataset={selectedDataset}
-          selectedColumns={selectedColumns}
-          isLoading={false}
-          onLoad={onLoad}
-        />
-      </div>
+      <DatasetExplore 
+        selectedDataset={selectedDataset} 
+        onColumnsChange={onColumnsChange}
+        onLoad={onLoad}
+      />
 
       {previewData && (
         <PreviewDialog
