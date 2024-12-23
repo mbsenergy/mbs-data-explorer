@@ -22,18 +22,19 @@ export const Navbar = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       
+      console.log("Fetching profile for user:", user.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("first_name, last_name, avatar_url")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching profile:", error);
         throw error;
       }
 
-      console.log("Navbar profile data:", data);
+      console.log("Profile fetch result:", data);
       return data;
     },
     enabled: !!user?.id,
