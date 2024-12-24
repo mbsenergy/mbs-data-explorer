@@ -2,97 +2,131 @@ import Highcharts from 'highcharts';
 
 const theme: Partial<Highcharts.Options> = {
   colors: [
-    '#002B4D',  // Navy
-    '#00A99D',  // Teal
-    '#4DC3D7',  // Blue
-    '#9ED19D',  // Green
-    '#F2C94C',  // Yellow
-    '#F2994A',  // Orange
+    '#4DC3D7',  // corporate.blue
+    '#00A99D',  // corporate.teal
+    '#9ED19D',  // corporate.green
+    '#F2C94C',  // corporate.yellow
+    '#F2994A',  // corporate.orange
+    '#002B4D',  // corporate.navy
   ],
   chart: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'hsl(220 100% 2%)', // matches --background
     style: {
       fontFamily: 'Inter, sans-serif',
     },
+    plotBorderColor: 'hsl(217 100% 15%)', // matches --border
   },
   title: {
     style: {
-      color: '#FFFFFF',
+      color: 'hsl(210 40% 98%)', // matches --foreground
       fontSize: '16px',
-      fontWeight: 'bold',
+      fontWeight: '600',
     }
   },
   subtitle: {
     style: {
-      color: '#FFFFFF',
+      color: 'hsl(215 20.2% 65.1%)', // matches --muted-foreground
       fontSize: '12px',
-      fontWeight: 'bold',
+    }
+  },
+  xAxis: {
+    gridLineColor: 'hsl(217 100% 15%)', // matches --border
+    gridLineWidth: 1,
+    lineColor: 'hsl(217 100% 15%)',
+    tickColor: 'hsl(217 100% 15%)',
+    labels: {
+      style: {
+        color: 'hsl(215 20.2% 65.1%)', // matches --muted-foreground
+        fontSize: '11px',
+      }
+    },
+    title: {
+      style: {
+        color: 'hsl(210 40% 98%)', // matches --foreground
+      }
+    }
+  },
+  yAxis: {
+    gridLineColor: 'hsl(217 100% 15%)', // matches --border
+    gridLineWidth: 1,
+    lineColor: 'hsl(217 100% 15%)',
+    tickColor: 'hsl(217 100% 15%)',
+    labels: {
+      style: {
+        color: 'hsl(215 20.2% 65.1%)', // matches --muted-foreground
+        fontSize: '11px',
+      }
+    },
+    title: {
+      style: {
+        color: 'hsl(210 40% 98%)', // matches --foreground
+      }
+    }
+  },
+  legend: {
+    backgroundColor: 'transparent',
+    itemStyle: {
+      color: 'hsl(210 40% 98%)', // matches --foreground
+      fontWeight: '500',
+      fontSize: '12px',
+    },
+    itemHoverStyle: {
+      color: 'hsl(215 20.2% 65.1%)', // matches --muted-foreground
     }
   },
   tooltip: {
-    backgroundColor: '#002B4D',
-    borderColor: '#00A99D',
+    backgroundColor: 'hsl(222 84% 5%)', // matches --card
+    borderColor: 'hsl(217 100% 15%)', // matches --border
     style: {
-      color: '#FFFFFF',
+      color: 'hsl(210 40% 98%)', // matches --foreground
     },
+    borderRadius: 6,
   },
-  xAxis: {
-    gridLineColor: '#1A1A2E',
-    gridLineWidth: 0.5,
-    lineWidth: 0.5,
-    title: {
-      style: {
-        color: '#00A99D',
-        fontSize: '9px',
-        fontWeight: 'bold',
+  plotOptions: {
+    series: {
+      dataLabels: {
+        color: 'hsl(210 40% 98%)', // matches --foreground
+        style: {
+          fontSize: '11px',
+        }
       },
+      marker: {
+        lineColor: 'hsl(217 100% 15%)', // matches --border
+      }
     },
-    labels: {
-      style: {
-        color: '#4DC3D7',
-        fontSize: '8px',
-        fontWeight: 'bold',
-      },
-    },
+    line: {
+      type: 'line'
+    }
   },
-  yAxis: {
-    gridLineColor: '#1A1A2E',
-    gridLineWidth: 0.5,
-    lineWidth: 0.5,
-    title: {
-      style: {
-        color: '#00A99D',
-        fontSize: '9px',
-        fontWeight: 'bold',
-      },
-    },
-    labels: {
-      style: {
-        color: '#4DC3D7',
-        fontSize: '8px',
-        fontWeight: 'bold',
-      },
-    },
+  credits: {
+    style: {
+      color: 'hsl(215 20.2% 65.1%)', // matches --muted-foreground
+    }
   },
-  legend: {
-    itemStyle: {
-      fontSize: '10px',
-      fontWeight: 'bold',
-      color: '#FFFFFF',
+  drilldown: {
+    activeAxisLabelStyle: {
+      color: 'hsl(210 40% 98%)', // matches --foreground
     },
-    itemHoverStyle: {
-      color: 'gray',
-    },
+    activeDataLabelStyle: {
+      color: 'hsl(210 40% 98%)', // matches --foreground
+    }
   },
-  series: [{
-    type: 'line',
-    name: 'Series 1',
-    data: [1, 2, 3, 4, 5]
-  }, {
-    type: 'line',
-    name: 'Series 2',
-    data: [5, 4, 3, 2, 1]
-  }] as Highcharts.SeriesOptionsType[]
+  navigation: {
+    buttonOptions: {
+      theme: {
+        fill: 'transparent',
+        stroke: 'hsl(217 100% 15%)', // matches --border
+        states: {
+          hover: {
+            fill: 'hsl(217 100% 15%)', // matches --border
+          },
+          select: {
+            fill: 'hsl(217 100% 15%)', // matches --border
+          }
+        }
+      }
+    }
+  }
 };
 
 // Apply the theme
