@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import "@/integrations/highcharts/highchartsConfig";
 
 export const MarketOverview = () => {
   const { toast } = useToast();
@@ -113,7 +114,7 @@ export const MarketOverview = () => {
   
       {/* Economics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4 metallic-card relative z-10 shimmer"> {/* Increased padding from p-6 to p-8 */}
+        <Card className="p-4 metallic-card relative z-10 shimmer">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">GDP by Country</h3>
             <Button 
@@ -133,12 +134,24 @@ export const MarketOverview = () => {
               <HighchartsReact 
                 highcharts={Highcharts}
                 options={{
-                  title: { text: 'GDP by Country' },
-                  xAxis: { categories: gdpData.map((item) => item.DATE) },
-                  yAxis: { title: { text: 'GDP' } },
+                  chart: {
+                    type: 'line',
+                    height: 125
+                  },
+                  title: { text: undefined },
+                  xAxis: { 
+                    categories: gdpData?.map((item) => item.DATE) || [],
+                    labels: { enabled: false }
+                  },
+                  yAxis: { 
+                    title: { text: undefined },
+                    labels: { enabled: false }
+                  },
+                  legend: { enabled: false },
+                  credits: { enabled: false },
                   series: [{
                     name: 'GDP',
-                    data: gdpData.map((item) => item.VALUE),
+                    data: gdpData?.map((item) => item.VALUE) || [],
                   }]
                 }}
               />
@@ -146,7 +159,7 @@ export const MarketOverview = () => {
           )}
         </Card>
   
-        <Card className="p-8 metallic-card"> {/* Increased padding from p-6 to p-8 */}
+        <Card className="p-8 metallic-card">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Employment by Country</h3>
             <Button 
@@ -166,12 +179,24 @@ export const MarketOverview = () => {
               <HighchartsReact 
                 highcharts={Highcharts}
                 options={{
-                  title: { text: 'Employment Rate by Country' },
-                  xAxis: { categories: employmentData.map((item) => item.DATE) },
-                  yAxis: { title: { text: 'Employment Rate' } },
+                  chart: {
+                    type: 'line',
+                    height: 125
+                  },
+                  title: { text: undefined },
+                  xAxis: { 
+                    categories: employmentData?.map((item) => item.DATE) || [],
+                    labels: { enabled: false }
+                  },
+                  yAxis: { 
+                    title: { text: undefined },
+                    labels: { enabled: false }
+                  },
+                  legend: { enabled: false },
+                  credits: { enabled: false },
                   series: [{
                     name: 'Employment',
-                    data: employmentData.map((item) => item.VALUE),
+                    data: employmentData?.map((item) => item.VALUE) || [],
                   }]
                 }}
               />
