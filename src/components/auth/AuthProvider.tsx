@@ -26,11 +26,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Checking session...");
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Session check result:", session ? "Session found" : "No session");
-        setUser(session?.user ?? null);
-        setLoading(false);
+        
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(null);
+          // Clear any stale tokens
+          await supabase.auth.signOut();
+        }
       } catch (error) {
         console.error("Error checking session:", error);
         setUser(null);
+        // Clear any stale tokens on error
+        await supabase.auth.signOut();
+      } finally {
         setLoading(false);
       }
     };
@@ -42,15 +51,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       async (event, session) => {
         console.log("Auth state change:", event, session?.user?.email);
         
-        if (event === "SIGNED_OUT") {
+        if (event === "SIGNED_OUT" || event === "USER_DELETED") {
           console.log("User signed out, clearing state and redirecting...");
           setUser(null);
           // Clear auth-related items from localStorage
           localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
           navigate("/login");
-        } else if (event === "SIGNED_IN") {
-          console.log("User signed in, updating state...");
-          setUser(session?.user ?? null);
+        } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          console.log("User signed in or token refreshed, updating state...");
+          if (session?.user) {
+            setUser(session.user);
+          }
         }
         
         setLoading(false);
