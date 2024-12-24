@@ -68,7 +68,6 @@ export const DownloadsChart = ({
       text: undefined
     },
     xAxis: {
-      categories: chartData.map(item => item.date),
       labels: {
         rotation: -45,
         style: {
@@ -77,6 +76,7 @@ export const DownloadsChart = ({
       }
     },
     yAxis: {
+      categories: chartData.map(item => item.date),
       title: {
         text: 'Number of Downloads'
       },

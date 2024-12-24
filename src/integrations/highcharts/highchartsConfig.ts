@@ -10,7 +10,7 @@ const theme: Partial<Highcharts.Options> = {
     '#002B4D',  // corporate.navy
   ],
   chart: {
-    backgroundColor: 'hsl(220 100% 2%)', // matches --background
+    backgroundColor: 'transparent', // matches --background
     style: {
       fontFamily: 'Inter, sans-serif',
     },
