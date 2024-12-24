@@ -113,11 +113,16 @@ const theme: Partial<Highcharts.Options> = {
       theme: {
         fill: 'transparent',
         stroke: 'hsl(217 100% 15%)', // matches --border
-        hover: {
-          fill: 'hsl(217 100% 15%)', // matches --border
+        style: {
+          color: 'hsl(210 40% 98%)'
         },
-        select: {
-          fill: 'hsl(217 100% 15%)', // matches --border
+        states: {
+          hover: {
+            fill: 'hsl(217 100% 15%)' // matches --border
+          },
+          select: {
+            fill: 'hsl(217 100% 15%)' // matches --border
+          }
         }
       }
     }
