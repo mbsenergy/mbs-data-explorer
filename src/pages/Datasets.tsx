@@ -17,6 +17,7 @@ type TableNames = keyof SupabaseDatabase['public']['Tables'];
 
 const Datasets = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedField, setSelectedField] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -209,6 +210,10 @@ const Datasets = () => {
             <Database className="h-4 w-4" />
             Query
           </TabsTrigger>
+          <TabsTrigger value="export" className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Export
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="explore">
@@ -241,6 +246,13 @@ const Datasets = () => {
 
         <TabsContent value="query">
           <DatasetQuery 
+            selectedDataset={selectedDataset}
+            selectedColumns={selectedColumns}
+          />
+        </TabsContent>
+
+        <TabsContent value="export">
+          <DatasetExport
             selectedDataset={selectedDataset}
             selectedColumns={selectedColumns}
           />
