@@ -7,6 +7,8 @@ import SqlEditor from "@/components/datasets/SqlEditor";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { VirtualizedTable } from "./VirtualizedTable";
+import type { ColumnDef } from "@tanstack/react-table";
 
 interface DatasetQueryProps {
   selectedDataset?: string | null;
@@ -18,6 +20,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
 
   const handleExecuteQuery = async (query: string) => {
     setIsLoading(true);
@@ -30,6 +33,16 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
 
       const results = data as any[];
       setQueryResults(results);
+      
+      // Generate columns dynamically from the first result
+      if (results.length > 0) {
+        const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
+          accessorKey: key,
+          header: key,
+          cell: info => String(info.getValue() ?? ''),
+        }));
+        setColumns(cols);
+      }
       
       toast({
         title: "Query executed successfully",
@@ -147,29 +160,12 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
           <p>Executing query...</p>
         </div>
       ) : queryResults && queryResults.length > 0 ? (
-        <div className="border rounded-md overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-muted">
-                {Object.keys(queryResults[0]).map((header) => (
-                  <th key={header} className="px-4 py-2 text-left font-medium">
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {queryResults.map((row, i) => (
-                <tr key={i} className="border-t">
-                  {Object.values(row).map((value: any, j) => (
-                    <td key={j} className="px-4 py-2">
-                      {String(value)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="border rounded-md">
+          <VirtualizedTable 
+            data={queryResults} 
+            columns={columns}
+            isLoading={isLoading}
+          />
         </div>
       ) : queryResults ? (
         <p className="text-center text-muted-foreground">No results found</p>
