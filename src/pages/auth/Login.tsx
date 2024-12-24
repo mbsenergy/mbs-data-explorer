@@ -61,7 +61,6 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
       {/* Background gradient effects */}
-      <div className="absolute inset-0 ai-gradient opacity-50" />
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
       
       {/* Animated background shapes */}
@@ -81,7 +80,7 @@ const Login = () => {
         <div className="space-y-6">
           <div className="flex flex-col items-center space-y-2">
             <img 
-              src="/brand/flux_logo_02.png" 
+              src="/brand/flux_logo_01.png" 
               alt="Flux Logo" 
               className="h-16 mb-4 animate-float"
             />
