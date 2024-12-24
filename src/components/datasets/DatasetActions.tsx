@@ -63,8 +63,10 @@ export const DatasetActions = ({
       <DatasetActivity 
         favorites={favorites}
         tables={tables}
+        selectedDataset={selectedDataset}
         onPreview={onPreview}
         onDownload={onDownload}
+        onSelect={onSelect}
         onToggleFavorite={onToggleFavorite}
       />
 

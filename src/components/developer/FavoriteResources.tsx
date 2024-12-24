@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Download, Eye } from "lucide-react";
@@ -21,7 +22,10 @@ export const FavoriteResources = ({
 }: FavoriteResourcesProps) => {
   return (
     <div className="space-y-4 p-4 border border-[hsl(217,100%,15%)] rounded-lg bg-card/50">
-      <h2 className="text-2xl font-semibold text-white">Favorite Resources</h2>
+      <div className="flex items-center gap-2 mb-4">
+        <Star className="h-6 w-6" />
+        <h2 className="text-2xl font-semibold text-white">Favorite Resources</h2>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>

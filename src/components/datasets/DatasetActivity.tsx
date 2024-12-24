@@ -4,21 +4,25 @@ import { DatasetOverview } from "./DatasetOverview";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { TableInfo } from "./types";
+import type { TableInfo, TableNames } from "./types";
 
 interface DatasetActivityProps {
   favorites: Set<string>;
   tables: TableInfo[];
+  selectedDataset: TableNames | null;
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
+  onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
 }
 
 export const DatasetActivity = ({ 
   favorites, 
   tables, 
+  selectedDataset,
   onPreview, 
   onDownload,
+  onSelect,
   onToggleFavorite 
 }: DatasetActivityProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
@@ -41,9 +45,11 @@ export const DatasetActivity = ({
         <CollapsibleContent>
           <DatasetOverview 
             favorites={favorites} 
-            tables={tables} 
+            tables={tables}
+            selectedDataset={selectedDataset}
             onPreview={onPreview}
             onDownload={onDownload}
+            onSelect={onSelect}
             onToggleFavorite={onToggleFavorite}
           />
         </CollapsibleContent>

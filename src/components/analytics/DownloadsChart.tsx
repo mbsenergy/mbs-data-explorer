@@ -1,19 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
 
 interface ChartDataItem {
   date: string;
@@ -67,6 +59,68 @@ export const DownloadsChart = ({
     'Dataset Exports': counts['Dataset Exports']
   }));
 
+  const chartOptions: Highcharts.Options = {
+    chart: {
+      type: 'bar',
+      height: 500,
+    },
+    title: {
+      text: undefined
+    },
+    xAxis: {
+      categories: chartData.map(item => item.date),
+      labels: {
+        rotation: -45,
+        style: {
+          fontSize: '10px'
+        }
+      }
+    },
+    yAxis: {
+      title: {
+        text: 'Number of Downloads'
+      },
+      allowDecimals: false
+    },
+    plotOptions: {
+      bar: {
+        stacking: 'normal',
+        borderRadius: 3,
+        dataLabels: {
+          enabled: true,
+          color: '#ffffff'
+        }
+      }
+    },
+    series: [{
+      name: 'Dataset Samples',
+      type: 'bar',
+      data: chartData.map(item => item['Dataset Samples']),
+      color: '#57D7E2'
+    }, {
+      name: 'Developer Files',
+      type: 'bar',
+      data: chartData.map(item => item['Developer Files']),
+      color: '#FEC6A1'
+    }, {
+      name: 'Dataset Exports',
+      type: 'bar',
+      data: chartData.map(item => item['Dataset Exports']),
+      color: '#A78BFA'
+    }],
+    legend: {
+      align: 'center',
+      verticalAlign: 'bottom',
+      layout: 'horizontal',
+      itemStyle: {
+        color: '#fff'
+      }
+    },
+    credits: {
+      enabled: false
+    }
+  };
+
   return (
     <Card className="p-6 bg-card metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -87,43 +141,10 @@ export const DownloadsChart = ({
             {isLoading ? (
               <Skeleton className="w-full h-full" />
             ) : chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date"
-                    tick={{ fill: '#ffffff' }}
-                  />
-                  <YAxis 
-                    tick={{ fill: '#ffffff' }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)'
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="Dataset Samples"
-                    stroke="#57D7E2"
-                    strokeWidth={2}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="Developer Files"
-                    stroke="#FEC6A1"
-                    strokeWidth={2}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="Dataset Exports"
-                    stroke="#A78BFA"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={chartOptions}
+              />
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
                 No download data available

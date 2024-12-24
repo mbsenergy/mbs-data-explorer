@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, FileSearch } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -28,7 +28,10 @@ export const DeveloperSearch = ({
     <Card className="p-6 mb-6 metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold">Search material</h2>
+          <div className="flex items-center gap-2">
+            <FileSearch className="h-6 w-6" />
+            <h2 className="text-2xl font-semibold">Search Material</h2>
+          </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">
               {isOpen ? (

@@ -1,11 +1,6 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useMemo } from 'react';
+import { DataGrid } from "@/components/datasets/query/DataGrid";
+import type { ColumnDef } from "@tanstack/react-table";
 
 interface DatasetTableProps {
   columns: string[];
@@ -14,30 +9,19 @@ interface DatasetTableProps {
 }
 
 export const DatasetTable = ({ columns, data, selectedColumns }: DatasetTableProps) => {
+  const tableColumns = useMemo(() => {
+    return selectedColumns.map((col): ColumnDef<any> => ({
+      accessorKey: col,
+      header: col,
+    }));
+  }, [selectedColumns]);
+
   return (
     <div className="border rounded-md">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {selectedColumns.map((col) => (
-                <TableHead key={col}>{col}</TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((item, index) => (
-              <TableRow key={index}>
-                {selectedColumns.map((col) => (
-                  <TableCell key={col} className="whitespace-nowrap">
-                    {String(item[col])}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataGrid
+        data={data}
+        columns={tableColumns}
+      />
     </div>
   );
 };

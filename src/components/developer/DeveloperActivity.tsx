@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Activity } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,7 +55,10 @@ export const DeveloperActivity = ({
     <Card className="p-4 metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold text-white">Activity</h2>
+          <div className="flex items-center gap-2">
+            <Activity className="h-6 w-6" />
+            <h2 className="text-2xl font-semibold">Activity</h2>
+          </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">
               {isOpen ? (

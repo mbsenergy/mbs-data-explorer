@@ -48,7 +48,7 @@ export const VirtualizedTable = ({ data, columns, isLoading }: VirtualizedTableP
   return (
     <div
       ref={tableContainerRef}
-      className="border rounded-md relative overflow-auto"
+      className="border rounded-md relative overflow-auto bg-card/50 backdrop-blur-sm border-white/[0.05]"
       style={{ height: tableHeight }}
     >
       <Table>
@@ -69,13 +69,13 @@ export const VirtualizedTable = ({ data, columns, isLoading }: VirtualizedTableP
         <TableBody>
           {paddingTop > 0 && (
             <tr>
-              <td style={{ height: `${paddingTop}px` }} />
+              <td style={{ height: `${paddingTop}px` }} className="bg-card/50" />
             </tr>
           )}
           {virtualRows.map((virtualRow) => {
             const row = rows[virtualRow.index];
             return (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} className="hover:bg-muted/50 transition-colors">
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -86,7 +86,7 @@ export const VirtualizedTable = ({ data, columns, isLoading }: VirtualizedTableP
           })}
           {paddingBottom > 0 && (
             <tr>
-              <td style={{ height: `${paddingBottom}px` }} />
+              <td style={{ height: `${paddingBottom}px` }} className="bg-card/50" />
             </tr>
           )}
         </TableBody>

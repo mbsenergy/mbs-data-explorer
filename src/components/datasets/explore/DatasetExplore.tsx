@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetFilters } from "./DatasetFilters";
@@ -43,7 +42,7 @@ export const DatasetExplore = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
   const [filteredData, setFilteredData] = useState<any[]>([]);
-  const itemsPerPage = 10;
+  const [pageSize] = useState(20);
   const { toast } = useToast();
   const { user } = useAuth();
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
@@ -160,7 +159,7 @@ export const DatasetExplore = ({
   };
 
   const handlePageChange = async (newPage: number) => {
-    const pageData = await fetchPage(newPage, itemsPerPage);
+    const pageData = await fetchPage(newPage, pageSize);
     if (pageData) {
       setCurrentPage(newPage);
     }
@@ -251,7 +250,7 @@ export const DatasetExplore = ({
   const generateFilterQuery = () => {
     if (!selectedDataset) return "";
     
-    let query = `SELECT ${selectedColumns.join(', ')} FROM "${selectedDataset}"`;
+    let query = `SELECT ${selectedColumns.map(col => `"${col}"`).join(', ')} FROM "${selectedDataset}"`;
     
     if (filters.length > 0) {
       const filterConditions = filters
@@ -282,7 +281,7 @@ export const DatasetExplore = ({
     const query = generateFilterQuery();
     const apiCall = `await supabase
   .from('${selectedDataset}')
-  .select('${selectedColumns.join(', ')}')`
+  .select('${selectedColumns.map(col => `"${col}"`).join(', ')}')`
     + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "");
 
     setIsQueryModalOpen(true);
@@ -345,20 +344,10 @@ export const DatasetExplore = ({
             selectedColumns={selectedColumns}
             onColumnSelect={handleColumnSelect}
           />
-
           <DatasetTable
             columns={columns}
-            data={filteredData.slice(
-              currentPage * itemsPerPage,
-              (currentPage + 1) * itemsPerPage
-            )}
+            data={filteredData}
             selectedColumns={selectedColumns}
-          />
-
-          <DatasetPagination
-            currentPage={currentPage}
-            totalPages={Math.ceil(filteredData.length / itemsPerPage)}
-            onPageChange={handlePageChange}
           />
 
           <DatasetQueryModal

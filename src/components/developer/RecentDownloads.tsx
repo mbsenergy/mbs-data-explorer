@@ -1,3 +1,4 @@
+import { History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Download, Eye, Star } from "lucide-react";
@@ -21,7 +22,10 @@ export const RecentDownloads = ({
 }: RecentDownloadsProps) => {
   return (
     <div className="p-4 border border-[hsl(217,100%,15%)] rounded-lg bg-card/50">
-      <h2 className="text-2xl font-semibold text-white">Recent Downloads</h2>
+      <div className="flex items-center gap-2 mb-4">
+        <History className="h-6 w-6" />
+        <h2 className="text-2xl font-semibold text-white">Recent Downloads</h2>
+      </div>
       <Carousel className="w-full">
         <CarouselContent>
           {recentDownloads?.map((download) => {

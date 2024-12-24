@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/table";
 import { DatasetTableRow } from "./DatasetTableRow";
 import type { TableInfo } from "./types";
+import { Button } from "@/components/ui/button"; 
+import { Download, Eye, Star, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface DatasetTableProps {
   tables: TableInfo[];

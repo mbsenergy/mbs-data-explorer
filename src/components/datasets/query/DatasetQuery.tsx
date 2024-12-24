@@ -1,28 +1,59 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Search, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
-import { Label } from "@/components/ui/label";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DatasetQueryResults } from "./DatasetQueryResults";
-import { DatasetQueryDisplay } from "./DatasetQueryDisplay";
+import { DatasetSearch } from "../DatasetSearch";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useQuery } from "@tanstack/react-query";
+import type { TableInfo } from "../types";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DatasetQueryProps {
-  selectedDataset?: string | null;
-  selectedColumns?: string[];
+  selectedDataset: TableNames | null;
+  selectedColumns: string[];
 }
 
-export const DatasetQuery = ({ 
-  selectedDataset, 
-  selectedColumns = [] 
-}: DatasetQueryProps) => {
+export const DatasetQuery = ({
+  selectedDataset: initialSelectedDataset,
+  selectedColumns: initialSelectedColumns,
+}) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
+  const [query, setQuery] = useState("SELECT * FROM your_table LIMIT 100");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedField, setSelectedField] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const { favorites, toggleFavorite } = useFavorites();
+  const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(initialSelectedDataset);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  
+  const { data: tables, isLoading: tablesLoading } = useQuery({
+    queryKey: ["tables"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_available_tables");
+      if (error) throw error;
+      return data as TableInfo[];
+    },
+  });
+
+  const filteredTables = tables?.filter(table => {
+    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
+    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
+    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
+    return matchesSearch && matchesField && matchesType && matchesFavorite;
+  });
 
   const validateQuery = (query: string): { isValid: boolean; error?: string } => {
     const disallowedKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE'];
@@ -45,6 +76,16 @@ export const DatasetQuery = ({
     }
 
     return { isValid: true };
+  };
+
+  const handleSelect = (tableName: string) => {
+    setSelectedDataset(tableName);
+    setQuery(`SELECT * FROM ${tableName} LIMIT 100`);
+    toast({
+      title: "Query Generated",
+      description: `Query for ${tableName} has been generated.`,
+      style: { backgroundColor: "#22c55e", color: "white" }
+    });
   };
 
   const handleExecuteQuery = async (query: string) => {
@@ -144,44 +185,68 @@ export const DatasetQuery = ({
     }
   };
 
-  const generateDefaultQuery = () => {
-    if (!selectedDataset) return "";
-    
-    const columns = selectedColumns.length > 0 
-      ? selectedColumns.map(col => `"${col}"`).join(', ')
-      : '*';
-      
-    return `SELECT ${columns}\nFROM "${selectedDataset}"\nLIMIT 100`;
-  };
-
   return (
-    <Card className="p-6 space-y-6 metallic-card">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">SQL Query</h2>
-        <p className="text-muted-foreground">
-          Execute custom SQL queries on the available datasets
-        </p>
-      </div>
-
-      {selectedDataset && (
-        <div className="space-y-2">
-          <Label>Selected Dataset</Label>
-          <div className="p-2 bg-muted rounded-md">
-            {selectedDataset}
+    <div className="space-y-6">
+      <Card className="p-6 metallic-card">
+        <Collapsible open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              <h2 className="text-2xl font-semibold">Datamart Search</h2>
+            </div>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm">
+                {isSearchOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
           </div>
-        </div>
-      )}
+          <CollapsibleContent>
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                Browse and select datasets to generate SQL queries
+              </p>
+              {tablesLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <p>Loading datasets...</p>
+                </div>
+              ) : (
+                <DatasetSearch
+                  tables={filteredTables || []}
+                  onPreview={() => {}}
+                  onDownload={() => {}}
+                  onSelect={handleSelect}
+                  onToggleFavorite={toggleFavorite}
+                  favorites={favorites}
+                  onSearchChange={setSearchTerm}
+                  onFieldChange={setSelectedField}
+                  onTypeChange={setSelectedType}
+                  onFavoriteChange={setShowOnlyFavorites}
+                  availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
+                  availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
+                  selectedDataset={selectedDataset || ""}
+                />
+              )}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-      {selectedColumns.length > 0 && (
-        <div className="space-y-2">
-          <Label>Selected Columns</Label>
-          <div className="p-2 bg-muted rounded-md">
-            {selectedColumns.join(", ")}
+      <Card className="p-6 metallic-card">
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Code className="h-5 w-5" />
+            <h2 className="text-2xl font-semibold">SQL Query</h2>
           </div>
+          <p className="text-muted-foreground">
+            Execute custom SQL queries on the available datasets
+          </p>
+          <SqlEditor onExecute={handleExecuteQuery} defaultValue={query} />
         </div>
-      )}
-
-      <SqlEditor onExecute={handleExecuteQuery} defaultValue={generateDefaultQuery()} />
+      </Card>
 
       <DatasetQueryResults
         isLoading={isLoading}
@@ -189,16 +254,6 @@ export const DatasetQuery = ({
         columns={columns}
         onDownload={handleDownloadResults}
       />
-
-      {queryResults && queryResults.length > 0 && (
-        <DatasetQueryDisplay
-          query={generateDefaultQuery()}
-          apiCall={`await supabase
-  .from('${selectedDataset}')
-  .select('${selectedColumns.join(', ')}')`
-            + (selectedColumns.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "")}
-        />
-      )}
-    </Card>
+    </div>
   );
 };

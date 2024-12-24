@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Download, Eye, Star } from "lucide-react";
+import { Download, Eye, Star, Check } from "lucide-react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import type { TableInfo } from "./types";
+import { cn } from "@/lib/utils";
 
 interface DatasetTableRowProps {
   table: TableInfo;
@@ -35,6 +36,15 @@ export const DatasetTableRow = ({
 
   const handleDownload = () => {
     setIsDownloadDialogOpen(true);
+  };
+
+  const handleSelect = () => {
+    onSelect(table.tablename);
+    toast({
+      title: "Dataset Selected",
+      description: table.tablename,
+      style: { backgroundColor: "#22c55e", color: "white" }
+    });
   };
 
   const handleConfirmDownload = async () => {
@@ -133,13 +143,14 @@ export const DatasetTableRow = ({
         <TableCell className="space-x-2">
           <Button
             variant="outline"
-            size="sm"
-            className={isSelected ? 
-              "bg-[#1E293B] text-white hover:bg-[#1E293B]/90" : 
-              "bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white"}
-            onClick={() => onSelect(table.tablename)}
+            size="icon"
+            onClick={handleSelect}
+            className={cn(
+              "bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white",
+              isSelected && "bg-[#1E293B] hover:bg-[#1E293B]/90"
+            )}
           >
-            {isSelected ? "Selected" : "Select"}
+            <Check className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"

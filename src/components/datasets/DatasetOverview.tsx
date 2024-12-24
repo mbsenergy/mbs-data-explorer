@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
-import { Download, Eye, Star } from "lucide-react";
+import { Download, Eye, Star, Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -11,6 +11,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { useToast } from "@/hooks/use-toast";
 import type { TableInfo } from "./types";
 import type { Database } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -19,7 +20,9 @@ interface DatasetOverviewProps {
   tables: TableInfo[];
   onPreview: (tableName: string) => void;
   onDownload: (tableName: string) => void;
+  onSelect: (tableName: string) => void;
   onToggleFavorite: (tableName: string) => void;
+  selectedDataset?: string;
 }
 
 export const DatasetOverview = ({ 
@@ -27,7 +30,9 @@ export const DatasetOverview = ({
   tables, 
   onPreview, 
   onDownload,
-  onToggleFavorite 
+  onSelect,
+  onToggleFavorite,
+  selectedDataset,
 }: DatasetOverviewProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -177,8 +182,8 @@ export const DatasetOverview = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-6 mb-8">
-      <Card className="p-4">
+    <div className="grid grid-cols-12 gap-6 mb-8">
+      <Card className="p-4 col-span-9">
         <h3 className="text-lg font-semibold mb-4">Favorite Datasets</h3>
         <div className="space-y-4">
           <Table>
@@ -209,20 +214,29 @@ export const DatasetOverview = ({
                     <TableCell className="space-x-2">
                       <Button
                         variant="outline"
-                        size="sm"
-                        onClick={() => onPreview(table.tablename)}
-                        className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                        size="icon"
+                        onClick={() => onSelect(table.tablename)}
+                        className={cn(
+                          "bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white",
+                          selectedDataset === table.tablename && "bg-[#1E293B] hover:bg-[#1E293B]/90"
+                        )}
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview
+                        <Check className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="icon"
+                        onClick={() => onPreview(table.tablename)}
+                        className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => handleDownload(table.tablename)}
                       >
-                        <Download className="h-4 w-4 mr-2" />
-                        Sample
+                        <Download className="h-4 w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -254,7 +268,7 @@ export const DatasetOverview = ({
         </div>
       </Card>
 
-      <Card className="p-4">
+      <Card className="p-4 col-span-3">
         <h3 className="text-lg font-semibold mb-4">Recent Downloads</h3>
         <Carousel className="w-full">
           <CarouselContent>
@@ -282,24 +296,33 @@ export const DatasetOverview = ({
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
-                        size="sm"
-                        onClick={() => onPreview(download.dataset_name)}
-                        className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                        size="icon"
+                        onClick={() => onSelect(download.dataset_name)}
+                        className={cn(
+                          "bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white",
+                          selectedDataset === download.dataset_name && "bg-[#1E293B] hover:bg-[#1E293B]/90"
+                        )}
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview
+                        <Check className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="icon"
+                        onClick={() => onPreview(download.dataset_name)}
+                        className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => handleDownload(download.dataset_name)}
                       >
-                        <Download className="h-4 w-4 mr-2" />
-                        Sample
+                        <Download className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={() => onToggleFavorite(download.dataset_name)}
                         className={favorites.has(download.dataset_name) ? "text-yellow-400" : "text-gray-400"}
                       >
@@ -311,8 +334,10 @@ export const DatasetOverview = ({
               );
             })}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <div className="flex justify-center gap-2 mt-4">
+            <CarouselPrevious className="static translate-y-0" />
+            <CarouselNext className="static translate-y-0" />
+          </div>
         </Carousel>
       </Card>
 

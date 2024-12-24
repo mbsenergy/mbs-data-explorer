@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; 
+import { Code, Activity, History } from "lucide-react";
 import { DeveloperSection } from "@/components/developer/DeveloperSection";
 import { DeveloperSearch } from "@/components/developer/DeveloperSearch";
 import { DeveloperActivity } from "@/components/developer/DeveloperActivity";
@@ -10,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 
 const Developer = () => {
-  const sections = ['presets', 'macros', 'developer', 'models'];
+  const sections = ['presets', 'macros', 'developer', 'models', 'queries'];
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
   const [showFavorites, setShowFavorites] = useState(false);
@@ -143,7 +144,12 @@ const Developer = () => {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">Developer Resources</h1>
+      <div className="flex items-center gap-2">
+        <Code className="h-8 w-8 text-corporate-teal" />
+        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">
+          Developer Resources
+        </h1>
+      </div>
       
       <DeveloperActivity
         favorites={favorites}
@@ -163,6 +169,7 @@ const Developer = () => {
       {sections.map(section => (
         <DeveloperSection 
           key={section} 
+          title={section.charAt(0).toUpperCase() + section.slice(1)}
           section={section}
           searchTerm={searchTerm}
           selectedTag={selectedTag}

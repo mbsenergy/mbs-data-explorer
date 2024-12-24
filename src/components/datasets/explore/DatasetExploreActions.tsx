@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Download, Database, Code } from "lucide-react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { DatasetActionDialog } from "./DatasetActionDialog";
 
 interface DatasetExploreActionsProps {
   selectedDataset: string | null;
@@ -19,6 +21,8 @@ export const DatasetExploreActions = ({
   isLoading
 }: DatasetExploreActionsProps) => {
   const { toast } = useToast();
+  const [showRetrieveDialog, setShowRetrieveDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   const handleRetrieve = async () => {
     if (!selectedDataset) {
@@ -30,6 +34,10 @@ export const DatasetExploreActions = ({
       return;
     }
 
+    setShowRetrieveDialog(true);
+  };
+
+  const handleConfirmRetrieve = async () => {
     // Check row count
     const { data: countData, error: countError } = await supabase
       .rpc('get_table_row_count', { table_name: selectedDataset });
@@ -43,19 +51,30 @@ export const DatasetExploreActions = ({
       return;
     }
     
-    if (countData > 200000) {
+    if (countData > 500000) {
       toast({
         title: "Dataset too large",
-        description: "Cannot retrieve datasets with more than 200,000 rows. Please use the export feature instead.",
+        description: "Cannot retrieve datasets with more than 500,000 rows. Please use the export feature instead.",
         variant: "destructive"
       });
       return;
     }
 
     onRetrieve();
+    setShowRetrieveDialog(false);
+  };
+
+  const handleExport = () => {
+    setShowExportDialog(true);
+  };
+
+  const handleConfirmExport = () => {
+    onExport();
+    setShowExportDialog(false);
   };
 
   return (
+    <>
     <div className="space-x-2">
       <Button
         variant="outline"
@@ -70,7 +89,7 @@ export const DatasetExploreActions = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={onExport}
+        onClick={handleExport}
         disabled={isLoading}
         className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
       >
@@ -88,5 +107,22 @@ export const DatasetExploreActions = ({
         Show Query
       </Button>
     </div>
+    <DatasetActionDialog
+      isOpen={showRetrieveDialog}
+      onClose={() => setShowRetrieveDialog(false)}
+      onConfirm={handleConfirmRetrieve}
+      title="Retrieve Dataset"
+      description="Are you sure you want to retrieve this dataset? This may take some time depending on the size of the data."
+      actionLabel="Retrieve"
+    />
+    <DatasetActionDialog
+      isOpen={showExportDialog}
+      onClose={() => setShowExportDialog(false)}
+      onConfirm={handleConfirmExport}
+      title="Export Dataset"
+      description="Are you sure you want to export this dataset?"
+      actionLabel="Export"
+    />
+    </>
   );
 };

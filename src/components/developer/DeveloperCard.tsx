@@ -38,7 +38,7 @@ export const DeveloperCard = ({
 
   return (
     <>
-      <Card className="overflow-hidden border shadow-lg h-[200px] flex flex-col ">
+      <Card className="overflow-hidden border border-white/[0.05] shadow-lg h-[200px] flex flex-col bg-gradient-to-b from-white/[0.08] to-transparent">
         <div className="p-4 flex-1 flex flex-col">
           <div className="flex gap-2 mb-2">
             <Badge variant="secondary">{field}</Badge>
@@ -50,7 +50,7 @@ export const DeveloperCard = ({
               variant="ghost" 
               size="sm"
               onClick={() => setIsPreviewOpen(true)}
-              className="shrink-0 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 text-white"
+              className="shrink-0 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
             >
               <Eye className="h-4 w-4 mr-2" />
               Preview
@@ -60,7 +60,7 @@ export const DeveloperCard = ({
                 variant="outline" 
                 size="sm"
                 onClick={() => onDownload(name, section)}
-                className="shrink-0 hover:bg-[#4fd9e8]"
+                className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Sample

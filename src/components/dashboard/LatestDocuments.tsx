@@ -22,7 +22,7 @@ export const LatestDocuments = () => {
           <Skeleton className="h-[300px] w-full" />
         ) : latestDocs?.length ? (
           <Carousel
-            className="w-full mx-auto my-6 border border-card bg-card rounded-lg p-4"
+            className="w-full mx-auto my-6 border border-card bg-card rounded-lg p-4 relative"
             opts={{
               align: 'start',
               loop: true,
@@ -42,8 +42,10 @@ export const LatestDocuments = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex -left-12" />
-            <CarouselNext className="hidden md:flex -right-12" />
+            <div className="flex justify-center gap-2 mt-4">
+              <CarouselPrevious className="static translate-y-0" />
+              <CarouselNext className="static translate-y-0" />
+            </div>
           </Carousel>
         ) : (
           <p className="text-center text-muted-foreground">No documents available</p>

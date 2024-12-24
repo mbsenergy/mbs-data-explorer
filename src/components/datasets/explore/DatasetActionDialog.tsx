@@ -10,21 +10,23 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface ConfirmDialogProps {
+interface DatasetActionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   title: string;
   description: string;
+  actionLabel?: string;
 }
 
-export const ConfirmDialog = ({
+export const DatasetActionDialog = ({
   isOpen,
   onClose,
   onConfirm,
   title,
   description,
-}: ConfirmDialogProps) => {
+  actionLabel = "Confirm",
+}: DatasetActionDialogProps) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
@@ -36,7 +38,7 @@ export const ConfirmDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Download</AlertDialogAction>
+          <AlertDialogAction onClick={onConfirm}>{actionLabel}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

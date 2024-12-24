@@ -1,4 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton"; 
+import { Code, Settings, Terminal, Database, FileCode, Search } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -11,6 +12,7 @@ import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
 import { Card } from "../ui/card";
 
 interface DeveloperSectionProps {
+  title: string;
   section: string;
   searchTerm?: string;
   selectedTag?: string;
@@ -21,7 +23,16 @@ interface DeveloperSectionProps {
   onToggleFavorite: (fileName: string) => void;
 }
 
+const sectionIcons = {
+  Presets: Settings,
+  Macros: Terminal,
+  Developer: Code,
+  Models: Database,
+  Queries: Search,
+};
+
 export const DeveloperSection = ({ 
+  title,
   section, 
   searchTerm = "", 
   selectedTag = "all",
@@ -32,6 +43,7 @@ export const DeveloperSection = ({
   onToggleFavorite
 }: DeveloperSectionProps) => {
   const { data: files, isLoading } = useDeveloperFiles(section);
+  const Icon = sectionIcons[title as keyof typeof sectionIcons];
 
   const filteredFiles = files?.filter(file => {
     const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -45,45 +57,49 @@ export const DeveloperSection = ({
   }
 
   return (
-    <Card className="p-6 space-y-2 metallic-card">
-    <div className="space-y-1">
-      <h2 className="text-2xl font-semibold capitalize">{section}</h2>
-      <div className="w-full">
-        {isLoading ? (
-          <Skeleton className="h-[200px] w-full" />
-        ) : filteredFiles?.length ? (
-          <Carousel
-            className="w-full mx-auto my-6 border border-card bg-card rounded-lg p-4"
-            opts={{
-              align: 'start',
-              loop: true,
-            }}
-          >
-            <CarouselContent>
-              {filteredFiles.map((file) => (
-                <CarouselItem 
-                  key={file.name} 
-                  className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
-                >
-                  <DeveloperCard 
-                    {...file} 
-                    section={section}
-                    isFavorite={favorites.has(file.name)}
-                    onToggleFavorite={onToggleFavorite}
-                    onPreview={onPreview}
-                    onDownload={onDownload}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex -left-12" />
-            <CarouselNext className="hidden md:flex -right-12" />
-          </Carousel>
-        ) : (
-          <p className="text-center text-muted-foreground">No files available</p>
-        )}
+    <Card className="p-6 space-y-2 metallic-card relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none" />
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 mb-4">
+          {Icon && <Icon className="h-6 w-6" />}
+          <h2 className="text-2xl font-semibold">{title}</h2>
+        </div>
+        <div className="w-full">
+          {isLoading ? (
+            <Skeleton className="h-[200px] w-full" />
+          ) : filteredFiles?.length ? (
+            <Carousel
+              className="w-full mx-auto my-6 border border-white/[0.05] bg-card/50 rounded-lg p-4 relative"
+              opts={{
+                align: 'start',
+                loop: true,
+              }}
+            >
+              <CarouselContent>
+                {filteredFiles.map((file) => (
+                  <CarouselItem 
+                    key={file.name} 
+                    className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
+                  >
+                    <DeveloperCard 
+                      {...file} 
+                      section={section}
+                      isFavorite={favorites.has(file.name)}
+                      onToggleFavorite={onToggleFavorite}
+                      onPreview={onPreview}
+                      onDownload={onDownload}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+            </Carousel>
+          ) : (
+            <p className="text-center text-muted-foreground">No files available</p>
+          )}
+        </div>
       </div>
-    </div>
     </Card>
   );
 };

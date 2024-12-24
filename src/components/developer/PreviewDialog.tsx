@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { useToast } from "@/components/ui/use-toast";
 import { useFileContent } from "@/hooks/useFileContent";
 
@@ -63,8 +64,11 @@ export const PreviewDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-5xl max-h-[80vh] flex flex-col">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>{fileName}</DialogTitle>
+        <DialogHeader>
+          <DialogTitle>
+            <VisuallyHidden>Preview {fileName}</VisuallyHidden>
+          </DialogTitle>
+          <div className="flex justify-end">
           <Button 
             variant="ghost" 
             size="icon"
@@ -73,6 +77,7 @@ export const PreviewDialog = ({
           >
             <Copy className="h-4 w-4" />
           </Button>
+          </div>
         </DialogHeader>
         <ScrollArea className="flex-1 h-[60vh] w-full overflow-y-auto scrollbar-custom">
           <div className="p-4">

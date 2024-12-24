@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { VirtualizedTable } from "./VirtualizedTable";
+import { DataGrid } from "./DataGrid";
+import { DatasetActionDialog } from "../explore/DatasetActionDialog";
 import { DatasetQueryEmptyState } from "./DatasetQueryEmptyState";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface DatasetQueryResultsProps {
   isLoading: boolean;
@@ -18,6 +20,17 @@ export const DatasetQueryResults = ({
   columns,
   onDownload
 }: DatasetQueryResultsProps) => {
+  const [showExportDialog, setShowExportDialog] = useState(false);
+
+  const handleExport = () => {
+    setShowExportDialog(true);
+  };
+
+  const handleConfirmExport = () => {
+    onDownload();
+    setShowExportDialog(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -37,24 +50,44 @@ export const DatasetQueryResults = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 metallic-card">
+        <div className="p-4 rounded-md bg-muted/50 border border-border">
+          <div className="text-sm text-muted-foreground">Number of Rows</div>
+          <div className="text-2xl font-semibold">{queryResults.length}</div>
+        </div>
+        <div className="p-4 rounded-md bg-muted/50 border border-border">
+          <div className="text-sm text-muted-foreground">Number of Columns</div>
+          <div className="text-2xl font-semibold">{columns.length}</div>
+        </div>
+      </div>
+
       <div className="flex justify-end">
         <Button
           variant="outline"
-          onClick={onDownload}
-          className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+          onClick={handleExport}
+          className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
         >
           <Download className="h-4 w-4 mr-2" />
-          Download Results
+          Export
         </Button>
       </div>
-      <div className="border rounded-md">
-        <VirtualizedTable 
-          data={queryResults} 
+      <div className="border rounded-md metallic-card">
+        <DataGrid
+          data={queryResults}
           columns={columns}
           isLoading={isLoading}
+          style={{ height: '700px' }}
         />
       </div>
+      <DatasetActionDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        onConfirm={handleConfirmExport}
+        title="Export Query Results"
+        description="Are you sure you want to export these query results?"
+        actionLabel="Export"
+      />
     </div>
   );
 };

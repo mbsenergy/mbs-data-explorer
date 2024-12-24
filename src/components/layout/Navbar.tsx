@@ -1,9 +1,10 @@
-import { HelpCircle, Home, Settings } from "lucide-react";
+import { Database, HelpCircle, Home, PanelLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useSidebar } from "@/components/ui/sidebar"; 
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { DatasetSearchCommand } from "@/components/datasets/DatasetSearchCommand";
 import {
@@ -15,6 +16,7 @@ import {
 
 export const Navbar = () => {
   const { user } = useAuth();
+  const { toggleSidebar, state } = useSidebar();
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -45,7 +47,10 @@ export const Navbar = () => {
 
   if (isLoading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]">
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card transition-[margin-left] duration-200",
+        state === "collapsed" ? "ml-[var(--sidebar-width-icon)]" : "ml-[var(--sidebar-width)]"
+      )}>
         <div className="container flex h-full items-center">
           <div className="animate-pulse h-4 w-48 bg-muted rounded" />
         </div>
@@ -54,10 +59,21 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/40 bg-card ml-[var(--sidebar-width)]">
+    <nav className={cn(
+      "fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/40 bg-card transition-all duration-300",
+      state === "collapsed" ? "ml-[var(--sidebar-width-icon)]" : "ml-[var(--sidebar-width)]"
+    )}>
       <div className="container flex h-full items-center">
+        <div className="flex items-center">
+          <img 
+            src="/brand/flux_logo_01.png" 
+            alt="Flux Logo" 
+            className="h-8 w-auto"
+          />
+        </div>
+
         {/* Welcome message - always visible */}
-        <div className="hidden md:block">
+        <div className="hidden md:block ml-8">
           <span className="text-sm text-muted-foreground">
             Welcome back{" "}
             <span className="font-medium text-foreground">
@@ -70,6 +86,18 @@ export const Navbar = () => {
 
         {/* Dataset Search Command */}
         <DatasetSearchCommand />
+
+        {/* Query Button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="mr-2 hover:bg-[#4fd9e8] hover:text-white transition-colors" 
+          asChild
+        >
+          <Link to="/datasets?tab=query">
+            <Database className="h-5 w-5" />
+          </Link>
+        </Button>
 
         {/* Help button */}
         <Button 

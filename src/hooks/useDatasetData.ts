@@ -140,11 +140,11 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
           setData(initialData);
         }
       } catch (error: any) {
-        console.error("Error fetching data:", error);
+        console.error("Error loading data:", error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: error.message || "Failed to fetch data"
+          description: error.message || "Failed to load data"
         });
         setData([]);
         setColumns([]);

@@ -1,14 +1,14 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Database, Filter, Search } from "lucide-react";
+import { Database, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { DatasetActions } from "@/components/datasets/DatasetActions";
 import { DatasetQuery } from "@/components/datasets/query/DatasetQuery";
-import { DatasetExport } from "@/components/datasets/export/DatasetExport";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { TableInfo } from "@/components/datasets/types";
 import type { Database as SupabaseDatabase } from "@/integrations/supabase/types";
@@ -17,6 +17,7 @@ type TableNames = keyof SupabaseDatabase['public']['Tables'];
 
 const Datasets = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedField, setSelectedField] = useState("all");
@@ -200,7 +201,7 @@ const Datasets = () => {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">Datasets</h1>
       
-      <Tabs defaultValue="explore" className="space-y-6">
+      <Tabs defaultValue={searchParams.get("tab") || "explore"} className="space-y-6">
         <TabsList>
           <TabsTrigger value="explore" className="flex items-center gap-2">
             <Search className="h-4 w-4" />
@@ -209,10 +210,6 @@ const Datasets = () => {
           <TabsTrigger value="query" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
             Query
-          </TabsTrigger>
-          <TabsTrigger value="export" className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            Export
           </TabsTrigger>
         </TabsList>
 
@@ -246,13 +243,6 @@ const Datasets = () => {
 
         <TabsContent value="query">
           <DatasetQuery 
-            selectedDataset={selectedDataset}
-            selectedColumns={selectedColumns}
-          />
-        </TabsContent>
-
-        <TabsContent value="export">
-          <DatasetExport
             selectedDataset={selectedDataset}
             selectedColumns={selectedColumns}
           />

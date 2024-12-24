@@ -5,9 +5,10 @@ export const useNotifications = (lastCheck: number) => {
   return useQuery({
     queryKey: ["notifications", lastCheck],
     queryFn: async () => {
-      const buckets = ['latest', 'report-scenario', 'osservatorio-energia'];
-      const allFiles = await Promise.all(
-        buckets.map(async (bucket) => {
+      try {
+        const buckets = ['latest', 'report-scenario', 'osservatorio-energia'];
+        const allFiles = await Promise.allSettled(
+          buckets.map(async (bucket) => {
           const { data, error } = await supabase
             .storage
             .from(bucket)
@@ -17,22 +18,28 @@ export const useNotifications = (lastCheck: number) => {
             });
 
           if (error) {
-            console.error(`Error fetching from ${bucket}:`, error);
-            return [];
+            return { status: 'fulfilled', value: [] };
           }
 
           return data.map(file => ({
             ...file,
             bucket,
           }));
-        })
-      );
-
-      return allFiles
-        .flat()
-        .sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          })
         );
+
+        return allFiles
+          .filter((result): result is PromiseFulfilledResult<any[]> => 
+            result.status === 'fulfilled')
+          .map(result => result.value)
+          .flat()
+          .sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        return [];
+      }
     },
     refetchInterval: 30000, // Check every 30 seconds
   });
