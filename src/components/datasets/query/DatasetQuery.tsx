@@ -152,7 +152,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
     
     // Ensure proper quoting of table and column names
     const columns = selectedColumns.length > 0 
-      ? selectedColumns.map(col => `"${col}"`).join(', ')
+      ? selectedColumns.join(', ')
       : '*';
       
     return `SELECT ${columns}\nFROM "${selectedDataset}"\nLIMIT 100`;
