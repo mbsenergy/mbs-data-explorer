@@ -1,21 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
-import { Download } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { VirtualizedTable } from "./VirtualizedTable";
 import type { ColumnDef } from "@tanstack/react-table";
+import { DatasetQueryResults } from "./DatasetQueryResults";
+import { DatasetQueryDisplay } from "./DatasetQueryDisplay";
 
 interface DatasetQueryProps {
   selectedDataset?: string | null;
   selectedColumns?: string[];
 }
 
-export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQueryProps) => {
+export const DatasetQuery = ({ 
+  selectedDataset, 
+  selectedColumns = [] 
+}: DatasetQueryProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
@@ -23,7 +25,6 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
   const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
 
   const validateQuery = (query: string): { isValid: boolean; error?: string } => {
-    // Basic SQL injection prevention
     const disallowedKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE'];
     const hasDisallowedKeywords = disallowedKeywords.some(keyword => 
       query.toUpperCase().includes(keyword)
@@ -36,7 +37,6 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
       };
     }
 
-    // Ensure it's a SELECT query
     if (!query.trim().toUpperCase().startsWith('SELECT')) {
       return { 
         isValid: false, 
@@ -50,7 +50,6 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
   const handleExecuteQuery = async (query: string) => {
     setIsLoading(true);
     try {
-      // Validate query first
       const validation = validateQuery(query);
       if (!validation.isValid) {
         throw new Error(validation.error);
@@ -61,7 +60,6 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
       });
 
       if (error) {
-        // Extract the actual error message from the Postgres error
         const pgError = error.message.match(/Query execution failed: (.*)/);
         throw new Error(pgError ? pgError[1] : error.message);
       }
@@ -69,7 +67,6 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
       const results = data as any[];
       setQueryResults(results);
       
-      // Generate columns dynamically from the first result
       if (results.length > 0) {
         const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
           accessorKey: key,
@@ -150,9 +147,8 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
   const generateDefaultQuery = () => {
     if (!selectedDataset) return "";
     
-    // Ensure proper quoting of table and column names
     const columns = selectedColumns.length > 0 
-      ? selectedColumns.join(', ')
+      ? selectedColumns.map(col => `"${col}"`).join(', ')
       : '*';
       
     return `SELECT ${columns}\nFROM "${selectedDataset}"\nLIMIT 100`;
@@ -160,23 +156,11 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
 
   return (
     <Card className="p-6 space-y-6 metallic-card">
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">SQL Query</h2>
-          <p className="text-muted-foreground">
-            Execute custom SQL queries on the available datasets
-          </p>
-        </div>
-        {queryResults && queryResults.length > 0 && (
-          <Button
-            variant="outline"
-            onClick={handleDownloadResults}
-            className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Download Results
-          </Button>
-        )}
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold">SQL Query</h2>
+        <p className="text-muted-foreground">
+          Execute custom SQL queries on the available datasets
+        </p>
       </div>
 
       {selectedDataset && (
@@ -199,21 +183,22 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
 
       <SqlEditor onExecute={handleExecuteQuery} defaultValue={generateDefaultQuery()} />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <p>Executing query...</p>
-        </div>
-      ) : queryResults && queryResults.length > 0 ? (
-        <div className="border rounded-md">
-          <VirtualizedTable 
-            data={queryResults} 
-            columns={columns}
-            isLoading={isLoading}
-          />
-        </div>
-      ) : queryResults ? (
-        <p className="text-center text-muted-foreground">No results found</p>
-      ) : null}
+      <DatasetQueryResults
+        isLoading={isLoading}
+        queryResults={queryResults}
+        columns={columns}
+        onDownload={handleDownloadResults}
+      />
+
+      {queryResults && queryResults.length > 0 && (
+        <DatasetQueryDisplay
+          query={generateDefaultQuery()}
+          apiCall={`await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.join(', ')}')`
+            + (selectedColumns.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "")}
+        />
+      )}
     </Card>
   );
 };
