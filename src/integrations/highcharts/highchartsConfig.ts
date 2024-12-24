@@ -109,20 +109,7 @@ const theme: Partial<Highcharts.Options> = {
     }
   },
   navigation: {
-    buttonOptions: {
-      theme: {
-        fill: 'transparent',
-        stroke: 'hsl(217 100% 15%)', // matches --border
-        states: {
-          hover: {
-            fill: 'hsl(217 100% 15%)',
-          },
-          select: {
-            fill: 'hsl(217 100% 15%)',
-          }
-        }
-      }
-    }
+    buttonOptions: {}
   }
 };
 
