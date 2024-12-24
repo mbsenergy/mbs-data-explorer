@@ -114,8 +114,9 @@ const theme: Partial<Highcharts.Options> = {
         fill: 'transparent',
         stroke: 'hsl(217 100% 15%)', // matches --border
         padding: 8,
-        symbolFill: 'hsl(210 40% 98%)',
-        symbolStroke: 'hsl(217 100% 15%)',
+        style: {
+          color: 'hsl(210 40% 98%)',
+        }
       }
     }
   }
