@@ -38,7 +38,7 @@ export const DeveloperCard = ({
 
   return (
     <>
-      <Card className="overflow-hidden border shadow-lg h-[200px] flex flex-col">
+      <Card className="overflow-hidden border shadow-lg h-[200px] flex flex-col ">
         <div className="p-4 flex-1 flex flex-col">
           <div className="flex gap-2 mb-2">
             <Badge variant="secondary">{field}</Badge>

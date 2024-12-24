@@ -29,7 +29,7 @@ const Guide = () => {
         </Button>
       </div>
 
-      <Card className="p-6 bg-card">
+      <Card className="p-6 bg-card metallic-card">
         <h2 className="text-xl font-semibold mb-4">Documentation</h2>
         <div className="space-y-6 text-muted-foreground">
           <section className="space-y-4">

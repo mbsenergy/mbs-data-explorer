@@ -86,10 +86,10 @@
 }
 
 .metallic-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  background: linear-gradient(145deg, #020817 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow: 0 6px 24px 0 rgba(31, 38, 135, 0.37);
   backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid #0c1d3b;
 }
 
 .ai-gradient {

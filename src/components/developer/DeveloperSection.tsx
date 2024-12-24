@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import { DeveloperCard } from "./DeveloperCard";
 import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
+import { Card } from "../ui/card";
 
 interface DeveloperSectionProps {
   section: string;
@@ -44,6 +45,7 @@ export const DeveloperSection = ({
   }
 
   return (
+    <Card className="p-6 space-y-2 metallic-card">
     <div className="space-y-1">
       <h2 className="text-2xl font-semibold capitalize">{section}</h2>
       <div className="w-full">
@@ -82,5 +84,6 @@ export const DeveloperSection = ({
         )}
       </div>
     </div>
+    </Card>
   );
 };

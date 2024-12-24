@@ -89,7 +89,7 @@ export const DatasetExplore = ({
   };
 
   return (
-    <Card className="p-6 space-y-6">
+    <Card className="p-6 space-y-6<">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">Explore</h2>

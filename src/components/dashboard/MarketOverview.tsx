@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import highchartsConfig from "@/integrations/highcharts/highchartsConfig"; // Import common config
 
 export const MarketOverview = () => {
   const { toast } = useToast();
@@ -114,7 +113,7 @@ export const MarketOverview = () => {
   
       {/* Economics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4"> {/* Increased padding from p-6 to p-8 */}
+        <Card className="p-4 metallic-card relative z-10 shimmer"> {/* Increased padding from p-6 to p-8 */}
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">GDP by Country</h3>
             <Button 
@@ -128,13 +127,12 @@ export const MarketOverview = () => {
             </Button>
           </div>
           {gdpLoading ? (
-            <Skeleton className="h-[125px] w-full" />
+            <Skeleton className="h-full w-full" />
           ) : (
             <div className="h-[125px]">
               <HighchartsReact 
                 highcharts={Highcharts}
                 options={{
-                  ...highchartsConfig,
                   title: { text: 'GDP by Country' },
                   xAxis: { categories: gdpData.map((item) => item.DATE) },
                   yAxis: { title: { text: 'GDP' } },
@@ -148,7 +146,7 @@ export const MarketOverview = () => {
           )}
         </Card>
   
-        <Card className="p-8"> {/* Increased padding from p-6 to p-8 */}
+        <Card className="p-8 metallic-card"> {/* Increased padding from p-6 to p-8 */}
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Employment by Country</h3>
             <Button 
@@ -162,13 +160,12 @@ export const MarketOverview = () => {
             </Button>
           </div>
           {employmentLoading ? (
-            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-full w-full" />
           ) : (
-            <div className="h-[200px]">
+            <div className="flex-1 w-full">
               <HighchartsReact 
                 highcharts={Highcharts}
                 options={{
-                  ...highchartsConfig,
                   title: { text: 'Employment Rate by Country' },
                   xAxis: { categories: employmentData.map((item) => item.DATE) },
                   yAxis: { title: { text: 'Employment Rate' } },

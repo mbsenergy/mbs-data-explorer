@@ -68,7 +68,7 @@ export const DownloadsChart = ({
   }));
 
   return (
-    <Card className="p-6 bg-card">
+    <Card className="p-6 bg-card metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Daily Downloads</h2>

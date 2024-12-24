@@ -24,7 +24,7 @@ export const DatasetActivity = ({
   const [isOpen, setIsOpen] = React.useState(true);
 
   return (
-    <Card className="p-6 mb-6">
+    <Card className="p-6 mb-6 metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold">Activity</h2>

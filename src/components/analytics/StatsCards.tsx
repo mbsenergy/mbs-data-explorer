@@ -21,7 +21,7 @@ export const StatsCards = ({
 }: StatsCardsProps) => {
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <Card className="p-6 bg-card">
+      <Card className="p-6 bg-card metallic-card">
         <h3 className="text-sm font-medium text-muted-foreground">Last Connection</h3>
         <div className="mt-2 text-2xl font-bold">
           {isLoading.lastConnection ? (

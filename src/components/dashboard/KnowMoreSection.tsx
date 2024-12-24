@@ -33,7 +33,7 @@ export const KnowMoreSection = () => {
         {links.map((link) => (
           <div key={link.to} className="flex flex-col flex-1">
             <Link to={link.to} className="h-full">
-              <Card className="p-6 h-full hover:bg-muted/50 transition-colors cursor-pointer">
+              <Card className="p-6 h-full hover:bg-muted/50 transition-colors cursor-pointer metallic-card">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">{link.title}</h3>
                   <ArrowRight className="h-5 w-5" />

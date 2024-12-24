@@ -89,7 +89,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="bg-card border-r border-border/40">
+    <Sidebar className="bg-card border-r border-border/40 metallic-card">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-start w-full">

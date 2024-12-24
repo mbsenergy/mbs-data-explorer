@@ -14,7 +14,7 @@ export const LatestDocuments = () => {
   const { data: latestDocs, isLoading: docsLoading } = useLatestDocuments();
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 metallic-card">
     <div className="space-y-1">
       <h2 className="text-2xl font-semibold">Latest Documents</h2>
       <div className="w-full">

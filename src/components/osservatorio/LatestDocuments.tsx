@@ -14,7 +14,7 @@ export const LatestDocuments = () => {
   const { data: latestDocs, isLoading: docsLoading } = useOsservatorioDocuments();
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 metallic-card">
     <div className="space-y-1">
       <h2 className="text-2xl font-semibold">Latest Osservatorio Reports</h2>
       <div className="w-full">
