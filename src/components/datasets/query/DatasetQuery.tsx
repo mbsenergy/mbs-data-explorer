@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
-import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { VirtualizedTable } from "./VirtualizedTable";
