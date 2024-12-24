@@ -22,14 +22,49 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
   const [isLoading, setIsLoading] = useState(false);
   const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
 
+  const validateQuery = (query: string): { isValid: boolean; error?: string } => {
+    // Basic SQL injection prevention
+    const disallowedKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE'];
+    const hasDisallowedKeywords = disallowedKeywords.some(keyword => 
+      query.toUpperCase().includes(keyword)
+    );
+    
+    if (hasDisallowedKeywords) {
+      return { 
+        isValid: false, 
+        error: "Only SELECT queries are allowed" 
+      };
+    }
+
+    // Ensure it's a SELECT query
+    if (!query.trim().toUpperCase().startsWith('SELECT')) {
+      return { 
+        isValid: false, 
+        error: "Query must start with SELECT" 
+      };
+    }
+
+    return { isValid: true };
+  };
+
   const handleExecuteQuery = async (query: string) => {
     setIsLoading(true);
     try {
+      // Validate query first
+      const validation = validateQuery(query);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
+      }
+
       const { data, error } = await supabase.rpc('execute_query', {
         query_text: query
       });
 
-      if (error) throw error;
+      if (error) {
+        // Extract the actual error message from the Postgres error
+        const pgError = error.message.match(/Query execution failed: (.*)/);
+        throw new Error(pgError ? pgError[1] : error.message);
+      }
 
       const results = data as any[];
       setQueryResults(results);
@@ -39,7 +74,10 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
         const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
           accessorKey: key,
           header: key,
-          cell: info => String(info.getValue() ?? ''),
+          cell: info => {
+            const value = info.getValue();
+            return value === null ? 'NULL' : String(value);
+          },
         }));
         setColumns(cols);
       }
@@ -60,10 +98,11 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
       console.error("Error executing query:", error);
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Query Error",
         description: error.message || "Failed to execute query"
       });
       setQueryResults(null);
+      setColumns([]);
     } finally {
       setIsLoading(false);
     }
@@ -110,8 +149,13 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns = [] }: DatasetQ
 
   const generateDefaultQuery = () => {
     if (!selectedDataset) return "";
-    const columns = selectedColumns.length > 0 ? selectedColumns.join(', ') : '*';
-    return `SELECT ${columns} FROM "${selectedDataset}" LIMIT 100`;
+    
+    // Ensure proper quoting of table and column names
+    const columns = selectedColumns.length > 0 
+      ? selectedColumns.map(col => `"${col}"`).join(', ')
+      : '*';
+      
+    return `SELECT ${columns}\nFROM "${selectedDataset}"\nLIMIT 100`;
   };
 
   return (
