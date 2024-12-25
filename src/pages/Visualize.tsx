@@ -7,39 +7,27 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo } from "@/components/datasets/types";
 import { Label } from "@/components/ui/label";
-import { 
-  Upload, 
-  Database, 
-  BarChart, 
-  Download, 
-  ChevronUp, 
-  ChevronDown,
-  LineChart,
-  ScatterChart,
-  BoxSelect
-} from "lucide-react";
+import { Download, Database, BarChart } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { v4 as uuidv4 } from 'uuid';
 import type { ColumnDef } from "@tanstack/react-table";
 import { DatasetFilters } from "@/components/datasets/explore/DatasetFilters";
-import Plot from 'react-plotly.js';
 import type { Filter } from "@/components/datasets/explore/types";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { DataDisplay } from "@/components/visualize/DataDisplay";
 
 interface DataPoint {
   [key: string]: any;
 }
 
 const chartTypes = [
-  { value: "scatter", label: "Scatter", icon: ScatterChart },
-  { value: "bar", label: "Bar", icon: BarChart },
-  { value: "line", label: "Line", icon: LineChart },
-  { value: "box", label: "Box", icon: BoxSelect }
+  { value: "scatter", label: "Scatter" },
+  { value: "bar", label: "Bar" },
+  { value: "line", label: "Line" },
+  { value: "box", label: "Box" }
 ];
 
 const Visualize = () => {
@@ -67,15 +55,6 @@ const Visualize = () => {
     }
   ]);
   const [showChart, setShowChart] = useState(false);
-  const [isUploadOpen, setIsUploadOpen] = useState(true);
-  const [isQueryOpen, setIsQueryOpen] = useState(true);
-  const [isFilterOpen, setIsFilterOpen] = useState(true);
-  const [isChartOpen, setIsChartOpen] = useState(true);
-  const [plotData, setPlotData] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedField, setSelectedField] = useState("all");
-  const [selectedType, setSelectedType] = useState("all");
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
 
   const { data: tables } = useQuery({
@@ -297,66 +276,6 @@ const Visualize = () => {
     }
   };
 
-  useEffect(() => {
-    if (!showChart || !plotConfig.xAxis || !plotConfig.yAxis || !filteredData.length) return;
-
-    const traces = [];
-    if (plotConfig.groupBy) {
-      const groups = filteredData.reduce((acc, item) => {
-        const group = item[plotConfig.groupBy];
-        if (!acc[group]) acc[group] = [];
-        acc[group].push(item);
-        return acc;
-      }, {} as Record<string, DataPoint[]>);
-
-      Object.entries(groups).forEach(([group, items]) => {
-        const xValues = items.map(item => item[plotConfig.xAxis]);
-        const yValues = items.map(item => item[plotConfig.yAxis]);
-
-        const aggregatedTrace = {
-          x: xValues,
-          y: plotConfig.aggregation !== 'none' 
-            ? aggregateValues(yValues, plotConfig.aggregation)
-            : yValues,
-          type: plotConfig.chartType,
-          name: group,
-          mode: plotConfig.chartType === 'line' ? 'lines+markers' : undefined,
-        };
-
-        traces.push(aggregatedTrace);
-      });
-    } else {
-      const xValues = filteredData.map(item => item[plotConfig.xAxis]);
-      const yValues = filteredData.map(item => item[plotConfig.yAxis]);
-
-      traces.push({
-        x: xValues,
-        y: plotConfig.aggregation !== 'none' 
-          ? aggregateValues(yValues, plotConfig.aggregation)
-          : yValues,
-        type: plotConfig.chartType,
-        mode: plotConfig.chartType === 'line' ? 'lines+markers' : undefined,
-      });
-    }
-
-    setPlotData(traces);
-  }, [showChart, plotConfig, filteredData]);
-
-  const aggregateValues = (values: number[], aggregation: string): number[] => {
-    switch (aggregation) {
-      case 'sum':
-        return [values.reduce((a, b) => a + b, 0)];
-      case 'mean':
-        return [values.reduce((a, b) => a + b, 0) / values.length];
-      case 'max':
-        return [Math.max(...values)];
-      case 'min':
-        return [Math.min(...values)];
-      default:
-        return values;
-    }
-  };
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
@@ -380,75 +299,8 @@ const Visualize = () => {
         availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Upload CSV Card */}
-        <Card className="p-6 metallic-card relative">
-          <Collapsible open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Upload className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Upload CSV</h2>
-              </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  {isUploadOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent>
-              <div className="space-y-4">
-                <Input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  disabled={isLoading}
-                />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-
-        {/* Query Data Card */}
-        <Card className="p-6 metallic-card relative">
-          <Collapsible open={isQueryOpen} onOpenChange={setIsQueryOpen}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Query Data</h2>
-              </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  {isQueryOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Select Table</Label>
-                  <Input
-                    type="text"
-                    placeholder="Enter table name"
-                    value={selectedTable}
-                    onChange={(e) => setSelectedTable(e.target.value)}
-                  />
-                </div>
-                <Button
-                  onClick={handleQueryData}
-                  disabled={isLoading}
-                  className="w-full bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
-                >
-                  Query Data
-                </Button>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-      </div>
-
       {originalData.length > 0 && (
         <>
-          {/* Filters Card */}
           <Card className="p-6 metallic-card relative">
             <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <div className="flex items-center justify-between mb-4">
@@ -488,7 +340,6 @@ const Visualize = () => {
             </Collapsible>
           </Card>
 
-          {/* Chart Configuration Card */}
           <Card className="p-6 metallic-card relative">
             <Collapsible open={isChartOpen} onOpenChange={setIsChartOpen}>
               <div className="flex items-center justify-between mb-4">
@@ -553,11 +404,10 @@ const Visualize = () => {
                   </div>
 
                   <div className="grid grid-cols-12 gap-6">
-                    {/* Chart Type Selection - 6 columns */}
                     <div className="col-span-6 space-y-2">
                       <Label>Chart Type</Label>
                       <div className="grid grid-cols-2 gap-2">
-                        {chartTypes.map(({ value, label, icon: Icon }) => (
+                        {chartTypes.map(({ value, label }) => (
                           <div key={value} className="flex items-center space-x-2">
                             <RadioGroup
                               value={plotConfig.chartType}
@@ -566,7 +416,6 @@ const Visualize = () => {
                               <div className="flex items-center space-x-2">
                                 <RadioGroupItem value={value} id={`chart-${value}`} />
                                 <Label htmlFor={`chart-${value}`} className="flex items-center gap-2">
-                                  <Icon className="h-4 w-4" />
                                   {label}
                                 </Label>
                               </div>
@@ -576,7 +425,6 @@ const Visualize = () => {
                       </div>
                     </div>
 
-                    {/* Summarizing Function - 6 columns */}
                     <div className="col-span-6 space-y-2">
                       <Label>Summarizing Function</Label>
                       <RadioGroup
@@ -623,26 +471,14 @@ const Visualize = () => {
             </Collapsible>
           </Card>
 
-          {showChart && plotData.length > 0 && (
-            <Card className="p-6 metallic-card">
-              <Plot
-                data={plotData}
-                layout={{
-                  title: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`,
-                  xaxis: { title: plotConfig.xAxis },
-                  yaxis: { title: plotConfig.yAxis },
-                  plot_bgcolor: 'transparent',
-                  paper_bgcolor: 'transparent',
-                  font: { color: '#fff' },
-                  showlegend: true,
-                  legend: { font: { color: '#fff' } },
-                  margin: { t: 50, r: 50, b: 50, l: 50 }
-                }}
-                style={{ width: '100%', height: '600px' }}
-                config={{ responsive: true }}
-              />
-            </Card>
-          )}
+          <DataDisplay
+            showChart={showChart}
+            plotData={plotData}
+            plotConfig={plotConfig}
+            filteredData={filteredData}
+            columns={columns}
+            isLoading={isLoading}
+          />
 
           <div className="flex justify-end">
             <Button
@@ -654,14 +490,6 @@ const Visualize = () => {
               Export Data
             </Button>
           </div>
-
-          <Card className="p-6 metallic-card">
-            <DataGrid
-              data={filteredData}
-              columns={columns}
-              isLoading={isLoading}
-            />
-          </Card>
         </>
       )}
     </div>
