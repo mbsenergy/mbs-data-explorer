@@ -52,7 +52,7 @@ export const DeveloperActivity = ({
   const displayedFavorites = favoritesList.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <Card className="p-4 metallic-card">
+    <Card className="p-6 mb-6 metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">

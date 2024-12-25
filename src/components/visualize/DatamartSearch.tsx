@@ -44,7 +44,7 @@ export const DatamartSearch = ({
   availableFields,
   availableTypes,
 }: DatamartSearchProps) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // Default to closed
 
   return (
     <Card className="p-6 metallic-card">
@@ -55,7 +55,7 @@ export const DatamartSearch = ({
             <h2 className="text-xl font-semibold">Datamart Search</h2>
           </div>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? (
                 <ChevronUp className="h-4 w-4" />
               ) : (
