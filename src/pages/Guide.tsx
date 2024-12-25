@@ -18,7 +18,7 @@ const Guide = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">Guide</h1>
+        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">How to use Flux</h1>
         <Button 
           onClick={handleMailClick}
           variant="outline"
@@ -34,6 +34,7 @@ const Guide = () => {
             <File className="h-6 w-6" />
             <h2 className="text-xl font-semibold">Documentation</h2>
           </div>
+          <br></br>
         <div className="space-y-6 text-muted-foreground">
           <section className="space-y-4">
             <h3 className="text-lg font-medium text-foreground">Overview</h3>
@@ -69,6 +70,20 @@ const Guide = () => {
               <li>Download filtered datasets for offline analysis.</li>
               <li>Check the Developer section for available analysis scripts.</li>
             </ol>
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="text-lg font-medium text-foreground">User Level Data Access</h3>
+            <p>
+              Depending on your role and contract, the datasets you can access may vary. Contact support for more information.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="text-lg font-medium text-foreground">External Usage</h3>
+            <p>
+              You can access the Flux data catalog using any SQL editor, database connection software, or the Supabase Python SDK/API. This provides flexibility for integrating Flux datasets into your workflows outside the app.
+            </p>
           </section>
         </div>
       </Card>
