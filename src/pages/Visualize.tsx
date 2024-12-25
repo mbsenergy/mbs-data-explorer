@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { 
   Upload, 
   Database, 
+  Table,
+  ChartBar,
   BarChart, 
   Download, 
   ChevronUp, 
@@ -472,13 +474,13 @@ const Visualize = () => {
                     Apply Filters
                   </Button>
                 </div>
-                <div className="border-t border-border mt-4 pt-4">
+                <div className="mt-4 pt-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-md bg-muted/50 border border-border">
+                    <div className="p-4 rounded-md border border-border">
                       <div className="text-sm text-muted-foreground">Original Data Rows</div>
                       <div className="text-2xl font-semibold">{originalData.length.toLocaleString()}</div>
                     </div>
-                    <div className="p-4 rounded-md bg-muted/50 border border-border">
+                    <div className="p-4 rounded-md border border-border">
                       <div className="text-sm text-muted-foreground">Filtered Data Rows</div>
                       <div className="text-2xl font-semibold">{filteredData.length.toLocaleString()}</div>
                     </div>
@@ -634,7 +636,22 @@ const Visualize = () => {
             </Button>
           </div>          
 
-            <Card className="p-6 metallic-card">
+          <Card className="p-6 metallic-card relative">
+          <Collapsible open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+
+          <Tabs defaultValue={"plot"} className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="plot" className="flex items-center gap-2">
+          <ChartBar className="h-4 w-4" />
+            Plot
+          </TabsTrigger>
+          <TabsTrigger value="table" className="flex items-center gap-2">
+            <Table className="h-4 w-4" />
+            Table
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="plot">
               <Plot
                 data={plotData}
                 layout={{
@@ -651,14 +668,17 @@ const Visualize = () => {
                 style={{ width: '100%', height: '600px' }}
                 config={{ responsive: true }}
               />
-            </Card>
+            </TabsContent>
 
-          <Card className="p-6 metallic-card">
+            <TabsContent value="table">
             <DataGrid
               data={filteredData}
               columns={columns}
               isLoading={isLoading}
             />
+          </TabsContent>
+          </Tabs>
+          </Collapsible>
           </Card>
         </>
       )}
