@@ -26,6 +26,7 @@ interface DatamartSearchProps {
   onFavoriteChange: (show: boolean) => void;
   availableFields: string[];
   availableTypes: string[];
+  defaultOpen?: boolean;
 }
 
 export const DatamartSearch = ({
@@ -43,8 +44,9 @@ export const DatamartSearch = ({
   onFavoriteChange,
   availableFields,
   availableTypes,
+  defaultOpen = true,
 }: DatamartSearchProps) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <Card className="p-6 metallic-card">
@@ -56,11 +58,7 @@ export const DatamartSearch = ({
           </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">
-              {isOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
+              {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
           </CollapsibleTrigger>
         </div>

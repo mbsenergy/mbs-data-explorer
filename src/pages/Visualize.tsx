@@ -378,6 +378,7 @@ const Visualize = () => {
         onFavoriteChange={setShowOnlyFavorites}
         availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
         availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
+        defaultOpen={false} // Add this prop to control initial state
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
