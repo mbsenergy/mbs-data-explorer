@@ -63,6 +63,7 @@ export default function Visualize() {
             <button 
               key={table.tablename} 
               onClick={() => handleExecuteQuery(table.tablename as TableNames)}
+              className="mr-2 mb-2 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
             >
               {table.tablename}
             </button>
