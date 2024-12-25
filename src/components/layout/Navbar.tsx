@@ -14,7 +14,7 @@ const Navbar = () => {
     const fetchNotifications = async () => {
       if (user) {
         const { data, error } = await supabase
-          .from("notifications")
+          .from("analytics")
           .select("*")
           .eq("user_id", user.id);
 

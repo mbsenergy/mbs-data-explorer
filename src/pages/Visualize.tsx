@@ -7,6 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo, TableNames } from "@/components/datasets/types";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { 
   Upload, 
   Database, 
@@ -24,11 +25,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
 import type { ColumnDef } from "@tanstack/react-table";
-import { DatasetFilters } from "@/components/datasets/explore/DatasetFilters";
-import Plot from 'react-plotly.js';
-import type { Filter } from "@/components/datasets/explore/types";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface DataPoint {
   [key: string]: any;
@@ -119,8 +115,9 @@ const Visualize = () => {
         });
 
       const cols: ColumnDef<any>[] = headers.map(header => ({
-        accessorKey: header,
-        header,
+        id: header,
+        header: header,
+        accessorFn: (row: any) => row[header],
       }));
 
       setOriginalData(parsedData);
