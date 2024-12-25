@@ -623,7 +623,17 @@ const Visualize = () => {
             </Collapsible>
           </Card>
 
-          {showChart && plotData.length > 0 && (
+          <div className="flex justify-end">
+            <Button
+              onClick={handleExportData}
+              disabled={!filteredData.length}
+              className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Data
+            </Button>
+          </div>          
+
             <Card className="p-6 metallic-card">
               <Plot
                 data={plotData}
@@ -642,18 +652,6 @@ const Visualize = () => {
                 config={{ responsive: true }}
               />
             </Card>
-          )}
-
-          <div className="flex justify-end">
-            <Button
-              onClick={handleExportData}
-              disabled={!filteredData.length}
-              className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export Data
-            </Button>
-          </div>
 
           <Card className="p-6 metallic-card">
             <DataGrid

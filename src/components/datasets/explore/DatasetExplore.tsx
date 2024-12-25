@@ -195,7 +195,7 @@ export const DatasetExplore = ({
         toast({
           variant: "destructive",
           title: "Too many rows",
-          description: "Cannot export more than 100,000 rows. Please apply filters to reduce the dataset size."
+          description: "Cannot export more than 500,000 rows. Please apply filters to reduce the dataset size."
         });
         return;
       }
