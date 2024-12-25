@@ -70,7 +70,7 @@ export const DatasetSearch = ({
 
   return (
     <Card className="p-6 mb-6 metallic-card">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Collapsible open={!isOpen} onOpenChange={setIsOpen}>
         <DatasetSearchHeader isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />
         <CollapsibleContent>
           <DatasetFilters

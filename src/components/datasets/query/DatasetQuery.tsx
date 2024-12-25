@@ -187,24 +187,6 @@ export const DatasetQuery = ({
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 metallic-card">
-        <Collapsible open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <FileSearch className="h-5 w-5" />
-              <h2 className="text-xl font-semibold">Datamart Search</h2>
-            </div>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm">
-                {isSearchOpen ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent>
             <div className="space-y-4">
               {tablesLoading ? (
                 <div className="flex items-center justify-center h-32">
@@ -228,9 +210,6 @@ export const DatasetQuery = ({
                 />
               )}
             </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
 
       <Card className="p-6 metallic-card">
         <div className="space-y-6">
