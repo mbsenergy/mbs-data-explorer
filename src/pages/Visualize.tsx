@@ -40,6 +40,7 @@ export default function Visualize() {
         }));
         setColumns(cols);
         setData(data);
+        // Update selectedColumns with just the column keys
         setSelectedColumns(cols.map(col => col.accessorKey));
       }
     } catch (error: any) {

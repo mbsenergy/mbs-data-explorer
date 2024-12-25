@@ -5,6 +5,7 @@ import { DatasetStats } from "./explore/DatasetStats";
 import { DatasetTable } from "./explore/DatasetTable";
 import { DatasetControls } from "./explore/DatasetControls";
 import { DatasetColumnSelect } from "./explore/DatasetColumnSelect";
+import { DatasetPagination } from "./explore/DatasetPagination";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
 
