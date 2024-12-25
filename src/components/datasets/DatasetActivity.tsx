@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { DatasetOverview } from "./DatasetOverview";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Activity, Star, History, FileSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TableInfo, TableNames } from "./types";
 
@@ -31,7 +31,10 @@ export const DatasetActivity = ({
     <Card className="p-6 mb-6 metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold">Activity</h2>
+          <div className="flex items-center gap-2">
+            <Activity className="h-6 w-6" />
+            <h2 className="text-2xl font-semibold">Activity</h2>
+          </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">
               {isOpen ? (

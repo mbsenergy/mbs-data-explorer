@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Search, Code } from "lucide-react";
+import { FileSearch, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -191,8 +191,8 @@ export const DatasetQuery = ({
         <Collapsible open={isSearchOpen} onOpenChange={setIsSearchOpen}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              <h2 className="text-2xl font-semibold">Datamart Search</h2>
+              <FileSearch className="h-5 w-5" />
+              <h2 className="text-xl font-semibold">Datamart Search</h2>
             </div>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm">
@@ -206,9 +206,6 @@ export const DatasetQuery = ({
           </div>
           <CollapsibleContent>
             <div className="space-y-4">
-              <p className="text-muted-foreground">
-                Browse and select datasets to generate SQL queries
-              </p>
               {tablesLoading ? (
                 <div className="flex items-center justify-center h-32">
                   <p>Loading datasets...</p>
