@@ -7,10 +7,16 @@ interface DataGridProps {
   data: any[];
   columns: ColumnDef<any>[];
   isLoading?: boolean;
+  style?: React.CSSProperties;
 }
 
-export function DataGrid({ data, columns, isLoading }: DataGridProps) {
-  const gridStyle = useMemo(() => ({ height: '800px', width: '100%', overflow: 'auto' }), []);
+export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
+  const gridStyle = useMemo(() => ({ 
+    height: '800px', 
+    width: '100%', 
+    overflow: 'auto',
+    ...style 
+  }), [style]);
 
   const defaultColDef = useMemo<ColDef>(() => ({
     sortable: true,
