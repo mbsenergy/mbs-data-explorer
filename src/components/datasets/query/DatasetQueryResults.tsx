@@ -51,14 +51,14 @@ export const DatasetQueryResults = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 metallic-card">
-        <div className="p-4 rounded-md bg-muted/50 border border-border">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-3 rounded-md bg-card border border-border">
           <div className="text-sm text-muted-foreground">Number of Rows</div>
-          <div className="text-2xl font-semibold">{queryResults.length}</div>
+          <div className="text-lg font-semibold">{queryResults.length}</div>
         </div>
-        <div className="p-4 rounded-md bg-muted/50 border border-border">
+        <div className="p-3 rounded-md bg-card border border-border">
           <div className="text-sm text-muted-foreground">Number of Columns</div>
-          <div className="text-2xl font-semibold">{columns.length}</div>
+          <div className="text-lg font-semibold">{columns.length}</div>
         </div>
       </div>
 

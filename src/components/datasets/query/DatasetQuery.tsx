@@ -80,7 +80,7 @@ export const DatasetQuery = ({
 
   const handleSelect = (tableName: string) => {
     setSelectedDataset(tableName);
-    setQuery(`SELECT * FROM ${tableName} LIMIT 100`);
+    setQuery(`SELECT * FROM "${tableName}" LIMIT 100`);
     toast({
       title: "Query Generated",
       description: `Query for ${tableName} has been generated.`,

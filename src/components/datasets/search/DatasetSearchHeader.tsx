@@ -15,9 +15,9 @@ export const DatasetSearchHeader = ({ isOpen, onToggle }: DatasetSearchHeaderPro
           </div>
       <Button variant="ghost" size="sm" onClick={onToggle}>
         {isOpen ? (
-          <ChevronUp className="h-4 w-4" />
-        ) : (
           <ChevronDown className="h-4 w-4" />
+        ) : (
+          <ChevronUp className="h-4 w-4" />
         )}
       </Button>
     </div>
