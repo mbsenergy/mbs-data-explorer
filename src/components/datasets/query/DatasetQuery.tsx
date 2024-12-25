@@ -1,21 +1,19 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Search, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
+import type { ColumnDef } from "@tanstack/react-table";
 import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetSearch } from "../DatasetSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { TableInfo, ColumnDefWithAccessor } from "../types";
-import type { Database } from "@/integrations/supabase/types";
+import type { TableInfo } from "../types";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetQueryProps {
   selectedDataset: TableNames | null;
@@ -30,7 +28,7 @@ export const DatasetQuery = ({
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [columns, setColumns] = useState<ColumnDefWithAccessor[]>([]);
+  const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
   const [query, setQuery] = useState("SELECT * FROM your_table LIMIT 100");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedField, setSelectedField] = useState("all");
@@ -48,30 +46,6 @@ export const DatasetQuery = ({
       return data as TableInfo[];
     },
   });
-
-  const availableFields = useMemo(() => {
-    if (!tables) return [];
-    const fields = new Set<string>();
-    tables.forEach(table => {
-      const match = table.tablename.match(/^([A-Z]{2})/);
-      if (match) {
-        fields.add(match[1]);
-      }
-    });
-    return Array.from(fields);
-  }, [tables]);
-
-  const availableTypes = useMemo(() => {
-    if (!tables) return [];
-    const types = new Set<string>();
-    tables.forEach(table => {
-      const match = table.tablename.match(/^[A-Z]{2}(\d{2})/);
-      if (match) {
-        types.add(match[1]);
-      }
-    });
-    return Array.from(types);
-  }, [tables]);
 
   const filteredTables = tables?.filter(table => {
     const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
@@ -105,7 +79,7 @@ export const DatasetQuery = ({
   };
 
   const handleSelect = (tableName: string) => {
-    setSelectedDataset(tableName as TableNames);
+    setSelectedDataset(tableName);
     setQuery(`SELECT * FROM ${tableName} LIMIT 100`);
     toast({
       title: "Query Generated",
@@ -135,7 +109,7 @@ export const DatasetQuery = ({
       setQueryResults(results);
       
       if (results.length > 0) {
-        const cols: ColumnDefWithAccessor[] = Object.keys(results[0]).map(key => ({
+        const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
           accessorKey: key,
           header: key,
           cell: info => {
@@ -251,8 +225,8 @@ export const DatasetQuery = ({
                   onFieldChange={setSelectedField}
                   onTypeChange={setSelectedType}
                   onFavoriteChange={setShowOnlyFavorites}
-                  availableFields={availableFields}
-                  availableTypes={availableTypes}
+                  availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
+                  availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
                   selectedDataset={selectedDataset || ""}
                 />
               )}

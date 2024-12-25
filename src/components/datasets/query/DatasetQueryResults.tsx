@@ -3,14 +3,14 @@ import { Download } from "lucide-react";
 import { DataGrid } from "./DataGrid";
 import { DatasetActionDialog } from "../explore/DatasetActionDialog";
 import { DatasetQueryEmptyState } from "./DatasetQueryEmptyState";
-import type { ColumnDefWithAccessor } from "../types";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 interface DatasetQueryResultsProps {
   isLoading: boolean;
   queryResults: any[] | null;
-  columns: ColumnDefWithAccessor[];
+  columns: ColumnDef<any>[];
   onDownload: () => void;
 }
 
@@ -77,6 +77,7 @@ export const DatasetQueryResults = ({
           data={queryResults}
           columns={columns}
           isLoading={isLoading}
+          style={{ height: '700px' }}
         />
       </div>
       <DatasetActionDialog

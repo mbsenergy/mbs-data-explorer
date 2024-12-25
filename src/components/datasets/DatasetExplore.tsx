@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DatasetPagination } from "./explore/DatasetPagination";
 import { DatasetStats } from "./explore/DatasetStats";
 import { DatasetTable } from "./explore/DatasetTable";
 import { DatasetControls } from "./explore/DatasetControls";
 import { DatasetColumnSelect } from "./explore/DatasetColumnSelect";
-import { DatasetPagination } from "./explore/DatasetPagination";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -89,7 +89,7 @@ export const DatasetExplore = ({
   };
 
   return (
-    <Card className="p-6 space-y-6">
+    <Card className="p-6 space-y-6<">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">Explore</h2>
