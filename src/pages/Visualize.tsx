@@ -3,25 +3,23 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DatasetTable } from "@/components/datasets/explore/DatasetTable";
-import type { TableNames } from "@/components/datasets/types";
-import { ColumnDefWithAccessor } from "@/components/datasets/types";
+import type { TableInfo, ColumnDefWithAccessor } from "@/components/datasets/types";
 
 export default function Visualize() {
   const { toast } = useToast();
   const [data, setData] = useState<any[]>([]);
   const [columns, setColumns] = useState<ColumnDefWithAccessor[]>([]);
-  const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(null);
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_available_tables");
       if (error) throw error;
-      return data;
+      return data as TableInfo[];
     },
   });
 
-  const handleExecuteQuery = async (tableName: TableNames) => {
+  const handleExecuteQuery = async (tableName: string) => {
     try {
       const { data, error } = await supabase
         .from(tableName)
@@ -56,14 +54,18 @@ export default function Visualize() {
         <p>Loading tables...</p>
       ) : (
         <div>
-          {tables.map((table: TableNames) => (
-            <button key={table} onClick={() => handleExecuteQuery(table)}>
-              {table}
+          {tables?.map((table: TableInfo) => (
+            <button key={table.tablename} onClick={() => handleExecuteQuery(table.tablename)}>
+              {table.tablename}
             </button>
           ))}
         </div>
       )}
-      <DatasetTable data={data} columns={columns} selectedColumns={columns.map(col => col.accessorKey)} />
+      <DatasetTable 
+        data={data} 
+        columns={columns} 
+        selectedColumns={columns.map(col => col.accessorKey)} 
+      />
     </div>
   );
 }

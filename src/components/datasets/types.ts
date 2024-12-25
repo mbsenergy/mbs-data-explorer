@@ -7,7 +7,7 @@ export type TableInfo = {
 
 export type TableNames = keyof Database['public']['Tables'];
 
-export interface ColumnDefWithAccessor extends ColumnDef<any> {
+export interface ColumnDefWithAccessor extends Omit<ColumnDef<any>, 'accessorKey'> {
   accessorKey: string;
   header: string;
   cell?: (info: any) => React.ReactNode;
