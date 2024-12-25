@@ -10,10 +10,7 @@ import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetSearch } from "../DatasetSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { TableInfo } from "../types";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import type { TableInfo, TableNames } from "../types";
 
 interface DatasetQueryProps {
   selectedDataset: TableNames | null;
@@ -23,7 +20,7 @@ interface DatasetQueryProps {
 export const DatasetQuery = ({
   selectedDataset: initialSelectedDataset,
   selectedColumns: initialSelectedColumns,
-}) => {
+}: DatasetQueryProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
