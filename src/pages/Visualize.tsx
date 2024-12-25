@@ -12,6 +12,7 @@ export default function Visualize() {
   const { toast } = useToast();
   const [data, setData] = useState<any[]>([]);
   const [columns, setColumns] = useState<ColumnDefWithAccessor[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
@@ -39,6 +40,7 @@ export default function Visualize() {
         }));
         setColumns(cols);
         setData(data);
+        setSelectedColumns(cols.map(col => col.accessorKey));
       }
     } catch (error: any) {
       console.error('Error executing query:', error);
@@ -70,7 +72,7 @@ export default function Visualize() {
       <DatasetTable 
         data={data} 
         columns={columns} 
-        selectedColumns={columns.map(col => col.accessorKey)} 
+        selectedColumns={selectedColumns} 
       />
     </div>
   );

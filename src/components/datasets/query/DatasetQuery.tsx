@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Search, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +30,7 @@ export const DatasetQuery = ({
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
+  const [columns, setColumns] = useState<ColumnDefWithAccessor[]>([]);
   const [query, setQuery] = useState("SELECT * FROM your_table LIMIT 100");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedField, setSelectedField] = useState("all");
@@ -49,8 +49,7 @@ export const DatasetQuery = ({
     },
   });
 
-  // Extract available fields (first two letters) and types (next two numbers) from table names
-  const availableFields = React.useMemo(() => {
+  const availableFields = useMemo(() => {
     if (!tables) return [];
     const fields = new Set<string>();
     tables.forEach(table => {
@@ -62,7 +61,7 @@ export const DatasetQuery = ({
     return Array.from(fields);
   }, [tables]);
 
-  const availableTypes = React.useMemo(() => {
+  const availableTypes = useMemo(() => {
     if (!tables) return [];
     const types = new Set<string>();
     tables.forEach(table => {
@@ -106,7 +105,7 @@ export const DatasetQuery = ({
   };
 
   const handleSelect = (tableName: string) => {
-    setSelectedDataset(tableName);
+    setSelectedDataset(tableName as TableNames);
     setQuery(`SELECT * FROM ${tableName} LIMIT 100`);
     toast({
       title: "Query Generated",
