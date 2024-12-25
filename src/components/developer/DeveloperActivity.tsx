@@ -70,7 +70,7 @@ export const DeveloperActivity = ({
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-12 gap-6 mb-8">
             <FavoriteResources
               displayedFavorites={displayedFavorites}
               currentPage={currentPage}

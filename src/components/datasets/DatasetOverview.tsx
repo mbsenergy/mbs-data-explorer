@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
-import { Download, Eye, Star, Check } from "lucide-react";
+import { Download, Eye, Star, Check, History } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -183,8 +183,11 @@ export const DatasetOverview = ({
 
   return (
     <div className="grid grid-cols-12 gap-6 mb-8">
-      <Card className="p-4 col-span-9">
-        <h3 className="text-lg font-semibold mb-4">Favorite Datasets</h3>
+      <Card className="p-4 col-span-8">
+      <div className="flex items-center gap-2">
+            <History className="h-6 w-6" />
+            <h3 className="text-xl font-semibold">Favourite datasets</h3>
+          </div>
         <div className="space-y-4">
           <Table>
             <TableHeader>
@@ -268,8 +271,11 @@ export const DatasetOverview = ({
         </div>
       </Card>
 
-      <Card className="p-4 col-span-3">
-        <h3 className="text-lg font-semibold mb-4">Recent Downloads</h3>
+      <Card className="p-4 col-span-4">
+      <div className="flex items-center gap-2">
+            <Star className="h-6 w-6" />
+            <h3 className="text-xl font-semibold">Recent downloads</h3>
+          </div>
         <Carousel className="w-full">
           <CarouselContent>
             {recentDownloads?.map((download) => {

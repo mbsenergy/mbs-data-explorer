@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mail } from "lucide-react";
+import { Mail, File } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const Guide = () => {
@@ -30,7 +30,10 @@ const Guide = () => {
       </div>
 
       <Card className="p-6 bg-card metallic-card">
-        <h2 className="text-xl font-semibold mb-4">Documentation</h2>
+      <div className="flex items-center gap-2">
+            <File className="h-6 w-6" />
+            <h2 className="text-xl font-semibold">Documentation</h2>
+          </div>
         <div className="space-y-6 text-muted-foreground">
           <section className="space-y-4">
             <h3 className="text-lg font-medium text-foreground">Overview</h3>

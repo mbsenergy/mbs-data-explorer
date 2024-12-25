@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
 const ServiceBox = ({ title }: { title: string }) => (
-  <div className="p-4 bg-muted rounded-lg">
+  <div className="p-4 bg-card hover:bg-muted/50 transition-colors cursor-pointer">
     <h4 className="font-medium">{title}</h4>
   </div>
 );

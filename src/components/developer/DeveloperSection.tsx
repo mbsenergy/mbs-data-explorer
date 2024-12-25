@@ -10,6 +10,7 @@ import {
 import { DeveloperCard } from "./DeveloperCard";
 import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
 import { Card } from "../ui/card";
+import React from "react";
 
 interface DeveloperSectionProps {
   title: string;
@@ -58,11 +59,10 @@ export const DeveloperSection = ({
 
   return (
     <Card className="p-6 space-y-2 metallic-card relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none" />
       <div className="space-y-1">
         <div className="flex items-center gap-2 mb-4">
           {Icon && <Icon className="h-6 w-6" />}
-          <h2 className="text-2xl font-semibold">{title}</h2>
+          <h2 className="text-xl font-semibold">{title}</h2>
         </div>
         <div className="w-full">
           {isLoading ? (
@@ -92,8 +92,10 @@ export const DeveloperSection = ({
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="hidden md:flex" />
-              <CarouselNext className="hidden md:flex" />
+          <div className="flex justify-center gap-2 mt-4">
+            <CarouselPrevious className="static translate-y-0" />
+            <CarouselNext className="static translate-y-0" />
+          </div>
             </Carousel>
           ) : (
             <p className="text-center text-muted-foreground">No files available</p>

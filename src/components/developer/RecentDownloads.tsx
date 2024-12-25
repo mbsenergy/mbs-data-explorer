@@ -2,6 +2,8 @@ import { History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Download, Eye, Star } from "lucide-react";
+import React from "react";
+import { Card } from "@/components/ui/card";
 
 interface RecentDownloadsProps {
   recentDownloads: any[];
@@ -21,10 +23,10 @@ export const RecentDownloads = ({
   onToggleFavorite,
 }: RecentDownloadsProps) => {
   return (
-    <div className="p-4 border border-[hsl(217,100%,15%)] rounded-lg bg-card/50">
+    <Card className="p-4 col-span-4">
       <div className="flex items-center gap-2 mb-4">
         <History className="h-6 w-6" />
-        <h2 className="text-2xl font-semibold text-white">Recent Downloads</h2>
+        <h3 className="text-xl font-semibold text-white">Recent Downloads</h3>
       </div>
       <Carousel className="w-full">
         <CarouselContent>
@@ -84,9 +86,11 @@ export const RecentDownloads = ({
             );
           })}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+          <div className="flex justify-center gap-2 mt-4">
+            <CarouselPrevious className="static translate-y-0" />
+            <CarouselNext className="static translate-y-0" />
+          </div>
       </Carousel>
-    </div>
+    </Card>
   );
 };

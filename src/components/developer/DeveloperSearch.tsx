@@ -30,7 +30,7 @@ export const DeveloperSearch = ({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <FileSearch className="h-6 w-6" />
-            <h2 className="text-2xl font-semibold">Search Material</h2>
+            <h2 className="text-xl font-semibold">Search Material</h2>
           </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">

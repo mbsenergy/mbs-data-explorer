@@ -22,7 +22,7 @@ export const CollapsibleCard = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <Card className={cn("bg-card metallic-card", className) }>
+    <Card className={cn("bg-card metallic-card hover:bg-muted/50 transition-colors cursor-pointer metallic-card", className) }>
       <div 
         className="flex items-center justify-between p-6 cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}

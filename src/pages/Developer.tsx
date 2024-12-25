@@ -143,13 +143,10 @@ const Developer = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center gap-2">
-        <Code className="h-8 w-8 text-corporate-teal" />
+    <div className="space-y-6">
         <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">
           Developer Resources
         </h1>
-      </div>
       
       <DeveloperActivity
         favorites={favorites}

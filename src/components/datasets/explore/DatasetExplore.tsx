@@ -15,6 +15,8 @@ import type { Database } from "@/integrations/supabase/types";
 import type { Filter } from "./types";
 import { v4 as uuidv4 } from 'uuid';
 import { Code } from "lucide-react";
+import { Compass } from "lucide-react";
+
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -291,7 +293,10 @@ export const DatasetExplore = ({
     <Card className="p-6 space-y-6 metallic-card">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">Explore</h2>
+        <div className="flex items-center gap-2">
+            <Compass className="h-6 w-6" />
+            <h2 className="text-2xl font-semibold">Explore</h2>
+          </div>
           {selectedDataset && (
             <p className="text-muted-foreground">
               Selected dataset: <span className="font-medium">{selectedDataset}</span>
