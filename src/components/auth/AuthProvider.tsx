@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { User, AuthError } from "@supabase/supabase-js";
+import type { User, AuthError, AuthTokenResponse } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       async (event, session) => {
         console.log("Auth state change:", event, session?.user?.email);
         
-        if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+        if (event === "SIGNED_OUT") {
           console.log("User signed out, clearing state and redirecting...");
           setUser(null);
           // Clear auth-related items from localStorage

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { DataGrid } from "@/components/datasets/query/DataGrid";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDefWithAccessor } from "@/components/datasets/types";
 
 interface DatasetTableProps {
   columns: string[];
@@ -10,9 +10,10 @@ interface DatasetTableProps {
 
 export const DatasetTable = ({ columns, data, selectedColumns }: DatasetTableProps) => {
   const tableColumns = useMemo(() => {
-    return selectedColumns.map((col): ColumnDef<any> => ({
+    return selectedColumns.map((col): ColumnDefWithAccessor => ({
       accessorKey: col,
       header: col,
+      cell: info => String(info.getValue() ?? ''),
     }));
   }, [selectedColumns]);
 

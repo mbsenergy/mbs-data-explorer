@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DatasetPagination } from "./explore/DatasetPagination";
 import { DatasetStats } from "./explore/DatasetStats";
 import { DatasetTable } from "./explore/DatasetTable";
 import { DatasetControls } from "./explore/DatasetControls";
