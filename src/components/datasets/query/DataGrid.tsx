@@ -1,22 +1,16 @@
 import { useMemo, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, GridReadyEvent } from 'ag-grid-community';
+import type { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface DataGridProps {
   data: any[];
   columns: ColumnDef<any>[];
   isLoading?: boolean;
-  style?: React.CSSProperties;
 }
 
-export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
-  const gridStyle = useMemo(() => ({ 
-    height: '800px', 
-    width: '100%', 
-    overflow: 'auto',
-    ...style 
-  }), [style]);
+export function DataGrid({ data, columns, isLoading }: DataGridProps) {
+  const gridStyle = useMemo(() => ({ height: '800px', width: '100%', overflow: 'auto' }), []);
 
   const defaultColDef = useMemo<ColDef>(() => ({
     sortable: true,
@@ -36,7 +30,7 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
 
   const columnDefs = useMemo(() => {
     return columns.map((col): ColDef => ({
-      field: String(col.header),
+      field: col.accessorKey as string,
       headerName: String(col.header),
       minWidth: 150,
       width: 200,

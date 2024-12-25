@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Search, Code, ChevronUp, ChevronDown } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Search, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +10,10 @@ import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetSearch } from "../DatasetSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { TableNames, TableInfo } from "../types";
+import type { TableInfo } from "../types";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DatasetQueryProps {
   selectedDataset: TableNames | null;
@@ -22,7 +23,7 @@ interface DatasetQueryProps {
 export const DatasetQuery = ({
   selectedDataset: initialSelectedDataset,
   selectedColumns: initialSelectedColumns,
-}: DatasetQueryProps) => {
+}) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
@@ -78,7 +79,7 @@ export const DatasetQuery = ({
   };
 
   const handleSelect = (tableName: string) => {
-    setSelectedDataset(tableName as TableNames);
+    setSelectedDataset(tableName);
     setQuery(`SELECT * FROM ${tableName} LIMIT 100`);
     toast({
       title: "Query Generated",

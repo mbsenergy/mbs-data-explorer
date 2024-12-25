@@ -1,7 +1,5 @@
-import type { Database } from "@/integrations/supabase/types";
-
-export type TableNames = keyof Database['public']['Tables'];
-
-export interface TableInfo {
+export type TableInfo = {
   tablename: string;
-}
+};
+
+export type TableNames = string;
