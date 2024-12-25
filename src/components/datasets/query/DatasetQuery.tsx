@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Search, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +46,31 @@ export const DatasetQuery = ({
       return data as TableInfo[];
     },
   });
+
+  // Extract available fields (first two letters) and types (next two numbers) from table names
+  const availableFields = React.useMemo(() => {
+    if (!tables) return [];
+    const fields = new Set<string>();
+    tables.forEach(table => {
+      const match = table.tablename.match(/^([A-Z]{2})/);
+      if (match) {
+        fields.add(match[1]);
+      }
+    });
+    return Array.from(fields);
+  }, [tables]);
+
+  const availableTypes = React.useMemo(() => {
+    if (!tables) return [];
+    const types = new Set<string>();
+    tables.forEach(table => {
+      const match = table.tablename.match(/^[A-Z]{2}(\d{2})/);
+      if (match) {
+        types.add(match[1]);
+      }
+    });
+    return Array.from(types);
+  }, [tables]);
 
   const filteredTables = tables?.filter(table => {
     const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
@@ -225,8 +250,8 @@ export const DatasetQuery = ({
                   onFieldChange={setSelectedField}
                   onTypeChange={setSelectedType}
                   onFavoriteChange={setShowOnlyFavorites}
-                  availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
-                  availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
+                  availableFields={availableFields}
+                  availableTypes={availableTypes}
                   selectedDataset={selectedDataset || ""}
                 />
               )}
