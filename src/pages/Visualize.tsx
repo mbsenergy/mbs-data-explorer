@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { DatamartSearch } from "@/components/visualize/DatamartSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { TableInfo, TableNames } from "@/components/datasets/types";
+import type { TableInfo } from "@/components/datasets/types";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { 
   Upload, 
   Database, 
@@ -23,8 +22,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { v4 as uuidv4 } from 'uuid';
 import type { ColumnDef } from "@tanstack/react-table";
+import { DatasetFilters } from "@/components/datasets/explore/DatasetFilters";
+import Plot from 'react-plotly.js';
+import type { Filter } from "@/components/datasets/explore/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface DataPoint {
   [key: string]: any;
@@ -115,9 +120,8 @@ const Visualize = () => {
         });
 
       const cols: ColumnDef<any>[] = headers.map(header => ({
-        id: header,
-        header: header,
-        accessorFn: (row: any) => row[header],
+        accessorKey: header,
+        header,
       }));
 
       setOriginalData(parsedData);
@@ -151,7 +155,7 @@ const Visualize = () => {
     setIsLoading(true);
     try {
       const { data: queryData, error } = await supabase
-        .from(selectedTable as TableNames)
+        .from(selectedTable)
         .select('*')
         .limit(1000);
 
@@ -161,8 +165,8 @@ const Visualize = () => {
         const cols: ColumnDef<any>[] = Object.keys(queryData[0])
           .filter(key => !key.startsWith('md_'))
           .map(key => ({
-            header: key,
             accessorKey: key,
+            header: key,
           }));
 
         setOriginalData(queryData);
@@ -374,7 +378,6 @@ const Visualize = () => {
         onFavoriteChange={setShowOnlyFavorites}
         availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
         availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
-        defaultOpen={false}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

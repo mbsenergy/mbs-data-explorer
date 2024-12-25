@@ -10,7 +10,7 @@ import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetSearch } from "../DatasetSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { TableInfo, TableNames } from "../types";
+import type { TableInfo } from "../types";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
