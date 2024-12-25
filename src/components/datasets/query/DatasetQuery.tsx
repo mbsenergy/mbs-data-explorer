@@ -12,13 +12,7 @@ import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetSearch } from "../DatasetSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { Database } from "@/integrations/supabase/types";
-
-type TableNames = keyof Database['public']['Tables'];
-
-interface TableInfo {
-  tablename: string;
-}
+import type { TableNames, TableInfo } from "../types";
 
 interface DatasetQueryProps {
   selectedDataset: TableNames | null;
@@ -84,7 +78,7 @@ export const DatasetQuery = ({
   };
 
   const handleSelect = (tableName: string) => {
-    setSelectedDataset(tableName);
+    setSelectedDataset(tableName as TableNames);
     setQuery(`SELECT * FROM ${tableName} LIMIT 100`);
     toast({
       title: "Query Generated",
