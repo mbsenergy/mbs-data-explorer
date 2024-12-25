@@ -9,12 +9,18 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { DatamartSearch } from "@/components/visualize/DatamartSearch";
 import { DataDisplay } from "@/components/visualize/DataDisplay";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { TableInfo } from "@/components/datasets/types";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
+
+interface TableInfo {
+  tablename: string;
+}
 
 const chartTypes = ["line", "bar", "scatter"] as const;
 type ChartType = typeof chartTypes[number];
 
-export const Visualize = () => {
+const Visualize = () => {
   const [selectedChartType, setSelectedChartType] = useState<ChartType>("line");
   const [selectedDataset, setSelectedDataset] = useState<TableInfo | null>(null);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -58,19 +64,35 @@ export const Visualize = () => {
             <CollapsibleContent>
               <DatamartSearch
                 tables={tables || []}
-                onSelect={(table) => setSelectedDataset(table)}
+                filteredTables={tables || []}
+                favorites={new Set()}
+                onPreview={() => {}}
+                onDownload={() => {}}
+                onSelect={(table) => setSelectedDataset({ tablename: table })}
+                onToggleFavorite={() => {}}
+                onSearchChange={() => {}}
+                onFieldChange={() => {}}
+                onTypeChange={() => {}}
+                onFavoriteChange={() => {}}
+                availableFields={[]}
+                availableTypes={[]}
               />
             </CollapsibleContent>
           </Collapsible>
         </TabsContent>
         <TabsContent value="data-display">
           <DataDisplay
-            dataset={selectedDataset}
-            selectedColumns={selectedColumns}
-            chartType={selectedChartType}
+            showChart={true}
+            plotData={[]}
+            plotConfig={{ xAxis: "", yAxis: "" }}
+            filteredData={[]}
+            columns={[]}
+            isLoading={false}
           />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
+
+export default Visualize;
