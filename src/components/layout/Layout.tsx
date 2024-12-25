@@ -8,7 +8,7 @@ export const Layout = () => {
     <SidebarProvider>
       <div className="min-h-screen">
         <Navbar />
-        <div className="flex">
+        <div className="flex pt-16">
           <AppSidebar />
           <main className="flex-1 p-8">
             <Outlet />
