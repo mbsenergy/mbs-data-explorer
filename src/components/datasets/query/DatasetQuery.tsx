@@ -1,19 +1,21 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Search, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
-import type { ColumnDef } from "@tanstack/react-table";
 import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetSearch } from "../DatasetSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { TableInfo } from "../types";
+import type { TableInfo, ColumnDefWithAccessor } from "../types";
+import type { Database } from "@/integrations/supabase/types";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetQueryProps {
   selectedDataset: TableNames | null;
@@ -134,7 +136,7 @@ export const DatasetQuery = ({
       setQueryResults(results);
       
       if (results.length > 0) {
-        const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
+        const cols: ColumnDefWithAccessor[] = Object.keys(results[0]).map(key => ({
           accessorKey: key,
           header: key,
           cell: info => {

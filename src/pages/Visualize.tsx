@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DatasetTable } from "@/components/datasets/explore/DatasetTable";
 import type { TableInfo, ColumnDefWithAccessor } from "@/components/datasets/types";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 export default function Visualize() {
   const { toast } = useToast();
@@ -19,7 +22,7 @@ export default function Visualize() {
     },
   });
 
-  const handleExecuteQuery = async (tableName: string) => {
+  const handleExecuteQuery = async (tableName: TableNames) => {
     try {
       const { data, error } = await supabase
         .from(tableName)
@@ -55,7 +58,10 @@ export default function Visualize() {
       ) : (
         <div>
           {tables?.map((table: TableInfo) => (
-            <button key={table.tablename} onClick={() => handleExecuteQuery(table.tablename)}>
+            <button 
+              key={table.tablename} 
+              onClick={() => handleExecuteQuery(table.tablename as TableNames)}
+            >
               {table.tablename}
             </button>
           ))}
