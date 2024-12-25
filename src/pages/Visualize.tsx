@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo } from "@/components/datasets/types";
 import { Label } from "@/components/ui/label";
-import { Download, Database, BarChart } from "lucide-react";
+import { Download, Database, BarChart, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,13 +23,6 @@ interface DataPoint {
   [key: string]: any;
 }
 
-const chartTypes = [
-  { value: "scatter", label: "Scatter" },
-  { value: "bar", label: "Bar" },
-  { value: "line", label: "Line" },
-  { value: "box", label: "Box" }
-];
-
 const Visualize = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -38,6 +31,12 @@ const Visualize = () => {
   const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTable, setSelectedTable] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedField, setSelectedField] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isChartOpen, setIsChartOpen] = useState(false);
   const [plotConfig, setPlotConfig] = useState({
     xAxis: "",
     yAxis: "",
@@ -275,6 +274,20 @@ const Visualize = () => {
       });
     }
   };
+
+  const plotData = useMemo(() => {
+    if (!filteredData.length || !plotConfig.xAxis || !plotConfig.yAxis) return [];
+
+    const trace = {
+      x: filteredData.map(d => d[plotConfig.xAxis]),
+      y: filteredData.map(d => d[plotConfig.yAxis]),
+      type: plotConfig.chartType,
+      mode: 'markers',
+      name: 'Data Points'
+    };
+
+    return [trace];
+  }, [filteredData, plotConfig]);
 
   return (
     <div className="space-y-6">
