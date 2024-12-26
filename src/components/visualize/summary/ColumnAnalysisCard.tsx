@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { ColumnDef, Table, RowModel, RowData, Column } from "@tanstack/react-table";
+import { ColumnDef, Table, RowModel, RowData, Column, Header } from "@tanstack/react-table";
 import { ColumnDistributionChart } from "./ColumnDistributionChart";
 import { getCoreRowModel, createColumnHelper } from "@tanstack/react-table";
 
@@ -75,9 +75,28 @@ export const ColumnAnalysisCard = ({ column, data, summary }: ColumnAnalysisCard
         getColumn: () => null,
       } as unknown as Table<any>;
 
+      const mockHeader = {
+        id: String(column.id),
+        index: 0,
+        depth: 0,
+        column: mockColumn,
+        headerGroup: {
+          depth: 0,
+          headers: [],
+          id: '0',
+        },
+        subHeaders: [],
+        colSpan: 1,
+        rowSpan: 1,
+        getLeafHeaders: () => [],
+        isPlaceholder: false,
+        placeholderId: undefined,
+        getContext: () => ({ table: mockTable, header: mockHeader, column: mockColumn }),
+      } as unknown as Header<any, unknown>;
+
       const headerContext = {
         column: mockColumn,
-        header: mockColumn,
+        header: mockHeader,
         table: mockTable,
       };
 
