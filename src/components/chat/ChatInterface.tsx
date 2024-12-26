@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -44,6 +45,23 @@ export const ChatInterface = () => {
     }
   };
 
+  const components: Components = {
+    code: ({ className, children, ...props }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      return match ? (
+        <pre className="bg-muted-foreground/20 p-2 rounded-lg overflow-x-auto">
+          <code className={className} {...props}>
+            {children}
+          </code>
+        </pre>
+      ) : (
+        <code className="bg-muted-foreground/20 rounded px-1" {...props}>
+          {children}
+        </code>
+      );
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <ScrollArea className="flex-1 pr-4">
@@ -64,18 +82,7 @@ export const ChatInterface = () => {
               >
                 <ReactMarkdown 
                   className="prose prose-invert max-w-none"
-                  components={{
-                    code: ({node, inline, className, children, ...props}) => {
-                      if (inline) {
-                        return <code className="bg-muted-foreground/20 rounded px-1" {...props}>{children}</code>
-                      }
-                      return (
-                        <pre className="bg-muted-foreground/20 p-2 rounded-lg overflow-x-auto">
-                          <code {...props}>{children}</code>
-                        </pre>
-                      )
-                    }
-                  }}
+                  components={components}
                 >
                   {message.content}
                 </ReactMarkdown>
