@@ -5,9 +5,11 @@ import { Toggle } from "@/components/ui/toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DataControlsProps } from "@/types/visualize";
-import * as XLSX from 'xlsx';
 import { useToast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
+import { processExcelFile } from "./file-processing/ExcelProcessor";
+import { processCsvFile } from "./file-processing/CsvProcessor";
+import type { DataControlsProps } from "@/types/visualize";
 
 export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControlsProps) => {
   const { toast } = useToast();
@@ -22,8 +24,27 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Validate file type
+    if (fileType === 'excel' && !file.name.match(/\.(xlsx|xls)$/i)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please select an Excel file (.xlsx or .xls)",
+      });
+      return;
+    }
+
+    if (fileType === 'csv' && !file.name.match(/\.csv$/i)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please select a CSV file (.csv)",
+      });
+      return;
+    }
+
     setSelectedFile(file);
-    // Reset states when new file is selected
     setWorkbook(null);
     setAvailableSheets([]);
     setSelectedSheet('');
@@ -40,30 +61,36 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
       return;
     }
 
-    if (fileType === 'excel') {
-      try {
+    try {
+      if (fileType === 'excel') {
         const buffer = await selectedFile.arrayBuffer();
         const wb = XLSX.read(buffer, { type: 'array' });
         const sheets = wb.SheetNames;
+        
+        if (sheets.length === 0) {
+          throw new Error('No sheets found in Excel file');
+        }
+        
         setWorkbook(wb);
         setAvailableSheets(sheets);
         setSelectedSheet(sheets[0]);
         setIsFileUploaded(true);
+        
         toast({
           title: "Success",
           description: "File uploaded successfully. Please select a sheet to continue.",
         });
-      } catch (error) {
-        console.error('Error reading Excel file:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to read Excel file",
-        });
+      } else {
+        // For CSV, process directly
+        handleProcessData();
       }
-    } else {
-      // For CSV, process directly
-      handleProcessData();
+    } catch (error: any) {
+      console.error('Error processing file:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to process file",
+      });
     }
   };
 
@@ -71,7 +98,7 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
     if (!selectedFile) return;
 
     try {
-      let data: any[] = [];
+      let result;
       
       if (fileType === 'excel') {
         if (!workbook || !selectedSheet) {
@@ -82,37 +109,16 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
           });
           return;
         }
-
-        const worksheet = workbook.Sheets[selectedSheet];
-        const headerRowNum = parseInt(headerRow) - 1;
         
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-          range: headerRowNum,
-          raw: false,
-          defval: ''
-        });
-        
-        data = jsonData;
+        result = await processExcelFile(selectedFile, selectedSheet, headerRow);
       } else {
-        const text = await selectedFile.text();
-        const rows = text.split('\n');
-        const headers = rows[0].split(',').map(h => h.trim());
-        
-        data = rows.slice(1)
-          .filter(row => row.trim())
-          .map(row => {
-            const values = row.split(',');
-            return headers.reduce((obj, header, i) => {
-              obj[header] = values[i]?.trim();
-              return obj;
-            }, {} as Record<string, string>);
-          });
+        result = await processCsvFile(selectedFile);
       }
 
       const syntheticEvent = {
         target: {
-          files: [new File([JSON.stringify(data)], selectedFile.name, { type: selectedFile.type })],
-          result: data
+          files: [new File([JSON.stringify(result.data)], selectedFile.name, { type: selectedFile.type })],
+          result: result
         }
       } as unknown as React.ChangeEvent<HTMLInputElement>;
 
@@ -120,7 +126,7 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
 
       toast({
         title: "Success",
-        description: `Loaded ${data.length} rows of data from ${selectedFile.name}`,
+        description: `Loaded ${result.data.length} rows of data from ${selectedFile.name}`,
       });
     } catch (error: any) {
       console.error('Error processing file:', error);
