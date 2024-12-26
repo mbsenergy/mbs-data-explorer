@@ -54,7 +54,7 @@ export const DataDisplay = ({
             <Button
               onClick={handleExport}
               disabled={!filteredData.length}
-              className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
+              className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black"
             >
               <Download className="h-4 w-4 mr-2" />
               Export Data
