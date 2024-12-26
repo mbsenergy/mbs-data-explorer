@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { HelpCircle, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -44,12 +45,28 @@ export const Navbar = () => {
     return email?.substring(0, 2).toUpperCase() || "U";
   };
 
+  const getLevelColor = (level: string) => {
+    switch (level?.toLowerCase()) {
+      case 'premium':
+        return 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600';
+      case 'plus':
+        return 'bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600';
+      default:
+        return 'bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600';
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-card border-b border-border/40 metallic-card">
       {/* Left Section */}
       <div className="flex-1">
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground flex items-center gap-2">
           Welcome, <h3 className="inline text-white font-semibold">{profile?.first_name || user?.email}</h3>
+          {profile?.level && (
+            <Badge className={`${getLevelColor(profile.level)} border-none text-xs`}>
+              {profile.level}
+            </Badge>
+          )}
         </span>
       </div>
 
