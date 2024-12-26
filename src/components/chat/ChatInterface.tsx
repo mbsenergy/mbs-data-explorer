@@ -81,7 +81,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               }`}
             >
               <div
-                className={`rounded-xl px-4 py-2 max-w-[85%] text-sm shadow-lg backdrop-blur-sm ${
+                className={`rounded-xl px-4 py-2 max-w-[70%] text-sm shadow-lg backdrop-blur-sm ${
                   message.role === 'user'
                     ? 'metallic-card text-primary-foreground ml-8'
                     : 'glass-panel mr-8 border-l-2 border-l-primary'
