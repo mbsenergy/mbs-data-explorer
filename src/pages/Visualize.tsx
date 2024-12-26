@@ -9,7 +9,7 @@ import type { TableInfo } from "@/components/datasets/types";
 import { Label } from "@/components/ui/label";
 import { 
   Upload, 
-  Database, 
+  Database,
   Table,
   ChartBar,
   BarChart, 
@@ -28,11 +28,13 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { v4 as uuidv4 } from 'uuid';
 import type { ColumnDef } from "@tanstack/react-table";
 import { DatasetFilters } from "@/components/datasets/explore/DatasetFilters";
-import Plot from 'react-plotly.js';
 import type { Filter } from "@/components/datasets/explore/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+import "@/integrations/highcharts/highchartsConfig";
 
 interface DataPoint {
   [key: string]: any;
@@ -303,46 +305,92 @@ const Visualize = () => {
   useEffect(() => {
     if (!showChart || !plotConfig.xAxis || !plotConfig.yAxis || !filteredData.length) return;
 
-    const traces = [];
-    if (plotConfig.groupBy) {
-      const groups = filteredData.reduce((acc, item) => {
-        const group = item[plotConfig.groupBy];
-        if (!acc[group]) acc[group] = [];
-        acc[group].push(item);
-        return acc;
-      }, {} as Record<string, DataPoint[]>);
+    const getSeriesType = () => {
+      switch (plotConfig.chartType) {
+        case 'bar':
+          return 'column';
+        case 'box':
+          return 'boxplot';
+        default:
+          return plotConfig.chartType;
+      }
+    };
 
-      Object.entries(groups).forEach(([group, items]) => {
-        const xValues = items.map(item => item[plotConfig.xAxis]);
-        const yValues = items.map(item => item[plotConfig.yAxis]);
+    const getSeriesData = () => {
+      if (plotConfig.groupBy) {
+        const groups = filteredData.reduce((acc, item) => {
+          const group = item[plotConfig.groupBy];
+          if (!acc[group]) acc[group] = [];
+          acc[group].push(item);
+          return acc;
+        }, {} as Record<string, DataPoint[]>);
 
-        const aggregatedTrace = {
-          x: xValues,
-          y: plotConfig.aggregation !== 'none' 
-            ? aggregateValues(yValues, plotConfig.aggregation)
-            : yValues,
-          type: plotConfig.chartType,
-          name: group,
-          mode: plotConfig.chartType === 'line' ? 'lines+markers' : undefined,
-        };
+        return Object.entries(groups).map(([group, items]) => {
+          const xValues = items.map(item => item[plotConfig.xAxis]);
+          const yValues = items.map(item => item[plotConfig.yAxis]);
 
-        traces.push(aggregatedTrace);
-      });
-    } else {
-      const xValues = filteredData.map(item => item[plotConfig.xAxis]);
-      const yValues = filteredData.map(item => item[plotConfig.yAxis]);
+          if (plotConfig.aggregation !== 'none') {
+            const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
+            return {
+              name: group,
+              type: getSeriesType(),
+              data: [[xValues[0], aggregatedValue]]
+            };
+          }
 
-      traces.push({
-        x: xValues,
-        y: plotConfig.aggregation !== 'none' 
-          ? aggregateValues(yValues, plotConfig.aggregation)
-          : yValues,
-        type: plotConfig.chartType,
-        mode: plotConfig.chartType === 'line' ? 'lines+markers' : undefined,
-      });
-    }
+          return {
+            name: group,
+            type: getSeriesType(),
+            data: xValues.map((x, i) => [x, yValues[i]])
+          };
+        });
+      } else {
+        const xValues = filteredData.map(item => item[plotConfig.xAxis]);
+        const yValues = filteredData.map(item => item[plotConfig.yAxis]);
 
-    setPlotData(traces);
+        if (plotConfig.aggregation !== 'none') {
+          const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
+          return [{
+            type: getSeriesType(),
+            data: [[xValues[0], aggregatedValue]]
+          }];
+        }
+
+        return [{
+          type: getSeriesType(),
+          data: xValues.map((x, i) => [x, yValues[i]])
+        }];
+      }
+    };
+
+    const chartOptions: Highcharts.Options = {
+      title: {
+        text: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`
+      },
+      xAxis: {
+        title: {
+          text: plotConfig.xAxis
+        }
+      },
+      yAxis: {
+        title: {
+          text: plotConfig.yAxis
+        }
+      },
+      series: getSeriesData(),
+      plotOptions: {
+        scatter: {
+          marker: {
+            radius: 4
+          }
+        },
+        column: {
+          borderRadius: 5
+        }
+      }
+    };
+
+    setPlotData(chartOptions);
   }, [showChart, plotConfig, filteredData]);
 
   const aggregateValues = (values: number[], aggregation: string): number[] => {
@@ -659,22 +707,13 @@ const Visualize = () => {
               </TabsList>
 
               <TabsContent value="plot">
-                <Plot
-                  data={plotData}
-                  layout={{
-                    title: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`,
-                    xaxis: { title: plotConfig.xAxis },
-                    yaxis: { title: plotConfig.yAxis },
-                    plot_bgcolor: 'transparent',
-                    paper_bgcolor: 'transparent',
-                    font: { color: '#fff' },
-                    showlegend: true,
-                    legend: { font: { color: '#fff' } },
-                    margin: { t: 50, r: 50, b: 50, l: 50 }
-                  }}
-                  style={{ width: '100%', height: '600px' }}
-                  config={{ responsive: true }}
-                />
+                <div className="w-full h-[600px]">
+                  <HighchartsReact
+                    highcharts={Highcharts}
+                    options={plotData}
+                    containerProps={{ style: { height: '100%' } }}
+                  />
+                </div>
               </TabsContent>
 
               <TabsContent value="table">
