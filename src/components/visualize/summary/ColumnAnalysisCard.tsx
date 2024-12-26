@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { ColumnDef } from "@tanstack/react-table";
 import { ColumnDistributionChart } from "./ColumnDistributionChart";
-import { getCoreRowModel } from "@tanstack/react-table";
+import { getCoreRowModel, createColumnHelper } from "@tanstack/react-table";
 
 interface ColumnAnalysisCardProps {
   column: ColumnDef<any>;
@@ -18,27 +18,38 @@ interface ColumnAnalysisCardProps {
 }
 
 export const ColumnAnalysisCard = ({ column, data, summary }: ColumnAnalysisCardProps) => {
+  const columnHelper = createColumnHelper<any>();
+
   const getColumnHeader = () => {
     if (typeof column.header === 'function') {
-      return column.header({
-        column: {
-          ...column,
-          getCanSort: () => false,
-          getIsSorted: () => false,
-          getSortIndex: () => 0,
-          getToggleSortingHandler: () => null,
-        },
+      const mockColumn = columnHelper.accessor(String(column.id), {
+        id: String(column.id),
         header: column.header,
-        table: {
-          options: {
-            data,
-            columns: [column],
-            getCoreRowModel,
-            state: {},
-            onStateChange: () => {},
-          },
-        },
       });
+
+      const mockTable = {
+        options: {
+          data,
+          columns: [mockColumn],
+          getCoreRowModel,
+          state: {},
+          onStateChange: () => {},
+        },
+        getHeaderGroups: () => [],
+        getRowModel: () => ({ rows: [] }),
+        getState: () => ({}),
+        setOptions: () => {},
+        reset: () => {},
+        getColumn: () => null,
+      };
+
+      const headerContext = {
+        column: mockColumn,
+        header: mockColumn,
+        table: mockTable,
+      };
+
+      return column.header(headerContext);
     }
     return column.header;
   };
