@@ -5,6 +5,8 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
+const MAX_SAFE_ROWS = 100000; // Maximum number of rows we can safely load
+
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [data, setData] = useState<any[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
@@ -51,6 +53,31 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
 
+      // Check if dataset is too large
+      if (totalRows > MAX_SAFE_ROWS) {
+        toast({
+          variant: "destructive",
+          title: "Dataset too large",
+          description: `This dataset has ${totalRows.toLocaleString()} rows. Please use the pagination controls to browse the data or export specific sections.`
+        });
+        // Load just the first page
+        const columnsToUse = selectedColumns.length > 0 ? 
+          selectedColumns : 
+          await fetchColumns(tableName);
+        
+        setColumns(columnsToUse);
+        const columnList = columnsToUse.map(col => `"${col}"`).join(',');
+        const { data: initialData, error } = await supabase.rpc('execute_query', {
+          query_text: `SELECT ${columnList} FROM "${tableName}" LIMIT ${pageSize}`
+        });
+
+        if (error) throw error;
+        if (initialData && Array.isArray(initialData)) {
+          setData(initialData);
+        }
+        return;
+      }
+
       const columnsToUse = selectedColumns.length > 0 ? 
         selectedColumns : 
         await fetchColumns(tableName);
@@ -62,10 +89,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
       for (let i = 0; i < numberOfPages; i++) {
         const from = i * pageSize;
-        const to = from + pageSize - 1;
 
         const { data: pageData, error } = await fetchWithRetry(async () => {
-          // Use double quotes around column names to preserve case
           const columnList = columnsToUse.map(col => `"${col}"`).join(',');
           return await supabase.rpc('execute_query', {
             query_text: `SELECT ${columnList} FROM "${tableName}" OFFSET ${from} LIMIT ${pageSize}`
@@ -118,7 +143,30 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
           .rpc('get_table_row_count', { table_name: selectedDataset });
 
         if (countError) throw countError;
-        setTotalRowCount(countResult || 0);
+        const totalRows = countResult || 0;
+        setTotalRowCount(totalRows);
+
+        // Only load first page if dataset is too large
+        if (totalRows > MAX_SAFE_ROWS) {
+          toast({
+            variant: "destructive",
+            title: "Dataset too large",
+            description: `This dataset has ${totalRows.toLocaleString()} rows. Please use the pagination controls to browse the data.`
+          });
+          const availableColumns = await fetchColumns(selectedDataset);
+          setColumns(availableColumns);
+          
+          const columnList = availableColumns.map(col => `"${col}"`).join(',');
+          const { data: initialData, error: queryError } = await supabase.rpc('execute_query', {
+            query_text: `SELECT ${columnList} FROM "${selectedDataset}" LIMIT ${pageSize}`
+          });
+
+          if (queryError) throw queryError;
+          if (initialData && Array.isArray(initialData)) {
+            setData(initialData);
+          }
+          return;
+        }
 
         const availableColumns = await fetchColumns(selectedDataset);
         setColumns(availableColumns);
