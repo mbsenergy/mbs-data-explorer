@@ -89,7 +89,7 @@ export const ChartControls = ({
 
   return (
     <div className="space-y-6">
-      <Card className="p-6">
+      <Card className="p-6 metallic-card">
         <Tabs defaultValue="type" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="type">Chart Type</TabsTrigger>
