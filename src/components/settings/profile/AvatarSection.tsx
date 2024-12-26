@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
+import { QueryObserverResult, RefetchOptions, useQueryClient } from "@tanstack/react-query";
 
 interface AvatarSectionProps {
   avatarUrl: string | null;
@@ -21,6 +21,7 @@ export const AvatarSection = ({
 }: AvatarSectionProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const getInitials = (firstName: string | null, lastName: string | null) => {
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}` || "U";
@@ -73,6 +74,9 @@ export const AvatarSection = ({
       }
 
       await onAvatarUpdate();
+      // Invalidate the profile query to refresh the navbar avatar
+      await queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
+      
       toast({
         title: "Avatar updated successfully",
         description: "Your profile picture has been updated.",
