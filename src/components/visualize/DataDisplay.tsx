@@ -32,7 +32,6 @@ export const DataDisplay = ({
   onExport
 }: DataDisplayProps) => {
   const [showExportDialog, setShowExportDialog] = useState(false);
-  const [chartOptions, setChartOptions] = useState<Options>(plotData);
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const { toast } = useToast();
 
@@ -46,10 +45,19 @@ export const DataDisplay = ({
   };
 
   const exportChartAsHTML = () => {
-    if (!chartRef.current?.chart) return;
+    if (!chartRef.current?.chart) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Chart is not ready for export",
+      });
+      return;
+    }
 
-    const svg = chartRef.current.chart.container.innerHTML;
-    const chartCode = `
+    // Wait for the next frame to ensure chart is rendered
+    requestAnimationFrame(() => {
+      const svg = chartRef.current?.chart.container.innerHTML;
+      const chartCode = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -68,30 +76,31 @@ export const DataDisplay = ({
     Highcharts.setOptions(theme);
     
     // Create the chart
-    const options = ${JSON.stringify(chartOptions, null, 2)};
+    const options = ${JSON.stringify(plotData, null, 2)};
     Highcharts.chart('container', options);
   </script>
 </body>
 </html>`;
 
-    const blob = new Blob([chartCode], { type: 'text/html' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'chart_export.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+      const blob = new Blob([chartCode], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chart_export.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
 
-    toast({
-      title: "Success",
-      description: "Chart exported as HTML successfully",
+      toast({
+        title: "Success",
+        description: "Chart exported as HTML successfully",
+      });
     });
   };
 
   const copyChartCode = () => {
-    const chartCode = JSON.stringify(chartOptions, null, 2);
+    const chartCode = JSON.stringify(plotData, null, 2);
     navigator.clipboard.writeText(chartCode).then(() => {
       toast({
         title: "Success",
