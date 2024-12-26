@@ -1,5 +1,6 @@
 import { DataPoint, PlotConfig } from "@/types/visualize";
-import { Options } from "highcharts";
+import type { Options, SeriesOptionsType } from "highcharts";
+import type { ChartSeriesData } from "@/types/dataset";
 
 export const aggregateValues = (values: number[], aggregation: string): number[] => {
   switch (aggregation) {
@@ -16,7 +17,7 @@ export const aggregateValues = (values: number[], aggregation: string): number[]
   }
 };
 
-export const getSeriesType = (chartType: string): string => {
+export const getSeriesType = (chartType: string): "scatter" | "column" | "line" | "boxplot" => {
   switch (chartType) {
     case 'bar':
       return 'column';
@@ -33,7 +34,7 @@ export const generateChartOptions = (
   filteredData: DataPoint[],
   plotConfig: PlotConfig
 ): Options => {
-  const getSeriesData = () => {
+  const getSeriesData = (): SeriesOptionsType[] => {
     if (plotConfig.groupBy) {
       const groups = filteredData.reduce((acc, item) => {
         const group = item[plotConfig.groupBy];
@@ -42,22 +43,23 @@ export const generateChartOptions = (
         return acc;
       }, {} as Record<string, DataPoint[]>);
 
-      return Object.entries(groups).map(([group, items]) => {
+      return Object.entries(groups).map(([group, items]): SeriesOptionsType => {
         const xValues = items.map(item => item[plotConfig.xAxis]);
         const yValues = items.map(item => Number(item[plotConfig.yAxis]));
+        const type = getSeriesType(plotConfig.chartType);
 
         if (plotConfig.aggregation !== 'none') {
           const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
           return {
             name: group,
-            type: getSeriesType(plotConfig.chartType),
+            type,
             data: [[xValues[0], aggregatedValue]]
           };
         }
 
         return {
           name: group,
-          type: getSeriesType(plotConfig.chartType),
+          type,
           data: xValues.map((x, i) => [x, yValues[i]])
         };
       });
@@ -65,17 +67,18 @@ export const generateChartOptions = (
 
     const xValues = filteredData.map(item => item[plotConfig.xAxis]);
     const yValues = filteredData.map(item => Number(item[plotConfig.yAxis]));
+    const type = getSeriesType(plotConfig.chartType);
 
     if (plotConfig.aggregation !== 'none') {
       const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
       return [{
-        type: getSeriesType(plotConfig.chartType),
+        type,
         data: [[xValues[0], aggregatedValue]]
       }];
     }
 
     return [{
-      type: getSeriesType(plotConfig.chartType),
+      type,
       data: xValues.map((x, i) => [x, yValues[i]])
     }];
   };
