@@ -2,7 +2,7 @@ import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2 } from "lucide-react";
+import { Loader2, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
@@ -33,10 +33,10 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
       if (error) throw error;
 
-      setMessages([...messages, { role: 'assistant', content: data.response }]);
+      setMessages([...messages, { role: 'user', content: userMessage }, { role: 'assistant', content: data.response }]);
     } catch (error) {
       console.error('Error calling Mistral AI:', error);
-      setMessages([...messages, { 
+      setMessages([...messages, { role: 'user', content: userMessage }, { 
         role: 'assistant', 
         content: 'Sorry, I encountered an error. Please try again.' 
       }]);
@@ -50,6 +50,10 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       e.preventDefault();
       handleSubmit(e);
     }
+  };
+
+  const handleClearChat = () => {
+    setMessages([]);
   };
 
   const components: Components = {
@@ -81,10 +85,10 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               }`}
             >
               <div
-                className={`rounded-xl px-4 py-2 max-w-[70%] text-sm shadow-lg backdrop-blur-sm ${
+                className={`rounded-xl px-3 py-2 max-w-[70%] text-xs shadow-lg backdrop-blur-sm ${
                   message.role === 'user'
-                    ? 'metallic-card text-primary-foreground ml-8'
-                    : 'glass-panel mr-8 border-l-2 border-l-primary'
+                    ? 'metallic-card text-primary-foreground ml-6'
+                    : 'glass-panel mr-6 border-l-2 border-l-primary'
                 }`}
               >
                 <ReactMarkdown 
@@ -99,7 +103,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t border-border/40">
+      <div className="p-3 border-t border-border/40">
         <form onSubmit={handleSubmit} className="space-y-2">
           <div className="flex gap-2">
             <Textarea
@@ -107,21 +111,33 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="How can I help?"
-              className="min-h-[60px] text-sm metallic-card resize-none"
+              className="min-h-[45px] text-xs metallic-card resize-none"
             />
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 rounded-full px-4"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                'Send'
-              )}
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="bg-primary hover:bg-primary/90 h-[45px] px-3"
+                size="icon"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                type="button"
+                onClick={handleClearChat}
+                variant="outline"
+                className="h-[45px] px-3"
+                size="icon"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground text-center">AI Powered by MBS-Energy</p>
+          <p className="text-[10px] text-muted-foreground text-center">AI Powered by MBS-Energy</p>
         </form>
       </div>
     </div>
