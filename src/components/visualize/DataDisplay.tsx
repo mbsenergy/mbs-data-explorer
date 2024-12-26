@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { DatasetActionDialog } from "@/components/datasets/explore/DatasetActionDialog";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Options } from "highcharts";
 import { Card } from "@/components/ui/card";
@@ -29,12 +29,8 @@ export const DataDisplay = ({
 }: DataDisplayProps) => {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [chartOptions, setChartOptions] = useState<Options>(plotData);
-  const chartRef = useRef<{ chart: Highcharts.Chart } | null>(null);
+  const chartRef = useRef<HighchartsReact.RefObject>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    setChartOptions(plotData);
-  }, [plotData, filteredData]);
 
   const handleExport = () => {
     setShowExportDialog(true);
@@ -48,16 +44,20 @@ export const DataDisplay = ({
   const exportChartAsHTML = () => {
     if (!chartRef.current?.chart) return;
 
-    const chartSVG = chartRef.current.chart.getSVG();
+    const svg = chartRef.current.chart.container.innerHTML;
     const chartCode = `
 <!DOCTYPE html>
 <html>
 <head>
   <title>Chart Export</title>
   <script src="https://code.highcharts.com/highcharts.js"></script>
+  <style>
+    body { margin: 0; padding: 20px; background: #1a1a1a; color: white; }
+    #container { width: 100%; height: 600px; }
+  </style>
 </head>
 <body>
-  <div id="container"></div>
+  <div id="container">${svg}</div>
   <script>
     const options = ${JSON.stringify(chartOptions, null, 2)};
     Highcharts.chart('container', options);
