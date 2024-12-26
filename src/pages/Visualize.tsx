@@ -83,7 +83,13 @@ const Visualize = () => {
   };
 
   const handleGenerateChart = () => {
-    setState(prev => ({ ...prev, showChart: true }));
+    // First reset the chart state
+    setState(prev => ({ ...prev, showChart: false }));
+    
+    // Then trigger a new chart generation in the next render cycle
+    setTimeout(() => {
+      setState(prev => ({ ...prev, showChart: true }));
+    }, 0);
   };
 
   return (
