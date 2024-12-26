@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Database } from "lucide-react";
+import { Database, Eye, Tag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 
 interface SavedQuery {
   id: string;
   name: string;
   query_text: string;
   created_at: string;
+  tags: string[];
 }
 
 interface SavedQueriesProps {
@@ -20,6 +25,8 @@ interface SavedQueriesProps {
 
 export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
   const [queries, setQueries] = useState<SavedQuery[]>([]);
+  const [selectedQuery, setSelectedQuery] = useState<SavedQuery | null>(null);
+  const [newTag, setNewTag] = useState("");
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -74,16 +81,95 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
     }
   };
 
+  const handleAddTag = async (queryId: string) => {
+    if (!newTag.trim()) return;
+
+    try {
+      const query = queries.find(q => q.id === queryId);
+      if (!query) return;
+
+      const updatedTags = [...(query.tags || []), newTag.trim()];
+      
+      const { error } = await supabase
+        .from("saved_queries")
+        .update({ tags: updatedTags })
+        .eq("id", queryId);
+
+      if (error) throw error;
+
+      setNewTag("");
+      await loadSavedQueries();
+      
+      toast({
+        title: "Success",
+        description: "Tag added successfully",
+      });
+    } catch (error: any) {
+      console.error("Error adding tag:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add tag",
+      });
+    }
+  };
+
+  const handleRemoveTag = async (queryId: string, tagToRemove: string) => {
+    try {
+      const query = queries.find(q => q.id === queryId);
+      if (!query) return;
+
+      const updatedTags = query.tags.filter(tag => tag !== tagToRemove);
+      
+      const { error } = await supabase
+        .from("saved_queries")
+        .update({ tags: updatedTags })
+        .eq("id", queryId);
+
+      if (error) throw error;
+
+      await loadSavedQueries();
+      
+      toast({
+        title: "Success",
+        description: "Tag removed successfully",
+      });
+    } catch (error: any) {
+      console.error("Error removing tag:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to remove tag",
+      });
+    }
+  };
+
+  const handleCopyQuery = async (query: string) => {
+    try {
+      await navigator.clipboard.writeText(query);
+      toast({
+        title: "Success",
+        description: "Query copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to copy query",
+      });
+    }
+  };
+
   if (!queries.length) {
     return null;
   }
 
   return (
-    <Card className="p-6 metallic-card">
-      <div className="flex items-center gap-2 mb-4">
-        <Database className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">Saved Queries</h2>
-      </div>
+    <CollapsibleCard
+      title="Saved Queries"
+      icon={<Database className="h-5 w-5" />}
+      defaultOpen={true}
+    >
       <ScrollArea className="h-[300px] pr-4">
         <div className="space-y-4">
           {queries.map((query) => (
@@ -94,10 +180,11 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onSelectQuery(query.query_text)}
-                    className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+                    onClick={() => setSelectedQuery(query)}
+                    className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
                   >
-                    Load
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview
                   </Button>
                   <Button
                     variant="outline"
@@ -109,9 +196,45 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
                   </Button>
                 </div>
               </div>
-              <pre className="text-sm bg-gray-900 p-2 rounded-md overflow-x-auto">
-                {query.query_text}
-              </pre>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {query.tags?.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    <Tag className="h-3 w-3" />
+                    {tag}
+                    <button
+                      onClick={() => handleRemoveTag(query.id, tag)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add tag..."
+                    className="h-7 w-24"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddTag(query.id);
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddTag(query.id)}
+                    className="h-7"
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Saved on {new Date(query.created_at).toLocaleDateString()}
               </p>
@@ -119,6 +242,32 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
           ))}
         </div>
       </ScrollArea>
-    </Card>
+
+      <Dialog open={!!selectedQuery} onOpenChange={() => setSelectedQuery(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{selectedQuery?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <p className="font-semibold">SQL Query:</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectedQuery && handleCopyQuery(selectedQuery.query_text)}
+                  className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+                >
+                  Copy Query
+                </Button>
+              </div>
+              <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
+                {selectedQuery?.query_text}
+              </pre>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </CollapsibleCard>
   );
 };

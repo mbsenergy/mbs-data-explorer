@@ -1782,6 +1782,7 @@ export type Database = {
           id: string
           name: string
           query_text: string
+          tags: string[] | null
           updated_at: string
           user_id: string
         }
@@ -1790,6 +1791,7 @@ export type Database = {
           id?: string
           name: string
           query_text: string
+          tags?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -1798,6 +1800,7 @@ export type Database = {
           id?: string
           name?: string
           query_text?: string
+          tags?: string[] | null
           updated_at?: string
           user_id?: string
         }
