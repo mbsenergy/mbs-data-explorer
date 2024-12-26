@@ -16,31 +16,19 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
   const [headerRow, setHeaderRow] = useState<string>('1');
   const [availableSheets, setAvailableSheets] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setSelectedFile(file);
-
-    if (fileType === 'excel') {
-      try {
-        const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: 'array' });
-        const sheets = workbook.SheetNames;
-        setAvailableSheets(sheets);
-        setSelectedSheet(sheets[0]);
-      } catch (error) {
-        console.error('Error reading Excel file:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to read Excel file",
-        });
-      }
-    }
+    // Reset sheet-related state when a new file is selected
+    setWorkbook(null);
+    setAvailableSheets([]);
+    setSelectedSheet('');
   };
 
-  const handleUpload = async () => {
+  const handleUploadFile = async () => {
     if (!selectedFile) {
       toast({
         variant: "destructive",
@@ -50,11 +38,53 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
       return;
     }
 
+    if (fileType === 'excel') {
+      try {
+        const buffer = await selectedFile.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: 'array' });
+        const sheets = wb.SheetNames;
+        setWorkbook(wb);
+        setAvailableSheets(sheets);
+        setSelectedSheet(sheets[0]);
+        toast({
+          title: "Success",
+          description: "File uploaded successfully. Please select a sheet to continue.",
+        });
+      } catch (error) {
+        console.error('Error reading Excel file:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to read Excel file",
+        });
+      }
+    } else {
+      // Process CSV file directly
+      handleProcessData();
+    }
+  };
+
+  const handleLoadSheetData = () => {
+    if (!workbook || !selectedSheet) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a sheet first",
+      });
+      return;
+    }
+
+    handleProcessData();
+  };
+
+  const handleProcessData = async () => {
+    if (!selectedFile) return;
+
     try {
       let data: any[] = [];
       
       if (fileType === 'excel') {
-        if (!selectedSheet) {
+        if (!workbook || !selectedSheet) {
           toast({
             variant: "destructive",
             title: "Error",
@@ -63,8 +93,6 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
           return;
         }
 
-        const buffer = await selectedFile.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: 'array' });
         const worksheet = workbook.Sheets[selectedSheet];
         const headerRowNum = parseInt(headerRow) - 1;
         
@@ -120,7 +148,7 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Upload className="h-4 w-4" />
-            <h2 className="text-lg font-semibold">Upload File</h2>
+            <h2 className="text-lg font-semibold">Upload Local File</h2>
           </div>
           <div className="flex items-center gap-2 bg-secondary/20 rounded-lg p-1">
             <Toggle
@@ -140,56 +168,73 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
           </div>
         </div>
 
-        {fileType === 'excel' && (
-          <div className="space-y-3 mb-4">
-            {availableSheets.length > 0 && (
-              <Select value={selectedSheet} onValueChange={setSelectedSheet}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue placeholder="Select a sheet" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSheets.map((sheet) => (
-                    <SelectItem key={sheet} value={sheet} className="text-sm">
-                      {sheet}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            
-            <Select value={headerRow} onValueChange={setHeaderRow}>
-              <SelectTrigger className="text-sm">
-                <SelectValue placeholder="Select header row" />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <SelectItem key={num} value={num.toString()} className="text-sm">
-                    Row {num}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
         <div className="space-y-4">
-          <Input
-            type="file"
-            accept={fileType === 'excel' ? '.xlsx,.xls' : '.csv'}
-            onChange={handleFileSelect}
-            disabled={isLoading}
-            className="text-sm cursor-pointer"
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Choose File</label>
+            <Input
+              type="file"
+              accept={fileType === 'excel' ? '.xlsx,.xls' : '.csv'}
+              onChange={handleFileSelect}
+              disabled={isLoading}
+              className="text-sm cursor-pointer"
+            />
+          </div>
+
           <Button 
-            onClick={handleUpload}
-            disabled={isLoading || (fileType === 'excel' && !selectedSheet) || !selectedFile}
+            onClick={handleUploadFile}
+            disabled={isLoading || !selectedFile}
             className="w-full bg-primary/20 hover:bg-primary/30"
           >
             <Upload className="h-4 w-4 mr-2" />
             Upload File
           </Button>
+
+          {fileType === 'excel' && availableSheets.length > 0 && (
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select Sheet</label>
+                <Select value={selectedSheet} onValueChange={setSelectedSheet}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Select a sheet" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSheets.map((sheet) => (
+                      <SelectItem key={sheet} value={sheet} className="text-sm">
+                        {sheet}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Header Row</label>
+                <Select value={headerRow} onValueChange={setHeaderRow}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Select header row" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <SelectItem key={num} value={num.toString()} className="text-sm">
+                        Row {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button 
+                onClick={handleLoadSheetData}
+                disabled={isLoading || !selectedSheet}
+                className="w-full bg-primary/20 hover:bg-primary/30"
+              >
+                Load Sheet Data
+              </Button>
+            </div>
+          )}
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        
+        <p className="text-xs text-muted-foreground mt-4">
           {fileType === 'excel' 
             ? 'Accepts Excel files (.xlsx, .xls)' 
             : 'Accepts CSV files (.csv)'}
