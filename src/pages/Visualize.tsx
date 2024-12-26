@@ -16,7 +16,6 @@ import { DataDisplay } from "@/components/visualize/DataDisplay";
 import type { VisualizeState, PlotConfig, Filter, DataPoint } from "@/types/visualize";
 import type { TableInfo } from "@/components/datasets/types";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { TableNames } from "@/components/datasets/types";
 
 const Visualize = () => {
   const { toast } = useToast();
@@ -263,12 +262,23 @@ const Visualize = () => {
     setState(prev => ({ ...prev, plotData: chartOptions }));
   }, [state.showChart, plotConfig, state.filteredData]);
 
-  const handleDataReceived = (data: any[], cols: ColumnDef<any>[]) => {
+  const handleDataReceived = (data: DataPoint[], rawColumns: ColumnDef<any>[]) => {
+    // Transform the columns to ensure they match DataPoint type
+    const typedColumns: ColumnDef<DataPoint>[] = rawColumns.map(col => ({
+      id: String(col.id),
+      header: col.header,
+      accessorKey: String((col as any).accessorKey || col.id),
+      cell: (info: any) => {
+        const value = info.getValue();
+        return value === null ? 'NULL' : String(value);
+      }
+    }));
+
     setState(prev => ({
       ...prev,
       originalData: data,
       filteredData: data,
-      columns: cols,
+      columns: typedColumns,
     }));
   };
 
