@@ -8,7 +8,19 @@ export const useFeatureAccess = (featureName: string) => {
   const { data: isEnabled, isLoading } = useQuery({
     queryKey: ['feature-access', user?.id, featureName],
     queryFn: async () => {
-      if (!user?.id) return false;
+      if (!user?.id) {
+        console.log('No user ID found');
+        return false;
+      }
+
+      // Get user's profile to check level
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('level')
+        .eq('id', user.id)
+        .single();
+
+      console.log('User profile:', profile);
 
       const { data, error } = await supabase.rpc('check_feature_access', {
         feature_name: featureName,
@@ -20,6 +32,7 @@ export const useFeatureAccess = (featureName: string) => {
         return false;
       }
 
+      console.log(`Feature access check for ${featureName}:`, data);
       return data;
     },
     enabled: !!user?.id,

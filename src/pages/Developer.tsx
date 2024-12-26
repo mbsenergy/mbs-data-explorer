@@ -25,6 +25,12 @@ const Developer = () => {
   // Check if user has access to developer features
   const { isEnabled: hasDeveloperAccess, isLoading: isCheckingAccess } = useFeatureAccess('developer');
 
+  console.log('Developer access check:', {
+    hasDeveloperAccess,
+    isCheckingAccess,
+    userId: user?.id
+  });
+
   // If user doesn't have access, show a message
   if (!isCheckingAccess && !hasDeveloperAccess) {
     return (
