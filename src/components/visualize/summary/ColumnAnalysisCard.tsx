@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Table, RowModel, RowData, Column } from "@tanstack/react-table";
 import { ColumnDistributionChart } from "./ColumnDistributionChart";
 import { getCoreRowModel, createColumnHelper } from "@tanstack/react-table";
 
@@ -22,15 +22,47 @@ export const ColumnAnalysisCard = ({ column, data, summary }: ColumnAnalysisCard
 
   const getColumnHeader = () => {
     if (typeof column.header === 'function') {
-      const mockColumn = columnHelper.accessor(String(column.id), {
+      const mockColumn = {
         id: String(column.id),
-        header: column.header,
-      });
+        columnDef: column,
+        columns: [],
+        depth: 0,
+        getFlatColumns: () => [],
+        getIsGrouped: () => false,
+        getIsPinned: () => null,
+        getIsResizing: () => false,
+        getIsSorted: () => false,
+        getIsVisible: () => true,
+        getLeafColumns: () => [],
+        getParentColumns: () => [],
+        getPin: () => null,
+        getPinnedIndex: () => 0,
+        getSortIndex: () => 0,
+        getStart: () => 0,
+        getSize: () => 0,
+        getTotalSize: () => 0,
+        getToggleSortingHandler: () => null,
+        getCanSort: () => false,
+        getCanPin: () => false,
+        getCanResize: () => false,
+        getCanFilter: () => false,
+        getCanGlobalFilter: () => false,
+        getIsFiltered: () => false,
+        getFilterValue: () => undefined,
+        getAutoFilterFn: () => undefined,
+        setFilterValue: () => {},
+        getFilterIndex: () => 0,
+        resetFilter: () => {},
+        resetSorting: () => {},
+        getFirstColumn: () => null,
+        getLastColumn: () => null,
+        header: String(column.id),
+      } as unknown as Column<any>;
 
       const mockTable = {
         options: {
           data,
-          columns: [mockColumn],
+          columns: [column],
           getCoreRowModel,
           state: {},
           onStateChange: () => {},
@@ -41,7 +73,7 @@ export const ColumnAnalysisCard = ({ column, data, summary }: ColumnAnalysisCard
         setOptions: () => {},
         reset: () => {},
         getColumn: () => null,
-      };
+      } as unknown as Table<any>;
 
       const headerContext = {
         column: mockColumn,
