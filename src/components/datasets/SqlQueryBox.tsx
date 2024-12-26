@@ -13,7 +13,7 @@ interface SqlQueryBoxProps {
   isLoading?: boolean;
 }
 
-const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }: SqlQueryBoxProps) => {
+export const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }: SqlQueryBoxProps) => {
   const [query, setQuery] = useState(defaultValue);
   const [queryName, setQueryName] = useState("");
   const { toast } = useToast();
@@ -92,6 +92,7 @@ const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }: SqlQue
             value={queryName}
             onChange={(e) => setQueryName(e.target.value)}
             className="w-[200px]"
+            disabled={isLoading}
           />
           <Button
             size="sm"
@@ -133,4 +134,5 @@ const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }: SqlQue
   );
 };
 
+// Also add a default export
 export default SqlQueryBox;
