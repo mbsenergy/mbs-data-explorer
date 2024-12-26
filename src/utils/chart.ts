@@ -47,7 +47,6 @@ const getAxisType = (dataType: string): AxisTypeValue => {
 
 const formatValue = (value: any, type: string): any => {
   if (type === 'datetime') {
-    // Ensure proper date parsing and conversion to timestamp
     const date = new Date(value);
     return date.getTime();
   }
@@ -65,7 +64,7 @@ export const generateChartOptions = (
   console.log("Plot config:", plotConfig);
 
   const getSeriesData = (): SeriesOptionsType[] => {
-    if (plotConfig.groupBy) {
+    if (plotConfig.groupBy && plotConfig.groupBy !== 'none') {
       // Group data by the groupBy field
       const groups = filteredData.reduce((acc, item) => {
         const group = item[plotConfig.groupBy];
@@ -75,14 +74,12 @@ export const generateChartOptions = (
       }, {} as Record<string, DataPoint[]>);
 
       return Object.entries(groups).map(([group, items]): SeriesOptionsType => {
-        // For each group, create a series
         const data = items.map(item => {
           const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
           const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
           return [xValue, yValue];
         });
 
-        // Sort data by x value
         data.sort((a, b) => (a[0] as number) - (b[0] as number));
 
         const type = getSeriesType(plotConfig.chartType);
@@ -112,11 +109,11 @@ export const generateChartOptions = (
       return [xValue, yValue];
     });
 
-    // Sort data by x value for proper line/area charts
     data.sort((a, b) => (a[0] as number) - (b[0] as number));
 
     const type = getSeriesType(plotConfig.chartType);
 
+    // Only apply aggregation if explicitly requested
     if (plotConfig.aggregation !== 'none') {
       const yValues = filteredData.map(item => Number(item[plotConfig.yAxis]));
       const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
@@ -126,6 +123,7 @@ export const generateChartOptions = (
       }];
     }
 
+    // Return all data points when no aggregation is requested
     return [{
       type,
       data
