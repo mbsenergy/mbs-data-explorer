@@ -27,7 +27,8 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
         toast({
           title: "Warning",
           description: "Large queries may take longer to execute. Consider adding a LIMIT clause.",
-          variant: "warning"
+          variant: "default",
+          className: "bg-yellow-500"
         });
       }
 
