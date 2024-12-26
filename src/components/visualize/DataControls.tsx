@@ -11,7 +11,11 @@ import { ExcelSheetSelector } from "./file-upload/ExcelSheetSelector";
 import { FileUploadButton } from "./file-upload/FileUploadButton";
 import type { DataControlsProps } from "@/types/visualize";
 
-export const DataControls = ({ onUpload, isLoading: parentIsLoading, selectedTable }: DataControlsProps) => {
+export const DataControls = ({ 
+  onUpload, 
+  isLoading: parentIsLoading, 
+  selectedTable 
+}: DataControlsProps) => {
   const { toast } = useToast();
   const [fileType, setFileType] = useState<'excel' | 'csv'>('excel');
   const [selectedSheet, setSelectedSheet] = useState<string>('');
@@ -121,6 +125,11 @@ export const DataControls = ({ onUpload, isLoading: parentIsLoading, selectedTab
         result = await processCsvFile(selectedFile);
       }
 
+      if (!result.data || !result.columns || result.data.length === 0) {
+        throw new Error('No data found in the file');
+      }
+
+      // Create a synthetic event with the processed data
       const syntheticEvent = {
         target: {
           files: [new File([JSON.stringify(result.data)], selectedFile.name, { type: selectedFile.type })],
@@ -128,7 +137,8 @@ export const DataControls = ({ onUpload, isLoading: parentIsLoading, selectedTab
         }
       } as unknown as React.ChangeEvent<HTMLInputElement>;
 
-      onUpload(syntheticEvent);
+      // Call the parent's onUpload with the processed data
+      await onUpload(syntheticEvent);
 
       toast({
         title: "Success",

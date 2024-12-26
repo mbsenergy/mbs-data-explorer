@@ -9,6 +9,10 @@ export const processExcelFile = async (file: File, selectedSheet: string, header
   const workbook = XLSX.read(buffer, { type: 'array' });
   const worksheet = workbook.Sheets[selectedSheet];
   
+  if (!worksheet) {
+    throw new Error('Selected sheet not found');
+  }
+
   // Convert header row number to 0-based index
   const headerRowIndex = parseInt(headerRow) - 1;
   
@@ -20,7 +24,7 @@ export const processExcelFile = async (file: File, selectedSheet: string, header
     blankrows: false
   });
 
-  if (jsonData.length === 0) {
+  if (!Array.isArray(jsonData) || jsonData.length === 0) {
     throw new Error('No data found in the selected sheet');
   }
 
@@ -34,5 +38,19 @@ export const processExcelFile = async (file: File, selectedSheet: string, header
     header: header,
   }));
 
-  return { data: jsonData, columns };
+  // Filter out empty rows and ensure all rows have the same structure
+  const cleanData = jsonData.filter(row => {
+    const hasValues = Object.values(row).some(value => value !== '');
+    const hasAllColumns = headers.every(header => header in row);
+    return hasValues && hasAllColumns;
+  });
+
+  if (cleanData.length === 0) {
+    throw new Error('No valid data rows found after processing');
+  }
+
+  return { 
+    data: cleanData, 
+    columns 
+  };
 };
