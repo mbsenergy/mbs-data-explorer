@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -61,9 +62,23 @@ export const ChatInterface = () => {
                     : 'bg-muted'
                 }`}
               >
-                <pre className="whitespace-pre-wrap font-sans">
+                <ReactMarkdown 
+                  className="prose prose-invert max-w-none"
+                  components={{
+                    code: ({node, inline, className, children, ...props}) => {
+                      if (inline) {
+                        return <code className="bg-muted-foreground/20 rounded px-1" {...props}>{children}</code>
+                      }
+                      return (
+                        <pre className="bg-muted-foreground/20 p-2 rounded-lg overflow-x-auto">
+                          <code {...props}>{children}</code>
+                        </pre>
+                      )
+                    }
+                  }}
+                >
                   {message.content}
-                </pre>
+                </ReactMarkdown>
               </div>
             </div>
           ))}
@@ -75,7 +90,7 @@ export const ChatInterface = () => {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me about PostgreSQL queries..."
+            placeholder="How can I help?"
             className="min-h-[80px]"
           />
           <Button type="submit" disabled={isLoading}>
