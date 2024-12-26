@@ -15,13 +15,19 @@ const SqlEditor = ({ onExecute, defaultValue = "" }: SqlEditorProps) => {
     setQuery(defaultValue);
   }, [defaultValue]);
 
+  const handleExecute = () => {
+    if (query.trim()) {
+      onExecute(query);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">SQL Query</h3>
         <Button
           size="sm"
-          onClick={() => onExecute(query)}
+          onClick={handleExecute}
           disabled={!query.trim()}
         >
           <Play className="w-4 h-4 mr-2" />

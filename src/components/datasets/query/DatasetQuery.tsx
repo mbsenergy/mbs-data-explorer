@@ -41,7 +41,6 @@ export const DatasetQuery = ({
     },
   });
 
-  // Filter tables based on search criteria
   const filteredTables = tables?.filter(table => {
     const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
@@ -49,10 +48,6 @@ export const DatasetQuery = ({
     const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
     return matchesSearch && matchesField && matchesType && matchesFavorite;
   });
-
-  // Extract unique fields and types from table names
-  const fields = Array.from(new Set(tables?.map(table => table.tablename.slice(0, 2)) || [])).sort();
-  const types = Array.from(new Set(tables?.map(table => table.tablename.slice(2, 4)) || [])).sort();
 
   const handleSelect = (tableName: string) => {
     setSelectedDataset(tableName as TableNames);
@@ -81,7 +76,7 @@ export const DatasetQuery = ({
         throw new Error(pgError ? pgError[1] : error.message);
       }
 
-      const results = data as any[];
+      const results = Array.isArray(data) ? data : [];
       setQueryResults(results);
       
       if (results.length > 0) {
@@ -170,8 +165,8 @@ export const DatasetQuery = ({
             onFieldChange={setSelectedField}
             onTypeChange={setSelectedType}
             onFavoriteChange={setShowOnlyFavorites}
-            availableFields={fields}
-            availableTypes={types}
+            availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
+            availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
             selectedDataset={selectedDataset as string || ""}
           />
         )}
