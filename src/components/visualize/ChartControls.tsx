@@ -5,6 +5,7 @@ import { ChartOptionsSelector } from "./chart-controls/ChartOptionsSelector";
 import { AxisSelector } from "./chart-controls/AxisSelector";
 import { useState } from "react";
 import type { ChartControlsProps, LegendPosition } from "@/types/visualize";
+import type { Options } from "highcharts";
 
 interface ChartOptions {
   showLegend: boolean;
@@ -47,29 +48,31 @@ export const ChartControls = ({
     const verticalAlign = value === 'bottom' ? 'bottom' : 'top';
     const layout = value === 'right' ? 'vertical' : 'horizontal';
 
-    onConfigChange({
-      ...plotConfig,
-      chartOptions: {
-        ...plotConfig.chartOptions,
-        [key]: value,
-        plotOptions: {
-          series: {
-            animation: chartOptions.enableAnimation,
-            marker: {
-              radius: chartOptions.markerSize
-            }
+    const chartConfig: Partial<Options> = {
+      plotOptions: {
+        series: {
+          animation: chartOptions.enableAnimation,
+          marker: {
+            radius: chartOptions.markerSize
           }
-        },
-        legend: {
-          enabled: chartOptions.showLegend,
-          align: legendAlign,
-          verticalAlign: verticalAlign,
-          layout: layout
-        },
-        chart: {
-          zoomType: chartOptions.enableZoom ? 'xy' : undefined
+        }
+      },
+      legend: {
+        enabled: chartOptions.showLegend,
+        align: legendAlign,
+        verticalAlign: verticalAlign,
+        layout: layout
+      },
+      chart: {
+        zooming: {
+          type: chartOptions.enableZoom ? 'xy' : 'none'
         }
       }
+    };
+
+    onConfigChange({
+      ...plotConfig,
+      chartOptions: chartConfig
     });
   };
 

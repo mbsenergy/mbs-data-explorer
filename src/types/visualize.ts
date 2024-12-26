@@ -1,5 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Options } from "highcharts";
+import type { ComparisonOperator, Filter } from "@/components/datasets/explore/types";
 
 export type DataPoint = Record<string, any>;
 
@@ -47,18 +48,10 @@ export interface DataControlsProps {
 export interface FilterControlsProps {
   columns: string[];
   filters: Filter[];
-  onFilterChange: (filterId: string, field: string, value: any) => void;
+  onFilterChange: (filterId: string, field: keyof Filter, value: string | ComparisonOperator) => void;
   onAddFilter: () => void;
   onRemoveFilter: (filterId: string) => void;
   onApplyFilters: () => void;
   originalCount: number;
   filteredCount: number;
-}
-
-export interface Filter {
-  id: string;
-  searchTerm: string;
-  selectedColumn: string;
-  operator: "AND" | "OR";
-  comparisonOperator: "=" | ">" | "<" | ">=" | "<=" | "!=" | "IN" | "NOT IN" | "LIKE";
 }
