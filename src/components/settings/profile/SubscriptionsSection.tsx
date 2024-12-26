@@ -44,19 +44,19 @@ export const SubscriptionsSection = ({
           {SUBSCRIPTION_OPTIONS.map((option) => (
             <div 
               key={option} 
-              className="flex items-center space-x-2"
-              onClick={() => isEditing && handleSubscriptionToggle(option)}
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => handleSubscriptionToggle(option)}
             >
               <Checkbox
                 id={option}
                 checked={subscriptions.includes(option)}
                 onCheckedChange={() => handleSubscriptionToggle(option)}
                 disabled={!isEditing}
-                className="cursor-pointer"
+                className={isEditing ? "cursor-pointer" : ""}
               />
               <Label
                 htmlFor={option}
-                className={`${!isEditing ? "text-muted-foreground" : "cursor-pointer"}`}
+                className={isEditing ? "cursor-pointer" : "text-muted-foreground"}
               >
                 {option}
               </Label>
