@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { ChatInterface } from "./ChatInterface";
 import { useState } from "react";
+import { Message } from "./types";
 
 export const ChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -30,7 +32,7 @@ export const ChatButton = () => {
               </span>
             </DialogTitle>
           </DialogHeader>
-          <ChatInterface />
+          <ChatInterface messages={messages} setMessages={setMessages} />
         </div>
       </DialogContent>
     </Dialog>

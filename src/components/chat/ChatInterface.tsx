@@ -6,14 +6,14 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
+import { Message } from "./types";
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+interface ChatInterfaceProps {
+  messages: Message[];
+  setMessages: (messages: Message[]) => void;
 }
 
-export const ChatInterface = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
