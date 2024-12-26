@@ -10,16 +10,15 @@ import { useQuery } from "@tanstack/react-query";
 import type { TableInfo, TableNames } from "../types";
 import { SqlQueryBox } from "../SqlQueryBox";
 import { SavedQueries } from "../SavedQueries";
-
-interface DatasetQueryProps {
-  selectedDataset: TableNames | null;
-  selectedColumns: string[];
-}
+import { PreviewDialog } from "@/components/developer/PreviewDialog";
 
 export const DatasetQuery = ({
   selectedDataset: initialSelectedDataset,
   selectedColumns: initialSelectedColumns,
-}: DatasetQueryProps) => {
+}: {
+  selectedDataset: TableNames | null;
+  selectedColumns: string[];
+}) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
@@ -32,6 +31,7 @@ export const DatasetQuery = ({
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
   const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(initialSelectedDataset as TableNames | null);
+  const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
 
   const { data: tables } = useQuery({
     queryKey: ["tables"],
@@ -58,6 +58,106 @@ export const DatasetQuery = ({
       description: `Query for ${tableName} has been generated.`,
       style: { backgroundColor: "#22c55e", color: "white" }
     });
+  };
+
+  const handlePreview = async (tableName: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .limit(10);
+
+      if (error) throw error;
+
+      if (data) {
+        setPreviewData({
+          tableName,
+          data: JSON.stringify(data, null, 2)
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to preview dataset"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDownload = async (tableName: string) => {
+    if (!user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to download datasets.",
+      });
+      return;
+    }
+
+    try {
+      const { error: analyticsError } = await supabase
+        .from("analytics")
+        .insert({
+          user_id: user.id,
+          dataset_name: tableName,
+          is_custom_query: false,
+        });
+
+      if (analyticsError) {
+        console.error("Error tracking download:", analyticsError);
+      }
+
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .limit(1000);
+
+      if (error) throw error;
+
+      if (!data || !data.length) {
+        throw new Error("No data available for download");
+      }
+
+      const headers = Object.keys(data[0]).filter(key => !key.startsWith('md_')).join(',');
+      const rows = data.map(row => {
+        return Object.entries(row)
+          .filter(([key]) => !key.startsWith('md_'))
+          .map(([_, value]) => {
+            if (value === null) return '';
+            if (typeof value === 'string' && value.includes(',')) {
+              return `"${value}"`;
+            }
+            return value;
+          })
+          .join(',');
+      });
+      const csv = [headers, ...rows].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${tableName}_sample.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Dataset sample downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to download dataset.",
+      });
+    }
   };
 
   const handleExecuteQuery = async (query: string) => {
@@ -165,8 +265,8 @@ export const DatasetQuery = ({
         filteredTables={filteredTables || []}
         favorites={favorites}
         selectedDataset={selectedDataset}
-        onPreview={() => {}}
-        onDownload={() => {}}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
         onSelect={handleTableSelect}
         onToggleFavorite={toggleFavorite}
         onSearchChange={setSearchTerm}
@@ -187,6 +287,17 @@ export const DatasetQuery = ({
         columns={columns}
         onDownload={() => {}}
       />
+
+      {previewData && (
+        <PreviewDialog
+          isOpen={!!previewData}
+          onClose={() => setPreviewData(null)}
+          filePath=""
+          fileName={previewData.tableName}
+          section="datasets"
+          directData={previewData.data}
+        />
+      )}
     </div>
   );
 };
