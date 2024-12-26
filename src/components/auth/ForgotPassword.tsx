@@ -21,10 +21,10 @@ export const ForgotPassword = ({ onBack }: { onBack: () => void }) => {
 
     try {
       // Get the current URL without any hash or query parameters
-      const baseUrl = window.location.origin + window.location.pathname;
+      const baseUrl = window.location.origin;
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${baseUrl}?reset=true`,
+        redirectTo: `${baseUrl}/login`,
       });
 
       if (error) throw error;
