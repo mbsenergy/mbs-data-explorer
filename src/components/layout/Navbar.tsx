@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
+import { ChatButton } from "@/components/chat/ChatButton";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -105,6 +106,8 @@ export const Navbar = () => {
         </Button>
 
         <NotificationBell />
+        
+        <ChatButton />
 
         {user ? (
           <DropdownMenu>
