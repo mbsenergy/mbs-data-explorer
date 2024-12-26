@@ -21,6 +21,9 @@ interface DataDisplayProps {
   onExport: () => void;
 }
 
+// Apply theme globally for all charts
+Highcharts.setOptions(theme);
+
 export const DataDisplay = ({
   plotData,
   filteredData,
@@ -159,7 +162,7 @@ export const DataDisplay = ({
             <div className="w-full h-[600px]">
               <HighchartsReact
                 highcharts={Highcharts}
-                options={chartOptions}
+                options={plotData}
                 ref={chartRef}
                 containerProps={{ style: { height: '100%' } }}
               />
