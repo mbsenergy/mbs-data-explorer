@@ -15,7 +15,7 @@ interface SqlEditorProps {
   isLoading?: boolean;
 }
 
-const SqlEditor = ({ onExecute, defaultValue = "", isLoading = false }: SqlEditorProps) => {
+const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }: SqlEditorProps) => {
   const [query, setQuery] = useState(defaultValue);
   const [queryName, setQueryName] = useState("");
   const [useBatchProcessing, setUseBatchProcessing] = useState(false);
@@ -136,4 +136,4 @@ const SqlEditor = ({ onExecute, defaultValue = "", isLoading = false }: SqlEdito
   );
 };
 
-export default SqlEditor;
+export default SqlQueryBox;

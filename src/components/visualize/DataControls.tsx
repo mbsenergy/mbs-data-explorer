@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Upload, Database } from "lucide-react";
 import { DataControlsProps } from "@/types/visualize";
-import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
+import SqlQueryBox from "@/components/datasets/SqlQueryBox";
 
 export const DataControls = ({ onUpload, onExecuteQuery, isLoading, selectedTable }: DataControlsProps) => {
   return (
