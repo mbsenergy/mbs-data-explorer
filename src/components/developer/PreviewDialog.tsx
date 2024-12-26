@@ -1,5 +1,7 @@
 import React from 'react';
 import { Copy } from "lucide-react";
+import hljs from 'highlight.js';
+import 'highlight.js/styles/night-owl.css';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { useToast } from "@/components/ui/use-toast";
 import { useFileContent } from "@/hooks/useFileContent";
-import { Highlight, themes } from "prism-react-renderer";
 
 interface PreviewDialogProps {
   isOpen: boolean;
@@ -71,11 +72,11 @@ export const PreviewDialog = ({
       case 'js':
         return 'javascript';
       case 'jsx':
-        return 'jsx';
+        return 'javascript';
       case 'ts':
         return 'typescript';
       case 'tsx':
-        return 'tsx';
+        return 'typescript';
       case 'py':
         return 'python';
       case 'json':
@@ -89,6 +90,27 @@ export const PreviewDialog = ({
       default:
         return 'typescript';
     }
+  };
+
+  const highlightCode = (code: string, language: string) => {
+    const highlighted = hljs.highlight(code, {
+      language: language,
+      ignoreIllegals: true
+    }).value;
+    
+    // Add line numbers
+    const lines = highlighted.split('\n');
+    return lines.map((line, i) => (
+      <div key={i} className="flex">
+        <span className="text-gray-500 mr-4 select-none w-[40px] text-right">
+          {(i + 1).toString().padStart(3, ' ')}
+        </span>
+        <span 
+          className="flex-1"
+          dangerouslySetInnerHTML={{ __html: line || '&nbsp;' }} 
+        />
+      </div>
+    ));
   };
 
   return (
@@ -142,34 +164,11 @@ export const PreviewDialog = ({
               </Table>
             ) : (
               <div className="rounded-md bg-gray-900 p-4">
-                <Highlight
-                  theme={themes.nightOwl}
-                  code={displayContent || ''}
-                  language={getLanguage(fileName)}
-                >
-                  {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                    <pre 
-                      className={`${className} font-jetbrains-mono`}
-                      style={{ 
-                        ...style,
-                        margin: 0,
-                        fontSize: '14px',
-                        lineHeight: '1.5'
-                      }}
-                    >
-                      {tokens.map((line, i) => (
-                        <div key={i} {...getLineProps({ line })}>
-                          <span className="text-gray-500 mr-4 select-none">
-                            {(i + 1).toString().padStart(3, ' ')}
-                          </span>
-                          {line.map((token, key) => (
-                            <span key={key} {...getTokenProps({ token })} />
-                          ))}
-                        </div>
-                      ))}
-                    </pre>
-                  )}
-                </Highlight>
+                <pre className="font-jetbrains-mono text-sm leading-6">
+                  {displayContent ? (
+                    highlightCode(displayContent, getLanguage(fileName))
+                  ) : ''}
+                </pre>
               </div>
             )}
           </div>
