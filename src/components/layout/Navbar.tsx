@@ -72,7 +72,7 @@ export const Navbar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate("/settings")}>
+              <DropdownMenuItem onClick={() => navigate("/user")}>
                 Profile Settings
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>

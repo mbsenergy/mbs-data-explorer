@@ -26,7 +26,7 @@ const navigationItems = [
 
 const profileItems = [
   { title: "Analytics", icon: BarChart3, url: "/analytics" },
-  { title: "User", icon: User, url: "/settings" },
+  { title: "User", icon: User, url: "/user" },
 ];
 
 const infoItems = [
