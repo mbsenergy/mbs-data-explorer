@@ -10,6 +10,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { DatasetTable } from "@/components/datasets/DatasetTable";
 import type { TableInfo } from "@/components/datasets/types";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DatamartSearchProps {
   tables: TableInfo[];
@@ -42,11 +44,36 @@ export const DatamartSearch = ({
   onTypeChange,
   onFavoriteChange,
 }: DatamartSearchProps) => {
-  const [isOpen, setIsOpen] = useState(false); // Default to closed
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
 
   // Fixed values for fields and types
   const fields = ["EC", "ME", "MS", "TS"];
   const types = ["01", "02", "03"];
+
+  const handlePreview = async (tableName: string) => {
+    try {
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
+        query_text: `SELECT * FROM "${tableName}" LIMIT 30`
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (queryResult && Array.isArray(queryResult)) {
+        const previewData = JSON.stringify(queryResult.slice(0, 30), null, 2);
+        onPreview(tableName);
+      }
+    } catch (error: any) {
+      console.error("Error previewing dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to preview dataset."
+      });
+    }
+  };
 
   return (
     <Card className="p-6 metallic-card">
@@ -106,7 +133,7 @@ export const DatamartSearch = ({
             </div>
             <DatasetTable
               tables={filteredTables}
-              onPreview={onPreview}
+              onPreview={handlePreview}
               onDownload={onDownload}
               onSelect={onSelect}
               onToggleFavorite={onToggleFavorite}
