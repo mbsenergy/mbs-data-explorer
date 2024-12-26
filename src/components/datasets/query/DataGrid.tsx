@@ -55,6 +55,14 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
           labelKey: 'columns',
           iconKey: 'columns',
           toolPanel: 'agColumnsToolPanel',
+          toolPanelParams: {
+            suppressRowGroups: false,
+            suppressValues: false,
+            suppressPivots: false,
+            suppressPivotMode: false,
+            suppressColumnFilter: false,
+            suppressColumnSelectAll: false,
+          },
           minWidth: 225,
           maxWidth: 225,
           width: 225,
@@ -73,6 +81,9 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
       position: 'right' as const,
       defaultToolPanel: 'columns',
     },
+    rowGroupPanelShow: 'always',
+    pivotPanelShow: 'always',
+    suppressColumnVirtualisation: true,
   };
 
   const onGridReady = (params: GridReadyEvent) => {
