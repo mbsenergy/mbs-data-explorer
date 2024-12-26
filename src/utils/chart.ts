@@ -47,10 +47,12 @@ const getAxisType = (dataType: string): AxisTypeValue => {
 
 const formatValue = (value: any, type: string): any => {
   if (type === 'datetime') {
-    return new Date(value).getTime();
+    // Ensure proper date parsing and conversion to timestamp
+    const date = new Date(value);
+    return date.getTime();
   }
   if (type === 'numeric' || type === 'logarithmic') {
-    return Number(value);
+    return Number(value) || 0;
   }
   return value;
 };
@@ -81,11 +83,7 @@ export const generateChartOptions = (
         });
 
         // Sort data by x value
-        data.sort((a, b) => {
-          const aValue = a[0];
-          const bValue = b[0];
-          return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-        });
+        data.sort((a, b) => (a[0] as number) - (b[0] as number));
 
         const type = getSeriesType(plotConfig.chartType);
 
@@ -114,12 +112,8 @@ export const generateChartOptions = (
       return [xValue, yValue];
     });
 
-    // Sort data by x value
-    data.sort((a, b) => {
-      const aValue = a[0];
-      const bValue = b[0];
-      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-    });
+    // Sort data by x value for proper line/area charts
+    data.sort((a, b) => (a[0] as number) - (b[0] as number));
 
     const type = getSeriesType(plotConfig.chartType);
 
@@ -142,6 +136,14 @@ export const generateChartOptions = (
     type: getAxisType(plotConfig.xAxisType),
     title: {
       text: plotConfig.xAxis
+    },
+    labels: {
+      formatter: function(this: any) {
+        if (plotConfig.xAxisType === 'datetime') {
+          return new Date(this.value).toLocaleDateString();
+        }
+        return this.value;
+      }
     }
   };
 
