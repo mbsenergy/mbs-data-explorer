@@ -1,14 +1,13 @@
-import type { Config } from "tailwindcss";
+import { type Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -18,8 +17,8 @@ export default {
       },
     },
     extend: {
-      fontSize: {
-        body: "0.80rem",
+      fontFamily: {
+        'jetbrains-mono': ['JetBrains Mono', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -28,12 +27,10 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         corporate: {
-          navy: "#002B4D",
-          teal: "#00A99D",
-          blue: "#4DC3D7",
-          green: "#9ED19D",
-          yellow: "#F2C94C",
-          orange: "#F2994A",
+          navy: "#020817",
+          blue: "#1E40AF",
+          teal: "#1EAEDB",
+          orange: "#F97316",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -78,26 +75,12 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
-        shimmer: {
-          "100%": { transform: "translateX(100%)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.5s ease-out",
-        float: "float 6s ease-in-out infinite",
-        shimmer: "shimmer 2s infinite",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;

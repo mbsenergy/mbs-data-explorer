@@ -149,22 +149,22 @@ export const PreviewDialog = ({
                 >
                   {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <pre 
-                      className={`${className} font-mono`}
                       style={{ 
-                        ...style, 
+                        ...style,
                         margin: 0,
-                        fontFamily: "'JetBrains Mono', monospace !important",
+                        fontFamily: "'JetBrains Mono', monospace",
                         fontSize: '14px',
                         lineHeight: '1.5'
                       }}
+                      className="font-jetbrains-mono"
                     >
                       {tokens.map((line, i) => (
-                        <div key={i} {...getLineProps({ line })}>
-                          <span className="text-gray-500 mr-4 select-none">
+                        <div key={i} {...getLineProps({ line })} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                          <span className="text-gray-500 mr-4 select-none" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                             {(i + 1).toString().padStart(3, ' ')}
                           </span>
                           {line.map((token, key) => (
-                            <span key={key} {...getTokenProps({ token })} />
+                            <span key={key} {...getTokenProps({ token })} style={{ fontFamily: "'JetBrains Mono', monospace" }} />
                           ))}
                         </div>
                       ))}
