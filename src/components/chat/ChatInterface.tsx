@@ -56,13 +56,13 @@ export const ChatInterface = () => {
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return match ? (
-        <pre className="bg-muted/20 p-2 rounded-lg overflow-x-auto">
+        <pre className="bg-card p-3 rounded-lg overflow-x-auto border border-border/40 font-jetbrains-mono">
           <code className={className} {...props}>
             {children}
           </code>
         </pre>
       ) : (
-        <code className="bg-muted/20 rounded px-1" {...props}>
+        <code className="bg-card px-1.5 py-0.5 rounded font-jetbrains-mono text-primary" {...props}>
           {children}
         </code>
       );
@@ -81,14 +81,14 @@ export const ChatInterface = () => {
               }`}
             >
               <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] text-sm ${
+                className={`rounded-lg px-4 py-2 max-w-[85%] text-sm ${
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted/50 backdrop-blur-sm'
+                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    : 'metallic-card shadow-lg'
                 }`}
               >
                 <ReactMarkdown 
-                  className="prose prose-invert prose-sm max-w-none"
+                  className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-1"
                   components={components}
                 >
                   {message.content}
@@ -106,9 +106,13 @@ export const ChatInterface = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="How can I help?"
-            className="min-h-[80px] text-sm"
+            className="min-h-[80px] text-sm metallic-card"
           />
-          <Button type="submit" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="bg-primary hover:bg-primary/90"
+          >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (

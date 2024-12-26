@@ -20,11 +20,13 @@ export const ChatButton = () => {
           <Bot className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[400px] sm:w-[600px] metallic-card border-l border-border/40">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5" />
-            FluxerBuddy
+          <SheetTitle className="flex items-center gap-2 text-lg">
+            <Bot className="h-6 w-6 text-primary" />
+            <span className="bg-gradient-to-r from-primary to-primary/50 text-transparent bg-clip-text">
+              FluxerBuddy
+            </span>
           </SheetTitle>
         </SheetHeader>
         <ChatInterface />
