@@ -47,14 +47,15 @@ export const ProfileSection = () => {
         .single();
 
       if (error) throw error;
+      
+      // Update the profile state when data is fetched
+      if (data) {
+        setProfile(data);
+      }
+      
       return data as Profile;
     },
     enabled: !!user?.id,
-    meta: {
-      onSuccess: (data: Profile) => {
-        setProfile(data);
-      },
-    },
   });
 
   const handleProfileChange = (field: string, value: string | null) => {
