@@ -7,6 +7,7 @@ import type { Database } from "@/integrations/supabase/types";
 type TableNames = keyof Database['public']['Tables'];
 
 const BATCH_THRESHOLD = 250000;
+const INITIAL_SAMPLE_SIZE = 1000;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [data, setData] = useState<any[]>([]);
@@ -31,7 +32,20 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     return [];
   };
 
-  const loadData = async (tableName: TableNames, selectedColumns: string[] = []) => {
+  // Function to load initial sample data
+  const loadSampleData = async (tableName: TableNames, columnsToUse: string[]) => {
+    const columnList = columnsToUse.map(col => `"${col}"`).join(',');
+    const query = `SELECT ${columnList} FROM "${tableName}" LIMIT ${INITIAL_SAMPLE_SIZE}`;
+
+    const { data: sampleData, error } = await supabase.rpc('execute_query', {
+      query_text: query
+    });
+
+    if (error) throw error;
+    return sampleData;
+  };
+
+  const loadData = async (tableName: TableNames, selectedColumns: string[] = [], useBatchProcessing: boolean = false) => {
     setIsLoading(true);
     setLoadingProgress(0);
     
@@ -50,14 +64,14 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       setColumns(columnsToUse);
 
-      // Use batch processing for large datasets
-      if (totalRows > BATCH_THRESHOLD) {
+      // If batch processing is requested and table is large enough
+      if (useBatchProcessing && totalRows > BATCH_THRESHOLD) {
         const batchData = await fetchDataInBatches(
           tableName, 
           columnsToUse,
           (progress) => {
             setLoadingProgress(progress);
-            if (progress % 20 === 0) { // Show toast every 20% progress
+            if (progress % 20 === 0) {
               toast({
                 title: "Loading data",
                 description: `${progress}% complete`
@@ -74,19 +88,14 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         return;
       }
 
-      // For smaller datasets, use regular loading
-      const columnList = columnsToUse.map(col => `"${col}"`).join(',');
-      const { data: queryResult, error } = await supabase.rpc('execute_query', {
-        query_text: `SELECT ${columnList} FROM "${tableName}"`
-      });
-
-      if (error) throw error;
+      // For initial load or smaller datasets, fetch sample data
+      const sampleData = await loadSampleData(tableName, columnsToUse);
       
-      if (queryResult && Array.isArray(queryResult)) {
-        setData(queryResult);
+      if (sampleData && Array.isArray(sampleData)) {
+        setData(sampleData);
         toast({
           title: "Success",
-          description: `Loaded ${queryResult.length} rows`
+          description: `Loaded ${sampleData.length} sample rows`
         });
       }
 
@@ -113,7 +122,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       return;
     }
 
-    loadData(selectedDataset);
+    // Initial load with sample data
+    loadData(selectedDataset, [], false);
   }, [selectedDataset]);
 
   const fetchPage = async (page: number, itemsPerPage: number) => {

@@ -17,7 +17,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Code } from "lucide-react";
 import { Compass } from "lucide-react";
 
-
 type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetExploreProps {
@@ -72,12 +71,11 @@ export const DatasetExplore = ({
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData(selectedDataset);
+      // Call loadData with batch processing enabled
+      await loadData(selectedDataset, selectedColumns, true);
       if (onLoad) {
         onLoad(selectedDataset);
       }
-      setShouldApplyFilters(false);
-      setFilteredData(data);
     }
   };
 
