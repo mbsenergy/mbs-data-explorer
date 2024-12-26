@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartTypeSelector } from "./chart-controls/ChartTypeSelector";
 import { ChartOptionsSelector } from "./chart-controls/ChartOptionsSelector";
 import { AxisSelector } from "./chart-controls/AxisSelector";
@@ -89,25 +90,35 @@ export const ChartControls = ({
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <ChartTypeSelector
-          value={plotConfig.chartType}
-          onChange={(type) => onConfigChange({ ...plotConfig, chartType: type })}
-        />
-      </Card>
+        <Tabs defaultValue="type" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="type">Chart Type</TabsTrigger>
+            <TabsTrigger value="axis">Axis</TabsTrigger>
+            <TabsTrigger value="options">Options</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="type" className="mt-4">
+            <ChartTypeSelector
+              value={plotConfig.chartType}
+              onChange={(type) => onConfigChange({ ...plotConfig, chartType: type })}
+            />
+          </TabsContent>
 
-      <Card className="p-6">
-        <AxisSelector
-          columns={columns}
-          config={axisConfig}
-          onChange={handleAxisConfigChange}
-        />
-      </Card>
+          <TabsContent value="axis" className="mt-4">
+            <AxisSelector
+              columns={columns}
+              config={axisConfig}
+              onChange={handleAxisConfigChange}
+            />
+          </TabsContent>
 
-      <Card className="p-6">
-        <ChartOptionsSelector
-          options={chartOptions}
-          onChange={handleChartOptionChange}
-        />
+          <TabsContent value="options" className="mt-4">
+            <ChartOptionsSelector
+              options={chartOptions}
+              onChange={handleChartOptionChange}
+            />
+          </TabsContent>
+        </Tabs>
       </Card>
 
       <div className="flex justify-end space-x-2">
