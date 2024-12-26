@@ -153,7 +153,16 @@ export const PreviewDialog = ({
                   language={getLanguage(fileName)}
                 >
                   {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                    <pre className={className} style={{ ...style, margin: 0 }}>
+                    <pre 
+                      className={className} 
+                      style={{ 
+                        ...style, 
+                        margin: 0,
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '14px',
+                        lineHeight: '1.5'
+                      }}
+                    >
                       {tokens.map((line, i) => (
                         <div key={i} {...getLineProps({ line })}>
                           <span className="text-gray-500 mr-4 select-none">
