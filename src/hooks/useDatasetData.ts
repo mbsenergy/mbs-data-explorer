@@ -28,10 +28,10 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   };
 
   const fetchColumns = async (tableName: TableNames) => {
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('*')
-      .limit(1);
+    // Use RPC call to execute_query instead of direct table query
+    const { data, error } = await supabase.rpc('execute_query', {
+      query_text: `SELECT * FROM "${tableName}" LIMIT 1`
+    });
 
     if (error) throw error;
     
