@@ -75,8 +75,8 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-4 py-4">
+      <ScrollArea className="flex-1 px-6">
+        <div className="space-y-4 py-6">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -85,7 +85,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               }`}
             >
               <div
-                className={`rounded-xl px-3 py-2 max-w-[70%] text-xs shadow-lg backdrop-blur-sm ${
+                className={`rounded-xl px-4 py-2.5 max-w-[85%] text-xs shadow-lg backdrop-blur-sm ${
                   message.role === 'user'
                     ? 'metallic-card text-primary-foreground ml-6'
                     : 'glass-panel mr-6 border-l-2 border-l-primary'
