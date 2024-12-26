@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { StatsCards } from "@/components/analytics/StatsCards";
 import { DownloadsChart } from "@/components/analytics/DownloadsChart";
-import { DownloadsTable } from "@/components/analytics/DownloadsTable";
+import { AnalyticsTables } from "@/components/analytics/AnalyticsTables";
 
 const Analytics = () => {
   const { user } = useAuth();
@@ -50,36 +50,6 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
-  // Use the same query key and structure as Navbar
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("is_cerved")
-        .eq("id", user?.id)
-        .maybeSingle();
-      
-      if (error) {
-        console.error("Profile error:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch profile data.",
-        });
-        throw error;
-      }
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: Infinity, // Never mark the data as stale
-    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
-    retry: 2,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
-
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ["analytics", user?.id],
     queryFn: async () => {
@@ -87,6 +57,7 @@ const Analytics = () => {
         .from("analytics")
         .select("*")
         .eq("user_id", user?.id)
+        .eq("is_custom_query", false)
         .order("downloaded_at", { ascending: false });
       
       if (error) {
@@ -95,6 +66,30 @@ const Analytics = () => {
           variant: "destructive",
           title: "Error",
           description: "Failed to fetch analytics data.",
+        });
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: queryData, isLoading: queryLoading } = useQuery({
+    queryKey: ["queries", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("analytics")
+        .select("*")
+        .eq("user_id", user?.id)
+        .eq("is_custom_query", true)
+        .order("downloaded_at", { ascending: false });
+      
+      if (error) {
+        console.error("Query analytics error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch query analytics data.",
         });
         throw error;
       }
@@ -172,46 +167,6 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
-  const { data: queryData, isLoading: queryLoading } = useQuery({
-    queryKey: ["queries", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("analytics")
-        .select("*")
-        .eq("user_id", user?.id)
-        .eq("is_custom_query", true)
-        .order("downloaded_at", { ascending: false });
-      
-      if (error) {
-        console.error("Query analytics error:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch query analytics data.",
-        });
-        throw error;
-      }
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-
-  // Helper function to determine dataset type and tags
-  const getDatasetInfo = (datasetName: string) => {
-    const type = datasetName.split('_')[0] || 'Unknown';
-    const tags = [];
-    
-    if (datasetName.includes('electricity')) tags.push('Electricity');
-    if (datasetName.includes('gas')) tags.push('Gas');
-    if (datasetName.includes('price')) tags.push('Price');
-    if (datasetName.includes('production')) tags.push('Production');
-    if (datasetName.includes('efficiency')) tags.push('Efficiency');
-    if (datasetName.includes('employment')) tags.push('Employment');
-    if (datasetName.includes('gdp')) tags.push('GDP');
-    
-    return { type, tags };
-  };
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-500">
@@ -243,23 +198,19 @@ const Analytics = () => {
         isLoading={analyticsLoading || developerAnalyticsLoading || exportsLoading || storageLoading || queryLoading}
       />
 
-      <DownloadsTable
-        title="Dataset Exports History"
-        data={exportsData || []}
-        isLoading={exportsLoading}
-      />
-
-      <DownloadsTable
-        title="Dataset Download History"
-        data={analyticsData || []}
-        isLoading={analyticsLoading}
-        getDatasetInfo={getDatasetInfo}
-      />
-
-      <DownloadsTable
-        title="Developer Resources Download History"
-        data={developerAnalytics || []}
-        isLoading={developerAnalyticsLoading}
+      <AnalyticsTables
+        analyticsData={analyticsData || []}
+        developerData={developerAnalytics || []}
+        exportsData={exportsData || []}
+        storageData={storageData || []}
+        queryData={queryData || []}
+        isLoading={{
+          analytics: analyticsLoading,
+          developer: developerAnalyticsLoading,
+          exports: exportsLoading,
+          storage: storageLoading,
+          queries: queryLoading
+        }}
       />
     </div>
   );

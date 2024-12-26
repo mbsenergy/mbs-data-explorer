@@ -79,7 +79,7 @@ export const DownloadsChart = ({
     'File Uploads': counts['File Uploads'],
     'Query Executions': counts['Query Executions']
   }))
-  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Sort by date ascending
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const chartOptions: Highcharts.Options = {
     chart: {
@@ -109,7 +109,7 @@ export const DownloadsChart = ({
       bar: {
         stacking: 'normal',
         borderRadius: 4,
-        borderWidth: 0, // Remove white borders
+        borderWidth: 0,
         dataLabels: {
           enabled: true,
           color: '#ffffff'
@@ -120,27 +120,32 @@ export const DownloadsChart = ({
       name: 'Dataset Samples',
       type: 'bar',
       data: chartData.map(item => item['Dataset Samples']),
-      color: '#57D7E2'
+      color: '#57D7E2',
+      visible: true
     }, {
       name: 'Developer Files',
       type: 'bar',
       data: chartData.map(item => item['Developer Files']),
-      color: '#FEC6A1'
+      color: '#FEC6A1',
+      visible: true
     }, {
       name: 'Dataset Exports',
       type: 'bar',
       data: chartData.map(item => item['Dataset Exports']),
-      color: '#A78BFA'
+      color: '#A78BFA',
+      visible: true
     }, {
       name: 'File Uploads',
       type: 'bar',
       data: chartData.map(item => item['File Uploads']),
-      color: '#34D399'
+      color: '#34D399',
+      visible: true
     }, {
       name: 'Query Executions',
       type: 'bar',
       data: chartData.map(item => item['Query Executions']),
-      color: '#F472B6'
+      color: '#F472B6',
+      visible: true
     }],
     legend: {
       align: 'center',
@@ -156,7 +161,8 @@ export const DownloadsChart = ({
       backgroundColor: 'transparent',
       borderWidth: 0,
       padding: 20,
-      margin: 20
+      margin: 20,
+      enabled: true
     },
     credits: {
       enabled: false
