@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -104,6 +104,20 @@ export const ProfileSection = () => {
         <CardHeader className="flex flex-row items-center gap-2">
           <User2 className="h-6 w-6 text-muted-foreground" />
           <CardTitle>Profile Information</CardTitle>
+          <div className="ml-auto">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (isEditing) {
+                  handleSave();
+                } else {
+                  setIsEditing(true);
+                }
+              }}
+            >
+              {isEditing ? "Save" : "Edit"}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -121,19 +135,6 @@ export const ProfileSection = () => {
                 </h3>
                 <p className="text-muted-foreground">{user?.email}</p>
               </div>
-
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (isEditing) {
-                    handleSave();
-                  } else {
-                    setIsEditing(true);
-                  }
-                }}
-              >
-                {isEditing ? "Save" : "Edit"}
-              </Button>
             </div>
 
             <PersonalInfoSection
