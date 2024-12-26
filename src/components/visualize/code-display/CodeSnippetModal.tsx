@@ -66,28 +66,49 @@ fig.update_layout(
 
 fig.show()`;
 
-  const rCode = `library(highcharter)
+  // Generate R code with proper structure
+  const generateRCode = (options: any) => {
+    const seriesData = options.series.map((series: any, index: number) => {
+      const data = JSON.stringify(series.data || []);
+      return `  hc %>%
+    hc_add_series(
+      name = "${series.name || `Series ${index + 1}`}",
+      data = ${data}
+    )`;
+    }).join('\n');
 
-options <- ${JSON.stringify(plotData, null, 2)}
+    return `library(highcharter)
 
-# Create the chart
+# Create the base chart
 hc <- highchart() %>%
-  hc_chart(type = options$chart$type) %>%
-  hc_title(text = options$title$text) %>%
-  hc_xAxis(title = list(text = options$xAxis$title$text)) %>%
-  hc_yAxis(title = list(text = options$yAxis$title$text))
+  hc_chart(type = "${options.chart?.type || 'line'}") %>%
+  hc_title(text = "${options.title?.text || ''}") %>%
+  hc_xAxis(
+    title = list(text = "${options.xAxis?.title?.text || ''}"),
+    type = "${options.xAxis?.type || 'linear'}"
+  ) %>%
+  hc_yAxis(
+    title = list(text = "${options.yAxis?.title?.text || ''}"),
+    type = "${options.yAxis?.type || 'linear'}"
+  )
 
 # Add series data
-for (series in options$series) {
-  hc <- hc %>%
-    hc_add_series(
-      name = series$name,
-      data = series$data
-    )
-}
+${seriesData}
+
+# Add legend configuration
+hc %>%
+  hc_legend(
+    enabled = ${options.legend?.enabled !== false},
+    align = "${options.legend?.align || 'center'}",
+    verticalAlign = "${options.legend?.verticalAlign || 'bottom'}",
+    layout = "${options.legend?.layout || 'horizontal'}"
+  )
 
 # Display the chart
 hc`;
+  };
+
+  const rCode = generateRCode(plotData);
 
   const handleCopy = async (code: string, language: string) => {
     try {
