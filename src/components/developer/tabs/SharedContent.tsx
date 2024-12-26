@@ -14,9 +14,9 @@ interface SharedContentProps {
 }
 
 export const SharedContent = ({
-  searchTerm,
-  selectedTag,
-  showFavorites,
+  searchTerm: externalSearchTerm,
+  selectedTag: externalSelectedTag,
+  showFavorites: externalShowFavorites,
   favorites,
   onPreview,
   onDownload,
@@ -24,6 +24,9 @@ export const SharedContent = ({
 }: SharedContentProps) => {
   const sections = ['presets', 'macros', 'developer', 'models', 'queries'];
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState(externalSearchTerm);
+  const [selectedTag, setSelectedTag] = useState(externalSelectedTag);
+  const [showFavorites, setShowFavorites] = useState(externalShowFavorites);
 
   const results = sections.map(section => {
     const { data: files } = useDeveloperFiles(section);
@@ -35,12 +38,24 @@ export const SharedContent = ({
     setAvailableTags(tags);
   }, [results]);
 
+  useEffect(() => {
+    setSearchTerm(externalSearchTerm);
+  }, [externalSearchTerm]);
+
+  useEffect(() => {
+    setSelectedTag(externalSelectedTag);
+  }, [externalSelectedTag]);
+
+  useEffect(() => {
+    setShowFavorites(externalShowFavorites);
+  }, [externalShowFavorites]);
+
   return (
     <div className="space-y-6">
       <DeveloperSearch
-        onSearchChange={() => {}}
-        onTagChange={() => {}}
-        onFavoriteChange={() => {}}
+        onSearchChange={setSearchTerm}
+        onTagChange={setSelectedTag}
+        onFavoriteChange={setShowFavorites}
         availableTags={availableTags}
       />
 
