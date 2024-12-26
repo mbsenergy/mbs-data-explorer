@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataPoint } from "@/types/visualize";
 
@@ -13,6 +14,7 @@ interface AxisSelectorProps {
     xAxis: string;
     yAxis: string;
     groupBy: string;
+    aggregation: string;
     xAxisLabel: string;
     yAxisLabel: string;
     reverseAxis: boolean;
@@ -109,6 +111,38 @@ export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) =
             </SelectContent>
           </Select>
         </div>
+
+        {config.groupBy !== 'none' && (
+          <div className="space-y-2">
+            <Label>Aggregation Method</Label>
+            <RadioGroup
+              value={config.aggregation}
+              onValueChange={(value) => onChange('aggregation', value)}
+              className="flex flex-col space-y-1"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="none" id="none" />
+                <Label htmlFor="none">None (Show all points)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="mean" id="mean" />
+                <Label htmlFor="mean">Mean</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="sum" id="sum" />
+                <Label htmlFor="sum">Sum</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="min" id="min" />
+                <Label htmlFor="min">Minimum</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="max" id="max" />
+                <Label htmlFor="max">Maximum</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
