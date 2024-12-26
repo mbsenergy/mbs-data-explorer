@@ -16,6 +16,9 @@ import { DataDisplay } from "@/components/visualize/DataDisplay";
 import type { VisualizeState, PlotConfig, Filter, DataPoint } from "@/types/visualize";
 import type { TableInfo } from "@/components/datasets/types";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 const Visualize = () => {
   const { toast } = useToast();
@@ -367,3 +370,4 @@ const Visualize = () => {
 };
 
 export default Visualize;
+
