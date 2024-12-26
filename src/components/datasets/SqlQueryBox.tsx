@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Play, Save } from "lucide-react";
+import { Play, Save, Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -89,7 +89,10 @@ export const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }:
   return (
     <Card className="p-6 space-y-4 metallic-card">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">SQL Query</h3>
+        <div className="flex items-center gap-2">
+          <Database className="h-5 w-5" />
+          <h3 className="font-semibold">SQL Query</h3>
+        </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Switch
