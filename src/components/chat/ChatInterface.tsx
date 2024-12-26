@@ -72,7 +72,7 @@ export const ChatInterface = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <ScrollArea className="flex-1 pr-4">
-        <div className="space-y-4 mt-4">
+        <div className="space-y-6 mt-4">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -81,10 +81,10 @@ export const ChatInterface = () => {
               }`}
             >
               <div
-                className={`rounded-lg px-4 py-2 max-w-[85%] text-base ${
+                className={`rounded-2xl px-6 py-3 max-w-[85%] text-base shadow-lg backdrop-blur-sm ${
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground shadow-lg'
-                    : 'metallic-card shadow-lg'
+                    ? 'bg-primary/90 text-primary-foreground ml-12'
+                    : 'glass-panel mr-12 border-l-4 border-l-primary'
                 }`}
               >
                 <ReactMarkdown 
