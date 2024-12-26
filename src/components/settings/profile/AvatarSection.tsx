@@ -4,12 +4,13 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
 interface AvatarSectionProps {
   avatarUrl: string | null;
   firstName: string | null;
   lastName: string | null;
-  onAvatarUpdate: () => Promise<void>;
+  onAvatarUpdate: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<any, Error>>;
 }
 
 export const AvatarSection = ({ 
