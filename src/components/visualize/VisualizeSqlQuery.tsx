@@ -22,11 +22,26 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
         throw new Error(validation.error);
       }
 
+      // Show warning for potentially long-running queries
+      if (query.toLowerCase().includes('count(*)') || !query.toLowerCase().includes('limit')) {
+        toast({
+          title: "Warning",
+          description: "Large queries may take longer to execute. Consider adding a LIMIT clause.",
+          variant: "warning"
+        });
+      }
+
       const { data, error } = await supabase.rpc('execute_query', {
         query_text: query
       });
 
       if (error) {
+        // Handle timeout errors specifically
+        if (error.message.includes('statement timeout') || error.message.includes('57014')) {
+          throw new Error(
+            'Query timed out. Try adding filters or LIMIT clause to reduce the result set.'
+          );
+        }
         const pgError = error.message.match(/Query execution failed: (.*)/);
         throw new Error(pgError ? pgError[1] : error.message);
       }
@@ -35,8 +50,9 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
       
       if (results.length > 0) {
         const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
-          accessorKey: key,
+          id: key,
           header: key,
+          accessorKey: key,
           cell: info => {
             const value = info.getValue();
             return value === null ? 'NULL' : String(value);
@@ -106,6 +122,7 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
     <SqlQueryBox 
       onExecute={handleExecuteQuery} 
       defaultValue="SELECT * FROM your_table LIMIT 100" 
+      isLoading={isLoading}
     />
   );
 };
