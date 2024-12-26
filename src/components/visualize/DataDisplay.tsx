@@ -1,6 +1,6 @@
 import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { Button } from "@/components/ui/button";
-import { Download, ChartBar, Table, FileText } from "lucide-react";
+import { Download, ChartBar, Table, FileText, Database, BarChart2, GanttChartSquare } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -58,19 +58,19 @@ export const DataDisplay = ({
         </Button>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-6 metallic-card">
         <Tabs defaultValue="summary" className="w-full">
           <TabsList>
             <TabsTrigger value="summary" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
+              <Database className="h-4 w-4" />
               Summary
             </TabsTrigger>
             <TabsTrigger value="plot" className="flex items-center gap-2">
-              <ChartBar className="h-4 w-4" />
+              <BarChart2 className="h-4 w-4" />
               Plot
             </TabsTrigger>
             <TabsTrigger value="table" className="flex items-center gap-2">
-              <Table className="h-4 w-4" />
+              <GanttChartSquare className="h-4 w-4" />
               Table
             </TabsTrigger>
           </TabsList>
