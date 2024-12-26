@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SavedQueryCarousel } from "./saved-queries/SavedQueryCarousel";
 import { SavedQueriesTable } from "./saved-queries/SavedQueriesTable";
+import { SavedQueryPreviewModal } from "./saved-queries/SavedQueryPreviewModal";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 
 interface SavedQueriesDisplayProps {
   onSelectQuery: (query: string) => void;
@@ -17,6 +19,7 @@ export const SavedQueriesDisplay = ({ onSelectQuery }: SavedQueriesDisplayProps)
   const { user } = useAuth();
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(0);
+  const [selectedQuery, setSelectedQuery] = useState<string | null>(null);
   const itemsPerPage = 7;
 
   const { data: savedQueries, refetch } = useQuery({
@@ -58,6 +61,10 @@ export const SavedQueriesDisplay = ({ onSelectQuery }: SavedQueriesDisplayProps)
     }
   };
 
+  const handlePreview = (query: string) => {
+    setSelectedQuery(query);
+  };
+
   const totalPages = Math.ceil((savedQueries?.length || 0) / itemsPerPage);
   const startIndex = currentPage * itemsPerPage;
   const displayedQueries = savedQueries?.slice(startIndex, startIndex + itemsPerPage) || [];
@@ -67,20 +74,19 @@ export const SavedQueriesDisplay = ({ onSelectQuery }: SavedQueriesDisplayProps)
   }
 
   return (
-    <Card className="p-6 space-y-6 metallic-card">
-      <div className="flex items-center gap-2 mb-4">
-        <Database className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">Saved Queries Overview</h2>
-      </div>
-
+    <CollapsibleCard
+      title="Saved Queries Overview"
+      icon={<Database className="h-5 w-5" />}
+      defaultOpen={true}
+    >
       <SavedQueryCarousel 
         queries={savedQueries} 
-        onPreview={onSelectQuery} 
+        onPreview={handlePreview} 
       />
 
       <SavedQueriesTable
         queries={displayedQueries}
-        onPreview={onSelectQuery}
+        onPreview={handlePreview}
         onDelete={handleDelete}
       />
 
@@ -105,6 +111,12 @@ export const SavedQueriesDisplay = ({ onSelectQuery }: SavedQueriesDisplayProps)
           Next
         </Button>
       </div>
-    </Card>
+
+      <SavedQueryPreviewModal
+        isOpen={!!selectedQuery}
+        onClose={() => setSelectedQuery(null)}
+        query={selectedQuery || ""}
+      />
+    </CollapsibleCard>
   );
 };
