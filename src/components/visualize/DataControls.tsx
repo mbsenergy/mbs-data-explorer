@@ -20,11 +20,6 @@ export const DataControls = ({ onUpload, onExecuteQuery, isLoading, selectedTabl
           disabled={isLoading}
         />
       </Card>
-
-      <SqlQueryBox 
-        onExecute={onExecuteQuery} 
-        defaultValue={`SELECT * FROM "${selectedTable || 'your_table'}" LIMIT 100`} 
-      />
     </div>
   );
 };

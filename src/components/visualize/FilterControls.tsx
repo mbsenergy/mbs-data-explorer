@@ -14,8 +14,7 @@ export const FilterControls = ({
   filteredCount
 }: FilterControlsProps) => {
   return (
-    <Card className="p-6 metallic-card">
-      <h2 className="text-xl font-semibold mb-4">Filters</h2>
+    <div>
       <DatasetFilters
         columns={columns}
         filters={filters}
@@ -40,6 +39,6 @@ export const FilterControls = ({
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
