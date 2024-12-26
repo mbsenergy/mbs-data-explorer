@@ -31,14 +31,18 @@ export const AvatarSection = ({
       const file = event.target.files?.[0];
       if (!file || !user) return;
 
+      // Construct a file path that includes the user ID as the folder name
       const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
 
+      // Upload the file to the avatars bucket
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         toast({
           title: "Error uploading avatar",
           description: uploadError.message,
@@ -47,16 +51,19 @@ export const AvatarSection = ({
         return;
       }
 
+      // Get the public URL for the uploaded file
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
+      // Update the user's profile with the new avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
         .eq('id', user.id);
 
       if (updateError) {
+        console.error('Profile update error:', updateError);
         toast({
           title: "Error updating profile",
           description: updateError.message,
