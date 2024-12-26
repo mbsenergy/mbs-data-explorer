@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,11 @@ export const NotificationBell = () => {
   const [lastCheck, setLastCheck] = useState(Date.now());
   const [notificationCount, setNotificationCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [clearedTimestamp, setClearedTimestamp] = useState<number | null>(null);
+  const [clearedTimestamp, setClearedTimestamp] = useState<number | null>(() => {
+    // Initialize from localStorage if available
+    const stored = localStorage.getItem('lastNotificationClear');
+    return stored ? parseInt(stored, 10) : null;
+  });
 
   const { data: notifications } = useNotifications(lastCheck);
 
@@ -48,10 +52,13 @@ export const NotificationBell = () => {
   };
 
   const clearNotifications = () => {
-    setLastCheck(Date.now());
-    setClearedTimestamp(Date.now());
+    const now = Date.now();
+    setLastCheck(now);
+    setClearedTimestamp(now);
     setHasNewItems(false);
     setNotificationCount(0);
+    // Store the clear timestamp in localStorage
+    localStorage.setItem('lastNotificationClear', now.toString());
   };
 
   const filteredNotifications = notifications?.filter(
