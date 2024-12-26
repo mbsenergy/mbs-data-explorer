@@ -40,7 +40,9 @@ export const ChartControls = ({
     xAxisLabel: '',
     yAxisLabel: '',
     reverseAxis: false,
-    logScale: false
+    logScale: false,
+    xAxisType: plotConfig.xAxisType,
+    yAxisType: plotConfig.yAxisType
   });
 
   const handleChartOptionChange = (key: keyof ChartOptions, value: any) => {
@@ -80,7 +82,7 @@ export const ChartControls = ({
 
   const handleAxisConfigChange = (key: string, value: any) => {
     setAxisConfig(prev => ({ ...prev, [key]: value }));
-    if (['xAxis', 'yAxis', 'groupBy', 'aggregation'].includes(key)) {
+    if (['xAxis', 'yAxis', 'groupBy', 'aggregation', 'xAxisType', 'yAxisType'].includes(key)) {
       onConfigChange({
         ...plotConfig,
         [key]: value

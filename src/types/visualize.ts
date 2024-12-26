@@ -21,6 +21,7 @@ export interface VisualizeState {
 export type ChartType = "scatter" | "bar" | "line" | "box" | "area" | "bubble";
 export type AggregationType = "none" | "sum" | "mean" | "max" | "min";
 export type LegendPosition = "top" | "bottom" | "left" | "right";
+export type AxisDataType = "auto" | "numeric" | "datetime" | "category";
 
 export interface PlotConfig {
   xAxis: string;
@@ -28,6 +29,8 @@ export interface PlotConfig {
   chartType: ChartType;
   groupBy: string;
   aggregation: AggregationType;
+  xAxisType: AxisDataType;
+  yAxisType: AxisDataType;
   chartOptions?: Partial<Options>;
 }
 

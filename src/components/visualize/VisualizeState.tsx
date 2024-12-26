@@ -28,7 +28,9 @@ export const useVisualizeState = () => {
     yAxis: "",
     chartType: "scatter",
     groupBy: "",
-    aggregation: "none"
+    aggregation: "none",
+    xAxisType: "auto",
+    yAxisType: "auto"
   });
 
   const [filters, setFilters] = useState<Filter[]>([

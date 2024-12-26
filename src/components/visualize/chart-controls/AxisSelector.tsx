@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataPoint } from "@/types/visualize";
+import { DataPoint, AxisDataType } from "@/types/visualize";
 
 interface AxisSelectorProps {
   columns: ColumnDef<DataPoint>[];
@@ -19,13 +19,21 @@ interface AxisSelectorProps {
     yAxisLabel: string;
     reverseAxis: boolean;
     logScale: boolean;
+    xAxisType: AxisDataType;
+    yAxisType: AxisDataType;
   };
   onChange: (key: string, value: any) => void;
 }
 
 export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) => {
-  // Only show columns that are marked as visible (show === true)
   const visibleColumns = columns.filter(col => (col as any).show);
+
+  const dataTypeOptions: { value: AxisDataType; label: string }[] = [
+    { value: "auto", label: "Auto-detect" },
+    { value: "numeric", label: "Numeric" },
+    { value: "datetime", label: "Date/Time" },
+    { value: "category", label: "Category" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -61,6 +69,23 @@ export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) =
               ))}
             </SelectContent>
           </Select>
+          {config.xAxis && (
+            <Select
+              value={config.xAxisType}
+              onValueChange={(value) => onChange('xAxisType', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select data type" />
+              </SelectTrigger>
+              <SelectContent>
+                {dataTypeOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Input
             placeholder="X Axis Label"
             value={config.xAxisLabel}
@@ -85,6 +110,23 @@ export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) =
               ))}
             </SelectContent>
           </Select>
+          {config.yAxis && (
+            <Select
+              value={config.yAxisType}
+              onValueChange={(value) => onChange('yAxisType', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select data type" />
+              </SelectTrigger>
+              <SelectContent>
+                {dataTypeOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Input
             placeholder="Y Axis Label"
             value={config.yAxisLabel}
