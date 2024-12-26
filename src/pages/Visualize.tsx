@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { DataInputTabs } from "@/components/visualize/DataInputTabs";
 import { CollapsibleCard } from "@/components/visualize/CollapsibleCard";
 import { ChartControls } from "@/components/visualize/ChartControls";
 import { FilterControls } from "@/components/visualize/FilterControls";
 import { DataColumnSelect } from "@/components/visualize/DataColumnSelect";
+import { DataColumnTypeSelect } from "@/components/visualize/DataColumnTypeSelect";
 import { DataDisplay } from "@/components/visualize/DataDisplay";
 import { useVisualizeState } from "@/components/visualize/VisualizeState";
+import { convertDataset } from "@/utils/dataTypeConversion";
 import { v4 as uuidv4 } from 'uuid';
 import type { DataPoint } from "@/types/visualize";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnTypeConfig, ColumnDataType } from "@/types/columns";
 
 const Visualize = () => {
   const {
@@ -16,10 +21,50 @@ const Visualize = () => {
     filters,
     setFilters,
     setPlotConfig,
-    handleDataReceived,
     handleFileUpload,
     handleExportData
   } = useVisualizeState();
+
+  const [columnTypes, setColumnTypes] = useState<ColumnTypeConfig[]>([]);
+
+  const handleDataReceived = (data: DataPoint[], rawColumns: ColumnDef<any>[]) => {
+    const initialColumnTypes = rawColumns.map(col => ({
+      name: String(col.id),
+      type: 'text' as ColumnDataType
+    }));
+
+    setColumnTypes(initialColumnTypes);
+
+    const typedColumns = rawColumns.map(col => ({
+      ...col,
+      show: true
+    }));
+
+    setState(prev => ({
+      ...prev,
+      originalData: data,
+      filteredData: data,
+      columns: typedColumns,
+    }));
+  };
+
+  const handleColumnTypeChange = (columnName: string, type: ColumnDataType) => {
+    // Update column types
+    const newColumnTypes = columnTypes.map(col => 
+      col.name === columnName ? { ...col, type } : col
+    );
+    setColumnTypes(newColumnTypes);
+
+    // Convert data with new types
+    const convertedData = convertDataset(state.originalData, newColumnTypes);
+    
+    setState(prev => ({
+      ...prev,
+      originalData: convertedData,
+      filteredData: convertedData,
+      showChart: false // Reset chart when types change
+    }));
+  };
 
   const compareValues = (itemValue: any, filterValue: string, operator: string): boolean => {
     const normalizedItemValue = String(itemValue).toLowerCase();
@@ -145,11 +190,18 @@ const Visualize = () => {
       </CollapsibleCard>
 
       <CollapsibleCard title="Columns">
-        <DataColumnSelect
-          columns={state.columns}
-          selectedColumns={state.columns.filter(col => col.show).map(col => String(col.id))}
-          onColumnSelect={handleColumnSelect}
-        />
+        <div className="space-y-6">
+          <DataColumnSelect
+            columns={state.columns}
+            selectedColumns={state.columns.filter(col => col.show).map(col => String(col.id))}
+            onColumnSelect={handleColumnSelect}
+          />
+          
+          <DataColumnTypeSelect
+            columns={columnTypes}
+            onTypeChange={handleColumnTypeChange}
+          />
+        </div>
       </CollapsibleCard>
 
       <CollapsibleCard title="Chart Configuration">
