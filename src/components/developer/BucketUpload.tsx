@@ -1,167 +1,110 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Database, Upload, FileType, Trash2, Download } from "lucide-react";
+import { Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { FileUploadForm } from "./bucket/FileUploadForm";
+import { FilePreviewDialog } from "./bucket/FilePreviewDialog";
+import { FileTable } from "./bucket/FileTable";
 
-interface UploadedFile {
+interface StorageFile {
   id: string;
-  name: string;
-  url: string;
+  storage_id: string;
+  original_name: string;
   created_at: string;
+  tags: string[];
 }
 
 export const BucketUpload = () => {
-  const [files, setFiles] = useState<UploadedFile[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [files, setFiles] = useState<StorageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewFile, setPreviewFile] = useState<{ path: string; name: string } | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      loadExistingFiles();
-    }
-  }, [user]);
-
-  const loadExistingFiles = async () => {
+  const loadFiles = async () => {
+    if (!user) return;
+    
     try {
-      const { data: files, error } = await supabase.storage
-        .from('user-bucket')
-        .list(user?.id || '', {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'created_at', order: 'desc' }
-        });
+      const { data, error } = await supabase
+        .from('storage_files')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      const processedFiles = await Promise.all(
-        (files || [])
-          .filter(file => !file.name.includes('.emptyFolderPlaceholder'))
-          .map(async (file) => {
-            const { data: { publicUrl } } = supabase.storage
-              .from('user-bucket')
-              .getPublicUrl(`${user?.id}/${file.name}`);
-
-            return {
-              id: file.name,
-              name: file.name.split('-').pop() || file.name, // Get original filename
-              url: publicUrl,
-              created_at: file.created_at || new Date().toISOString(),
-            };
-          })
-      );
-
-      setFiles(processedFiles);
+      setFiles(data);
     } catch (error) {
       console.error('Error loading files:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load existing files",
+        description: "Failed to load files",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  useEffect(() => {
+    loadFiles();
+  }, [user]);
 
-    // Check file size (1MB = 1048576 bytes)
-    if (file.size > 1048576) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "File size must be less than 1MB",
-      });
-      event.target.value = '';
-      return;
-    }
-
-    setSelectedFile(file);
+  const handlePreview = (storageId: string, fileName: string) => {
+    setPreviewFile({
+      path: `${user?.id}/${storageId}`,
+      name: fileName
+    });
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select a file first",
-      });
-      return;
-    }
-
-    setIsUploading(true);
+  const handleDownload = async (storageId: string, fileName: string) => {
     try {
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${user?.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
+      const { data, error } = await supabase.storage
         .from('user-bucket')
-        .upload(filePath, selectedFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('user-bucket')
-        .getPublicUrl(filePath);
-
-      const newFile = {
-        id: fileName,
-        name: selectedFile.name,
-        url: publicUrl,
-        created_at: new Date().toISOString(),
-      };
-
-      setFiles(prev => [newFile, ...prev]);
-      setSelectedFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-      toast({
-        title: "Success",
-        description: "File uploaded successfully",
-      });
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to upload file",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleDelete = async (fileId: string) => {
-    try {
-      const filePath = `${user?.id}/${fileId}`;
-      const { error } = await supabase.storage
-        .from('user-bucket')
-        .remove([filePath]);
+        .download(`${user?.id}/${storageId}`);
 
       if (error) throw error;
 
-      setFiles(prev => prev.filter(f => f.id !== fileId));
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "File downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to download file",
+      });
+    }
+  };
+
+  const handleDelete = async (fileId: string, storageId: string) => {
+    try {
+      const { error: storageError } = await supabase.storage
+        .from('user-bucket')
+        .remove([`${user?.id}/${storageId}`]);
+
+      if (storageError) throw storageError;
+
+      const { error: dbError } = await supabase
+        .from('storage_files')
+        .delete()
+        .eq('id', fileId);
+
+      if (dbError) throw dbError;
+
+      setFiles(files.filter(f => f.id !== fileId));
       toast({
         title: "Success",
         description: "File deleted successfully",
@@ -176,26 +119,10 @@ export const BucketUpload = () => {
     }
   };
 
-  const handleDownload = async (file: UploadedFile) => {
-    try {
-      const response = await fetch(file.url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to download file",
-      });
-    }
+  const handleTagsUpdate = (fileId: string, newTags: string[]) => {
+    setFiles(files.map(file => 
+      file.id === fileId ? { ...file, tags: newTags } : file
+    ));
   };
 
   return (
@@ -205,23 +132,7 @@ export const BucketUpload = () => {
       defaultOpen={true}
     >
       <Card className="p-4 space-y-4 metallic-card">
-        <div className="flex items-center gap-4">
-          <Input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileSelect}
-            disabled={isUploading}
-            className="flex-1"
-          />
-          <Button 
-            onClick={handleUpload}
-            disabled={isUploading || !selectedFile} 
-            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload
-          </Button>
-        </div>
+        <FileUploadForm onUploadSuccess={loadFiles} />
       </Card>
 
       {isLoading ? (
@@ -229,56 +140,28 @@ export const BucketUpload = () => {
           <p>Loading files...</p>
         </div>
       ) : files.length > 0 ? (
-        <Carousel
-          className="w-full mx-auto my-6 border border-white/[0.05] bg-card/50 rounded-lg p-4 relative"
-          opts={{
-            align: 'start',
-            loop: true,
-          }}
-        >
-          <CarouselContent>
-            {files.map((file) => (
-              <CarouselItem key={file.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
-                <Card className="p-4 space-y-4 metallic-card">
-                  <div className="flex items-center gap-2">
-                    <FileType className="h-5 w-5" />
-                    <p className="font-semibold truncate flex-1">{file.name}</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Uploaded on {new Date(file.created_at).toLocaleDateString()}
-                  </p>
-                  <div className="flex justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(file)}
-                      className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(file.id)}
-                      className="bg-red-500/20 hover:bg-red-500/30"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <div className="flex justify-center gap-2 mt-4">
-            <CarouselPrevious className="static translate-y-0" />
-            <CarouselNext className="static translate-y-0" />
-          </div>
-        </Carousel>
+        <Card className="p-4 metallic-card">
+          <FileTable
+            files={files}
+            onPreview={handlePreview}
+            onDownload={handleDownload}
+            onDelete={handleDelete}
+            onTagsUpdate={handleTagsUpdate}
+          />
+        </Card>
       ) : (
         <div className="flex justify-center p-4">
           <p className="text-muted-foreground">No files uploaded yet</p>
         </div>
+      )}
+
+      {previewFile && (
+        <FilePreviewDialog
+          isOpen={!!previewFile}
+          onClose={() => setPreviewFile(null)}
+          filePath={previewFile.path}
+          fileName={previewFile.name}
+        />
       )}
     </CollapsibleCard>
   );

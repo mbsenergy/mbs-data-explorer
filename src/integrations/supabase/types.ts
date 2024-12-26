@@ -1866,6 +1866,33 @@ export type Database = {
         }
         Relationships: []
       }
+      storage_files: {
+        Row: {
+          created_at: string
+          id: string
+          original_name: string
+          storage_id: string
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          original_name: string
+          storage_id: string
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          original_name?: string
+          storage_id?: string
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       TS01_entsoe_actual_generation: {
         Row: {
           ASSET_CATEGORY: string | null
