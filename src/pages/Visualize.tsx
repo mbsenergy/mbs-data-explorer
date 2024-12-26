@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,12 @@ import type { Filter } from "@/components/datasets/explore/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
+interface DataPoint {
+  [key: string]: any;
+}
 
 const chartTypes = [
   { value: "scatter", label: "Scatter", icon: ScatterChart },
@@ -48,7 +54,7 @@ export const Visualize = () => {
   const [filteredData, setFilteredData] = useState<DataPoint[]>([]);
   const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTable, setSelectedTable] = useState("");
+  const [selectedTable, setSelectedTable] = useState<TableNames | "">("");
   const [plotConfig, setPlotConfig] = useState({
     xAxis: "",
     yAxis: "",

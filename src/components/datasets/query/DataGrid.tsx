@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
+import type { ColDef, GridReadyEvent } from 'ag-grid-community';
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface DataGridProps {
@@ -29,12 +29,17 @@ export function DataGrid({ data, columns, isLoading }: DataGridProps) {
   }), []);
 
   const columnDefs = useMemo(() => {
-    return columns.map((col): ColDef => ({
-      field: col.accessorKey as string,
-      headerName: String(col.header),
-      minWidth: 150,
-      width: 200,
-    }));
+    return columns.map((col): ColDef => {
+      const accessorKey = typeof col.accessorKey === 'string' ? col.accessorKey : '';
+      const header = typeof col.header === 'string' ? col.header : '';
+      
+      return {
+        field: accessorKey,
+        headerName: header,
+        minWidth: 150,
+        width: 200,
+      };
+    });
   }, [columns]);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
