@@ -110,7 +110,7 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
         <CarouselContent>
           {queries.slice(0, 5).map((query) => (
             <CarouselItem key={query.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
-              <Card className="p-4 space-y-4">
+              <Card className="p-4 space-y-4 metallic-card">
                 <div>
                   <h3 className="font-semibold mb-2">{query.name}</h3>
                   <TagEditor
@@ -144,7 +144,7 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
       <ScrollArea className="h-[300px] pr-4 mt-6">
         <div className="space-y-4">
           {queries.map((query) => (
-            <Card key={query.id} className="p-4 bg-card/50">
+            <Card key={query.id} className="p-4 metallic-card">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-semibold">{query.name}</h3>
                 <div className="flex gap-2">
