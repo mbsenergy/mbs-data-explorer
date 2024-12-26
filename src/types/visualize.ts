@@ -43,7 +43,7 @@ export interface ChartControlsProps {
 
 export interface DataControlsProps {
   onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onExecuteQuery: (query: string) => void;
+  onExecuteQuery: () => void;
   isLoading: boolean;
   selectedTable: string;
 }
