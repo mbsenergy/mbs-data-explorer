@@ -81,8 +81,8 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
       position: 'right' as const,
       defaultToolPanel: 'columns',
     },
-    rowGroupPanelShow: 'always',
-    pivotPanelShow: 'always',
+    rowGroupPanelShow: 'always' as const,
+    pivotPanelShow: 'always' as const,
     suppressColumnVirtualisation: true,
   };
 
