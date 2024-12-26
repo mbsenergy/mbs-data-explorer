@@ -17,7 +17,7 @@ export interface VisualizeState {
   showOnlyFavorites: boolean;
 }
 
-export type ChartType = "scatter" | "bar" | "line" | "box";
+export type ChartType = "scatter" | "bar" | "line" | "box" | "area" | "bubble";
 export type AggregationType = "none" | "sum" | "mean" | "max" | "min";
 
 export interface PlotConfig {
@@ -26,6 +26,7 @@ export interface PlotConfig {
   chartType: ChartType;
   groupBy: string;
   aggregation: AggregationType;
+  chartOptions?: Partial<Options>;
 }
 
 export interface ChartControlsProps {
@@ -33,30 +34,4 @@ export interface ChartControlsProps {
   plotConfig: PlotConfig;
   onConfigChange: (config: PlotConfig) => void;
   onGenerateChart: () => void;
-}
-
-export interface DataControlsProps {
-  onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onExecuteQuery: () => void;
-  isLoading: boolean;
-  selectedTable: string;
-}
-
-export interface FilterControlsProps {
-  columns: string[];
-  filters: Filter[];
-  onFilterChange: (filterId: string, field: keyof Filter, value: string) => void;
-  onAddFilter: () => void;
-  onRemoveFilter: (filterId: string) => void;
-  onApplyFilters: () => void;
-  originalCount: number;
-  filteredCount: number;
-}
-
-export interface Filter {
-  id: string;
-  searchTerm: string;
-  selectedColumn: string;
-  operator: "AND" | "OR";
-  comparisonOperator: "=" | ">" | "<" | ">=" | "<=" | "!=" | "IN" | "NOT IN";
 }
