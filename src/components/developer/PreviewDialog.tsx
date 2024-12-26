@@ -15,28 +15,32 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { useToast } from "@/components/ui/use-toast";
 import { useFileContent } from "@/hooks/useFileContent";
 
-interface PreviewDialogProps {
+export interface PreviewDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  filePath: string;
-  fileName: string;
-  section: string;
+  filePath?: string;
+  fileName?: string;
+  section?: string;
   directData?: string;
+  content?: string; // Added for backward compatibility
+  title?: string;
 }
 
 export const PreviewDialog = ({ 
   isOpen, 
   onClose, 
-  filePath, 
-  fileName,
-  section,
-  directData 
+  filePath = '', 
+  fileName = '',
+  section = '',
+  directData,
+  content,
+  title
 }: PreviewDialogProps) => {
   const { toast } = useToast();
   const fullPath = section ? `${section}/${fileName}` : fileName;
   const { data: fileContent, isLoading, error } = useFileContent(directData ? '' : fullPath);
   
-  const displayContent = directData || fileContent;
+  const displayContent = content || directData || fileContent;
   let parsedData: any[] = [];
   let isJson = false;
   

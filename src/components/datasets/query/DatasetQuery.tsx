@@ -11,7 +11,12 @@ import { SavedQueries } from "../SavedQueries";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { fetchDataInBatches } from "@/utils/batchProcessing";
 
-export const DatasetQuery = () => {
+interface DatasetQueryProps {
+  selectedDataset?: TableNames | null;
+  selectedColumns?: string[];
+}
+
+export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryProps) => {
   const [results, setResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -143,7 +148,7 @@ export const DatasetQuery = () => {
   return (
     <div className="space-y-6">
       <SavedQueries
-        onSelect={(query) => {
+        onSelectQuery={(query) => {
           setSelectedQuery(query);
           setShowPreview(true);
         }}
@@ -156,7 +161,11 @@ export const DatasetQuery = () => {
       />
 
       {results.length > 0 ? (
-        <DatasetQueryResults data={results} isLoading={isLoading} />
+        <DatasetQueryResults 
+          queryResults={results}
+          columns={columns}
+          isLoading={isLoading} 
+        />
       ) : (
         <DatasetQueryEmptyState />
       )}
@@ -164,8 +173,8 @@ export const DatasetQuery = () => {
       <PreviewDialog
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
-        content={selectedQuery}
-        title="Query Preview"
+        directData={selectedQuery}
+        fileName="Query Preview"
       />
     </div>
   );

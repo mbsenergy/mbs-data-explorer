@@ -19,11 +19,12 @@ interface SavedQuery {
   tags: string[];
 }
 
-interface SavedQueriesProps {
+export interface SavedQueriesProps {
   onSelectQuery: (query: string) => void;
+  onSelect?: (query: string) => void; // Added for backward compatibility
 }
 
-export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
+export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => {
   const [queries, setQueries] = useState<SavedQuery[]>([]);
   const [selectedQuery, setSelectedQuery] = useState<SavedQuery | null>(null);
   const [newTag, setNewTag] = useState("");
@@ -160,6 +161,11 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
     }
   };
 
+  const handleSelect = (query: string) => {
+    if (onSelect) onSelect(query);
+    if (onSelectQuery) onSelectQuery(query);
+  };
+
   if (!queries.length) {
     return null;
   }
@@ -180,7 +186,7 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelectedQuery(query)}
+                    onClick={() => handleSelect(query.query_text)}
                     className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
                   >
                     <Eye className="h-4 w-4 mr-2" />

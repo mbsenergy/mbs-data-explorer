@@ -7,19 +7,22 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
-interface DatasetQueryResultsProps {
+export interface DatasetQueryResultsProps {
   isLoading: boolean;
-  queryResults: any[] | null;
+  queryResults?: any[] | null;
+  data?: any[]; // Added for backward compatibility
   columns: ColumnDef<any>[];
-  onDownload: () => void;
+  onDownload?: () => void;
 }
 
 export const DatasetQueryResults = ({
   isLoading,
   queryResults,
+  data,
   columns,
   onDownload
 }: DatasetQueryResultsProps) => {
+  const resultsToUse = queryResults || data || [];
   const [showExportDialog, setShowExportDialog] = useState(false);
   const { toast } = useToast();
 
@@ -29,7 +32,7 @@ export const DatasetQueryResults = ({
 
   const handleConfirmExport = () => {
     try {
-      if (!queryResults || queryResults.length === 0) {
+      if (!resultsToUse || resultsToUse.length === 0) {
         toast({
           variant: "destructive",
           title: "Error",
@@ -39,8 +42,8 @@ export const DatasetQueryResults = ({
       }
 
       // Create CSV content
-      const headers = Object.keys(queryResults[0]).join(',');
-      const rows = queryResults.map(row => 
+      const headers = Object.keys(resultsToUse[0]).join(',');
+      const rows = resultsToUse.map(row => 
         Object.values(row).map(value => {
           if (value === null) return '';
           if (typeof value === 'string' && value.includes(',')) {
@@ -86,11 +89,11 @@ export const DatasetQueryResults = ({
     );
   }
 
-  if (!queryResults) {
+  if (!resultsToUse) {
     return <DatasetQueryEmptyState />;
   }
 
-  if (queryResults.length === 0) {
+  if (resultsToUse.length === 0) {
     return (
       <p className="text-center text-muted-foreground">No results found</p>
     );
@@ -101,7 +104,7 @@ export const DatasetQueryResults = ({
       <div className="grid grid-cols-2 gap-4">
         <div className="p-3 rounded-md bg-card border border-border">
           <div className="text-sm text-muted-foreground">Number of Rows</div>
-          <div className="text-lg font-semibold">{queryResults.length}</div>
+          <div className="text-lg font-semibold">{resultsToUse.length}</div>
         </div>
         <div className="p-3 rounded-md bg-card border border-border">
           <div className="text-sm text-muted-foreground">Number of Columns</div>
@@ -121,7 +124,7 @@ export const DatasetQueryResults = ({
       </div>
       <div className="border rounded-md metallic-card h-[700px]">
         <DataGrid
-          data={queryResults}
+          data={resultsToUse}
           columns={columns}
           isLoading={isLoading}
         />
