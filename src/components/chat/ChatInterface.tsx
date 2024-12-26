@@ -56,13 +56,13 @@ export const ChatInterface = () => {
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return match ? (
-        <pre className="bg-card p-3 rounded-lg overflow-x-auto border border-border/40 font-jetbrains-mono">
+        <pre className="bg-card p-4 rounded-lg overflow-x-auto border border-border/40 font-jetbrains-mono text-base">
           <code className={className} {...props}>
             {children}
           </code>
         </pre>
       ) : (
-        <code className="bg-card px-1.5 py-0.5 rounded font-jetbrains-mono text-primary" {...props}>
+        <code className="bg-card px-2 py-1 rounded font-jetbrains-mono text-primary text-base" {...props}>
           {children}
         </code>
       );
@@ -81,14 +81,14 @@ export const ChatInterface = () => {
               }`}
             >
               <div
-                className={`rounded-lg px-4 py-2 max-w-[85%] text-sm ${
+                className={`rounded-lg px-4 py-2 max-w-[85%] text-base ${
                   message.role === 'user'
                     ? 'bg-primary text-primary-foreground shadow-lg'
                     : 'metallic-card shadow-lg'
                 }`}
               >
                 <ReactMarkdown 
-                  className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-1"
+                  className="prose prose-invert prose-base max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-1"
                   components={components}
                 >
                   {message.content}
@@ -106,7 +106,7 @@ export const ChatInterface = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="How can I help?"
-            className="min-h-[80px] text-sm metallic-card"
+            className="min-h-[80px] text-base metallic-card"
           />
           <Button 
             type="submit" 
