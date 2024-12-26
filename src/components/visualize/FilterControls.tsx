@@ -1,7 +1,18 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FilterControlsProps } from "@/types/visualize";
 import { DatasetFilters } from "@/components/datasets/explore/DatasetFilters";
+import type { Filter, ComparisonOperator } from "@/components/datasets/explore/types";
+
+interface FilterControlsProps {
+  columns: string[];
+  filters: Filter[];
+  onFilterChange: (filterId: string, field: keyof Filter, value: string | ComparisonOperator) => void;
+  onAddFilter: () => void;
+  onRemoveFilter: (filterId: string) => void;
+  onApplyFilters: () => void;
+  originalCount: number;
+  filteredCount: number;
+}
 
 export const FilterControls = ({
   columns,

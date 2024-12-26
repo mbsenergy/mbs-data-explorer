@@ -97,7 +97,7 @@ export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) =
               <SelectValue placeholder="Select grouping" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No grouping</SelectItem>
+              <SelectItem value="none">No grouping</SelectItem>
               {columns.map(col => (
                 <SelectItem key={String(col.id)} value={String(col.id)}>
                   {String(col.header)}
