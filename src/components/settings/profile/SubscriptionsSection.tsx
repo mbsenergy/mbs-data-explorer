@@ -24,6 +24,8 @@ export const SubscriptionsSection = ({
   onSubscriptionsChange,
 }: SubscriptionsSectionProps) => {
   const handleSubscriptionToggle = (option: string) => {
+    if (!isEditing) return;
+    
     const newSubscriptions = subscriptions.includes(option)
       ? subscriptions.filter(s => s !== option)
       : [...subscriptions, option];
@@ -42,16 +44,13 @@ export const SubscriptionsSection = ({
             <Checkbox
               id={option}
               checked={subscriptions.includes(option)}
-              onCheckedChange={() => {
-                if (isEditing) {
-                  handleSubscriptionToggle(option);
-                }
-              }}
+              onCheckedChange={() => handleSubscriptionToggle(option)}
               disabled={!isEditing}
+              className="cursor-pointer"
             />
             <Label
               htmlFor={option}
-              className={!isEditing ? "text-muted-foreground" : ""}
+              className={`${!isEditing ? "text-muted-foreground" : "cursor-pointer"}`}
             >
               {option}
             </Label>
