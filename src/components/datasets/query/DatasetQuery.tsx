@@ -50,7 +50,7 @@ export const DatasetQuery = ({
     return matchesSearch && matchesField && matchesType && matchesFavorite;
   });
 
-  const handleSelect = (tableName: string) => {
+  const handleTableSelect = async (tableName: string) => {
     setSelectedDataset(tableName as TableNames);
     setQuery(`SELECT * FROM "${tableName}" LIMIT 100`);
     toast({
@@ -68,7 +68,7 @@ export const DatasetQuery = ({
         throw new Error(validation.error);
       }
 
-      const { data, error } = await supabase.rpc('execute_query', {
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: query
       });
 
@@ -77,7 +77,7 @@ export const DatasetQuery = ({
         throw new Error(pgError ? pgError[1] : error.message);
       }
 
-      const results = Array.isArray(data) ? data : [];
+      const results = Array.isArray(queryResult) ? queryResult : [];
       setQueryResults(results);
       
       if (results.length > 0) {
@@ -168,7 +168,7 @@ export const DatasetQuery = ({
             favorites={favorites}
             onPreview={() => {}}
             onDownload={() => {}}
-            onSelect={handleSelect}
+            onSelect={handleTableSelect}
             onToggleFavorite={toggleFavorite}
             onSearchChange={setSearchTerm}
             onFieldChange={setSelectedField}
@@ -183,14 +183,14 @@ export const DatasetQuery = ({
 
       <SqlQueryBox onExecute={handleExecuteQuery} defaultValue={query} />
 
-      <SavedQueries onSelectQuery={handleSelectSavedQuery} />
-
       <DatasetQueryResults
         isLoading={isLoading}
         queryResults={queryResults}
         columns={columns}
         onDownload={() => {}}
       />
+
+      <SavedQueries onSelectQuery={handleSelectSavedQuery} />
     </div>
   );
 };
