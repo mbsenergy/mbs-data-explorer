@@ -1,7 +1,6 @@
-import { Star } from "lucide-react";
+import { Star, Download, Eye } from "lucide-react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Download, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface FavoriteResourcesProps {
@@ -33,7 +32,7 @@ export const FavoriteResources = ({
             <TableCell className="font-bold">Name</TableCell>
             <TableCell className="font-bold">Field</TableCell>
             <TableCell className="font-bold">Extension</TableCell>
-            <TableCell className="font-bold">Actions</TableCell>
+            <TableCell className="font-bold w-[120px]">Actions</TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -50,30 +49,33 @@ export const FavoriteResources = ({
                   {file.extension}
                 </span>
               </TableCell>
-              <TableCell className="space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onPreview(file.name, file.section)}
-                  className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Preview
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDownload(file.name, file.section)}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Sample
-                </Button>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onPreview(file.name, file.section)}
+                    className="h-8 w-8 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                    title="Preview"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDownload(file.name, file.section)}
+                    className="h-8 w-8 bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+                    title="Download"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2">
+      <div className="flex items-center justify-end space-x-2 mt-4">
         <Button
           variant="outline"
           size="sm"
