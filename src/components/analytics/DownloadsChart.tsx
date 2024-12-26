@@ -12,12 +12,16 @@ interface ChartDataItem {
   'Dataset Samples': number;
   'Developer Files': number;
   'Dataset Exports': number;
+  'File Uploads': number;
+  'Query Executions': number;
 }
 
 interface DownloadsChartProps {
   analyticsData: any[];
   developerData: any[];
   exportsData: any[];
+  storageData: any[];
+  queryData: any[];
   isLoading: boolean;
 }
 
@@ -25,29 +29,43 @@ export const DownloadsChart = ({
   analyticsData, 
   developerData,
   exportsData,
+  storageData,
+  queryData,
   isLoading 
 }: DownloadsChartProps) => {
   const [isOpen, setIsOpen] = useState(true);
   
   const chartData: ChartDataItem[] = Object.entries(
-    [...(analyticsData || []), ...(developerData || []), ...(exportsData || [])]
+    [...(analyticsData || []), 
+     ...(developerData || []), 
+     ...(exportsData || []),
+     ...(storageData || []),
+     ...(queryData || [])]
     .reduce((acc: Record<string, ChartDataItem>, curr) => {
-      const date = new Date(curr.downloaded_at).toISOString().split('T')[0];
+      const date = new Date(curr.downloaded_at || curr.created_at).toISOString().split('T')[0];
       if (!acc[date]) {
         acc[date] = {
           date,
           'Dataset Samples': 0,
           'Developer Files': 0,
-          'Dataset Exports': 0
+          'Dataset Exports': 0,
+          'File Uploads': 0,
+          'Query Executions': 0
         };
       }
       
       if ('dataset_name' in curr) {
-        acc[date]['Dataset Samples']++;
+        if (curr.is_custom_query) {
+          acc[date]['Query Executions']++;
+        } else {
+          acc[date]['Dataset Samples']++;
+        }
       } else if ('file_name' in curr) {
         acc[date]['Developer Files']++;
       } else if ('export_name' in curr) {
         acc[date]['Dataset Exports']++;
+      } else if ('storage_id' in curr) {
+        acc[date]['File Uploads']++;
       }
       
       return acc;
@@ -56,7 +74,9 @@ export const DownloadsChart = ({
     date,
     'Dataset Samples': counts['Dataset Samples'],
     'Developer Files': counts['Developer Files'],
-    'Dataset Exports': counts['Dataset Exports']
+    'Dataset Exports': counts['Dataset Exports'],
+    'File Uploads': counts['File Uploads'],
+    'Query Executions': counts['Query Executions']
   }));
 
   const chartOptions: Highcharts.Options = {
@@ -68,6 +88,7 @@ export const DownloadsChart = ({
       text: undefined
     },
     xAxis: {
+      categories: chartData.map(item => item.date),
       labels: {
         rotation: -45,
         style: {
@@ -76,9 +97,8 @@ export const DownloadsChart = ({
       }
     },
     yAxis: {
-      categories: chartData.map(item => item.date),
       title: {
-        text: 'Number of Downloads'
+        text: 'Number of Actions'
       },
       allowDecimals: false
     },
@@ -107,6 +127,16 @@ export const DownloadsChart = ({
       type: 'bar',
       data: chartData.map(item => item['Dataset Exports']),
       color: '#A78BFA'
+    }, {
+      name: 'File Uploads',
+      type: 'bar',
+      data: chartData.map(item => item['File Uploads']),
+      color: '#34D399'
+    }, {
+      name: 'Query Executions',
+      type: 'bar',
+      data: chartData.map(item => item['Query Executions']),
+      color: '#F472B6'
     }],
     legend: {
       align: 'center',
@@ -125,7 +155,7 @@ export const DownloadsChart = ({
     <Card className="p-6 bg-card metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Daily Downloads</h2>
+          <h2 className="text-xl font-semibold">Daily Activity</h2>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">
               {isOpen ? (
@@ -147,7 +177,7 @@ export const DownloadsChart = ({
               />
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
-                No download data available
+                No activity data available
               </div>
             )}
           </div>

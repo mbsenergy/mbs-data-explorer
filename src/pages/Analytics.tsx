@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { StatsCards } from "@/components/analytics/StatsCards";
 import { DownloadsChart } from "@/components/analytics/DownloadsChart";
 import { DownloadsTable } from "@/components/analytics/DownloadsTable";
@@ -98,10 +98,9 @@ const Analytics = () => {
         });
         throw error;
       }
-
       return data;
     },
-    enabled: !!user?.id && !!profile,
+    enabled: !!user?.id,
   });
 
   const { data: developerAnalytics, isLoading: developerAnalyticsLoading } = useQuery({
@@ -150,6 +149,53 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
+  const { data: storageData, isLoading: storageLoading } = useQuery({
+    queryKey: ["storage", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("storage_files")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Storage error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch storage data.",
+        });
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: queryData, isLoading: queryLoading } = useQuery({
+    queryKey: ["queries", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("analytics")
+        .select("*")
+        .eq("user_id", user?.id)
+        .eq("is_custom_query", true)
+        .order("downloaded_at", { ascending: false });
+      
+      if (error) {
+        console.error("Query analytics error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch query analytics data.",
+        });
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   // Helper function to determine dataset type and tags
   const getDatasetInfo = (datasetName: string) => {
     const type = datasetName.split('_')[0] || 'Unknown';
@@ -168,7 +214,9 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-500">Analytics</h1>
+      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-500">
+        Analytics
+      </h1>
 
       <StatsCards
         lastConnection={lastConnection}
@@ -176,12 +224,13 @@ const Analytics = () => {
         totalDownloads={
           (analyticsData?.length || 0) + 
           (developerAnalytics?.length || 0) + 
-          (exportsData?.length || 0)
+          (exportsData?.length || 0) +
+          (storageData?.length || 0)
         }
         isLoading={{
           lastConnection: lastConnectionLoading,
           connections: connectionsLoading,
-          analytics: analyticsLoading || developerAnalyticsLoading || exportsLoading
+          analytics: analyticsLoading || developerAnalyticsLoading || exportsLoading || storageLoading
         }}
       />
 
@@ -189,7 +238,9 @@ const Analytics = () => {
         analyticsData={analyticsData || []}
         developerData={developerAnalytics || []}
         exportsData={exportsData || []}
-        isLoading={analyticsLoading || developerAnalyticsLoading || exportsLoading}
+        storageData={storageData || []}
+        queryData={queryData || []}
+        isLoading={analyticsLoading || developerAnalyticsLoading || exportsLoading || storageLoading || queryLoading}
       />
 
       <DownloadsTable
