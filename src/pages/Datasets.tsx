@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { DatasetActions } from "@/components/datasets/DatasetActions";
 import { DatasetQuery } from "@/components/datasets/query/DatasetQuery";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import type { TableInfo } from "@/components/datasets/types";
 import type { Database as SupabaseDatabase } from "@/integrations/supabase/types";
 
@@ -29,6 +30,10 @@ const Datasets = () => {
   const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(null);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const { favorites, toggleFavorite } = useFavorites();
+
+  // Feature access checks
+  const { isEnabled: canQuery } = useFeatureAccess("query");
+  const { isEnabled: canSearch } = useFeatureAccess("datamart_search");
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
@@ -198,9 +203,28 @@ const Datasets = () => {
     );
   }
 
+  if (!canSearch) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
+          Datasets
+        </h1>
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-semibold mb-2">Feature Not Available</h2>
+          <p className="text-muted-foreground">
+            The Datamart Search feature is only available for Plus and Premium users.
+            Please upgrade your account to access this feature.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">Datasets</h1>
+      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
+        Datasets
+      </h1>
       
       <Tabs defaultValue={searchParams.get("tab") || "explore"} className="space-y-6">
         <TabsList>
@@ -208,10 +232,12 @@ const Datasets = () => {
             <Search className="h-4 w-4" />
             Explore
           </TabsTrigger>
-          <TabsTrigger value="query" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            Query
-          </TabsTrigger>
+          {canQuery && (
+            <TabsTrigger value="query" className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              Query
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="explore">
@@ -242,12 +268,14 @@ const Datasets = () => {
           />
         </TabsContent>
 
-        <TabsContent value="query">
-          <DatasetQuery 
-            selectedDataset={selectedDataset}
-            selectedColumns={selectedColumns}
-          />
-        </TabsContent>
+        {canQuery && (
+          <TabsContent value="query">
+            <DatasetQuery 
+              selectedDataset={selectedDataset}
+              selectedColumns={selectedColumns}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
