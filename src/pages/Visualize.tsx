@@ -35,33 +35,41 @@ import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import "@/integrations/highcharts/highchartsConfig";
-
-interface DataPoint {
-  [key: string]: any;
-}
+import { DataPoint, PlotConfig, VisualizeState } from "@/types/visualize";
+import { generateChartOptions } from "@/utils/chart";
 
 const chartTypes = [
   { value: "scatter", label: "Scatter", icon: ScatterChart },
   { value: "bar", label: "Bar", icon: BarChart },
   { value: "line", label: "Line", icon: LineChart },
   { value: "box", label: "Box", icon: BoxSelect }
-];
+] as const;
 
 const Visualize = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [originalData, setOriginalData] = useState<DataPoint[]>([]);
-  const [filteredData, setFilteredData] = useState<DataPoint[]>([]);
-  const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedTable, setSelectedTable] = useState("");
-  const [plotConfig, setPlotConfig] = useState({
+  const [state, setState] = useState<VisualizeState>({
+    originalData: [],
+    filteredData: [],
+    columns: [],
+    isLoading: false,
+    selectedTable: "",
+    showChart: false,
+    plotData: [],
+    searchTerm: "",
+    selectedField: "all",
+    selectedType: "all",
+    showOnlyFavorites: false
+  });
+
+  const [plotConfig, setPlotConfig] = useState<PlotConfig>({
     xAxis: "",
     yAxis: "",
     chartType: "scatter",
     groupBy: "",
-    aggregation: "none",
+    aggregation: "none"
   });
+
   const [filters, setFilters] = useState<Filter[]>([
     { 
       id: uuidv4(), 
@@ -71,16 +79,12 @@ const Visualize = () => {
       comparisonOperator: "=" 
     }
   ]);
-  const [showChart, setShowChart] = useState(false);
+
   const [isUploadOpen, setIsUploadOpen] = useState(true);
   const [isQueryOpen, setIsQueryOpen] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(true);
   const [isChartOpen, setIsChartOpen] = useState(true);
-  const [plotData, setPlotData] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedField, setSelectedField] = useState("all");
-  const [selectedType, setSelectedType] = useState("all");
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+
   const { favorites, toggleFavorite } = useFavorites();
 
   const { data: tables } = useQuery({
@@ -93,15 +97,15 @@ const Visualize = () => {
   });
 
   const filteredTables = tables?.filter(table => {
-    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
-    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
-    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
+    const matchesSearch = table.tablename.toLowerCase().includes(state.searchTerm.toLowerCase());
+    const matchesField = state.selectedField === "all" || table.tablename.startsWith(state.selectedField);
+    const matchesType = state.selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${state.selectedType}_`));
+    const matchesFavorite = !state.showOnlyFavorites || favorites.has(table.tablename);
     return matchesSearch && matchesField && matchesType && matchesFavorite;
   });
 
   const handleTableSelect = (tableName: string) => {
-    setSelectedTable(tableName);
+    setState(prev => ({ ...prev, selectedTable: tableName }));
     handleQueryData();
   };
 
@@ -109,7 +113,7 @@ const Visualize = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsLoading(true);
+    setState(prev => ({ ...prev, isLoading: true }));
     try {
       const text = await file.text();
       const rows = text.split('\n');
@@ -129,9 +133,12 @@ const Visualize = () => {
         header,
       }));
 
-      setOriginalData(parsedData);
-      setFilteredData(parsedData);
-      setColumns(cols);
+      setState(prev => ({
+        ...prev,
+        originalData: parsedData,
+        filteredData: parsedData,
+        columns: cols,
+      }));
       toast({
         title: "Success",
         description: `Loaded ${parsedData.length} rows of data`,
@@ -143,12 +150,12 @@ const Visualize = () => {
         description: error.message || "Failed to load CSV file",
       });
     } finally {
-      setIsLoading(false);
+      setState(prev => ({ ...prev, isLoading: false }));
     }
   };
 
   const handleQueryData = async () => {
-    if (!selectedTable) {
+    if (!state.selectedTable) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -157,10 +164,10 @@ const Visualize = () => {
       return;
     }
 
-    setIsLoading(true);
+    setState(prev => ({ ...prev, isLoading: true }));
     try {
       const { data: queryData, error } = await supabase
-        .from(selectedTable)
+        .from(state.selectedTable)
         .select('*')
         .limit(1000);
 
@@ -174,12 +181,15 @@ const Visualize = () => {
             header: key,
           }));
 
-        setOriginalData(queryData);
-        setFilteredData(queryData);
-        setColumns(cols);
+        setState(prev => ({
+          ...prev,
+          originalData: queryData,
+          filteredData: queryData,
+          columns: cols,
+        }));
         toast({
           title: "Success",
-          description: `Loaded ${queryData.length} rows from ${selectedTable}`,
+          description: `Loaded ${queryData.length} rows from ${state.selectedTable}`,
         });
       }
     } catch (error: any) {
@@ -189,7 +199,7 @@ const Visualize = () => {
         description: error.message || "Failed to query data",
       });
     } finally {
-      setIsLoading(false);
+      setState(prev => ({ ...prev, isLoading: false }));
     }
   };
 
@@ -264,11 +274,11 @@ const Visualize = () => {
   };
 
   const handleExportData = () => {
-    if (!filteredData.length) return;
+    if (!state.filteredData.length) return;
 
     try {
-      const headers = Object.keys(filteredData[0]).join(',');
-      const rows = filteredData.map(row => 
+      const headers = Object.keys(state.filteredData[0]).join(',');
+      const rows = state.filteredData.map(row => 
         Object.values(row).map(value => {
           if (value === null) return '';
           if (typeof value === 'string' && value.includes(',')) {
@@ -303,110 +313,11 @@ const Visualize = () => {
   };
 
   useEffect(() => {
-    if (!showChart || !plotConfig.xAxis || !plotConfig.yAxis || !filteredData.length) return;
+    if (!state.showChart || !plotConfig.xAxis || !plotConfig.yAxis || !state.filteredData.length) return;
 
-    const getSeriesType = () => {
-      switch (plotConfig.chartType) {
-        case 'bar':
-          return 'column';
-        case 'box':
-          return 'boxplot';
-        default:
-          return plotConfig.chartType;
-      }
-    };
-
-    const getSeriesData = () => {
-      if (plotConfig.groupBy) {
-        const groups = filteredData.reduce((acc, item) => {
-          const group = item[plotConfig.groupBy];
-          if (!acc[group]) acc[group] = [];
-          acc[group].push(item);
-          return acc;
-        }, {} as Record<string, DataPoint[]>);
-
-        return Object.entries(groups).map(([group, items]) => {
-          const xValues = items.map(item => item[plotConfig.xAxis]);
-          const yValues = items.map(item => item[plotConfig.yAxis]);
-
-          if (plotConfig.aggregation !== 'none') {
-            const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
-            return {
-              name: group,
-              type: getSeriesType(),
-              data: [[xValues[0], aggregatedValue]]
-            };
-          }
-
-          return {
-            name: group,
-            type: getSeriesType(),
-            data: xValues.map((x, i) => [x, yValues[i]])
-          };
-        });
-      } else {
-        const xValues = filteredData.map(item => item[plotConfig.xAxis]);
-        const yValues = filteredData.map(item => item[plotConfig.yAxis]);
-
-        if (plotConfig.aggregation !== 'none') {
-          const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
-          return [{
-            type: getSeriesType(),
-            data: [[xValues[0], aggregatedValue]]
-          }];
-        }
-
-        return [{
-          type: getSeriesType(),
-          data: xValues.map((x, i) => [x, yValues[i]])
-        }];
-      }
-    };
-
-    const chartOptions: Highcharts.Options = {
-      title: {
-        text: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`
-      },
-      xAxis: {
-        title: {
-          text: plotConfig.xAxis
-        }
-      },
-      yAxis: {
-        title: {
-          text: plotConfig.yAxis
-        }
-      },
-      series: getSeriesData(),
-      plotOptions: {
-        scatter: {
-          marker: {
-            radius: 4
-          }
-        },
-        column: {
-          borderRadius: 5
-        }
-      }
-    };
-
-    setPlotData(chartOptions);
-  }, [showChart, plotConfig, filteredData]);
-
-  const aggregateValues = (values: number[], aggregation: string): number[] => {
-    switch (aggregation) {
-      case 'sum':
-        return [values.reduce((a, b) => a + b, 0)];
-      case 'mean':
-        return [values.reduce((a, b) => a + b, 0) / values.length];
-      case 'max':
-        return [Math.max(...values)];
-      case 'min':
-        return [Math.min(...values)];
-      default:
-        return values;
-    }
-  };
+    const chartOptions = generateChartOptions(state.filteredData, plotConfig);
+    setState(prev => ({ ...prev, plotData: chartOptions }));
+  }, [state.showChart, plotConfig, state.filteredData]);
 
   return (
     <div className="space-y-6">
@@ -418,15 +329,15 @@ const Visualize = () => {
         tables={tables || []}
         filteredTables={filteredTables || []}
         favorites={favorites}
-        selectedDataset={selectedTable}
+        selectedDataset={state.selectedTable}
         onPreview={() => {}}
         onDownload={() => {}}
         onSelect={handleTableSelect}
         onToggleFavorite={toggleFavorite}
-        onSearchChange={setSearchTerm}
-        onFieldChange={setSelectedField}
-        onTypeChange={setSelectedType}
-        onFavoriteChange={setShowOnlyFavorites}
+        onSearchChange={(term) => setState(prev => ({ ...prev, searchTerm: term }))}
+        onFieldChange={(field) => setState(prev => ({ ...prev, selectedField: field }))}
+        onTypeChange={(type) => setState(prev => ({ ...prev, selectedType: type }))}
+        onFavoriteChange={(show) => setState(prev => ({ ...prev, showOnlyFavorites: show }))}
         availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
         availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
       />
@@ -452,7 +363,7 @@ const Visualize = () => {
                   type="file"
                   accept=".csv"
                   onChange={handleFileUpload}
-                  disabled={isLoading}
+                  disabled={state.isLoading}
                 />
               </div>
             </CollapsibleContent>
@@ -480,13 +391,13 @@ const Visualize = () => {
                   <Input
                     type="text"
                     placeholder="Enter table name"
-                    value={selectedTable}
-                    onChange={(e) => setSelectedTable(e.target.value)}
+                    value={state.selectedTable}
+                    onChange={(e) => setState(prev => ({ ...prev, selectedTable: e.target.value }))}
                   />
                 </div>
                 <Button
                   onClick={handleQueryData}
-                  disabled={isLoading}
+                  disabled={state.isLoading}
                   className="w-full bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
                 >
                   Query Data
@@ -497,7 +408,7 @@ const Visualize = () => {
         </Card>
       </div>
 
-      {originalData.length > 0 && (
+      {state.originalData.length > 0 && (
         <>
           {/* Filters Card */}
           <Card className="p-6 metallic-card relative">
@@ -512,14 +423,14 @@ const Visualize = () => {
               </div>
               <CollapsibleContent>
                 <DatasetFilters
-                  columns={columns.map(col => col.accessorKey as string)}
+                  columns={state.columns.map(col => col.accessorKey as string)}
                   filters={filters}
                   onFilterChange={handleFilterChange}
                   onAddFilter={handleAddFilter}
                   onRemoveFilter={handleRemoveFilter}
                 />
                 <div className="flex justify-end mt-4">
-                  <Button onClick={() => setFilteredData(applyFilters(originalData))} className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white">
+                  <Button onClick={() => setState(prev => ({ ...prev, filteredData: applyFilters(state.originalData) }))} className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white">
                     Apply Filters
                   </Button>
                 </div>
@@ -527,11 +438,11 @@ const Visualize = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-md border border-border">
                       <div className="text-sm text-muted-foreground">Original Data Rows</div>
-                      <div className="text-2xl font-semibold">{originalData.length.toLocaleString()}</div>
+                      <div className="text-2xl font-semibold">{state.originalData.length.toLocaleString()}</div>
                     </div>
                     <div className="p-4 rounded-md border border-border">
                       <div className="text-sm text-muted-foreground">Filtered Data Rows</div>
-                      <div className="text-2xl font-semibold">{filteredData.length.toLocaleString()}</div>
+                      <div className="text-2xl font-semibold">{state.filteredData.length.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -542,7 +453,7 @@ const Visualize = () => {
           {/* SQL Query Box */}
           <SqlQueryBox 
             onExecute={handleExportData} 
-            defaultValue={`SELECT * FROM ${selectedTable || 'your_table'} LIMIT 100`} 
+            defaultValue={`SELECT * FROM ${state.selectedTable || 'your_table'} LIMIT 100`} 
           />
 
           {/* Chart Configuration Card */}
@@ -570,7 +481,7 @@ const Visualize = () => {
                         onChange={(e) => setPlotConfig(prev => ({ ...prev, xAxis: e.target.value }))}
                       >
                         <option value="">Select column</option>
-                        {columns.map(col => (
+                        {state.columns.map(col => (
                           <option key={col.accessorKey as string} value={col.accessorKey as string}>
                             {col.header as string}
                           </option>
@@ -585,7 +496,7 @@ const Visualize = () => {
                         onChange={(e) => setPlotConfig(prev => ({ ...prev, yAxis: e.target.value }))}
                       >
                         <option value="">Select column</option>
-                        {columns.map(col => (
+                        {state.columns.map(col => (
                           <option key={col.accessorKey as string} value={col.accessorKey as string}>
                             {col.header as string}
                           </option>
@@ -600,7 +511,7 @@ const Visualize = () => {
                         onChange={(e) => setPlotConfig(prev => ({ ...prev, groupBy: e.target.value }))}
                       >
                         <option value="">No grouping</option>
-                        {columns.map(col => (
+                        {state.columns.map(col => (
                           <option key={col.accessorKey as string} value={col.accessorKey as string}>
                             {col.header as string}
                           </option>
@@ -668,7 +579,7 @@ const Visualize = () => {
 
                   <div className="flex justify-end space-x-2">
                     <Button
-                      onClick={() => setShowChart(true)}
+                      onClick={() => setState(prev => ({ ...prev, showChart: true }))}
                       disabled={!plotConfig.xAxis || !plotConfig.yAxis}
                       className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
                     >
@@ -683,7 +594,7 @@ const Visualize = () => {
           <div className="flex justify-end">
             <Button
               onClick={handleExportData}
-              disabled={!filteredData.length}
+              disabled={!state.filteredData.length}
               className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
             >
               <Download className="h-4 w-4 mr-2" />
@@ -694,7 +605,7 @@ const Visualize = () => {
           <Card className="p-6 metallic-card relative">
             <Collapsible open={isUploadOpen} onOpenChange={setIsUploadOpen}>
 
-            <Tabs defaultValue={"plot"} className="space-y-6">
+            <Tabs defaultValue="plot" className="space-y-6">
               <TabsList>
                 <TabsTrigger value="plot" className="flex items-center gap-2">
                   <ChartBar className="h-4 w-4" />
@@ -710,7 +621,7 @@ const Visualize = () => {
                 <div className="w-full h-[600px]">
                   <HighchartsReact
                     highcharts={Highcharts}
-                    options={plotData}
+                    options={state.plotData}
                     containerProps={{ style: { height: '100%' } }}
                   />
                 </div>
@@ -718,9 +629,9 @@ const Visualize = () => {
 
               <TabsContent value="table">
                 <DataGrid
-                  data={filteredData}
-                  columns={columns}
-                  isLoading={isLoading}
+                  data={state.filteredData}
+                  columns={state.columns}
+                  isLoading={state.isLoading}
                 />
               </TabsContent>
             </Tabs>
