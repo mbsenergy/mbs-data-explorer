@@ -30,7 +30,7 @@ export const DatasetQuery = ({
   const [selectedType, setSelectedType] = useState("all");
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
-  const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(initialSelectedDataset as TableNames | null);
+  const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(initialSelectedDataset);
   const [previewData, setPreviewData] = useState<{ tableName: string; data: string } | null>(null);
 
   const { data: tables } = useQuery({
@@ -60,7 +60,7 @@ export const DatasetQuery = ({
     });
   };
 
-  const handlePreview = async (tableName: string) => {
+  const handlePreview = async (tableName: TableNames) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -87,7 +87,7 @@ export const DatasetQuery = ({
     }
   };
 
-  const handleDownload = async (tableName: string) => {
+  const handleDownload = async (tableName: TableNames) => {
     if (!user?.id) {
       toast({
         variant: "destructive",
