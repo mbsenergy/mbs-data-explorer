@@ -59,48 +59,60 @@ export const ProfileSection = () => {
   });
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
+    try {
+      const file = event.target.files?.[0];
+      if (!file || !user) return;
 
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}-${Math.random()}.${fileExt}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file);
+      // First upload the file
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
 
-    if (uploadError) {
+      if (uploadError) {
+        toast({
+          title: "Error uploading avatar",
+          description: uploadError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Finally update the profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) {
+        toast({
+          title: "Error updating profile",
+          description: updateError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await refetch();
+      toast({
+        title: "Avatar updated successfully",
+        description: "Your profile picture has been updated.",
+      });
+    } catch (error) {
+      console.error('Avatar upload error:', error);
       toast({
         title: "Error uploading avatar",
-        description: uploadError.message,
+        description: "An unexpected error occurred while uploading your avatar.",
         variant: "destructive",
       });
-      return;
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ avatar_url: publicUrl })
-      .eq('id', user.id);
-
-    if (updateError) {
-      toast({
-        title: "Error updating profile",
-        description: updateError.message,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    refetch();
-    toast({
-      title: "Avatar updated successfully",
-      description: "Your profile picture has been updated.",
-    });
   };
 
   const handleSave = async () => {
