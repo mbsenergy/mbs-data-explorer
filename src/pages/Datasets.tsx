@@ -79,7 +79,7 @@ const Datasets = () => {
 
   const handlePreview = async (tableName: string) => {
     try {
-      const { data, error } = await supabase.rpc('execute_query', {
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: `SELECT * FROM "${tableName}" LIMIT 30`
       });
 
@@ -87,11 +87,13 @@ const Datasets = () => {
         throw error;
       }
 
-      const previewRows = data.slice(0, 30);
-      setPreviewData({
-        tableName,
-        data: JSON.stringify(previewRows, null, 2)
-      });
+      if (queryResult && Array.isArray(queryResult)) {
+        const previewRows = queryResult.slice(0, 30);
+        setPreviewData({
+          tableName,
+          data: JSON.stringify(previewRows, null, 2)
+        });
+      }
     } catch (error: any) {
       console.error("Error previewing dataset:", error);
       toast({

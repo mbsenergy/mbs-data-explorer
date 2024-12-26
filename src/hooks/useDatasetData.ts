@@ -29,14 +29,15 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   const fetchColumns = async (tableName: TableNames) => {
     // Use RPC call to execute_query instead of direct table query
-    const { data, error } = await supabase.rpc('execute_query', {
+    const { data: queryResult, error } = await supabase.rpc('execute_query', {
       query_text: `SELECT * FROM "${tableName}" LIMIT 1`
     });
 
     if (error) throw error;
     
-    if (data && data.length > 0) {
-      return Object.keys(data[0]).filter(col => !col.startsWith('md_'));
+    // queryResult is an array of objects, take the first one if it exists
+    if (queryResult && Array.isArray(queryResult) && queryResult.length > 0) {
+      return Object.keys(queryResult[0]).filter(col => !col.startsWith('md_'));
     }
     return [];
   };
@@ -129,15 +130,15 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         const availableColumns = await fetchColumns(selectedDataset);
         setColumns(availableColumns);
 
-        // Fetch initial data without limit
-        const { data: initialData, error: initialError } = await supabase
-          .from(selectedDataset)
-          .select(availableColumns.join(','));
+        // Fetch initial data
+        const { data: queryResult, error: queryError } = await supabase.rpc('execute_query', {
+          query_text: `SELECT ${availableColumns.join(',')} FROM "${selectedDataset}"`
+        });
 
-        if (initialError) throw initialError;
+        if (queryError) throw queryError;
         
-        if (initialData) {
-          setData(initialData);
+        if (queryResult && Array.isArray(queryResult)) {
+          setData(queryResult);
         }
       } catch (error: any) {
         console.error("Error loading data:", error);
@@ -163,21 +164,23 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const start = page * itemsPerPage;
       const end = start + itemsPerPage - 1;
       
-      const { data: pageData, error } = await fetchWithRetry(async () => {
-        return await supabase
-          .from(selectedDataset)
-          .select(columns.join(','))
-          .range(start, end);
+      const { data: pageData, error } = await supabase.rpc('execute_query', {
+        query_text: `SELECT ${columns.join(',')} FROM "${selectedDataset}" OFFSET ${start} LIMIT ${itemsPerPage}`
       });
       
       if (error) throw error;
-      return pageData;
+      
+      if (pageData && Array.isArray(pageData)) {
+        return pageData;
+      }
+      return [];
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error fetching page",
         description: error.message
       });
+      return [];
     }
   };
 
