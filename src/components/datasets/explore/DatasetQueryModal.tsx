@@ -7,9 +7,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import hljs from 'highlight.js';
-import 'highlight.js/styles/night-owl.css';
-import { useEffect } from "react";
 
 interface DatasetQueryModalProps {
   isOpen: boolean;
@@ -52,12 +49,6 @@ data = response.execute()`
     }
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      hljs.highlightAll();
-    }
-  }, [isOpen, query, apiCall]);
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
@@ -82,8 +73,8 @@ data = response.execute()`
                 Copy Query
               </Button>
             </div>
-            <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto">
-              <code className="language-sql">{query}</code>
+            <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
+              {query}
             </pre>
           </div>
           <div>
@@ -101,8 +92,8 @@ data = response.execute()`
                 Copy Python Code
               </Button>
             </div>
-            <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto">
-              <code className="language-python">{pythonApiCall}</code>
+            <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
+              {pythonApiCall}
             </pre>
           </div>
         </div>
