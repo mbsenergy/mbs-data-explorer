@@ -75,8 +75,8 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-4 py-6">
+      <ScrollArea className="flex-1 px-3">
+        <div className="space-y-3 py-4">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -85,10 +85,10 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               }`}
             >
               <div
-                className={`rounded-xl px-4 py-2.5 max-w-[65%] text-xs shadow-lg backdrop-blur-sm ${
+                className={`rounded-xl px-3 py-2 max-w-[60%] text-xs shadow-lg backdrop-blur-sm ${
                   message.role === 'user'
-                    ? 'metallic-card text-primary-foreground ml-4'
-                    : 'glass-panel mr-4 border-l-2 border-l-primary'
+                    ? 'metallic-card text-primary-foreground ml-3'
+                    : 'glass-panel mr-3 border-l-2 border-l-primary'
                 }`}
               >
                 <ReactMarkdown 
@@ -111,13 +111,13 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="How can I help?"
-              className="min-h-[45px] text-xs metallic-card resize-none"
+              className="min-h-[40px] text-xs metallic-card resize-none"
             />
             <div className="flex flex-col gap-2">
               <Button 
                 type="submit" 
                 disabled={isLoading}
-                className="bg-primary hover:bg-primary/90 h-[45px] px-3"
+                className="bg-primary hover:bg-primary/90 h-[40px] px-2"
                 size="icon"
               >
                 {isLoading ? (
@@ -130,7 +130,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                 type="button"
                 onClick={handleClearChat}
                 variant="outline"
-                className="h-[45px] px-3"
+                className="h-[40px] px-2"
                 size="icon"
               >
                 <Trash2 className="h-4 w-4" />
