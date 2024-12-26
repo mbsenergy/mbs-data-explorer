@@ -22,6 +22,9 @@ interface AxisSelectorProps {
 }
 
 export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) => {
+  // Only show columns that are marked as visible (show === true)
+  const visibleColumns = columns.filter(col => (col as any).show);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
@@ -49,7 +52,7 @@ export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) =
               <SelectValue placeholder="Select column" />
             </SelectTrigger>
             <SelectContent>
-              {columns.map(col => (
+              {visibleColumns.map(col => (
                 <SelectItem key={String(col.id)} value={String(col.id)}>
                   {String(col.header)}
                 </SelectItem>
@@ -73,7 +76,7 @@ export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) =
               <SelectValue placeholder="Select column" />
             </SelectTrigger>
             <SelectContent>
-              {columns.map(col => (
+              {visibleColumns.map(col => (
                 <SelectItem key={String(col.id)} value={String(col.id)}>
                   {String(col.header)}
                 </SelectItem>
@@ -98,7 +101,7 @@ export const AxisSelector = ({ columns, config, onChange }: AxisSelectorProps) =
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">No grouping</SelectItem>
-              {columns.map(col => (
+              {visibleColumns.map(col => (
                 <SelectItem key={String(col.id)} value={String(col.id)}>
                   {String(col.header)}
                 </SelectItem>
