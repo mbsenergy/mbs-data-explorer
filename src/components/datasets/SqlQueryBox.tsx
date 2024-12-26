@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 
 interface SqlEditorProps {
   onExecute: (query: string, useBatchProcessing: boolean) => void;
@@ -86,7 +87,7 @@ export const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }:
   };
 
   return (
-    <div className="space-y-4">
+    <Card className="p-6 space-y-4 metallic-card">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">SQL Query</h3>
         <div className="flex items-center gap-4">
@@ -132,6 +133,6 @@ export const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }:
         className="font-mono min-h-[200px]"
         disabled={isLoading}
       />
-    </div>
+    </Card>
   );
 };
