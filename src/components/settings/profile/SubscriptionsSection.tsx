@@ -1,8 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Bell } from "lucide-react";
-import { useState } from "react";
 
 const SUBSCRIPTION_OPTIONS = [
   "Flux catalog & news",
@@ -24,8 +23,6 @@ export const SubscriptionsSection = ({
   subscriptions,
   onSubscriptionsChange,
 }: SubscriptionsSectionProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-
   const handleSubscriptionToggle = (option: string) => {
     const newSubscriptions = subscriptions.includes(option)
       ? subscriptions.filter(s => s !== option)
@@ -34,48 +31,33 @@ export const SubscriptionsSection = ({
   };
 
   return (
-    <Card className="relative">
-      <CardHeader 
-        className="flex flex-row items-center justify-between cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center gap-2">
-          <Bell className="h-6 w-6 text-muted-foreground" />
-          <CardTitle>Subscriptions</CardTitle>
-        </div>
-        <button
-          type="button"
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {isExpanded ? "▼" : "▶"}
-        </button>
-      </CardHeader>
-      {isExpanded && (
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            {SUBSCRIPTION_OPTIONS.map((option) => (
-              <div key={option} className="flex items-center space-x-2">
-                <Checkbox
-                  id={option}
-                  checked={subscriptions.includes(option)}
-                  onCheckedChange={() => {
-                    if (isEditing) {
-                      handleSubscriptionToggle(option);
-                    }
-                  }}
-                  disabled={!isEditing}
-                />
-                <Label
-                  htmlFor={option}
-                  className={!isEditing ? "text-muted-foreground" : ""}
-                >
-                  {option}
-                </Label>
-              </div>
-            ))}
+    <CollapsibleCard 
+      title="Subscriptions" 
+      icon={<Bell className="h-5 w-5" />}
+      defaultOpen={true}
+    >
+      <div className="grid grid-cols-2 gap-4">
+        {SUBSCRIPTION_OPTIONS.map((option) => (
+          <div key={option} className="flex items-center space-x-2">
+            <Checkbox
+              id={option}
+              checked={subscriptions.includes(option)}
+              onCheckedChange={() => {
+                if (isEditing) {
+                  handleSubscriptionToggle(option);
+                }
+              }}
+              disabled={!isEditing}
+            />
+            <Label
+              htmlFor={option}
+              className={!isEditing ? "text-muted-foreground" : ""}
+            >
+              {option}
+            </Label>
           </div>
-        </CardContent>
-      )}
-    </Card>
+        ))}
+      </div>
+    </CollapsibleCard>
   );
 };
