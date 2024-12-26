@@ -12,7 +12,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   
-  const pageSize = 1000; // Chunk size for fetching data
+  const pageSize = 1000;
   const maxRetries = 3;
 
   const fetchWithRetry = async (fn: () => Promise<any>, retries = maxRetries) => {
@@ -28,14 +28,12 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   };
 
   const fetchColumns = async (tableName: TableNames) => {
-    // Use RPC call to execute_query instead of direct table query
     const { data: queryResult, error } = await supabase.rpc('execute_query', {
       query_text: `SELECT * FROM "${tableName}" LIMIT 1`
     });
 
     if (error) throw error;
     
-    // queryResult is an array of objects, take the first one if it exists
     if (queryResult && Array.isArray(queryResult) && queryResult.length > 0) {
       return Object.keys(queryResult[0]).filter(col => !col.startsWith('md_'));
     }
@@ -45,7 +43,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const loadData = async (tableName: TableNames, selectedColumns: string[] = []) => {
     setIsLoading(true);
     try {
-      // First get total count
       const { data: countResult, error: countError } = await supabase
         .rpc('get_table_row_count', { table_name: tableName });
       
@@ -54,32 +51,30 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
 
-      // Get available columns if not provided
       const columnsToUse = selectedColumns.length > 0 ? 
         selectedColumns : 
         await fetchColumns(tableName);
       
       setColumns(columnsToUse);
 
-      // Calculate number of pages needed
       const numberOfPages = Math.ceil(totalRows / pageSize);
       let allData: any[] = [];
 
-      // Fetch data in chunks
       for (let i = 0; i < numberOfPages; i++) {
         const from = i * pageSize;
         const to = from + pageSize - 1;
 
         const { data: pageData, error } = await fetchWithRetry(async () => {
-          return await supabase
-            .from(tableName)
-            .select(columnsToUse.join(','))
-            .range(from, to);
+          // Use double quotes around column names to preserve case
+          const columnList = columnsToUse.map(col => `"${col}"`).join(',');
+          return await supabase.rpc('execute_query', {
+            query_text: `SELECT ${columnList} FROM "${tableName}" OFFSET ${from} LIMIT ${pageSize}`
+          });
         });
 
         if (error) throw error;
         
-        if (pageData) {
+        if (pageData && Array.isArray(pageData)) {
           allData = [...allData, ...pageData];
           console.log(`Loaded chunk ${i + 1}/${numberOfPages} (${pageData.length} rows)`);
         }
@@ -119,20 +114,18 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       setIsLoading(true);
 
       try {
-        // Get total count
         const { data: countResult, error: countError } = await supabase
           .rpc('get_table_row_count', { table_name: selectedDataset });
 
         if (countError) throw countError;
         setTotalRowCount(countResult || 0);
 
-        // Get available columns
         const availableColumns = await fetchColumns(selectedDataset);
         setColumns(availableColumns);
 
-        // Fetch initial data
+        const columnList = availableColumns.map(col => `"${col}"`).join(',');
         const { data: queryResult, error: queryError } = await supabase.rpc('execute_query', {
-          query_text: `SELECT ${availableColumns.join(',')} FROM "${selectedDataset}"`
+          query_text: `SELECT ${columnList} FROM "${selectedDataset}"`
         });
 
         if (queryError) throw queryError;
@@ -162,10 +155,10 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     
     try {
       const start = page * itemsPerPage;
-      const end = start + itemsPerPage - 1;
+      const columnList = columns.map(col => `"${col}"`).join(',');
       
       const { data: pageData, error } = await supabase.rpc('execute_query', {
-        query_text: `SELECT ${columns.join(',')} FROM "${selectedDataset}" OFFSET ${start} LIMIT ${itemsPerPage}`
+        query_text: `SELECT ${columnList} FROM "${selectedDataset}" OFFSET ${start} LIMIT ${itemsPerPage}`
       });
       
       if (error) throw error;
