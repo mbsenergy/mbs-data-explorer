@@ -2,6 +2,7 @@ import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SUBSCRIPTION_OPTIONS = [
   "Flux catalog & news",
@@ -38,24 +39,41 @@ export const SubscriptionsSection = ({
       icon={<Bell className="h-5 w-5" />}
       defaultOpen={true}
     >
-      <div className="grid grid-cols-2 gap-4">
-        {SUBSCRIPTION_OPTIONS.map((option) => (
-          <div key={option} className="flex items-center space-x-2">
-            <Checkbox
-              id={option}
-              checked={subscriptions.includes(option)}
-              onCheckedChange={() => handleSubscriptionToggle(option)}
-              disabled={!isEditing}
-              className="cursor-pointer"
-            />
-            <Label
-              htmlFor={option}
-              className={`${!isEditing ? "text-muted-foreground" : "cursor-pointer"}`}
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          {SUBSCRIPTION_OPTIONS.map((option) => (
+            <div 
+              key={option} 
+              className="flex items-center space-x-2"
+              onClick={() => isEditing && handleSubscriptionToggle(option)}
             >
-              {option}
-            </Label>
+              <Checkbox
+                id={option}
+                checked={subscriptions.includes(option)}
+                onCheckedChange={() => handleSubscriptionToggle(option)}
+                disabled={!isEditing}
+                className="cursor-pointer"
+              />
+              <Label
+                htmlFor={option}
+                className={`${!isEditing ? "text-muted-foreground" : "cursor-pointer"}`}
+              >
+                {option}
+              </Label>
+            </div>
+          ))}
+        </div>
+        
+        {isEditing && (
+          <div className="flex justify-end pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => onSubscriptionsChange(subscriptions)}
+            >
+              Save Subscriptions
+            </Button>
           </div>
-        ))}
+        )}
       </div>
     </CollapsibleCard>
   );
