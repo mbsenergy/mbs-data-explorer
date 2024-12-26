@@ -120,6 +120,7 @@ export const ChatInterface = () => {
             )}
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground mt-2 text-center">AI Powered by MBS-Energy</p>
       </form>
     </div>
   );
