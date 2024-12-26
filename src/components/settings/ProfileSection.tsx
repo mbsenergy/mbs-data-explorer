@@ -113,9 +113,12 @@ export const ProfileSection = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Profile Information</CardTitle>
-          <Badge className={`${getLevelColor(profile.level)} border-none`}>
-            {profile.level}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold">Level:</span>
+            <Badge className={`${getLevelColor(profile.level)} border-none text-base`}>
+              {profile.level}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
