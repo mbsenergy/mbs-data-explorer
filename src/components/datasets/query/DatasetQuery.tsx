@@ -10,7 +10,7 @@ import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetSearch } from "../DatasetSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
-import type { TableInfo } from "../types";
+import type { TableInfo, TableNames } from "../types";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -24,7 +24,7 @@ interface DatasetQueryProps {
 export const DatasetQuery = ({
   selectedDataset: initialSelectedDataset,
   selectedColumns: initialSelectedColumns,
-}) => {
+}: DatasetQueryProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [queryResults, setQueryResults] = useState<any[] | null>(null);
@@ -36,9 +36,9 @@ export const DatasetQuery = ({
   const [selectedType, setSelectedType] = useState("all");
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
-  const [selectedDataset, setSelectedDataset] = useState<string | null>(initialSelectedDataset);
+  const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(initialSelectedDataset as TableNames | null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  
+
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
     queryFn: async () => {
@@ -48,16 +48,8 @@ export const DatasetQuery = ({
     },
   });
 
-  const filteredTables = tables?.filter(table => {
-    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
-    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
-    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
-    return matchesSearch && matchesField && matchesType && matchesFavorite;
-  });
-
   const handleSelect = (tableName: string) => {
-    setSelectedDataset(tableName);
+    setSelectedDataset(tableName as TableNames);
     setQuery(`SELECT * FROM "${tableName}" LIMIT 100`);
     toast({
       title: "Query Generated",
@@ -156,7 +148,7 @@ export const DatasetQuery = ({
           </div>
         ) : (
           <DatasetSearch
-            tables={filteredTables || []}
+            tables={tables || []}
             onPreview={() => {}}
             onDownload={() => {}}
             onSelect={handleSelect}
@@ -166,6 +158,8 @@ export const DatasetQuery = ({
             onFieldChange={setSelectedField}
             onTypeChange={setSelectedType}
             onFavoriteChange={setShowOnlyFavorites}
+            availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
+            availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
             selectedDataset={selectedDataset || ""}
           />
         )}

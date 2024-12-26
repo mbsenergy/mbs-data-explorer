@@ -72,12 +72,11 @@ export const DatasetQueryResults = ({
           Export
         </Button>
       </div>
-      <div className="border rounded-md metallic-card">
+      <div className="border rounded-md metallic-card h-[700px]">
         <DataGrid
           data={queryResults}
           columns={columns}
           isLoading={isLoading}
-          style={{ height: '700px' }}
         />
       </div>
       <DatasetActionDialog

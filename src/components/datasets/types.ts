@@ -2,4 +2,37 @@ export type TableInfo = {
   tablename: string;
 };
 
-export type TableNames = string;
+export interface DatasetFiltersProps {
+  onSearchChange: (search: string) => void;
+  onFieldChange: (field: string) => void;
+  onTypeChange: (type: string) => void;
+  onFavoriteChange: (showFavorites: boolean) => void;
+  availableFields: string[];
+  availableTypes: string[];
+}
+
+export interface DataGridProps {
+  data: any[];
+  columns: ColumnDef<any>[];
+  isLoading?: boolean;
+  style?: React.CSSProperties;
+}
+
+export interface DatasetSearchProps {
+  tables: TableInfo[];
+  onPreview: (tableName: string) => void;
+  onDownload: (tableName: string) => void;
+  onSelect: (tableName: string) => void;
+  onToggleFavorite: (tableName: string) => void;
+  favorites: Set<string>;
+  onSearchChange: (search: string) => void;
+  onFieldChange: (field: string) => void;
+  onTypeChange: (type: string) => void;
+  onFavoriteChange: (showFavorites: boolean) => void;
+  availableFields: string[];
+  availableTypes: string[];
+  selectedDataset: string;
+  onLoad?: (tableName: string) => void;
+}
+
+export type TableNames = keyof Database['public']['Tables'];
