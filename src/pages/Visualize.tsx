@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import type { TableInfo } from "@/components/datasets/types";
 import { Label } from "@/components/ui/label";
 import { 
   Upload, 
-  Database, 
+  Database,
   Table,
   ChartBar,
   BarChart, 
@@ -34,10 +34,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
 
-interface DataPoint {
-  [key: string]: any;
-}
-
 const chartTypes = [
   { value: "scatter", label: "Scatter", icon: ScatterChart },
   { value: "bar", label: "Bar", icon: BarChart },
@@ -45,7 +41,7 @@ const chartTypes = [
   { value: "box", label: "Box", icon: BoxSelect }
 ];
 
-const Visualize = () => {
+export const Visualize = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [originalData, setOriginalData] = useState<DataPoint[]>([]);
@@ -426,24 +422,10 @@ const Visualize = () => {
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Select Table</Label>
-                  <Input
-                    type="text"
-                    placeholder="Enter table name"
-                    value={selectedTable}
-                    onChange={(e) => setSelectedTable(e.target.value)}
-                  />
-                </div>
-                <Button
-                  onClick={handleQueryData}
-                  disabled={isLoading}
-                  className="w-full bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
-                >
-                  Query Data
-                </Button>
-              </div>
+              <SqlQueryBox 
+                onExecute={handleExecuteQuery} 
+                defaultValue={`SELECT * FROM "${selectedTable || 'your_table'}" LIMIT 100`} 
+              />
             </CollapsibleContent>
           </Collapsible>
         </Card>
@@ -490,12 +472,6 @@ const Visualize = () => {
               </CollapsibleContent>
             </Collapsible>
           </Card>
-
-          {/* SQL Query Box */}
-          <SqlQueryBox 
-            onExecute={handleExportData} 
-            defaultValue={`SELECT * FROM ${selectedTable || 'your_table'} LIMIT 100`} 
-          />
 
           {/* Chart Configuration Card */}
           <Card className="p-6 metallic-card relative">
