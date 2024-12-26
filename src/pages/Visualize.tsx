@@ -92,6 +92,16 @@ const Visualize = () => {
     }, 0);
   };
 
+  const handleApplyFilters = () => {
+    const newFilteredData = applyFilters(state.originalData);
+    console.log("Applying filters, new filtered data:", newFilteredData);
+    setState(prev => ({ 
+      ...prev, 
+      filteredData: newFilteredData,
+      showChart: false // Reset chart when filters change
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
@@ -128,14 +138,7 @@ const Visualize = () => {
           onRemoveFilter={(filterId) => {
             setFilters(filters.filter(f => f.id !== filterId));
           }}
-          onApplyFilters={() => {
-            const newFilteredData = applyFilters(state.originalData);
-            console.log("Applying filters, new filtered data:", newFilteredData);
-            setState(prev => ({ 
-              ...prev, 
-              filteredData: newFilteredData 
-            }));
-          }}
+          onApplyFilters={handleApplyFilters}
           originalCount={state.originalData.length}
           filteredCount={state.filteredData.length}
         />
