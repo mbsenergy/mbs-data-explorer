@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Robot } from "lucide-react";
+import { Bot } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -14,7 +14,7 @@ export const ChatButton = () => {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
-          <Robot className="h-5 w-5" />
+          <Bot className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">
