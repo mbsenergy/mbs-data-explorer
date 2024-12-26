@@ -8,6 +8,7 @@ import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { FileUploadForm } from "./bucket/FileUploadForm";
 import { FilePreviewDialog } from "./bucket/FilePreviewDialog";
 import { FileTable } from "./bucket/FileTable";
+import { FileCarousel } from "./bucket/FileCarousel";
 
 interface StorageFile {
   id: string;
@@ -134,6 +135,16 @@ export const BucketUpload = () => {
       <Card className="p-4 space-y-4 metallic-card">
         <FileUploadForm onUploadSuccess={loadFiles} />
       </Card>
+
+      {files.length > 0 && (
+        <FileCarousel
+          files={files}
+          onPreview={handlePreview}
+          onDownload={handleDownload}
+          onDelete={handleDelete}
+          onTagsUpdate={handleTagsUpdate}
+        />
+      )}
 
       {isLoading ? (
         <div className="flex justify-center p-4">
