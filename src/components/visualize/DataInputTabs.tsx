@@ -22,7 +22,7 @@ export const DataInputTabs = ({
       <TabsList>
         <TabsTrigger value="upload" className="flex items-center gap-2">
           <Upload className="h-4 w-4" />
-          Upload Local File
+          Upload CSV
         </TabsTrigger>
         <TabsTrigger value="query" className="flex items-center gap-2">
           <Code className="h-4 w-4" />
