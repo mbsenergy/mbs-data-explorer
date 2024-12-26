@@ -10,8 +10,10 @@ import { PersonalContent } from "@/components/developer/tabs/PersonalContent";
 import { FileText, Grid } from "lucide-react";
 import { DeveloperActivity } from "@/components/developer/DeveloperActivity";
 import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 
 const Developer = () => {
+  const { isEnabled: canAccessDeveloper } = useFeatureAccess("developer");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
   const [showFavorites, setShowFavorites] = useState(false);
@@ -19,6 +21,24 @@ const Developer = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [previewData, setPreviewData] = useState<{ fileName: string; content: string; section: string } | null>(null);
+
+  // If user doesn't have access, show upgrade message
+  if (!canAccessDeveloper) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">
+          Developer Resources
+        </h1>
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-semibold mb-2">Premium Feature</h2>
+          <p className="text-muted-foreground">
+            The Developer section is only available for Premium users.
+            Please upgrade your account to access developer resources.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch all files to pass to DeveloperActivity
   const sections = ['presets', 'macros', 'developer', 'models', 'queries'];
@@ -161,7 +181,7 @@ const Developer = () => {
       {previewData && (
         <PreviewDialog
           isOpen={!!previewData}
-          onClose={handleClosePreview}
+          onClose={() => setPreviewData(null)}
           filePath=""
           fileName={previewData.fileName}
           section={previewData.section}
