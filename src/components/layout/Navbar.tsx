@@ -17,7 +17,6 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Fetch profile data including avatar_url
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -47,26 +46,7 @@ export const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-card border-b border-border/40 metallic-card">
-      <div className="flex items-center space-x-8">
-        {/* Company Logo */}
-        <div className="flex items-center">
-          <img 
-            src="/brand/flux_logo_02.png" 
-            alt="Company Logo" 
-            className="h-8"
-          />
-        </div>
-
-        {/* Welcome Message */}
-        <div className="hidden md:block">
-          <span className="text-sm text-muted-foreground">
-            Welcome, {profile?.first_name || user?.email}
-          </span>
-        </div>
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex items-center space-x-4">
+      <div className="flex-1">
         <Button 
           variant="ghost" 
           size="sm"
@@ -76,6 +56,24 @@ export const Navbar = () => {
           <Database className="h-4 w-4" />
           Query
         </Button>
+      </div>
+
+      {/* Center Logo */}
+      <div className="flex-1 flex justify-center items-center">
+        <img 
+          src="/brand/flux_logo_02.png" 
+          alt="Company Logo" 
+          className="h-8"
+        />
+      </div>
+
+      {/* Right Section */}
+      <div className="flex-1 flex items-center justify-end space-x-4">
+        <div className="hidden md:block">
+          <span className="text-sm text-muted-foreground">
+            Welcome, <h3 className="inline text-white font-semibold">{profile?.first_name || user?.email}</h3>
+          </span>
+        </div>
 
         <Button 
           variant="ghost" 

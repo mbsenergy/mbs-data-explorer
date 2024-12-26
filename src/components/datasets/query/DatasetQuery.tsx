@@ -160,26 +160,24 @@ export const DatasetQuery = ({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        {tables && (
-          <DatamartSearch
-            tables={tables}
-            filteredTables={filteredTables || []}
-            favorites={favorites}
-            onPreview={() => {}}
-            onDownload={() => {}}
-            onSelect={handleTableSelect}
-            onToggleFavorite={toggleFavorite}
-            onSearchChange={setSearchTerm}
-            onFieldChange={setSelectedField}
-            onTypeChange={setSelectedType}
-            onFavoriteChange={setShowOnlyFavorites}
-            availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
-            availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
-            selectedDataset={selectedDataset as string || ""}
-          />
-        )}
-      </div>
+      <DatamartSearch
+        tables={tables || []}
+        filteredTables={filteredTables || []}
+        favorites={favorites}
+        selectedDataset={selectedDataset}
+        onPreview={() => {}}
+        onDownload={() => {}}
+        onSelect={handleTableSelect}
+        onToggleFavorite={toggleFavorite}
+        onSearchChange={setSearchTerm}
+        onFieldChange={setSelectedField}
+        onTypeChange={setSelectedType}
+        onFavoriteChange={setShowOnlyFavorites}
+        availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
+        availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
+      />
+
+      <SavedQueries onSelectQuery={handleSelectSavedQuery} />
 
       <SqlQueryBox onExecute={handleExecuteQuery} defaultValue={query} />
 
@@ -189,8 +187,6 @@ export const DatasetQuery = ({
         columns={columns}
         onDownload={() => {}}
       />
-
-      <SavedQueries onSelectQuery={handleSelectSavedQuery} />
     </div>
   );
 };
