@@ -21,9 +21,6 @@ interface DataDisplayProps {
   onExport: () => void;
 }
 
-// Apply theme globally for all charts
-Highcharts.setOptions(theme);
-
 export const DataDisplay = ({
   plotData,
   filteredData,
@@ -100,11 +97,85 @@ export const DataDisplay = ({
   };
 
   const copyChartCode = () => {
-    const chartCode = JSON.stringify(plotData, null, 2);
-    navigator.clipboard.writeText(chartCode).then(() => {
+    const reactCode = `import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+
+const options = ${JSON.stringify(plotData, null, 2)};
+
+const Chart = () => (
+  <HighchartsReact
+    highcharts={Highcharts}
+    options={options}
+  />
+);`;
+
+    const pythonCode = `import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+# Assuming your data is in a pandas DataFrame
+options = ${JSON.stringify(plotData, null, 2)}
+
+# Create figure
+fig = go.Figure()
+
+# Add traces based on series data
+for series in options['series']:
+    fig.add_trace(
+        go.Scatter(
+            x=[point[0] for point in series['data']],
+            y=[point[1] for point in series['data']],
+            name=series['name'],
+            mode='lines+markers'
+        )
+    )
+
+# Update layout
+fig.update_layout(
+    title=options['title']['text'],
+    xaxis_title=options['xAxis']['title']['text'],
+    yaxis_title=options['yAxis']['title']['text'],
+    template='plotly_dark'
+)
+
+fig.show()`;
+
+    const rCode = `library(highcharter)
+
+options <- ${JSON.stringify(plotData, null, 2)}
+
+# Create the chart
+hc <- highchart() %>%
+  hc_chart(type = options$chart$type) %>%
+  hc_title(text = options$title$text) %>%
+  hc_xAxis(title = list(text = options$xAxis$title$text)) %>%
+  hc_yAxis(title = list(text = options$yAxis$title$text))
+
+# Add series data
+for (series in options$series) {
+  hc <- hc %>%
+    hc_add_series(
+      name = series$name,
+      data = series$data
+    )
+}
+
+# Display the chart
+hc`;
+
+    const allCode = `// React Implementation
+${reactCode}
+
+# Python Implementation
+${pythonCode}
+
+# R Implementation
+${rCode}`;
+
+    navigator.clipboard.writeText(allCode).then(() => {
       toast({
         title: "Success",
-        description: "Chart configuration copied to clipboard",
+        description: "Chart code snippets copied to clipboard",
       });
     }).catch(() => {
       toast({
@@ -158,7 +229,7 @@ export const DataDisplay = ({
                 className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
               >
                 <Code className="h-4 w-4 mr-2" />
-                Copy Config
+                Copy Code
               </Button>
             </div>
           </div>
