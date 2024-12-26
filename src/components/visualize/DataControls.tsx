@@ -17,15 +17,17 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
   const [availableSheets, setAvailableSheets] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null);
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setSelectedFile(file);
-    // Reset sheet-related state when a new file is selected
+    // Reset states when new file is selected
     setWorkbook(null);
     setAvailableSheets([]);
     setSelectedSheet('');
+    setIsFileUploaded(false);
   };
 
   const handleUploadFile = async () => {
@@ -46,6 +48,7 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
         setWorkbook(wb);
         setAvailableSheets(sheets);
         setSelectedSheet(sheets[0]);
+        setIsFileUploaded(true);
         toast({
           title: "Success",
           description: "File uploaded successfully. Please select a sheet to continue.",
@@ -59,22 +62,9 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
         });
       }
     } else {
-      // Process CSV file directly
+      // For CSV, process directly
       handleProcessData();
     }
-  };
-
-  const handleLoadSheetData = () => {
-    if (!workbook || !selectedSheet) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select a sheet first",
-      });
-      return;
-    }
-
-    handleProcessData();
   };
 
   const handleProcessData = async () => {
@@ -148,7 +138,7 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Upload className="h-4 w-4" />
-            <h2 className="text-lg font-semibold">Upload Local File</h2>
+            <h2 className="text-sm font-semibold">Upload Local File</h2>
           </div>
           <div className="flex items-center gap-2 bg-secondary/20 rounded-lg p-1">
             <Toggle
@@ -170,36 +160,38 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Choose File</label>
+            <label className="text-xs font-medium">Choose File</label>
             <Input
               type="file"
               accept={fileType === 'excel' ? '.xlsx,.xls' : '.csv'}
               onChange={handleFileSelect}
               disabled={isLoading}
-              className="text-sm cursor-pointer"
+              className="text-xs cursor-pointer"
             />
           </div>
 
-          <Button 
-            onClick={handleUploadFile}
-            disabled={isLoading || !selectedFile}
-            className="w-full bg-primary/20 hover:bg-primary/30"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload File
-          </Button>
+          {selectedFile && !isFileUploaded && (
+            <Button 
+              onClick={handleUploadFile}
+              disabled={isLoading || !selectedFile}
+              className="w-full bg-primary/20 hover:bg-primary/30 text-xs"
+            >
+              <Upload className="h-3 w-3 mr-2" />
+              Upload File
+            </Button>
+          )}
 
-          {fileType === 'excel' && availableSheets.length > 0 && (
-            <div className="space-y-4 mt-4">
+          {fileType === 'excel' && isFileUploaded && availableSheets.length > 0 && (
+            <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Select Sheet</label>
+                <label className="text-xs font-medium">Select Sheet</label>
                 <Select value={selectedSheet} onValueChange={setSelectedSheet}>
-                  <SelectTrigger className="text-sm">
+                  <SelectTrigger className="text-xs">
                     <SelectValue placeholder="Select a sheet" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableSheets.map((sheet) => (
-                      <SelectItem key={sheet} value={sheet} className="text-sm">
+                      <SelectItem key={sheet} value={sheet} className="text-xs">
                         {sheet}
                       </SelectItem>
                     ))}
@@ -208,14 +200,14 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Header Row</label>
+                <label className="text-xs font-medium">Header Row</label>
                 <Select value={headerRow} onValueChange={setHeaderRow}>
-                  <SelectTrigger className="text-sm">
+                  <SelectTrigger className="text-xs">
                     <SelectValue placeholder="Select header row" />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4, 5].map((num) => (
-                      <SelectItem key={num} value={num.toString()} className="text-sm">
+                      <SelectItem key={num} value={num.toString()} className="text-xs">
                         Row {num}
                       </SelectItem>
                     ))}
@@ -224,9 +216,9 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
               </div>
 
               <Button 
-                onClick={handleLoadSheetData}
+                onClick={handleProcessData}
                 disabled={isLoading || !selectedSheet}
-                className="w-full bg-primary/20 hover:bg-primary/30"
+                className="w-full bg-primary/20 hover:bg-primary/30 text-xs"
               >
                 Load Sheet Data
               </Button>
