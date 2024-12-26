@@ -146,7 +146,18 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
         <div className="grid gap-4">
           {columns.map(col => {
             const columnId = String(col.id);
-            const columnHeader = typeof col.header === 'function' ? col.header({}) : col.header;
+            const columnHeader = typeof col.header === 'function' 
+              ? col.header({
+                  column: col,
+                  header: col.header,
+                  table: {
+                    options: {
+                      columns: columns,
+                      data: data,
+                    },
+                  },
+                })
+              : col.header;
             const summary = getColumnSummary(columnId);
             
             return (
