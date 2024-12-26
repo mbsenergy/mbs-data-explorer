@@ -1,21 +1,22 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import type { ColDef, GridReadyEvent } from 'ag-grid-community';
 import type { ColumnDef } from "@tanstack/react-table";
 import type { DataGridProps } from '@/types/dataset';
+import '@ag-grid-community/styles/ag-grid.css';
+import '@ag-grid-community/styles/ag-theme-alpine.css';
 
-export function DataGrid({ data, columns, isLoading }: DataGridProps) {
-  const gridStyle = useMemo(() => ({ height: '800px', width: '100%', overflow: 'auto' }), []);
+export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
+  const gridStyle = useMemo(() => ({ 
+    height: '600px', 
+    width: '100%', 
+    ...style 
+  }), [style]);
 
   const defaultColDef = useMemo<ColDef>(() => ({
     sortable: true,
     filter: true,
     resizable: true,
-    pivot: true,
-    enablePivot: true,
-    enableRowGroup: true,
-    enableValue: true,
-    enablePivotMode: true,
     floatingFilter: true,
     filterParams: {
       buttons: ['reset', 'apply'],
@@ -25,16 +26,16 @@ export function DataGrid({ data, columns, isLoading }: DataGridProps) {
 
   const columnDefs = useMemo(() => {
     return columns.map((col): ColDef => ({
-      field: col.id as string,
+      field: col.accessorKey as string,
       headerName: String(col.header),
       minWidth: 150,
       width: 200,
     }));
   }, [columns]);
 
-  const onGridReady = useCallback((params: GridReadyEvent) => {
-    // Don't auto-size columns to allow horizontal scrolling
-  }, []);
+  const onGridReady = (params: GridReadyEvent) => {
+    params.api.sizeColumnsToFit();
+  };
 
   if (isLoading) {
     return (
@@ -51,35 +52,6 @@ export function DataGrid({ data, columns, isLoading }: DataGridProps) {
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         enableRangeSelection={true}
-        pivotPanelShow="always"
-        pivotMode={false}
-        sideBar={{
-          position: 'right',
-          defaultToolPanel: 'columns',
-          toolPanels: [
-            {
-              id: 'columns',
-              labelDefault: 'Columns',
-              labelKey: 'columns',
-              iconKey: 'columns',
-              toolPanel: 'agColumnsToolPanel',
-              toolPanelParams: {
-                suppressPivotMode: false,
-                suppressValues: false,
-                suppressRowGroups: false,
-                suppressPivots: false,
-              }
-            },
-            {
-              id: 'filters',
-              labelDefault: 'Filters',
-              labelKey: 'filters',
-              iconKey: 'filter',
-              toolPanel: 'agFiltersToolPanel',
-            },
-          ],
-        }}
-        enableCellTextSelection={true}
         animateRows={true}
         rowSelection="multiple"
         suppressRowClickSelection={true}

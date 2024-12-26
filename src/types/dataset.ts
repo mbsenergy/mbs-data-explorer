@@ -1,5 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { SeriesOptionsType } from "highcharts";
+
+export interface DataGridProps {
+  data: any[];
+  columns: ColumnDef<any>[];
+  isLoading?: boolean;
+  style?: React.CSSProperties;
+}
 
 export interface DatasetFiltersProps {
   columns: string[];
@@ -9,12 +15,6 @@ export interface DatasetFiltersProps {
   onColumnChange: (value: string) => void;
   availableFields: string[];
   availableTypes: string[];
-}
-
-export interface DataGridProps {
-  data: any[];
-  columns: ColumnDef<any>[];
-  isLoading?: boolean;
 }
 
 export interface DatasetSearchProps {

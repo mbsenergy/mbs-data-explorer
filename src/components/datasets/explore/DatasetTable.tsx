@@ -13,6 +13,10 @@ export const DatasetTable = ({ columns, data, selectedColumns }: DatasetTablePro
     return selectedColumns.map((col): ColumnDef<any> => ({
       accessorKey: col,
       header: col,
+      cell: info => {
+        const value = info.getValue();
+        return value === null ? 'NULL' : String(value);
+      },
     }));
   }, [selectedColumns]);
 
