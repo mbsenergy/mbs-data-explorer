@@ -8,10 +8,9 @@ import { DatamartSearch } from "@/components/visualize/DatamartSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo, TableNames } from "../types";
-import SqlQueryBox from "../SqlQueryBox";
+import { SqlQueryBox } from "../SqlQueryBox";
 import { SavedQueries } from "../SavedQueries";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
-import { Loader2 } from "lucide-react";
 
 export const DatasetQuery = ({
   selectedDataset: initialSelectedDataset,
@@ -98,7 +97,6 @@ export const DatasetQuery = ({
       return;
     }
 
-    setIsLoading(true);
     try {
       const { error: analyticsError } = await supabase
         .from("analytics")
@@ -159,8 +157,6 @@ export const DatasetQuery = ({
         title: "Error",
         description: error.message || "Failed to download dataset.",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -283,7 +279,7 @@ export const DatasetQuery = ({
 
       <SavedQueries onSelectQuery={handleSelectSavedQuery} />
 
-      <SqlQueryBox onExecute={handleExecuteQuery} defaultValue={query} isLoading={isLoading} />
+      <SqlQueryBox onExecute={handleExecuteQuery} defaultValue={query} />
 
       <DatasetQueryResults
         isLoading={isLoading}

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { DatasetActionDialog } from "./DatasetActionDialog";
-import { Loader2 } from "lucide-react";
 
 interface DatasetExploreActionsProps {
   selectedDataset: string | null;
@@ -52,10 +51,10 @@ export const DatasetExploreActions = ({
       return;
     }
     
-    if (countData > 1000000) {
+    if (countData > 500000) {
       toast({
         title: "Dataset too large",
-        description: "Cannot retrieve datasets with more than 1,000,000 rows. Please use the export feature instead.",
+        description: "Cannot retrieve datasets with more than 500,000 rows. Please use the export feature instead.",
         variant: "destructive"
       });
       return;
@@ -84,17 +83,8 @@ export const DatasetExploreActions = ({
         disabled={isLoading}
         className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
       >
-        {isLoading ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Loading...
-          </>
-        ) : (
-          <>
-            <Database className="h-4 w-4 mr-2" />
-            Retrieve
-          </>
-        )}
+        <Database className="h-4 w-4 mr-2" />
+        Retrieve
       </Button>
       <Button
         variant="outline"
