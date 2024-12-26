@@ -8,12 +8,14 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ForgotPassword } from "@/components/auth/ForgotPassword";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -77,69 +79,82 @@ const Login = () => {
       </div>
       
       <Card className="w-full max-w-md p-8 metallic-card relative z-10 shimmer">
-        <div className="space-y-6">
-          <div className="flex flex-col items-center space-y-2">
-            <img 
-              src="/brand/flux_logo_01.png" 
-              alt="Flux Logo" 
-              className="h-16 mb-4 animate-float"
-            />
-            <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
-              Welcome back
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Enter your company credentials to access the platform
-            </p>
+        {showForgotPassword ? (
+          <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+        ) : (
+          <div className="space-y-6">
+            <div className="flex flex-col items-center space-y-2">
+              <img 
+                src="/brand/flux_logo_01.png" 
+                alt="Flux Logo" 
+                className="h-16 mb-4 animate-float"
+              />
+              <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
+                Welcome back
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Enter your company credentials to access the platform
+              </p>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-foreground/90">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-foreground/90">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
+                  disabled={loading}
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-corporate-blue to-corporate-teal hover:opacity-90 transition-opacity"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full text-sm text-muted-foreground hover:text-primary"
+                onClick={() => setShowForgotPassword(true)}
+              >
+                Forgot your password?
+              </Button>
+            </form>
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground/90">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground/90">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
-                disabled={loading}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-corporate-blue to-corporate-teal hover:opacity-90 transition-opacity"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </Button>
-          </form>
-        </div>
+        )}
       </Card>
     </div>
   );
