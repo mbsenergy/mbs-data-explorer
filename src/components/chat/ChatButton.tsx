@@ -20,7 +20,7 @@ export const ChatButton = () => {
           <Bot className="h-5 w-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-0 metallic-card border border-border/40 w-[800px] min-w-[600px] max-w-[1200px] translate-y-[-10%]">
+      <DialogContent className="p-0 metallic-card border border-border/40 w-[800px] min-w-[600px] max-w-[1200px]">
         <div className="h-[80vh] p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
