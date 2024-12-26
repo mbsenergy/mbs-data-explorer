@@ -48,6 +48,15 @@ export const DatasetQuery = ({
     },
   });
 
+  // Filter tables based on search criteria
+  const filteredTables = tables?.filter(table => {
+    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
+    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
+    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
+    return matchesSearch && matchesField && matchesType && matchesFavorite;
+  });
+
   const handleSelect = (tableName: string) => {
     setSelectedDataset(tableName as TableNames);
     setQuery(`SELECT * FROM "${tableName}" LIMIT 100`);
@@ -56,29 +65,6 @@ export const DatasetQuery = ({
       description: `Query for ${tableName} has been generated.`,
       style: { backgroundColor: "#22c55e", color: "white" }
     });
-  };
-
-  const validateQuery = (query: string): { isValid: boolean; error?: string } => {
-    const disallowedKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE'];
-    const hasDisallowedKeywords = disallowedKeywords.some(keyword => 
-      query.toUpperCase().includes(keyword)
-    );
-    
-    if (hasDisallowedKeywords) {
-      return { 
-        isValid: false, 
-        error: "Only SELECT queries are allowed" 
-      };
-    }
-
-    if (!query.trim().toUpperCase().startsWith('SELECT')) {
-      return { 
-        isValid: false, 
-        error: "Query must start with SELECT" 
-      };
-    }
-
-    return { isValid: true };
   };
 
   const handleExecuteQuery = async (query: string) => {
@@ -139,6 +125,33 @@ export const DatasetQuery = ({
     }
   };
 
+  const validateQuery = (query: string): { isValid: boolean; error?: string } => {
+    const disallowedKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE'];
+    const hasDisallowedKeywords = disallowedKeywords.some(keyword => 
+      query.toUpperCase().includes(keyword)
+    );
+    
+    if (hasDisallowedKeywords) {
+      return { 
+        isValid: false, 
+        error: "Only SELECT queries are allowed" 
+      };
+    }
+
+    if (!query.trim().toUpperCase().startsWith('SELECT')) {
+      return { 
+        isValid: false, 
+        error: "Query must start with SELECT" 
+      };
+    }
+
+    return { isValid: true };
+  };
+
+  // Extract unique fields and types from table names
+  const fields = Array.from(new Set(tables?.map(table => table.tablename.slice(0, 2)) || [])).sort();
+  const types = Array.from(new Set(tables?.map(table => table.tablename.slice(2, 4)) || [])).sort();
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -158,8 +171,8 @@ export const DatasetQuery = ({
             onFieldChange={setSelectedField}
             onTypeChange={setSelectedType}
             onFavoriteChange={setShowOnlyFavorites}
-            availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
-            availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
+            availableFields={fields}
+            availableTypes={types}
             selectedDataset={selectedDataset as string || ""}
           />
         )}
