@@ -5,6 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { DataGridProps } from '@/types/dataset';
 import '@ag-grid-community/styles/ag-grid.css';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
+import 'ag-grid-enterprise';  // Import enterprise features
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -38,6 +39,9 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
       headerName: String(col.header),
       minWidth: 150,
       width: 200,
+      enablePivot: true,
+      enableRowGroup: true,
+      enableValue: true,
       ...(typeof data[0]?.[(col as any).accessorKey] === 'number' && {
         aggFunc: 'sum',
         allowedAggFuncs: ['sum', 'avg', 'min', 'max', 'count'],
@@ -84,11 +88,15 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
     rowGroupPanelShow: 'always' as const,
     pivotPanelShow: 'always' as const,
     suppressColumnVirtualisation: true,
+    defaultToolPanel: 'pivot',
+    showPivotPanel: true,
   };
 
   const onGridReady = (params: GridReadyEvent) => {
     gridApiRef.current = params.api;
     params.api.sizeColumnsToFit();
+    // Open the sidebar by default
+    params.api.setSideBarVisible(true);
   };
 
   const togglePivotMode = () => {
