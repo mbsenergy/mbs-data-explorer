@@ -7,6 +7,8 @@ import { DataDisplay } from "@/components/visualize/DataDisplay";
 import { useVisualizeState } from "@/components/visualize/VisualizeState";
 import { v4 as uuidv4 } from 'uuid';
 import type { DataPoint } from "@/types/visualize";
+import type { ColumnTypeConfig } from "@/types/column-types";
+import { convertDatasetColumns } from "@/utils/dataTypeConversion";
 
 const Visualize = () => {
   const {
@@ -20,6 +22,44 @@ const Visualize = () => {
     handleFileUpload,
     handleExportData
   } = useVisualizeState();
+
+  const [columnTypes, setColumnTypes] = useState<ColumnTypeConfig[]>([]);
+
+  const handleDataReceived = (data: DataPoint[], rawColumns: ColumnDef<any>[]) => {
+    const initialColumnTypes = rawColumns.map(col => ({
+      name: String(col.id),
+      type: 'text' as const,
+      show: true
+    }));
+    setColumnTypes(initialColumnTypes);
+    setState(prev => ({
+      ...prev,
+      originalData: data,
+      filteredData: data,
+      columns: rawColumns,
+    }));
+  };
+
+  const handleColumnTypeChange = (columnName: string, newType: string) => {
+    setColumnTypes(prev => 
+      prev.map(col => 
+        col.name === columnName ? { ...col, type: newType as ColumnDataType } : col
+      )
+    );
+
+    const typeMap = columnTypes.reduce((acc, col) => {
+      acc[col.name] = col.type;
+      return acc;
+    }, {} as { [key: string]: string });
+
+    const convertedData = convertDatasetColumns(state.originalData, typeMap);
+    
+    setState(prev => ({
+      ...prev,
+      originalData: convertedData,
+      filteredData: convertedData,
+    }));
+  };
 
   const compareValues = (itemValue: any, filterValue: string, operator: string): boolean => {
     const normalizedItemValue = String(itemValue).toLowerCase();
@@ -83,10 +123,7 @@ const Visualize = () => {
   };
 
   const handleGenerateChart = () => {
-    // First reset the chart state
     setState(prev => ({ ...prev, showChart: false }));
-    
-    // Then trigger a new chart generation in the next render cycle
     setTimeout(() => {
       setState(prev => ({ ...prev, showChart: true }));
     }, 0);
@@ -94,11 +131,10 @@ const Visualize = () => {
 
   const handleApplyFilters = () => {
     const newFilteredData = applyFilters(state.originalData);
-    console.log("Applying filters, new filtered data:", newFilteredData);
     setState(prev => ({ 
       ...prev, 
       filteredData: newFilteredData,
-      showChart: false // Reset chart when filters change
+      showChart: false 
     }));
   };
 
@@ -149,6 +185,8 @@ const Visualize = () => {
           columns={state.columns}
           selectedColumns={state.columns.filter(col => col.show).map(col => String(col.id))}
           onColumnSelect={handleColumnSelect}
+          columnTypes={columnTypes}
+          onColumnTypeChange={handleColumnTypeChange}
         />
       </CollapsibleCard>
 
