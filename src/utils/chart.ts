@@ -1,6 +1,5 @@
 import { DataPoint, PlotConfig } from "@/types/visualize";
 import type { Options, SeriesOptionsType, AxisTypeValue } from "highcharts";
-import type { ChartSeriesData } from "@/types/dataset";
 
 export const aggregateValues = (values: number[], aggregation: string): number[] => {
   switch (aggregation) {
@@ -73,17 +72,20 @@ export const generateChartOptions = (
         return acc;
       }, {} as Record<string, DataPoint[]>);
 
-      return Object.entries(groups).map(([group, items]): SeriesOptionsType => {
+      return Object.entries(groups).map(([group, items]) => {
+        // For each group, create a series with ALL data points
         const data = items.map(item => {
           const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
           const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
           return [xValue, yValue];
         });
 
+        // Sort data points
         data.sort((a, b) => (a[0] as number) - (b[0] as number));
 
         const type = getSeriesType(plotConfig.chartType);
 
+        // Only apply aggregation if explicitly requested
         if (plotConfig.aggregation !== 'none') {
           const yValues = items.map(item => Number(item[plotConfig.yAxis]));
           const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
@@ -94,6 +96,7 @@ export const generateChartOptions = (
           };
         }
 
+        // Return all data points for the group
         return {
           name: group,
           type,
@@ -102,7 +105,7 @@ export const generateChartOptions = (
       });
     }
 
-    // If no grouping, create a single series
+    // If no grouping, create a single series with all data points
     const data = filteredData.map(item => {
       const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
       const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
@@ -123,7 +126,7 @@ export const generateChartOptions = (
       }];
     }
 
-    // Return all data points when no aggregation is requested
+    // Return all data points
     return [{
       type,
       data
