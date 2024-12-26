@@ -32,6 +32,7 @@ import Plot from 'react-plotly.js';
 import type { Filter } from "@/components/datasets/explore/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
 
 interface DataPoint {
   [key: string]: any;
@@ -490,6 +491,12 @@ const Visualize = () => {
             </Collapsible>
           </Card>
 
+          {/* SQL Query Box */}
+          <SqlQueryBox 
+            onExecute={handleExportData} 
+            defaultValue={`SELECT * FROM ${selectedTable || 'your_table'} LIMIT 100`} 
+          />
+
           {/* Chart Configuration Card */}
           <Card className="p-6 metallic-card relative">
             <Collapsible open={isChartOpen} onOpenChange={setIsChartOpen}>
@@ -637,48 +644,48 @@ const Visualize = () => {
           </div>          
 
           <Card className="p-6 metallic-card relative">
-          <Collapsible open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+            <Collapsible open={isUploadOpen} onOpenChange={setIsUploadOpen}>
 
-          <Tabs defaultValue={"plot"} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="plot" className="flex items-center gap-2">
-          <ChartBar className="h-4 w-4" />
-            Plot
-          </TabsTrigger>
-          <TabsTrigger value="table" className="flex items-center gap-2">
-            <Table className="h-4 w-4" />
-            Table
-          </TabsTrigger>
-        </TabsList>
+            <Tabs defaultValue={"plot"} className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="plot" className="flex items-center gap-2">
+                  <ChartBar className="h-4 w-4" />
+                  Plot
+                </TabsTrigger>
+                <TabsTrigger value="table" className="flex items-center gap-2">
+                  <Table className="h-4 w-4" />
+                  Table
+                </TabsTrigger>
+              </TabsList>
 
-        <TabsContent value="plot">
-              <Plot
-                data={plotData}
-                layout={{
-                  title: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`,
-                  xaxis: { title: plotConfig.xAxis },
-                  yaxis: { title: plotConfig.yAxis },
-                  plot_bgcolor: 'transparent',
-                  paper_bgcolor: 'transparent',
-                  font: { color: '#fff' },
-                  showlegend: true,
-                  legend: { font: { color: '#fff' } },
-                  margin: { t: 50, r: 50, b: 50, l: 50 }
-                }}
-                style={{ width: '100%', height: '600px' }}
-                config={{ responsive: true }}
-              />
-            </TabsContent>
+              <TabsContent value="plot">
+                <Plot
+                  data={plotData}
+                  layout={{
+                    title: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`,
+                    xaxis: { title: plotConfig.xAxis },
+                    yaxis: { title: plotConfig.yAxis },
+                    plot_bgcolor: 'transparent',
+                    paper_bgcolor: 'transparent',
+                    font: { color: '#fff' },
+                    showlegend: true,
+                    legend: { font: { color: '#fff' } },
+                    margin: { t: 50, r: 50, b: 50, l: 50 }
+                  }}
+                  style={{ width: '100%', height: '600px' }}
+                  config={{ responsive: true }}
+                />
+              </TabsContent>
 
-            <TabsContent value="table">
-            <DataGrid
-              data={filteredData}
-              columns={columns}
-              isLoading={isLoading}
-            />
-          </TabsContent>
-          </Tabs>
-          </Collapsible>
+              <TabsContent value="table">
+                <DataGrid
+                  data={filteredData}
+                  columns={columns}
+                  isLoading={isLoading}
+                />
+              </TabsContent>
+            </Tabs>
+            </Collapsible>
           </Card>
         </>
       )}
