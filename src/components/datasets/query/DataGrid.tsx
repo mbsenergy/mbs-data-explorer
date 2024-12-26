@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, GridReadyEvent } from 'ag-grid-community';
+import type { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import type { ColumnDef } from "@tanstack/react-table";
 import type { DataGridProps } from '@/types/dataset';
 import '@ag-grid-community/styles/ag-grid.css';
@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 
 export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
   const { toast } = useToast();
+  const gridApiRef = useRef<GridApi | null>(null);
+  
   const gridStyle = useMemo(() => ({ 
     height: '600px', 
     width: '100%', 
@@ -21,9 +23,9 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
     filter: true,
     resizable: true,
     floatingFilter: true,
-    enablePivot: true, // Enable pivot for all columns by default
-    enableRowGroup: true, // Enable row grouping for all columns
-    enableValue: true, // Enable value aggregation for all columns
+    enablePivot: true,
+    enableRowGroup: true,
+    enableValue: true,
     filterParams: {
       buttons: ['reset', 'apply'],
       closeOnApply: true,
@@ -36,16 +38,15 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
       headerName: String(col.header),
       minWidth: 150,
       width: 200,
-      // Add specific pivot settings for numeric columns
       ...(typeof data[0]?.[(col as any).accessorKey] === 'number' && {
-        aggFunc: 'sum', // Default aggregation function for numeric columns
+        aggFunc: 'sum',
         allowedAggFuncs: ['sum', 'avg', 'min', 'max', 'count'],
       }),
     }));
   }, [columns, data]);
 
   const gridOptions = {
-    pivotMode: false, // Start with pivot mode disabled
+    pivotMode: false,
     sideBar: {
       toolPanels: [
         {
@@ -69,26 +70,28 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
           width: 250,
         },
       ],
-      position: 'right' as const, // Explicitly type as 'left' | 'right'
+      position: 'right' as const,
       defaultToolPanel: 'columns',
     },
   };
 
   const onGridReady = (params: GridReadyEvent) => {
+    gridApiRef.current = params.api;
     params.api.sizeColumnsToFit();
   };
 
-  const togglePivotMode = (params: any) => {
-    const api = params.api;
-    const isPivotMode = !api.isPivotMode();
-    api.setPivotMode(isPivotMode);
-    
-    toast({
-      title: isPivotMode ? "Pivot Mode Enabled" : "Pivot Mode Disabled",
-      description: isPivotMode 
-        ? "Drag columns to row groups or values to create pivot tables" 
-        : "Returned to standard view",
-    });
+  const togglePivotMode = () => {
+    if (gridApiRef.current) {
+      const isPivotMode = !gridApiRef.current.isPivotMode();
+      gridApiRef.current.setPivotMode(isPivotMode);
+      
+      toast({
+        title: isPivotMode ? "Pivot Mode Enabled" : "Pivot Mode Disabled",
+        description: isPivotMode 
+          ? "Drag columns to row groups or values to create pivot tables" 
+          : "Returned to standard view",
+      });
+    }
   };
 
   if (isLoading) {
@@ -104,12 +107,7 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
       <div className="flex justify-end">
         <Button
           variant="outline"
-          onClick={(e) => {
-            const gridApi = (document.querySelector('.ag-theme-alpine-dark') as any)?.gridApi;
-            if (gridApi) {
-              togglePivotMode({ api: gridApi });
-            }
-          }}
+          onClick={togglePivotMode}
           className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
         >
           Toggle Pivot Mode
