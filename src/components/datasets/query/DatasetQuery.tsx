@@ -42,13 +42,83 @@ export const DatasetQuery = ({
     },
   });
 
-  const filteredTables = tables?.filter(table => {
-    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
-    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
-    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
-    return matchesSearch && matchesField && matchesType && matchesFavorite;
-  });
+  const handleExecuteQuery = async (query: string) => {
+    setIsLoading(true);
+    setQueryResults(null);
+    setColumns([]);
+
+    try {
+      // Show warning for potentially long-running queries
+      if (!query.toLowerCase().includes('limit') || query.toLowerCase().includes('count(*)')) {
+        toast({
+          title: "Warning",
+          description: "Large queries may take longer to execute. Consider adding a LIMIT clause.",
+          variant: "default",
+          className: "bg-yellow-500"
+        });
+      }
+
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
+        query_text: query
+      });
+
+      if (error) {
+        // Handle timeout errors specifically
+        if (error.message.includes('57014') || error.message.includes('statement timeout')) {
+          throw new Error(
+            'Query timed out. Try these tips:\n' +
+            '- Add a LIMIT clause\n' +
+            '- Add more specific WHERE conditions\n' +
+            '- Break down the query into smaller parts'
+          );
+        }
+        throw error;
+      }
+
+      const results = Array.isArray(queryResult) ? queryResult : [];
+      
+      if (results.length > 0) {
+        const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
+          id: key,
+          header: key,
+          accessorKey: key,
+          cell: info => {
+            const value = info.getValue();
+            return value === null ? 'NULL' : String(value);
+          },
+        }));
+        setColumns(cols);
+        setQueryResults(results);
+      } else {
+        setColumns([]);
+        setQueryResults([]);
+      }
+      
+      toast({
+        title: "Query executed successfully",
+        description: `Retrieved ${results.length} rows`
+      });
+
+      if (user?.id) {
+        await supabase.from("analytics").insert({
+          user_id: user.id,
+          dataset_name: "custom_query",
+          is_custom_query: true
+        });
+      }
+    } catch (error: any) {
+      console.error("Error executing query:", error);
+      toast({
+        variant: "destructive",
+        title: "Query Error",
+        description: error.message || "Failed to execute query"
+      });
+      setQueryResults(null);
+      setColumns([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleTableSelect = async (tableName: string) => {
     setSelectedDataset(tableName as TableNames);
@@ -121,19 +191,16 @@ export const DatasetQuery = ({
         throw new Error("No data available for download");
       }
 
-      const headers = Object.keys(data[0]).filter(key => !key.startsWith('md_')).join(',');
-      const rows = data.map(row => {
-        return Object.entries(row)
-          .filter(([key]) => !key.startsWith('md_'))
-          .map(([_, value]) => {
-            if (value === null) return '';
-            if (typeof value === 'string' && value.includes(',')) {
-              return `"${value}"`;
-            }
-            return value;
-          })
-          .join(',');
-      });
+      const headers = Object.keys(data[0]).join(',');
+      const rows = data.map(row => 
+        Object.values(row).map(value => {
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
       const csv = [headers, ...rows].join('\n');
 
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -160,103 +227,13 @@ export const DatasetQuery = ({
     }
   };
 
-  const handleExecuteQuery = async (query: string) => {
-    setIsLoading(true);
-    try {
-      const validation = validateQuery(query);
-      if (!validation.isValid) {
-        throw new Error(validation.error);
-      }
-
-      const { data: queryResult, error } = await supabase.rpc('execute_query', {
-        query_text: query
-      });
-
-      if (error) {
-        const pgError = error.message.match(/Query execution failed: (.*)/);
-        throw new Error(pgError ? pgError[1] : error.message);
-      }
-
-      const results = Array.isArray(queryResult) ? queryResult : [];
-      setQueryResults(results);
-      
-      if (results.length > 0) {
-        const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
-          accessorKey: key,
-          header: key,
-          cell: info => {
-            const value = info.getValue();
-            return value === null ? 'NULL' : String(value);
-          },
-        }));
-        setColumns(cols);
-      } else {
-        setColumns([]);
-      }
-      
-      toast({
-        title: "Query executed successfully",
-        description: `Retrieved ${results.length} rows`
-      });
-
-      if (user?.id) {
-        await supabase.from("analytics").insert({
-          user_id: user.id,
-          dataset_name: "custom_query",
-          is_custom_query: true
-        });
-      }
-    } catch (error: any) {
-      console.error("Error executing query:", error);
-      toast({
-        variant: "destructive",
-        title: "Query Error",
-        description: error.message || "Failed to execute query"
-      });
-      setQueryResults(null);
-      setColumns([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const validateQuery = (query: string): { isValid: boolean; error?: string } => {
-    if (!query.trim()) {
-      return { 
-        isValid: false, 
-        error: "Query cannot be empty" 
-      };
-    }
-
-    const disallowedKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE'];
-    const hasDisallowedKeywords = disallowedKeywords.some(keyword => 
-      query.toUpperCase().includes(keyword)
-    );
-    
-    if (hasDisallowedKeywords) {
-      return { 
-        isValid: false, 
-        error: "Only SELECT queries are allowed" 
-      };
-    }
-
-    if (!query.trim().toUpperCase().startsWith('SELECT')) {
-      return { 
-        isValid: false, 
-        error: "Query must start with SELECT" 
-      };
-    }
-
-    return { isValid: true };
-  };
-
-  const handleSelectSavedQuery = (queryText: string) => {
-    setQuery(queryText);
-    toast({
-      title: "Query Loaded",
-      description: "Saved query has been loaded into the editor",
-    });
-  };
+  const filteredTables = tables?.filter(table => {
+    const matchesSearch = table.tablename.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesField = selectedField === "all" || table.tablename.startsWith(selectedField);
+    const matchesType = selectedType === "all" || table.tablename.match(new RegExp(`^[A-Z]{2}${selectedType}_`));
+    const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
+    return matchesSearch && matchesField && matchesType && matchesFavorite;
+  });
 
   return (
     <div className="space-y-6">
@@ -277,9 +254,13 @@ export const DatasetQuery = ({
         availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
       />
 
-      <SavedQueries onSelectQuery={handleSelectSavedQuery} />
+      <SavedQueries onSelectQuery={(queryText) => setQuery(queryText)} />
 
-      <SqlQueryBox onExecute={handleExecuteQuery} defaultValue={query} />
+      <SqlQueryBox 
+        onExecute={handleExecuteQuery} 
+        defaultValue={query}
+        isLoading={isLoading}
+      />
 
       <DatasetQueryResults
         isLoading={isLoading}
