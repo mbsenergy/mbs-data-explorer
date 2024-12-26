@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Eye, Trash2 } from "lucide-react";
+import { TagBadge } from "@/components/datasets/query-tags/TagBadge";
 import {
   Table,
   TableBody,
@@ -14,6 +15,7 @@ interface SavedQuery {
   name: string;
   query_text: string;
   created_at: string;
+  tags?: string[];
 }
 
 interface SavedQueriesTableProps {
@@ -29,6 +31,7 @@ export const SavedQueriesTable = ({ queries, onPreview, onDelete }: SavedQueries
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
+            <TableHead>Tags</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -37,6 +40,13 @@ export const SavedQueriesTable = ({ queries, onPreview, onDelete }: SavedQueries
           {queries.map((query) => (
             <TableRow key={query.id}>
               <TableCell className="font-medium">{query.name}</TableCell>
+              <TableCell>
+                <div className="flex flex-wrap gap-2">
+                  {query.tags?.map((tag) => (
+                    <TagBadge key={tag} tag={tag} onRemove={() => {}} />
+                  ))}
+                </div>
+              </TableCell>
               <TableCell>
                 {new Date(query.created_at).toLocaleDateString()}
               </TableCell>
