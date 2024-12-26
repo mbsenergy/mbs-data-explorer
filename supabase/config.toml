@@ -1,1 +1,2 @@
-project_id = "iwxrujnudebniylrpjlx"
+[functions.data-access]
+verify_jwt = false
