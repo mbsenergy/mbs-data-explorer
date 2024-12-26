@@ -1,16 +1,16 @@
-import { Card } from "@/components/ui/card";
-import { Code } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Play, Save, Loader2 } from "lucide-react";
+import { Play, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface SqlEditorProps {
-  onExecute: (query: string) => void;
+  onExecute: (query: string, useBatchProcessing: boolean) => void;
   defaultValue?: string;
   isLoading?: boolean;
 }
@@ -18,6 +18,7 @@ interface SqlEditorProps {
 const SqlEditor = ({ onExecute, defaultValue = "", isLoading = false }: SqlEditorProps) => {
   const [query, setQuery] = useState(defaultValue);
   const [queryName, setQueryName] = useState("");
+  const [useBatchProcessing, setUseBatchProcessing] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -27,7 +28,7 @@ const SqlEditor = ({ onExecute, defaultValue = "", isLoading = false }: SqlEdito
 
   const handleExecute = () => {
     if (query.trim()) {
-      onExecute(query);
+      onExecute(query, useBatchProcessing);
     }
   };
 
@@ -88,7 +89,15 @@ const SqlEditor = ({ onExecute, defaultValue = "", isLoading = false }: SqlEdito
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">SQL Query</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="batch-processing"
+              checked={useBatchProcessing}
+              onCheckedChange={setUseBatchProcessing}
+            />
+            <Label htmlFor="batch-processing">Batch Processing</Label>
+          </div>
           <Input
             placeholder="Query name"
             value={queryName}
@@ -111,12 +120,8 @@ const SqlEditor = ({ onExecute, defaultValue = "", isLoading = false }: SqlEdito
             onClick={handleExecute}
             disabled={isLoading || !query.trim()}
           >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Play className="h-4 w-4 mr-2" />
-            )}
-            {isLoading ? "Executing..." : "Execute"}
+            <Play className="w-4 h-4 mr-2" />
+            Execute
           </Button>
         </div>
       </div>
@@ -131,21 +136,4 @@ const SqlEditor = ({ onExecute, defaultValue = "", isLoading = false }: SqlEdito
   );
 };
 
-export const SqlQueryBox = ({ onExecute, defaultValue, isLoading }: SqlEditorProps) => {
-  return (
-    <Card className="p-6 metallic-card">
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Code className="h-5 w-5" />
-          <h2 className="text-2xl font-semibold">SQL Query</h2>
-        </div>
-        <p className="text-muted-foreground">
-          Execute custom SQL queries on the available datasets
-        </p>
-        <SqlEditor onExecute={onExecute} defaultValue={defaultValue} isLoading={isLoading} />
-      </div>
-    </Card>
-  );
-};
-
-export default SqlQueryBox;
+export default SqlEditor;

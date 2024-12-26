@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
+import { fetchDataInBatches } from "@/utils/batchProcessing";
 
 interface VisualizeSqlQueryProps {
   onDataReceived: (data: any[], columns: ColumnDef<any>[]) => void;
@@ -14,7 +15,7 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleExecuteQuery = async (query: string) => {
+  const handleExecuteQuery = async (query: string, useBatchProcessing: boolean) => {
     setIsLoading(true);
     try {
       const validation = validateQuery(query);
@@ -32,22 +33,45 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
         });
       }
 
-      const { data, error } = await supabase.rpc('execute_query', {
-        query_text: query
-      });
-
-      if (error) {
-        // Handle timeout errors specifically
-        if (error.message.includes('statement timeout') || error.message.includes('57014')) {
-          throw new Error(
-            'Query timed out. Try adding filters or LIMIT clause to reduce the result set.'
-          );
+      let results: any[] = [];
+      
+      if (useBatchProcessing) {
+        // Extract table name from query (basic implementation)
+        const tableMatch = query.match(/FROM\s+["']?(\w+)["']?/i);
+        if (!tableMatch) {
+          throw new Error("Could not determine table name from query");
         }
-        const pgError = error.message.match(/Query execution failed: (.*)/);
-        throw new Error(pgError ? pgError[1] : error.message);
-      }
+        const tableName = tableMatch[1];
+        
+        results = await fetchDataInBatches(
+          tableName,
+          [],
+          (progress) => {
+            if (progress % 20 === 0) {
+              toast({
+                title: "Loading data",
+                description: `${progress}% complete`
+              });
+            }
+          }
+        );
+      } else {
+        const { data, error } = await supabase.rpc('execute_query', {
+          query_text: query
+        });
 
-      const results = Array.isArray(data) ? data : [];
+        if (error) {
+          if (error.message.includes('statement timeout') || error.message.includes('57014')) {
+            throw new Error(
+              'Query timed out. Try adding filters or LIMIT clause to reduce the result set.'
+            );
+          }
+          const pgError = error.message.match(/Query execution failed: (.*)/);
+          throw new Error(pgError ? pgError[1] : error.message);
+        }
+
+        results = Array.isArray(data) ? data : [];
+      }
       
       if (results.length > 0) {
         const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
