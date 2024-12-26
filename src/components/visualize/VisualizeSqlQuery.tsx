@@ -23,7 +23,6 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
         throw new Error(validation.error);
       }
 
-      // Show warning for potentially long-running queries
       if (query.toLowerCase().includes('count(*)') || !query.toLowerCase().includes('limit')) {
         toast({
           title: "Warning",
@@ -36,7 +35,6 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
       let results: any[] = [];
       
       if (useBatchProcessing) {
-        // Extract table name from query (basic implementation)
         const tableMatch = query.match(/FROM\s+["']?(\w+)["']?/i);
         if (!tableMatch) {
           throw new Error("Could not determine table name from query");
@@ -66,23 +64,24 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
               'Query timed out. Try adding filters or LIMIT clause to reduce the result set.'
             );
           }
-          const pgError = error.message.match(/Query execution failed: (.*)/);
-          throw new Error(pgError ? pgError[1] : error.message);
+          throw error;
         }
 
         results = Array.isArray(data) ? data : [];
       }
-      
+
+      // Generate columns with show property set to true by default
       if (results.length > 0) {
         const cols: ColumnDef<any>[] = Object.keys(results[0]).map(key => ({
           id: key,
           header: key,
           accessorKey: key,
-          cell: info => {
-            const value = info.getValue();
-            return value === null ? 'NULL' : String(value);
-          },
+          show: true // Add this property for column visibility
         }));
+        
+        console.log("Generated columns:", cols);
+        console.log("Query results:", results);
+        
         onDataReceived(results, cols);
       } else {
         onDataReceived([], []);
