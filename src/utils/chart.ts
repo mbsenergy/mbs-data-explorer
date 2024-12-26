@@ -30,6 +30,31 @@ export const getSeriesType = (chartType: string): "scatter" | "column" | "line" 
   }
 };
 
+const getAxisType = (dataType: string): AxisTypeValue => {
+  switch (dataType) {
+    case 'datetime':
+      return 'datetime';
+    case 'numeric':
+      return 'linear';
+    case 'logarithmic':
+      return 'logarithmic';
+    case 'category':
+      return 'category';
+    default:
+      return 'linear';
+  }
+};
+
+const formatValue = (value: any, type: string): any => {
+  if (type === 'datetime') {
+    return new Date(value).getTime();
+  }
+  if (type === 'numeric' || type === 'logarithmic') {
+    return Number(value);
+  }
+  return value;
+};
+
 export const generateChartOptions = (
   filteredData: DataPoint[],
   plotConfig: PlotConfig
@@ -50,10 +75,8 @@ export const generateChartOptions = (
       return Object.entries(groups).map(([group, items]): SeriesOptionsType => {
         // For each group, create a series
         const data = items.map(item => {
-          const xValue = plotConfig.xAxisType === 'datetime' 
-            ? new Date(item[plotConfig.xAxis]).getTime()
-            : item[plotConfig.xAxis];
-          const yValue = Number(item[plotConfig.yAxis]);
+          const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
+          const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
           return [xValue, yValue];
         }).sort((a, b) => (a[0] as number) - (b[0] as number)); // Sort by x value
 
@@ -65,7 +88,7 @@ export const generateChartOptions = (
           return {
             name: group,
             type,
-            data: [[items[0][plotConfig.xAxis], aggregatedValue]]
+            data: [[formatValue(items[0][plotConfig.xAxis], plotConfig.xAxisType), aggregatedValue]]
           };
         }
 
@@ -79,10 +102,8 @@ export const generateChartOptions = (
 
     // If no grouping, create a single series
     const data = filteredData.map(item => {
-      const xValue = plotConfig.xAxisType === 'datetime' 
-        ? new Date(item[plotConfig.xAxis]).getTime()
-        : item[plotConfig.xAxis];
-      const yValue = Number(item[plotConfig.yAxis]);
+      const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
+      const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
       return [xValue, yValue];
     }).sort((a, b) => (a[0] as number) - (b[0] as number)); // Sort by x value
 
@@ -93,7 +114,7 @@ export const generateChartOptions = (
       const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
       return [{
         type,
-        data: [[filteredData[0][plotConfig.xAxis], aggregatedValue]]
+        data: [[formatValue(filteredData[0][plotConfig.xAxis], plotConfig.xAxisType), aggregatedValue]]
       }];
     }
 
@@ -103,21 +124,17 @@ export const generateChartOptions = (
     }];
   };
 
-  const getAxisType = (dataType: string): AxisTypeValue => {
-    switch (dataType) {
-      case 'datetime':
-        return 'datetime';
-      case 'category':
-        return 'category';
-      default:
-        return 'linear';
-    }
-  };
-
   const xAxisConfig = {
     type: getAxisType(plotConfig.xAxisType),
     title: {
       text: plotConfig.xAxis
+    }
+  };
+
+  const yAxisConfig = {
+    type: getAxisType(plotConfig.yAxisType),
+    title: {
+      text: plotConfig.yAxis
     }
   };
 
@@ -126,12 +143,7 @@ export const generateChartOptions = (
       text: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`
     },
     xAxis: xAxisConfig,
-    yAxis: {
-      title: {
-        text: plotConfig.yAxis
-      },
-      type: plotConfig.yAxisType === 'numeric' ? 'linear' : getAxisType(plotConfig.yAxisType)
-    },
+    yAxis: yAxisConfig,
     series: getSeriesData(),
     plotOptions: {
       scatter: {
@@ -158,11 +170,13 @@ export const generateChartOptions = (
       formatter: function(this: any) {
         if (!this.point) return '';
         
-        const x = plotConfig.xAxisType === 'datetime' 
-          ? new Date(this.point.x as number).toLocaleDateString()
-          : this.point.x;
+        let xValue = this.point.x;
+        if (plotConfig.xAxisType === 'datetime') {
+          xValue = new Date(xValue).toLocaleDateString();
+        }
+        
         return `<b>${this.series.name || ''}</b><br/>
-                ${plotConfig.xAxis}: ${x}<br/>
+                ${plotConfig.xAxis}: ${xValue}<br/>
                 ${plotConfig.yAxis}: ${this.point.y}`;
       }
     }
