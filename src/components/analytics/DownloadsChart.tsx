@@ -70,19 +70,22 @@ export const DownloadsChart = ({
       
       return acc;
     }, {} as Record<string, ChartDataItem>)
-  ).map(([date, counts]) => ({
+  )
+  .map(([date, counts]) => ({
     date,
     'Dataset Samples': counts['Dataset Samples'],
     'Developer Files': counts['Developer Files'],
     'Dataset Exports': counts['Dataset Exports'],
     'File Uploads': counts['File Uploads'],
     'Query Executions': counts['Query Executions']
-  }));
+  }))
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Sort by date ascending
 
   const chartOptions: Highcharts.Options = {
     chart: {
       type: 'bar',
       height: 500,
+      backgroundColor: 'transparent',
     },
     title: {
       text: undefined
@@ -105,7 +108,8 @@ export const DownloadsChart = ({
     plotOptions: {
       bar: {
         stacking: 'normal',
-        borderRadius: 3,
+        borderRadius: 4,
+        borderWidth: 0, // Remove white borders
         dataLabels: {
           enabled: true,
           color: '#ffffff'
@@ -143,8 +147,16 @@ export const DownloadsChart = ({
       verticalAlign: 'bottom',
       layout: 'horizontal',
       itemStyle: {
-        color: '#fff'
-      }
+        color: '#fff',
+        fontWeight: '400'
+      },
+      itemHoverStyle: {
+        color: '#ccc'
+      },
+      backgroundColor: 'transparent',
+      borderWidth: 0,
+      padding: 20,
+      margin: 20
     },
     credits: {
       enabled: false
