@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Database, Eye, Tag } from "lucide-react";
+import { Database, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { TagBadge } from "./query-tags/TagBadge";
+import { TagInput } from "./query-tags/TagInput";
 
 interface SavedQuery {
   id: string;
@@ -198,42 +198,17 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
                 {query.tags?.map((tag) => (
-                  <Badge
+                  <TagBadge
                     key={tag}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    <Tag className="h-3 w-3" />
-                    {tag}
-                    <button
-                      onClick={() => handleRemoveTag(query.id, tag)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    placeholder="Add tag..."
-                    className="h-7 w-24"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleAddTag(query.id);
-                      }
-                    }}
+                    tag={tag}
+                    onRemove={(tag) => handleRemoveTag(query.id, tag)}
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleAddTag(query.id)}
-                    className="h-7"
-                  >
-                    Add
-                  </Button>
-                </div>
+                ))}
+                <TagInput
+                  value={newTag}
+                  onChange={setNewTag}
+                  onAdd={() => handleAddTag(query.id)}
+                />
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Saved on {new Date(query.created_at).toLocaleDateString()}
