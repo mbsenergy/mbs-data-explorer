@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SharedContent } from "@/components/developer/tabs/SharedContent";
 import { PersonalContent } from "@/components/developer/tabs/PersonalContent";
 import { FileText, Grid } from "lucide-react";
+import { DeveloperActivity } from "@/components/developer/DeveloperActivity";
+import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
 
 const Developer = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,6 +19,13 @@ const Developer = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [previewData, setPreviewData] = useState<{ fileName: string; content: string; section: string } | null>(null);
+
+  // Fetch all files to pass to DeveloperActivity
+  const sections = ['presets', 'macros', 'developer', 'models', 'queries'];
+  const results = sections.map(section => {
+    const { data: files } = useDeveloperFiles(section);
+    return (files || []).map(file => ({ ...file, section }));
+  }).flat();
 
   const handlePreview = async (fileName: string, section: string) => {
     try {
@@ -111,6 +120,14 @@ const Developer = () => {
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">
         Developer Resources
       </h1>
+
+      <DeveloperActivity
+        favorites={favorites}
+        files={results}
+        onPreview={handlePreview}
+        onDownload={handleDownload}
+        onToggleFavorite={toggleFavorite}
+      />
 
       <Tabs defaultValue="shared" className="space-y-6">
         <TabsList>
