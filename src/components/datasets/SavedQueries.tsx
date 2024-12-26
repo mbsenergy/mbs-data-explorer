@@ -10,6 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { TagBadge } from "./query-tags/TagBadge";
 import { TagInput } from "./query-tags/TagInput";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface SavedQuery {
   id: string;
@@ -145,22 +152,6 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
     }
   };
 
-  const handleCopyQuery = async (query: string) => {
-    try {
-      await navigator.clipboard.writeText(query);
-      toast({
-        title: "Success",
-        description: "Query copied to clipboard",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to copy query",
-      });
-    }
-  };
-
   const handleSelect = (query: string) => {
     if (onSelect) onSelect(query);
     if (onSelectQuery) onSelectQuery(query);
@@ -176,7 +167,57 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
       icon={<Database className="h-5 w-5" />}
       defaultOpen={false}
     >
-      <ScrollArea className="h-[300px] pr-4">
+      <Carousel
+        className="w-full mx-auto my-6 border border-white/[0.05] bg-card/50 rounded-lg p-4 relative"
+        opts={{
+          align: 'start',
+          loop: true,
+        }}
+      >
+        <CarouselContent>
+          {queries.slice(0, 5).map((query) => (
+            <CarouselItem key={query.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
+              <Card className="p-4 space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">{query.name}</h3>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {query.tags?.map((tag) => (
+                      <TagBadge
+                        key={tag}
+                        tag={tag}
+                        onRemove={(tag) => handleRemoveTag(query.id, tag)}
+                      />
+                    ))}
+                    <TagInput
+                      value={newTag}
+                      onChange={setNewTag}
+                      onAdd={() => handleAddTag(query.id)}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Saved on {new Date(query.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSelect(query.query_text)}
+                  className="w-full bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </Button>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="flex justify-center gap-2 mt-4">
+          <CarouselPrevious className="static translate-y-0" />
+          <CarouselNext className="static translate-y-0" />
+        </div>
+      </Carousel>
+
+      <ScrollArea className="h-[300px] pr-4 mt-6">
         <div className="space-y-4">
           {queries.map((query) => (
             <Card key={query.id} className="p-4 bg-card/50">
@@ -223,32 +264,6 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
           ))}
         </div>
       </ScrollArea>
-
-      <Dialog open={!!selectedQuery} onOpenChange={() => setSelectedQuery(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{selectedQuery?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <p className="font-semibold">SQL Query:</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => selectedQuery && handleCopyQuery(selectedQuery.query_text)}
-                  className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-                >
-                  Copy Query
-                </Button>
-              </div>
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
-                {selectedQuery?.query_text}
-              </pre>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </CollapsibleCard>
   );
 };
