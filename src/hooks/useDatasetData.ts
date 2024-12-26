@@ -42,7 +42,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     });
 
     if (error) throw error;
-    return sampleData;
+    return Array.isArray(sampleData) ? sampleData : [];
   };
 
   // Function to load full dataset without batch processing
@@ -55,7 +55,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     });
 
     if (error) throw error;
-    return fullData;
+    return Array.isArray(fullData) ? fullData : [];
   };
 
   const loadData = async (tableName: TableNames, selectedColumns: string[] = [], useBatchProcessing: boolean = false) => {
