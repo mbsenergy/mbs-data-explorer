@@ -23,7 +23,9 @@ export const ChatButton = () => {
       </SheetTrigger>
       <SheetContent side="right" className="p-0 metallic-card border-l border-border/40">
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="invisible" />
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-background/50">
+            <div className="h-full w-full" />
+          </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={80} minSize={40} className="p-6">
             <SheetHeader>
