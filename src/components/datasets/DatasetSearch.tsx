@@ -17,7 +17,7 @@ interface DatasetSearchProps {
   onSearchChange: (search: string) => void;
   onFieldChange: (field: string) => void;
   onTypeChange: (type: string) => void;
-  onFavoriteChange: (showFavorites: boolean) => void;
+  onFavoriteChange: (show: boolean) => void;
   availableFields: string[];
   availableTypes: string[];
   selectedDataset?: string;
@@ -40,7 +40,7 @@ export const DatasetSearch = ({
   selectedDataset,
   onLoad,
 }: DatasetSearchProps) => {
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 7;
 
@@ -60,7 +60,7 @@ export const DatasetSearch = ({
     (currentPage + 1) * rowsPerPage
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleSelectDataset = (event: CustomEvent<string>) => {
       onSelect(event.detail);
     };
@@ -74,32 +74,34 @@ export const DatasetSearch = ({
 
   return (
     <Card className="p-6 mb-6 metallic-card">
-      <Collapsible open={!isOpen} onOpenChange={setIsOpen}>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <DatasetSearchHeader isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />
         <CollapsibleContent>
-          <DatasetFilters
-            onSearchChange={onSearchChange}
-            onFieldChange={onFieldChange}
-            onTypeChange={onTypeChange}
-            onFavoriteChange={onFavoriteChange}
-            availableFields={fields}
-            availableTypes={types}
-          />
-          <div className="mt-6">
-            <DatasetTable
-              tables={paginatedTables}
-              onPreview={onPreview}
-              onDownload={onDownload}
-              onSelect={onSelect}
-              onToggleFavorite={onToggleFavorite}
-              favorites={favorites}
-              selectedDataset={selectedDataset}
+          <div className="space-y-4">
+            <DatasetFilters
+              onSearchChange={onSearchChange}
+              onFieldChange={onFieldChange}
+              onTypeChange={onTypeChange}
+              onFavoriteChange={onFavoriteChange}
+              availableFields={fields}
+              availableTypes={types}
             />
-            <DatasetSearchPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            <div className="mt-6">
+              <DatasetTable
+                tables={paginatedTables}
+                onPreview={onPreview}
+                onDownload={onDownload}
+                onSelect={onSelect}
+                onToggleFavorite={onToggleFavorite}
+                favorites={favorites}
+                selectedDataset={selectedDataset}
+              />
+              <DatasetSearchPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
           </div>
         </CollapsibleContent>
       </Collapsible>

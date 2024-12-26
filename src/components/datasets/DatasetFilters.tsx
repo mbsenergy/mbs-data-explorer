@@ -32,7 +32,7 @@ const DatasetFilters = ({
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
-        <Select onValueChange={onFieldChange}>
+        <Select onValueChange={onFieldChange} defaultValue="all">
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a field" />
           </SelectTrigger>
@@ -43,7 +43,7 @@ const DatasetFilters = ({
             ))}
           </SelectContent>
         </Select>
-        <Select onValueChange={onTypeChange}>
+        <Select onValueChange={onTypeChange} defaultValue="all">
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a type" />
           </SelectTrigger>
