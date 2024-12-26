@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,9 +26,58 @@ export const BucketUpload = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      loadExistingFiles();
+    }
+  }, [user]);
+
+  const loadExistingFiles = async () => {
+    try {
+      const { data: files, error } = await supabase.storage
+        .from('user-bucket')
+        .list(user?.id || '', {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+
+      if (error) throw error;
+
+      const processedFiles = await Promise.all(
+        (files || [])
+          .filter(file => !file.name.includes('.emptyFolderPlaceholder'))
+          .map(async (file) => {
+            const { data: { publicUrl } } = supabase.storage
+              .from('user-bucket')
+              .getPublicUrl(`${user?.id}/${file.name}`);
+
+            return {
+              id: file.name,
+              name: file.name.split('-').pop() || file.name, // Get original filename
+              url: publicUrl,
+              created_at: file.created_at || new Date().toISOString(),
+            };
+          })
+      );
+
+      setFiles(processedFiles);
+    } catch (error) {
+      console.error('Error loading files:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load existing files",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -134,7 +183,7 @@ export const BucketUpload = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = file.name; // Use original file name
+      a.download = file.name;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -175,52 +224,62 @@ export const BucketUpload = () => {
         </div>
       </Card>
 
-      <Carousel
-        className="w-full mx-auto my-6 border border-white/[0.05] bg-card/50 rounded-lg p-4 relative"
-        opts={{
-          align: 'start',
-          loop: true,
-        }}
-      >
-        <CarouselContent>
-          {files.slice(0, 5).map((file) => (
-            <CarouselItem key={file.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
-              <Card className="p-4 space-y-4 metallic-card">
-                <div className="flex items-center gap-2">
-                  <FileType className="h-5 w-5" />
-                  <p className="font-semibold truncate flex-1">{file.name}</p>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Uploaded on {new Date(file.created_at).toLocaleDateString()}
-                </p>
-                <div className="flex justify-between">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownload(file)}
-                    className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(file.id)}
-                    className="bg-red-500/20 hover:bg-red-500/30"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <div className="flex justify-center gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0" />
-          <CarouselNext className="static translate-y-0" />
+      {isLoading ? (
+        <div className="flex justify-center p-4">
+          <p>Loading files...</p>
         </div>
-      </Carousel>
+      ) : files.length > 0 ? (
+        <Carousel
+          className="w-full mx-auto my-6 border border-white/[0.05] bg-card/50 rounded-lg p-4 relative"
+          opts={{
+            align: 'start',
+            loop: true,
+          }}
+        >
+          <CarouselContent>
+            {files.map((file) => (
+              <CarouselItem key={file.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
+                <Card className="p-4 space-y-4 metallic-card">
+                  <div className="flex items-center gap-2">
+                    <FileType className="h-5 w-5" />
+                    <p className="font-semibold truncate flex-1">{file.name}</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Uploaded on {new Date(file.created_at).toLocaleDateString()}
+                  </p>
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(file)}
+                      className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(file.id)}
+                      className="bg-red-500/20 hover:bg-red-500/30"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <div className="flex justify-center gap-2 mt-4">
+            <CarouselPrevious className="static translate-y-0" />
+            <CarouselNext className="static translate-y-0" />
+          </div>
+        </Carousel>
+      ) : (
+        <div className="flex justify-center p-4">
+          <p className="text-muted-foreground">No files uploaded yet</p>
+        </div>
+      )}
     </CollapsibleCard>
   );
 };
