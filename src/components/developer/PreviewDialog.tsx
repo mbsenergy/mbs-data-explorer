@@ -42,12 +42,15 @@ export const PreviewDialog = ({
   try {
     if (displayContent) {
       const parsed = JSON.parse(displayContent);
-      // Check if parsed data is an array, if not, wrap it in an array
+      // Ensure parsedData is always an array
       parsedData = Array.isArray(parsed) ? parsed : [parsed];
-      isJson = true;
+      // Only set isJson if we successfully parsed and have data
+      isJson = parsedData.length > 0;
     }
   } catch (e) {
     // Not JSON data, which is fine
+    isJson = false;
+    parsedData = [];
   }
 
   const columns = parsedData.length > 0 ? Object.keys(parsedData[0]) : [];
