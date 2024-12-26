@@ -1,8 +1,12 @@
 import * as XLSX from 'xlsx';
 import type { ColumnDef } from "@tanstack/react-table";
 
+interface ExcelRow {
+  [key: string]: string | number | null;
+}
+
 export const processExcelFile = async (file: File, selectedSheet: string, headerRow: string): Promise<{
-  data: any[];
+  data: ExcelRow[];
   columns: ColumnDef<any>[];
 }> => {
   const buffer = await file.arrayBuffer();
@@ -22,7 +26,7 @@ export const processExcelFile = async (file: File, selectedSheet: string, header
     raw: false,
     defval: '',
     blankrows: false
-  });
+  }) as ExcelRow[];
 
   if (!Array.isArray(jsonData) || jsonData.length === 0) {
     throw new Error('No data found in the selected sheet');
@@ -39,7 +43,7 @@ export const processExcelFile = async (file: File, selectedSheet: string, header
   }));
 
   // Filter out empty rows and ensure all rows have the same structure
-  const cleanData = jsonData.filter(row => {
+  const cleanData = jsonData.filter((row: ExcelRow) => {
     const hasValues = Object.values(row).some(value => value !== '');
     const hasAllColumns = headers.every(header => header in row);
     return hasValues && hasAllColumns;
