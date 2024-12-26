@@ -378,8 +378,6 @@ const Visualize = () => {
         
       </div>
 
-      {state.originalData.length > 0 && (
-        <>
           {/* Filters Card */}
           <Card className="p-6 metallic-card relative">
             <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -601,8 +599,6 @@ const Visualize = () => {
             </Tabs>
             </Collapsible>
           </Card>
-        </>
-      )}
     </div>
   );
 };
