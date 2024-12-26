@@ -75,7 +75,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <ScrollArea className="flex-1 px-6">
+      <ScrollArea className="flex-1 px-4">
         <div className="space-y-4 py-6">
           {messages.map((message, index) => (
             <div
