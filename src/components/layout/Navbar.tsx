@@ -68,13 +68,13 @@ export const Navbar = () => {
       {/* Navigation Buttons */}
       <div className="flex items-center space-x-4">
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm"
           onClick={() => navigate("/datasets?tab=query")}
           className="hidden md:flex items-center gap-2"
         >
           <Database className="h-4 w-4" />
-          Dataset Query
+          Query
         </Button>
 
         <Button 
