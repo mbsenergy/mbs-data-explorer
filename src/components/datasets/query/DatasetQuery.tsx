@@ -1,10 +1,7 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { FileSearch, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import SqlEditor from "@/components/datasets/SqlEditor";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatamartSearch } from "@/components/visualize/DatamartSearch";
@@ -97,6 +94,8 @@ export const DatasetQuery = ({
           },
         }));
         setColumns(cols);
+      } else {
+        setColumns([]);
       }
       
       toast({
@@ -126,6 +125,13 @@ export const DatasetQuery = ({
   };
 
   const validateQuery = (query: string): { isValid: boolean; error?: string } => {
+    if (!query.trim()) {
+      return { 
+        isValid: false, 
+        error: "Query cannot be empty" 
+      };
+    }
+
     const disallowedKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE'];
     const hasDisallowedKeywords = disallowedKeywords.some(keyword => 
       query.toUpperCase().includes(keyword)
