@@ -1692,10 +1692,12 @@ export type Database = {
           date_of_birth: string | null
           email: string | null
           first_name: string | null
+          github_url: string | null
           id: string
           is_cerved: boolean | null
           it_skills: string[] | null
           last_name: string | null
+          linkedin_url: string | null
           preferred_data: string[] | null
           role: string | null
           subscriptions: string[] | null
@@ -1709,10 +1711,12 @@ export type Database = {
           date_of_birth?: string | null
           email?: string | null
           first_name?: string | null
+          github_url?: string | null
           id: string
           is_cerved?: boolean | null
           it_skills?: string[] | null
           last_name?: string | null
+          linkedin_url?: string | null
           preferred_data?: string[] | null
           role?: string | null
           subscriptions?: string[] | null
@@ -1726,10 +1730,12 @@ export type Database = {
           date_of_birth?: string | null
           email?: string | null
           first_name?: string | null
+          github_url?: string | null
           id?: string
           is_cerved?: boolean | null
           it_skills?: string[] | null
           last_name?: string | null
+          linkedin_url?: string | null
           preferred_data?: string[] | null
           role?: string | null
           subscriptions?: string[] | null

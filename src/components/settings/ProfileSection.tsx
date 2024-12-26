@@ -51,8 +51,10 @@ export const ProfileSection = () => {
       return data as Profile;
     },
     enabled: !!user?.id,
-    onSuccess: (data) => {
-      setProfile(data);
+    meta: {
+      onSuccess: (data: Profile) => {
+        setProfile(data);
+      },
     },
   });
 
