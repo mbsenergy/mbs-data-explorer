@@ -24,7 +24,10 @@ interface Profile {
 }
 
 const getLevelColor = (level: string) => {
-  switch (level) {
+  // Normalize the level to match database values
+  const normalizedLevel = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+  
+  switch (normalizedLevel) {
     case 'Premium':
       return 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600';
     case 'Plus':
@@ -48,7 +51,7 @@ export const ProfileSection = () => {
     github_url: "",
     linkedin_url: "",
     avatar_url: "",
-    level: "Basic",
+    level: "Basic", // Default value with proper casing
   });
 
   const { refetch } = useQuery({
@@ -116,7 +119,7 @@ export const ProfileSection = () => {
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold">Level:</span>
             <Badge className={`${getLevelColor(profile.level)} border-none text-base`}>
-              {profile.level}
+              {profile.level.charAt(0).toUpperCase() + profile.level.slice(1).toLowerCase()}
             </Badge>
           </div>
         </div>

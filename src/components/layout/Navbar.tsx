@@ -46,10 +46,13 @@ export const Navbar = () => {
   };
 
   const getLevelColor = (level: string) => {
-    switch (level?.toLowerCase()) {
-      case 'premium':
+    // Normalize the level to match database values
+    const normalizedLevel = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+    
+    switch (normalizedLevel) {
+      case 'Premium':
         return 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600';
-      case 'plus':
+      case 'Plus':
         return 'bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600';
       default:
         return 'bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600';
@@ -64,7 +67,7 @@ export const Navbar = () => {
           Welcome, <h3 className="inline text-white font-semibold">{profile?.first_name || user?.email}</h3>
           {profile?.level && (
             <Badge className={`${getLevelColor(profile.level)} border-none text-xs`}>
-              {profile.level}
+              {profile.level.charAt(0).toUpperCase() + profile.level.slice(1).toLowerCase()}
             </Badge>
           )}
         </span>
