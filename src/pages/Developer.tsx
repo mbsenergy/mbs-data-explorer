@@ -1,39 +1,24 @@
-import { useState, useEffect } from "react"; 
-import { Code, Activity, History } from "lucide-react";
-import { DeveloperSection } from "@/components/developer/DeveloperSection";
-import { DeveloperSearch } from "@/components/developer/DeveloperSearch";
-import { DeveloperActivity } from "@/components/developer/DeveloperActivity";
-import { SavedQueriesDisplay } from "@/components/developer/SavedQueriesDisplay";
-import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
+import { useState } from "react";
+import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { useDeveloperFavorites } from "@/hooks/useDeveloperFavorites";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { PreviewDialog } from "@/components/developer/PreviewDialog";
+import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SharedContent } from "@/components/developer/tabs/SharedContent";
+import { PersonalContent } from "@/components/developer/tabs/PersonalContent";
+import { FileText, Grid } from "lucide-react";
 
 const Developer = () => {
-  const sections = ['presets', 'macros', 'developer', 'models', 'queries'];
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
   const [showFavorites, setShowFavorites] = useState(false);
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const { favorites, toggleFavorite } = useDeveloperFavorites();
   const { user } = useAuth();
   const { toast } = useToast();
   const [previewData, setPreviewData] = useState<{ fileName: string; content: string; section: string } | null>(null);
 
-  const results = sections.map(section => {
-    const { data: files } = useDeveloperFiles(section);
-    return (files || []).map(file => ({ ...file, section }));
-  }).flat();
-
-  useEffect(() => {
-    const tags = [...new Set(results.map(file => file.field))];
-    setAvailableTags(tags);
-  }, [results]);
-
   const handlePreview = async (fileName: string, section: string) => {
-    console.log('Preview requested for:', { fileName, section });
     try {
       if (!section) {
         throw new Error('Section is required for preview');
@@ -70,8 +55,6 @@ const Developer = () => {
   };
 
   const handleDownload = async (fileName: string, section: string) => {
-    console.log('Download requested for:', { fileName, section });
-    
     if (!user?.id) {
       toast({
         variant: "destructive",
@@ -81,29 +64,12 @@ const Developer = () => {
       return;
     }
 
-    if (!section) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid file section.",
-      });
-      return;
-    }
-
     try {
       const { data, error: downloadError } = await supabase.storage
         .from('developer')
         .download(`${section}/${fileName}`);
 
-      if (downloadError) {
-        console.error('Download error:', downloadError);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to download file.",
-        });
-        return;
-      }
+      if (downloadError) throw downloadError;
 
       const { error: analyticsError } = await supabase
         .from("developer_analytics")
@@ -140,52 +106,40 @@ const Developer = () => {
     }
   };
 
-  const handleSelectQuery = (query: string) => {
-    // This function will be implemented when we connect it to the SQL editor
-    console.log('Selected query:', query);
-    toast({
-      title: "Query Selected",
-      description: "Query loaded successfully.",
-    });
-  };
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">
         Developer Resources
       </h1>
-      
-      <DeveloperActivity
-        favorites={favorites}
-        files={results}
-        onPreview={handlePreview}
-        onDownload={handleDownload}
-        onToggleFavorite={toggleFavorite}
-      />
 
-      <SavedQueriesDisplay onSelectQuery={handleSelectQuery} />
+      <Tabs defaultValue="shared" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="shared" className="flex items-center gap-2">
+            <Grid className="h-4 w-4" />
+            Shared Resources
+          </TabsTrigger>
+          <TabsTrigger value="personal" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Personal Resources
+          </TabsTrigger>
+        </TabsList>
 
-      <DeveloperSearch
-        onSearchChange={setSearchTerm}
-        onTagChange={setSelectedTag}
-        onFavoriteChange={setShowFavorites}
-        availableTags={availableTags}
-      />
+        <TabsContent value="shared" className="space-y-6">
+          <SharedContent
+            searchTerm={searchTerm}
+            selectedTag={selectedTag}
+            showFavorites={showFavorites}
+            favorites={favorites}
+            onPreview={handlePreview}
+            onDownload={handleDownload}
+            onToggleFavorite={toggleFavorite}
+          />
+        </TabsContent>
 
-      {sections.map(section => (
-        <DeveloperSection 
-          key={section} 
-          title={section.charAt(0).toUpperCase() + section.slice(1)}
-          section={section}
-          searchTerm={searchTerm}
-          selectedTag={selectedTag}
-          showFavorites={showFavorites}
-          favorites={favorites}
-          onPreview={handlePreview}
-          onDownload={handleDownload}
-          onToggleFavorite={toggleFavorite}
-        />
-      ))}
+        <TabsContent value="personal" className="space-y-6">
+          <PersonalContent />
+        </TabsContent>
+      </Tabs>
 
       {previewData && (
         <PreviewDialog
