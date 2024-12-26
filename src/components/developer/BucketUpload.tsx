@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,11 +24,13 @@ interface UploadedFile {
 
 export const BucketUpload = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -39,18 +41,32 @@ export const BucketUpload = () => {
         title: "Error",
         description: "File size must be less than 1MB",
       });
+      event.target.value = '';
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a file first",
+      });
       return;
     }
 
     setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `${user?.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('user-bucket')
-        .upload(filePath, file);
+        .upload(filePath, selectedFile);
 
       if (uploadError) throw uploadError;
 
@@ -60,12 +76,16 @@ export const BucketUpload = () => {
 
       const newFile = {
         id: fileName,
-        name: file.name,
+        name: selectedFile.name,
         url: publicUrl,
         created_at: new Date().toISOString(),
       };
 
       setFiles(prev => [newFile, ...prev]);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
 
       toast({
         title: "Success",
@@ -107,6 +127,28 @@ export const BucketUpload = () => {
     }
   };
 
+  const handleDownload = async (file: UploadedFile) => {
+    try {
+      const response = await fetch(file.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name; // Use original file name
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to download file",
+      });
+    }
+  };
+
   return (
     <CollapsibleCard
       title="Personal Bucket"
@@ -116,12 +158,17 @@ export const BucketUpload = () => {
       <Card className="p-4 space-y-4 metallic-card">
         <div className="flex items-center gap-4">
           <Input
+            ref={fileInputRef}
             type="file"
-            onChange={handleFileUpload}
+            onChange={handleFileSelect}
             disabled={isUploading}
             className="flex-1"
           />
-          <Button disabled={isUploading} className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30">
+          <Button 
+            onClick={handleUpload}
+            disabled={isUploading || !selectedFile} 
+            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+          >
             <Upload className="h-4 w-4 mr-2" />
             Upload
           </Button>
@@ -150,7 +197,7 @@ export const BucketUpload = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(file.url, '_blank')}
+                    onClick={() => handleDownload(file)}
                     className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
                   >
                     <Download className="h-4 w-4 mr-2" />
