@@ -9,6 +9,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo, TableNames } from "../types";
 import { SqlQueryBox } from "../SqlQueryBox";
+import { SavedQueries } from "../SavedQueries";
 
 interface DatasetQueryProps {
   selectedDataset: TableNames | null;
@@ -149,6 +150,14 @@ export const DatasetQuery = ({
     return { isValid: true };
   };
 
+  const handleSelectSavedQuery = (queryText: string) => {
+    setQuery(queryText);
+    toast({
+      title: "Query Loaded",
+      description: "Saved query has been loaded into the editor",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -173,6 +182,8 @@ export const DatasetQuery = ({
       </div>
 
       <SqlQueryBox onExecute={handleExecuteQuery} defaultValue={query} />
+
+      <SavedQueries onSelectQuery={handleSelectSavedQuery} />
 
       <DatasetQueryResults
         isLoading={isLoading}
