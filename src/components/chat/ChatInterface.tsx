@@ -83,7 +83,7 @@ export const ChatInterface = () => {
               <div
                 className={`rounded-2xl px-6 py-3 max-w-[85%] text-base shadow-lg backdrop-blur-sm ${
                   message.role === 'user'
-                    ? 'bg-primary/90 text-primary-foreground ml-12'
+                    ? 'metallic-card text-primary-foreground ml-12'
                     : 'glass-panel mr-12 border-l-4 border-l-primary'
                 }`}
               >
