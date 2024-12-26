@@ -1,7 +1,4 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Download } from "lucide-react";
 import { DatamartSearch } from "@/components/visualize/DatamartSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
@@ -9,16 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { v4 as uuidv4 } from 'uuid';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartBar, Table } from "lucide-react";
-import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
 import "@/integrations/highcharts/highchartsConfig";
-import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { ChartControls } from "@/components/visualize/ChartControls";
-import { DataControls } from "@/components/visualize/DataControls";
 import { FilterControls } from "@/components/visualize/FilterControls";
 import { generateChartOptions } from "@/utils/chart";
+import { DataInputTabs } from "@/components/visualize/DataInputTabs";
+import { CollapsibleCard } from "@/components/visualize/CollapsibleCard";
+import { DataDisplay } from "@/components/visualize/DataDisplay";
 import type { VisualizeState, PlotConfig, Filter, DataPoint } from "@/types/visualize";
 import type { TableInfo } from "@/components/datasets/types";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -292,98 +286,63 @@ const Visualize = () => {
         availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
       />
 
-      <DataControls
+      <DataInputTabs
         onUpload={handleFileUpload}
         onExecuteQuery={handleQueryData}
         isLoading={state.isLoading}
         selectedTable={state.selectedTable}
       />
 
-      <FilterControls
-        columns={state.columns.map(col => col.id as string)}
-        filters={filters}
-        onFilterChange={(filterId, field, value) => {
-          setFilters(filters.map(f =>
-            f.id === filterId
-              ? { ...f, [field]: value }
-              : f
-          ));
-        }}
-        onAddFilter={() => {
-          setFilters([...filters, { 
-            id: uuidv4(), 
-            searchTerm: "", 
-            selectedColumn: "", 
-            operator: "AND",
-            comparisonOperator: "=" 
-          }]);
-        }}
-        onRemoveFilter={(filterId) => {
-          setFilters(filters.filter(f => f.id !== filterId));
-        }}
-        onApplyFilters={() => {
-          setState(prev => ({ 
-            ...prev, 
-            filteredData: applyFilters(state.originalData) 
-          }));
-        }}
-        originalCount={state.originalData.length}
-        filteredCount={state.filteredData.length}
-      />
+      <CollapsibleCard title="Filters">
+        <FilterControls
+          columns={state.columns.map(col => col.id as string)}
+          filters={filters}
+          onFilterChange={(filterId, field, value) => {
+            setFilters(filters.map(f =>
+              f.id === filterId
+                ? { ...f, [field]: value }
+                : f
+            ));
+          }}
+          onAddFilter={() => {
+            setFilters([...filters, { 
+              id: uuidv4(), 
+              searchTerm: "", 
+              selectedColumn: "", 
+              operator: "AND",
+              comparisonOperator: "=" 
+            }]);
+          }}
+          onRemoveFilter={(filterId) => {
+            setFilters(filters.filter(f => f.id !== filterId));
+          }}
+          onApplyFilters={() => {
+            setState(prev => ({ 
+              ...prev, 
+              filteredData: applyFilters(state.originalData) 
+            }));
+          }}
+          originalCount={state.originalData.length}
+          filteredCount={state.filteredData.length}
+        />
+      </CollapsibleCard>
 
-      <Card className="p-6 metallic-card">
-        <h2 className="text-xl font-semibold mb-4">Chart Configuration</h2>
+      <CollapsibleCard title="Chart Configuration">
         <ChartControls
           columns={state.columns}
           plotConfig={plotConfig}
           onConfigChange={setPlotConfig}
           onGenerateChart={() => setState(prev => ({ ...prev, showChart: true }))}
         />
-      </Card>
+      </CollapsibleCard>
 
-      <div className="flex justify-end">
-        <Button
-          onClick={handleExportData}
-          disabled={!state.filteredData.length}
-          className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export Data
-        </Button>
-      </div>          
-
-      <Card className="p-6 metallic-card">
-        <Tabs defaultValue="plot" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="plot" className="flex items-center gap-2">
-              <ChartBar className="h-4 w-4" />
-              Plot
-            </TabsTrigger>
-            <TabsTrigger value="table" className="flex items-center gap-2">
-              <Table className="h-4 w-4" />
-              Table
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="plot">
-            <div className="w-full h-[600px]">
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={state.plotData}
-                containerProps={{ style: { height: '100%' } }}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="table">
-            <DataGrid
-              data={state.filteredData}
-              columns={state.columns}
-              isLoading={state.isLoading}
-            />
-          </TabsContent>
-        </Tabs>
-      </Card>
+      <DataDisplay
+        plotData={state.plotData}
+        filteredData={state.filteredData}
+        columns={state.columns}
+        isLoading={state.isLoading}
+        onExport={handleExportData}
+      />
     </div>
   );
 };
