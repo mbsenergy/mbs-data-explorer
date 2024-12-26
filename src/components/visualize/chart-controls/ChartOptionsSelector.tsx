@@ -4,11 +4,12 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { LegendPosition } from "@/types/visualize";
 
 interface ChartOptionsProps {
   options: {
     showLegend: boolean;
-    legendPosition: 'top' | 'bottom' | 'left' | 'right';
+    legendPosition: LegendPosition;
     enableZoom: boolean;
     enableAnimation: boolean;
     opacity: number;
@@ -53,7 +54,7 @@ export const ChartOptionsSelector = ({ options, onChange }: ChartOptionsProps) =
             <Label>Legend Position</Label>
             <Select
               value={options.legendPosition}
-              onValueChange={(value) => onChange('legendPosition', value)}
+              onValueChange={(value: LegendPosition) => onChange('legendPosition', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select position" />

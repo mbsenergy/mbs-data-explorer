@@ -4,7 +4,16 @@ import { ChartTypeSelector } from "./chart-controls/ChartTypeSelector";
 import { ChartOptionsSelector } from "./chart-controls/ChartOptionsSelector";
 import { AxisSelector } from "./chart-controls/AxisSelector";
 import { useState } from "react";
-import type { ChartControlsProps } from "@/types/visualize";
+import type { ChartControlsProps, LegendPosition } from "@/types/visualize";
+
+interface ChartOptions {
+  showLegend: boolean;
+  legendPosition: LegendPosition;
+  enableZoom: boolean;
+  enableAnimation: boolean;
+  opacity: number;
+  markerSize: number;
+}
 
 export const ChartControls = ({
   columns,
@@ -12,9 +21,9 @@ export const ChartControls = ({
   onConfigChange,
   onGenerateChart
 }: ChartControlsProps) => {
-  const [chartOptions, setChartOptions] = useState({
+  const [chartOptions, setChartOptions] = useState<ChartOptions>({
     showLegend: true,
-    legendPosition: 'bottom' as const,
+    legendPosition: 'bottom',
     enableZoom: false,
     enableAnimation: true,
     opacity: 100,
@@ -31,9 +40,13 @@ export const ChartControls = ({
     logScale: false
   });
 
-  const handleChartOptionChange = (key: string, value: any) => {
+  const handleChartOptionChange = (key: keyof ChartOptions, value: any) => {
     setChartOptions(prev => ({ ...prev, [key]: value }));
-    // Update Highcharts options based on the changes
+    
+    const legendAlign = value === 'right' ? 'right' : 'center';
+    const verticalAlign = value === 'bottom' ? 'bottom' : 'top';
+    const layout = value === 'right' ? 'vertical' : 'horizontal';
+
     onConfigChange({
       ...plotConfig,
       chartOptions: {
@@ -49,12 +62,14 @@ export const ChartControls = ({
         },
         legend: {
           enabled: chartOptions.showLegend,
-          align: chartOptions.legendPosition === 'right' ? 'right' : 'center',
-          verticalAlign: chartOptions.legendPosition === 'bottom' ? 'bottom' : 'top',
-          layout: chartOptions.legendPosition === 'right' ? 'vertical' : 'horizontal'
+          align: legendAlign,
+          verticalAlign: verticalAlign,
+          layout: layout
         },
         chart: {
-          zoomType: chartOptions.enableZoom ? 'xy' : undefined
+          zooming: {
+            enabled: chartOptions.enableZoom
+          }
         }
       }
     });
