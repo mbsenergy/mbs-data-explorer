@@ -3,6 +3,7 @@ import { Code, Activity, History } from "lucide-react";
 import { DeveloperSection } from "@/components/developer/DeveloperSection";
 import { DeveloperSearch } from "@/components/developer/DeveloperSearch";
 import { DeveloperActivity } from "@/components/developer/DeveloperActivity";
+import { SavedQueriesDisplay } from "@/components/developer/SavedQueriesDisplay";
 import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
 import { useDeveloperFavorites } from "@/hooks/useDeveloperFavorites";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -23,7 +24,7 @@ const Developer = () => {
 
   const results = sections.map(section => {
     const { data: files } = useDeveloperFiles(section);
-    return (files || []).map(file => ({ ...file, section })); // Add section to each file
+    return (files || []).map(file => ({ ...file, section }));
   }).flat();
 
   useEffect(() => {
@@ -90,7 +91,6 @@ const Developer = () => {
     }
 
     try {
-      // First try to download the file
       const { data, error: downloadError } = await supabase.storage
         .from('developer')
         .download(`${section}/${fileName}`);
@@ -105,7 +105,6 @@ const Developer = () => {
         return;
       }
 
-      // If download successful, track the analytics
       const { error: analyticsError } = await supabase
         .from("developer_analytics")
         .insert({
@@ -118,7 +117,6 @@ const Developer = () => {
         console.error("Analytics tracking error:", analyticsError);
       }
 
-      // Create download link
       const url = URL.createObjectURL(data);
       const a = document.createElement('a');
       a.href = url;
@@ -142,11 +140,20 @@ const Developer = () => {
     }
   };
 
+  const handleSelectQuery = (query: string) => {
+    // This function will be implemented when we connect it to the SQL editor
+    console.log('Selected query:', query);
+    toast({
+      title: "Query Selected",
+      description: "Query loaded successfully.",
+    });
+  };
+
   return (
     <div className="space-y-6">
-        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">
-          Developer Resources
-        </h1>
+      <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-700 to-green-500">
+        Developer Resources
+      </h1>
       
       <DeveloperActivity
         favorites={favorites}
@@ -155,6 +162,8 @@ const Developer = () => {
         onDownload={handleDownload}
         onToggleFavorite={toggleFavorite}
       />
+
+      <SavedQueriesDisplay onSelectQuery={handleSelectQuery} />
 
       <DeveloperSearch
         onSearchChange={setSearchTerm}
