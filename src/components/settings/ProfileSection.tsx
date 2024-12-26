@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { AvatarSection } from "./profile/AvatarSection";
 import { PersonalInfoSection } from "./profile/PersonalInfoSection";
 import { ProfessionalInfoSection } from "./profile/ProfessionalInfoSection";
+import { SubscriptionsSection } from "./profile/SubscriptionsSection";
+import { User2 } from "lucide-react";
 
 interface Profile {
   first_name: string | null;
@@ -19,6 +21,7 @@ interface Profile {
   github_url: string | null;
   linkedin_url: string | null;
   avatar_url: string | null;
+  subscriptions: string[] | null;
 }
 
 export const ProfileSection = () => {
@@ -35,6 +38,7 @@ export const ProfileSection = () => {
     github_url: "",
     linkedin_url: "",
     avatar_url: "",
+    subscriptions: [],
   });
 
   const { refetch } = useQuery({
@@ -48,7 +52,6 @@ export const ProfileSection = () => {
 
       if (error) throw error;
       
-      // Update the profile state when data is fetched
       if (data) {
         setProfile(data);
       }
@@ -58,7 +61,7 @@ export const ProfileSection = () => {
     enabled: !!user?.id,
   });
 
-  const handleProfileChange = (field: string, value: string | null) => {
+  const handleProfileChange = (field: string, value: string | null | string[]) => {
     setProfile((prev) => ({
       ...prev,
       [field]: value,
@@ -68,7 +71,6 @@ export const ProfileSection = () => {
   const handleSave = async () => {
     if (!user) return;
 
-    // Ensure date_of_birth is null if empty string
     const updatedProfile = {
       ...profile,
       date_of_birth: profile.date_of_birth || null,
@@ -97,54 +99,63 @@ export const ProfileSection = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Profile Information</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <AvatarSection
-              avatarUrl={profile.avatar_url}
-              firstName={profile.first_name}
-              lastName={profile.last_name}
-              onAvatarUpdate={refetch}
-            />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-2">
+          <User2 className="h-6 w-6 text-muted-foreground" />
+          <CardTitle>Profile Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <AvatarSection
+                avatarUrl={profile.avatar_url}
+                firstName={profile.first_name}
+                lastName={profile.last_name}
+                onAvatarUpdate={refetch}
+              />
 
-            <div className="flex-1">
-              <h3 className="text-2xl font-semibold">
-                {profile.first_name} {profile.last_name}
-              </h3>
-              <p className="text-muted-foreground">{user?.email}</p>
+              <div className="flex-1">
+                <h3 className="text-2xl font-semibold">
+                  {profile.first_name} {profile.last_name}
+                </h3>
+                <p className="text-muted-foreground">{user?.email}</p>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (isEditing) {
+                    handleSave();
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
+              >
+                {isEditing ? "Save" : "Edit"}
+              </Button>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (isEditing) {
-                  handleSave();
-                } else {
-                  setIsEditing(true);
-                }
-              }}
-            >
-              {isEditing ? "Save" : "Edit"}
-            </Button>
+            <PersonalInfoSection
+              isEditing={isEditing}
+              profile={profile}
+              onProfileChange={handleProfileChange}
+            />
+
+            <ProfessionalInfoSection
+              isEditing={isEditing}
+              profile={profile}
+              onProfileChange={handleProfileChange}
+            />
           </div>
+        </CardContent>
+      </Card>
 
-          <PersonalInfoSection
-            isEditing={isEditing}
-            profile={profile}
-            onProfileChange={handleProfileChange}
-          />
-
-          <ProfessionalInfoSection
-            isEditing={isEditing}
-            profile={profile}
-            onProfileChange={handleProfileChange}
-          />
-        </div>
-      </CardContent>
-    </Card>
+      <SubscriptionsSection
+        isEditing={isEditing}
+        subscriptions={profile.subscriptions || []}
+        onSubscriptionsChange={(value) => handleProfileChange("subscriptions", value)}
+      />
+    </div>
   );
 };
