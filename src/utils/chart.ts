@@ -34,8 +34,12 @@ export const generateChartOptions = (
   filteredData: DataPoint[],
   plotConfig: PlotConfig
 ): Options => {
+  console.log("Generating chart with data:", filteredData);
+  console.log("Plot config:", plotConfig);
+
   const getSeriesData = (): SeriesOptionsType[] => {
     if (plotConfig.groupBy) {
+      // Group data by the groupBy field
       const groups = filteredData.reduce((acc, item) => {
         const group = item[plotConfig.groupBy];
         if (!acc[group]) acc[group] = [];
@@ -44,58 +48,80 @@ export const generateChartOptions = (
       }, {} as Record<string, DataPoint[]>);
 
       return Object.entries(groups).map(([group, items]): SeriesOptionsType => {
-        const xValues = items.map(item => item[plotConfig.xAxis]);
-        const yValues = items.map(item => Number(item[plotConfig.yAxis]));
+        // For each group, create a series
+        const data = items.map(item => {
+          const xValue = plotConfig.xAxisType === 'datetime' 
+            ? new Date(item[plotConfig.xAxis]).getTime()
+            : item[plotConfig.xAxis];
+          const yValue = Number(item[plotConfig.yAxis]);
+          return [xValue, yValue];
+        }).sort((a, b) => (a[0] as number) - (b[0] as number)); // Sort by x value
+
         const type = getSeriesType(plotConfig.chartType);
 
         if (plotConfig.aggregation !== 'none') {
+          const yValues = items.map(item => Number(item[plotConfig.yAxis]));
           const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
           return {
             name: group,
             type,
-            data: [[xValues[0], aggregatedValue]]
+            data: [[items[0][plotConfig.xAxis], aggregatedValue]]
           };
         }
 
         return {
           name: group,
           type,
-          data: xValues.map((x, i) => [x, yValues[i]])
+          data
         };
       });
     }
 
-    const xValues = filteredData.map(item => item[plotConfig.xAxis]);
-    const yValues = filteredData.map(item => Number(item[plotConfig.yAxis]));
+    // If no grouping, create a single series
+    const data = filteredData.map(item => {
+      const xValue = plotConfig.xAxisType === 'datetime' 
+        ? new Date(item[plotConfig.xAxis]).getTime()
+        : item[plotConfig.xAxis];
+      const yValue = Number(item[plotConfig.yAxis]);
+      return [xValue, yValue];
+    }).sort((a, b) => (a[0] as number) - (b[0] as number)); // Sort by x value
+
     const type = getSeriesType(plotConfig.chartType);
 
     if (plotConfig.aggregation !== 'none') {
+      const yValues = filteredData.map(item => Number(item[plotConfig.yAxis]));
       const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
       return [{
         type,
-        data: [[xValues[0], aggregatedValue]]
+        data: [[filteredData[0][plotConfig.xAxis], aggregatedValue]]
       }];
     }
 
     return [{
       type,
-      data: xValues.map((x, i) => [x, yValues[i]])
+      data
     }];
+  };
+
+  const xAxisConfig = {
+    type: plotConfig.xAxisType === 'datetime' ? 'datetime' : 
+          plotConfig.xAxisType === 'category' ? 'category' : 
+          'linear',
+    title: {
+      text: plotConfig.xAxis
+    }
   };
 
   return {
     title: {
       text: `${plotConfig.yAxis} vs ${plotConfig.xAxis}`
     },
-    xAxis: {
-      title: {
-        text: plotConfig.xAxis
-      }
-    },
+    xAxis: xAxisConfig,
     yAxis: {
       title: {
         text: plotConfig.yAxis
-      }
+      },
+      type: plotConfig.yAxisType === 'logarithmic' ? 'logarithmic' : 'linear'
     },
     series: getSeriesData(),
     plotOptions: {
@@ -106,6 +132,28 @@ export const generateChartOptions = (
       },
       column: {
         borderRadius: 5
+      },
+      series: {
+        animation: {
+          duration: 1000
+        },
+        dataLabels: {
+          enabled: false
+        },
+        marker: {
+          enabled: true
+        }
+      }
+    },
+    tooltip: {
+      formatter: function() {
+        const point = this.point;
+        const x = plotConfig.xAxisType === 'datetime' 
+          ? new Date(point.x as number).toLocaleDateString()
+          : point.x;
+        return `<b>${this.series.name}</b><br/>
+                ${plotConfig.xAxis}: ${x}<br/>
+                ${plotConfig.yAxis}: ${point.y}`;
       }
     }
   };
