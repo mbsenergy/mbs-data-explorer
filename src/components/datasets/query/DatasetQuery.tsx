@@ -8,7 +8,7 @@ import { DatamartSearch } from "@/components/visualize/DatamartSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo, TableNames } from "../types";
-import SqlQueryBox from "../SqlQueryBox";
+import { SqlQueryBox } from "../SqlQueryBox";
 import { SavedQueries } from "../SavedQueries";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 

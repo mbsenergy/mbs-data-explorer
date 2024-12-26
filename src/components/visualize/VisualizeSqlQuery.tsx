@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import type { ColumnDef } from "@tanstack/react-table";
-import SqlQueryBox from "@/components/datasets/SqlQueryBox";
+import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
 import { fetchDataInBatches } from "@/utils/batchProcessing";
 
 interface VisualizeSqlQueryProps {
