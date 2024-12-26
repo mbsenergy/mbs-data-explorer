@@ -1,5 +1,5 @@
 import { DataPoint, PlotConfig } from "@/types/visualize";
-import type { Options, SeriesOptionsType } from "highcharts";
+import type { Options, SeriesOptionsType, AxisTypeValue } from "highcharts";
 import type { ChartSeriesData } from "@/types/dataset";
 
 export const aggregateValues = (values: number[], aggregation: string): number[] => {
@@ -103,10 +103,19 @@ export const generateChartOptions = (
     }];
   };
 
+  const getAxisType = (dataType: string): AxisTypeValue => {
+    switch (dataType) {
+      case 'datetime':
+        return 'datetime';
+      case 'category':
+        return 'category';
+      default:
+        return 'linear';
+    }
+  };
+
   const xAxisConfig = {
-    type: plotConfig.xAxisType === 'datetime' ? 'datetime' : 
-          plotConfig.xAxisType === 'category' ? 'category' : 
-          'linear',
+    type: getAxisType(plotConfig.xAxisType),
     title: {
       text: plotConfig.xAxis
     }
@@ -121,7 +130,7 @@ export const generateChartOptions = (
       title: {
         text: plotConfig.yAxis
       },
-      type: plotConfig.yAxisType === 'logarithmic' ? 'logarithmic' : 'linear'
+      type: plotConfig.yAxisType === 'numeric' ? 'linear' : getAxisType(plotConfig.yAxisType)
     },
     series: getSeriesData(),
     plotOptions: {
@@ -146,14 +155,15 @@ export const generateChartOptions = (
       }
     },
     tooltip: {
-      formatter: function() {
-        const point = this.point;
+      formatter: function(this: Highcharts.TooltipFormatterContextObject) {
+        if (!this.point) return '';
+        
         const x = plotConfig.xAxisType === 'datetime' 
-          ? new Date(point.x as number).toLocaleDateString()
-          : point.x;
-        return `<b>${this.series.name}</b><br/>
+          ? new Date(this.point.x as number).toLocaleDateString()
+          : this.point.x;
+        return `<b>${this.series.name || ''}</b><br/>
                 ${plotConfig.xAxis}: ${x}<br/>
-                ${plotConfig.yAxis}: ${point.y}`;
+                ${plotConfig.yAxis}: ${this.point.y}`;
       }
     }
   };
