@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { useToast } from "@/components/ui/use-toast";
 import { useFileContent } from "@/hooks/useFileContent";
+import { Highlight, themes } from "prism-react-renderer";
 
 interface PreviewDialogProps {
   isOpen: boolean;
@@ -36,10 +37,12 @@ export const PreviewDialog = ({
   
   const displayContent = directData || fileContent;
   let parsedData: any[] = [];
+  let isJson = false;
   
   try {
     if (displayContent) {
       parsedData = JSON.parse(displayContent);
+      isJson = true;
     }
   } catch (e) {
     // Not JSON data, which is fine
@@ -61,6 +64,33 @@ export const PreviewDialog = ({
     }
   };
 
+  // Determine the language based on file extension
+  const getLanguage = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'js':
+        return 'javascript';
+      case 'jsx':
+        return 'jsx';
+      case 'ts':
+        return 'typescript';
+      case 'tsx':
+        return 'tsx';
+      case 'py':
+        return 'python';
+      case 'json':
+        return 'json';
+      case 'sql':
+        return 'sql';
+      case 'html':
+        return 'html';
+      case 'css':
+        return 'css';
+      default:
+        return 'typescript';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-5xl max-h-[80vh] flex flex-col">
@@ -69,14 +99,14 @@ export const PreviewDialog = ({
             <VisuallyHidden>Preview {fileName}</VisuallyHidden>
           </DialogTitle>
           <div className="flex justify-end">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleCopy}
-            className="h-8 w-8 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 text-white"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={handleCopy}
+              className="h-8 w-8 bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30 text-white"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
         <ScrollArea className="flex-1 h-[60vh] w-full overflow-y-auto scrollbar-custom">
@@ -87,7 +117,7 @@ export const PreviewDialog = ({
             {error && !directData && (
               <div className="text-red-500">Error loading file content</div>
             )}
-            {parsedData.length > 0 ? (
+            {isJson ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -111,9 +141,28 @@ export const PreviewDialog = ({
                 </TableBody>
               </Table>
             ) : (
-              <pre className="whitespace-pre-wrap font-mono text-sm">
-                {displayContent}
-              </pre>
+              <div className="rounded-md bg-gray-900 p-4">
+                <Highlight
+                  theme={themes.nightOwl}
+                  code={displayContent || ''}
+                  language={getLanguage(fileName)}
+                >
+                  {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                    <pre className={className} style={{ ...style, margin: 0 }}>
+                      {tokens.map((line, i) => (
+                        <div key={i} {...getLineProps({ line })}>
+                          <span className="text-gray-500 mr-4 select-none">
+                            {(i + 1).toString().padStart(3, ' ')}
+                          </span>
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </div>
+                      ))}
+                    </pre>
+                  )}
+                </Highlight>
+              </div>
             )}
           </div>
         </ScrollArea>
