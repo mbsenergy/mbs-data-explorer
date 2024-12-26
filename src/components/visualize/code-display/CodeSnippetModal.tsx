@@ -66,16 +66,16 @@ fig.update_layout(
 
 fig.show()`;
 
-  // Generate R code with proper structure
+  // Generate R code with proper structure and null checks
   const generateRCode = (options: any) => {
-    const seriesData = options.series.map((series: any, index: number) => {
+    const seriesData = options.series ? options.series.map((series: any, index: number) => {
       const data = JSON.stringify(series.data || []);
       return `  hc %>%
     hc_add_series(
       name = "${series.name || `Series ${index + 1}`}",
       data = ${data}
     )`;
-    }).join('\n');
+    }).join('\n') : '';
 
     return `library(highcharter)
 
