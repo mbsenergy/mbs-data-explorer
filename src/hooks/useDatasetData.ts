@@ -6,7 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
-const BATCH_THRESHOLD = 250000; // Changed from 250,000 to match requirement
+const BATCH_THRESHOLD = 250000;
 const INITIAL_SAMPLE_SIZE = 1000;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
@@ -45,6 +45,19 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     return sampleData;
   };
 
+  // Function to load full dataset without batch processing
+  const loadFullData = async (tableName: TableNames, columnsToUse: string[]) => {
+    const columnList = columnsToUse.map(col => `"${col}"`).join(',');
+    const query = `SELECT ${columnList} FROM "${tableName}"`;
+
+    const { data: fullData, error } = await supabase.rpc('execute_query', {
+      query_text: query
+    });
+
+    if (error) throw error;
+    return fullData;
+  };
+
   const loadData = async (tableName: TableNames, selectedColumns: string[] = [], useBatchProcessing: boolean = false) => {
     setIsLoading(true);
     setLoadingProgress(0);
@@ -57,7 +70,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
-      console.log('Total rows:', totalRows); // Debug log
+      console.log('Total rows:', totalRows);
 
       const columnsToUse = selectedColumns.length > 0 ? 
         selectedColumns : 
@@ -65,10 +78,10 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       setColumns(columnsToUse);
 
-      // Check if batch processing should be used
+      // Determine if batch processing should be used
       const shouldUseBatchProcessing = useBatchProcessing && totalRows > BATCH_THRESHOLD;
-      console.log('Should use batch processing:', shouldUseBatchProcessing); // Debug log
-      
+      console.log('Should use batch processing:', shouldUseBatchProcessing);
+
       if (shouldUseBatchProcessing) {
         toast({
           title: "Large Dataset Detected",
@@ -95,14 +108,20 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
           title: "Success",
           description: `Loaded ${batchData.length} rows using batch processing`
         });
-        return;
-      }
-
-      // For initial load or smaller datasets, fetch sample data
-      const sampleData = await loadSampleData(tableName, columnsToUse);
-      
-      if (sampleData && Array.isArray(sampleData)) {
+      } else if (useBatchProcessing) {
+        // For datasets under threshold, load all data at once
+        const fullData = await loadFullData(tableName, columnsToUse);
+        setData(fullData);
+        
+        toast({
+          title: "Success",
+          description: `Loaded ${fullData.length} rows`
+        });
+      } else {
+        // For initial load, fetch sample data
+        const sampleData = await loadSampleData(tableName, columnsToUse);
         setData(sampleData);
+        
         toast({
           title: "Success",
           description: `Loaded ${sampleData.length} sample rows`
