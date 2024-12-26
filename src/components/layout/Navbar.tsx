@@ -46,16 +46,11 @@ export const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-card border-b border-border/40 metallic-card">
+      {/* Left Section */}
       <div className="flex-1">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => navigate("/datasets?tab=query")}
-          className="hidden md:flex items-center gap-2"
-        >
-          <Database className="h-4 w-4" />
-          Query
-        </Button>
+        <span className="text-sm text-muted-foreground">
+          Welcome, <h3 className="inline text-white font-semibold">{profile?.first_name || user?.email}</h3>
+        </span>
       </div>
 
       {/* Center Logo */}
@@ -69,11 +64,15 @@ export const Navbar = () => {
 
       {/* Right Section */}
       <div className="flex-1 flex items-center justify-end space-x-4">
-        <div className="hidden md:block">
-          <span className="text-sm text-muted-foreground">
-            Welcome, <h3 className="inline text-white font-semibold">{profile?.first_name || user?.email}</h3>
-          </span>
-        </div>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => navigate("/datasets?tab=query")}
+          className="hidden md:flex items-center gap-2"
+        >
+          <Database className="h-4 w-4" />
+          Query
+        </Button>
 
         <Button 
           variant="ghost" 

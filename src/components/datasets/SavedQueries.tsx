@@ -168,7 +168,7 @@ export const SavedQueries = ({ onSelectQuery }: SavedQueriesProps) => {
     <CollapsibleCard
       title="Saved Queries"
       icon={<Database className="h-5 w-5" />}
-      defaultOpen={true}
+      defaultOpen={false}
     >
       <ScrollArea className="h-[300px] pr-4">
         <div className="space-y-4">
