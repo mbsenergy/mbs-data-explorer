@@ -2,6 +2,7 @@ import { DataInputTabs } from "@/components/visualize/DataInputTabs";
 import { CollapsibleCard } from "@/components/visualize/CollapsibleCard";
 import { ChartControls } from "@/components/visualize/ChartControls";
 import { FilterControls } from "@/components/visualize/FilterControls";
+import { DataColumnSelect } from "@/components/visualize/DataColumnSelect";
 import { DataDisplay } from "@/components/visualize/DataDisplay";
 import { useVisualizeState } from "@/components/visualize/VisualizeState";
 import { v4 as uuidv4 } from 'uuid';
@@ -64,6 +65,23 @@ const Visualize = () => {
     );
   };
 
+  const handleColumnSelect = (column: string) => {
+    const newColumns = state.columns.map(col => {
+      if (String(col.id) === column) {
+        return {
+          ...col,
+          show: !col.show
+        };
+      }
+      return col;
+    });
+
+    setState(prev => ({
+      ...prev,
+      columns: newColumns
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
@@ -111,6 +129,14 @@ const Visualize = () => {
         />
       </CollapsibleCard>
 
+      <CollapsibleCard title="Columns">
+        <DataColumnSelect
+          columns={state.columns}
+          selectedColumns={state.columns.filter(col => col.show).map(col => String(col.id))}
+          onColumnSelect={handleColumnSelect}
+        />
+      </CollapsibleCard>
+
       <CollapsibleCard title="Chart Configuration">
         <ChartControls
           columns={state.columns}
@@ -123,7 +149,7 @@ const Visualize = () => {
       <DataDisplay
         plotData={state.plotData}
         filteredData={state.filteredData}
-        columns={state.columns}
+        columns={state.columns.filter(col => col.show)}
         isLoading={state.isLoading}
         onExport={handleExportData}
       />

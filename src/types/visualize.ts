@@ -7,7 +7,7 @@ export type DataPoint = Record<string, any>;
 export interface VisualizeState {
   originalData: DataPoint[];
   filteredData: DataPoint[];
-  columns: ColumnDef<DataPoint>[];
+  columns: (ColumnDef<DataPoint> & { show?: boolean })[];
   isLoading: boolean;
   selectedTable: string;
   showChart: boolean;
