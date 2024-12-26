@@ -7,13 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import SqlEditor from "@/components/datasets/SqlEditor";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DatasetQueryResults } from "./DatasetQueryResults";
-import { DatasetSearch } from "../DatasetSearch";
+import { DatamartSearch } from "@/components/visualize/DatamartSearch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo, TableNames } from "../types";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import { SqlQueryBox } from "../SqlQueryBox";
 
 interface DatasetQueryProps {
@@ -37,9 +34,8 @@ export const DatasetQuery = ({
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
   const [selectedDataset, setSelectedDataset] = useState<TableNames | null>(initialSelectedDataset as TableNames | null);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const { data: tables, isLoading: tablesLoading } = useQuery({
+  const { data: tables } = useQuery({
     queryKey: ["tables"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_available_tables");
@@ -56,6 +52,10 @@ export const DatasetQuery = ({
     const matchesFavorite = !showOnlyFavorites || favorites.has(table.tablename);
     return matchesSearch && matchesField && matchesType && matchesFavorite;
   });
+
+  // Extract unique fields and types from table names
+  const fields = Array.from(new Set(tables?.map(table => table.tablename.slice(0, 2)) || [])).sort();
+  const types = Array.from(new Set(tables?.map(table => table.tablename.slice(2, 4)) || [])).sort();
 
   const handleSelect = (tableName: string) => {
     setSelectedDataset(tableName as TableNames);
@@ -148,25 +148,18 @@ export const DatasetQuery = ({
     return { isValid: true };
   };
 
-  // Extract unique fields and types from table names
-  const fields = Array.from(new Set(tables?.map(table => table.tablename.slice(0, 2)) || [])).sort();
-  const types = Array.from(new Set(tables?.map(table => table.tablename.slice(2, 4)) || [])).sort();
-
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        {tablesLoading ? (
-          <div className="flex items-center justify-center h-32">
-            <p>Loading datasets...</p>
-          </div>
-        ) : (
-          <DatasetSearch
-            tables={tables || []}
+        {tables && (
+          <DatamartSearch
+            tables={tables}
+            filteredTables={filteredTables || []}
+            favorites={favorites}
             onPreview={() => {}}
             onDownload={() => {}}
             onSelect={handleSelect}
             onToggleFavorite={toggleFavorite}
-            favorites={favorites}
             onSearchChange={setSearchTerm}
             onFieldChange={setSelectedField}
             onTypeChange={setSelectedType}
