@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useFileContent } from "@/hooks/useFileContent";
 
 export interface PreviewDialogProps {
@@ -22,7 +22,7 @@ export interface PreviewDialogProps {
   fileName?: string;
   section?: string;
   directData?: string;
-  content?: string; // Added for backward compatibility
+  content?: string;
   title?: string;
 }
 
@@ -37,8 +37,12 @@ export const PreviewDialog = ({
   title
 }: PreviewDialogProps) => {
   const { toast } = useToast();
-  const fullPath = section ? `${section}/${fileName}` : fileName;
-  const { data: fileContent, isLoading, error } = useFileContent(directData ? '' : fullPath);
+  
+  // Only fetch from storage if we don't have direct data
+  const shouldFetchFromStorage = !directData && filePath;
+  const fullPath = shouldFetchFromStorage ? (section ? `${section}/${fileName}` : fileName) : '';
+  
+  const { data: fileContent, isLoading, error } = useFileContent(shouldFetchFromStorage ? fullPath : '');
   
   const displayContent = content || directData || fileContent;
   let parsedData: any[] = [];
@@ -92,7 +96,7 @@ export const PreviewDialog = ({
       case 'css':
         return 'css';
       default:
-        return 'typescript';
+        return 'sql'; // Default to SQL for query previews
     }
   };
 
@@ -102,7 +106,6 @@ export const PreviewDialog = ({
       ignoreIllegals: true
     }).value;
     
-    // Add line numbers
     const lines = highlighted.split('\n');
     return lines.map((line, i) => (
       <div key={i} className="flex font-jetbrains-mono">
@@ -122,7 +125,7 @@ export const PreviewDialog = ({
       <DialogContent className="max-w-5xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
-            <VisuallyHidden>Preview {fileName}</VisuallyHidden>
+            <VisuallyHidden>Preview {title || fileName}</VisuallyHidden>
           </DialogTitle>
           <div className="flex justify-end">
             <Button 

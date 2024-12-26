@@ -6,12 +6,12 @@ export const useFileContent = (path: string) => {
     queryKey: ["file-content", path],
     queryFn: async () => {
       try {
-        console.log('Fetching file:', path);
-        
         if (!path) {
-          throw new Error("No file path provided");
+          return '';
         }
 
+        console.log('Fetching file:', path);
+        
         const { data, error } = await supabase.storage
           .from("developer")
           .download(path);
