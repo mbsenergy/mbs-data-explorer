@@ -9,6 +9,8 @@ interface DatasetFiltersProps {
   onFieldChange: (field: string) => void;
   onTypeChange: (type: string) => void;
   onFavoriteChange: (showFavorites: boolean) => void;
+  availableFields: string[];
+  availableTypes: string[];
 }
 
 const DatasetFilters = ({ 
@@ -16,11 +18,9 @@ const DatasetFilters = ({
   onFieldChange, 
   onTypeChange,
   onFavoriteChange,
+  availableFields,
+  availableTypes,
 }: DatasetFiltersProps) => {
-  // Fixed values for fields and types
-  const fields = ["EC", "ME", "MS", "TS"];
-  const types = ["01", "02", "03"];
-
   return (
     <div className="space-y-4">
       <div className="flex gap-4 items-center">
@@ -38,7 +38,7 @@ const DatasetFilters = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All fields</SelectItem>
-            {fields.map((field) => (
+            {availableFields.map((field) => (
               <SelectItem key={field} value={field}>{field}</SelectItem>
             ))}
           </SelectContent>
@@ -49,7 +49,7 @@ const DatasetFilters = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
-            {types.map((type) => (
+            {availableTypes.map((type) => (
               <SelectItem key={type} value={type}>{type}</SelectItem>
             ))}
           </SelectContent>
