@@ -20,16 +20,14 @@ export const fetchDataInBatches = async (
     const totalRows = countResult || 0;
     
     while (hasMoreData) {
+      // Construct proper SELECT query with escaped column names
       const columnList = selectedColumns.length > 0 
         ? selectedColumns.map(col => `"${col}"`).join(',')
         : '*';
 
-      const query = `
-        SELECT ${columnList} 
-        FROM "${tableName}" 
-        OFFSET ${offset} 
-        LIMIT ${BATCH_SIZE}
-      `;
+      const query = `SELECT ${columnList} FROM "${tableName}" LIMIT ${BATCH_SIZE} OFFSET ${offset}`;
+
+      console.log('Executing batch query:', query); // Debug log
 
       const { data: batchData, error } = await supabase.rpc('execute_query', {
         query_text: query
