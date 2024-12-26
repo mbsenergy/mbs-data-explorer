@@ -23,6 +23,8 @@ type TableNames = keyof Database['public']['Tables'];
 
 const Visualize = () => {
   const { isEnabled: canVisualize } = useFeatureAccess("visualize");
+  const { toast } = useToast();
+  const { user } = useAuth();
 
   // If user doesn't have access, show upgrade message
   if (!canVisualize) {
