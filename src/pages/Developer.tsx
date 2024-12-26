@@ -10,6 +10,8 @@ import { PersonalContent } from "@/components/developer/tabs/PersonalContent";
 import { FileText, Grid } from "lucide-react";
 import { DeveloperActivity } from "@/components/developer/DeveloperActivity";
 import { useDeveloperFiles } from "@/hooks/useDeveloperFiles";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Developer = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,6 +21,31 @@ const Developer = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [previewData, setPreviewData] = useState<{ fileName: string; content: string; section: string } | null>(null);
+
+  // Check if user has access to developer features
+  const { isEnabled: hasDeveloperAccess, isLoading: isCheckingAccess } = useFeatureAccess('developer');
+
+  // If user doesn't have access, show a message
+  if (!isCheckingAccess && !hasDeveloperAccess) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <h1 className="text-2xl font-bold">Feature Not Available</h1>
+        <p className="text-muted-foreground">
+          This feature is only available with our Premium subscription.
+        </p>
+      </div>
+    );
+  }
+
+  // Show loading state while checking access
+  if (isCheckingAccess) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[200px] w-full" />
+      </div>
+    );
+  }
 
   // Fetch all files to pass to DeveloperActivity
   const sections = ['presets', 'macros', 'developer', 'models', 'queries'];
