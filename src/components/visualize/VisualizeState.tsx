@@ -44,11 +44,13 @@ export const useVisualizeState = () => {
   ]);
 
   useEffect(() => {
-    if (!state.showChart || !plotConfig.xAxis || !plotConfig.yAxis || !state.filteredData.length) return;
-
-    const chartOptions = generateChartOptions(state.filteredData, plotConfig);
-    setState(prev => ({ ...prev, plotData: chartOptions }));
-  }, [state.showChart, plotConfig, state.filteredData]);
+    if (state.showChart && plotConfig.xAxis && plotConfig.yAxis && state.filteredData.length) {
+      console.log("Generating chart with data:", state.filteredData);
+      console.log("Plot config:", plotConfig);
+      const chartOptions = generateChartOptions(state.filteredData, plotConfig);
+      setState(prev => ({ ...prev, plotData: chartOptions }));
+    }
+  }, [state.showChart]);
 
   const handleDataReceived = (data: DataPoint[], rawColumns: ColumnDef<any>[]) => {
     const typedColumns: ColumnDef<DataPoint>[] = rawColumns.map(col => ({

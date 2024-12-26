@@ -82,6 +82,10 @@ const Visualize = () => {
     }));
   };
 
+  const handleGenerateChart = () => {
+    setState(prev => ({ ...prev, showChart: true }));
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
@@ -142,7 +146,7 @@ const Visualize = () => {
           columns={state.columns}
           plotConfig={plotConfig}
           onConfigChange={setPlotConfig}
-          onGenerateChart={() => setState(prev => ({ ...prev, showChart: true }))}
+          onGenerateChart={handleGenerateChart}
         />
       </CollapsibleCard>
 

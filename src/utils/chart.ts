@@ -155,7 +155,7 @@ export const generateChartOptions = (
       }
     },
     tooltip: {
-      formatter: function(this: Highcharts.TooltipFormatterContextObject) {
+      formatter: function(this: any) {
         if (!this.point) return '';
         
         const x = plotConfig.xAxisType === 'datetime' 
