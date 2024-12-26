@@ -370,42 +370,12 @@ const Visualize = () => {
           </Collapsible>
         </Card>
 
-        {/* Query Data Card */}
-        <Card className="p-6 metallic-card relative">
-          <Collapsible open={isQueryOpen} onOpenChange={setIsQueryOpen}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Query Data</h2>
-              </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  {isQueryOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Select Table</Label>
-                  <Input
-                    type="text"
-                    placeholder="Enter table name"
-                    value={state.selectedTable}
-                    onChange={(e) => setState(prev => ({ ...prev, selectedTable: e.target.value }))}
-                  />
-                </div>
-                <Button
-                  onClick={handleQueryData}
-                  disabled={state.isLoading}
-                  className="w-full bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
-                >
-                  Query Data
-                </Button>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
+          {/* SQL Query Box */}
+          <SqlQueryBox 
+            onExecute={handleExportData} 
+            defaultValue={`SELECT * FROM "${state.selectedTable || 'your_table'}" LIMIT 100`} 
+            />
+        
       </div>
 
       {state.originalData.length > 0 && (
@@ -449,12 +419,6 @@ const Visualize = () => {
               </CollapsibleContent>
             </Collapsible>
           </Card>
-
-          {/* SQL Query Box */}
-          <SqlQueryBox 
-            onExecute={handleExportData} 
-            defaultValue={`SELECT * FROM ${state.selectedTable || 'your_table'} LIMIT 100`} 
-          />
 
           {/* Chart Configuration Card */}
           <Card className="p-6 metallic-card relative">
