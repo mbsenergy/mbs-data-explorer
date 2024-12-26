@@ -1,25 +1,136 @@
-import { Card } from "@/components/ui/card";
-import { Code } from "lucide-react";
-import SqlEditor from "@/components/datasets/SqlEditor";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Play, Save, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface SqlQueryBoxProps {
   onExecute: (query: string) => void;
   defaultValue?: string;
+  isLoading?: boolean;
 }
 
-export const SqlQueryBox = ({ onExecute, defaultValue }: SqlQueryBoxProps) => {
+const SqlQueryBox = ({ onExecute, defaultValue = "", isLoading = false }: SqlQueryBoxProps) => {
+  const [query, setQuery] = useState(defaultValue);
+  const [queryName, setQueryName] = useState("");
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    setQuery(defaultValue);
+  }, [defaultValue]);
+
+  const handleExecute = () => {
+    if (query.trim()) {
+      onExecute(query);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to save queries",
+      });
+      return;
+    }
+
+    if (!queryName.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please provide a name for your query",
+      });
+      return;
+    }
+
+    if (!query.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Query cannot be empty",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("saved_queries").insert({
+        user_id: user.id,
+        name: queryName.trim(),
+        query_text: query.trim(),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Query saved successfully",
+      });
+
+      setQueryName("");
+    } catch (error: any) {
+      console.error("Error saving query:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to save query",
+      });
+    }
+  };
+
   return (
-    <Card className="p-6 metallic-card">
-      <div className="space-y-6">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold">SQL Query</h3>
         <div className="flex items-center gap-2">
-          <Code className="h-5 w-5" />
-          <h2 className="text-2xl font-semibold">SQL Query</h2>
+          <Input
+            placeholder="Query name"
+            value={queryName}
+            onChange={(e) => setQueryName(e.target.value)}
+            className="w-[200px]"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSave}
+            disabled={!query.trim() || !queryName.trim() || isLoading}
+            className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Save
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleExecute}
+            disabled={!query.trim() || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Executing...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 mr-2" />
+                Execute
+              </>
+            )}
+          </Button>
         </div>
-        <p className="text-muted-foreground">
-          Execute custom SQL queries on the available datasets
-        </p>
-        <SqlEditor onExecute={onExecute} defaultValue={defaultValue} />
       </div>
-    </Card>
+      <Textarea
+        placeholder="SELECT * FROM your_table WHERE..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="font-mono min-h-[200px]"
+        disabled={isLoading}
+      />
+    </div>
   );
 };
+
+export default SqlQueryBox;
