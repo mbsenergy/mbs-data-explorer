@@ -78,7 +78,14 @@ export const generateChartOptions = (
           const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
           const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
           return [xValue, yValue];
-        }).sort((a, b) => (a[0] as number) - (b[0] as number)); // Sort by x value
+        });
+
+        // Sort data by x value
+        data.sort((a, b) => {
+          const aValue = a[0];
+          const bValue = b[0];
+          return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        });
 
         const type = getSeriesType(plotConfig.chartType);
 
@@ -105,7 +112,14 @@ export const generateChartOptions = (
       const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
       const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
       return [xValue, yValue];
-    }).sort((a, b) => (a[0] as number) - (b[0] as number)); // Sort by x value
+    });
+
+    // Sort data by x value
+    data.sort((a, b) => {
+      const aValue = a[0];
+      const bValue = b[0];
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    });
 
     const type = getSeriesType(plotConfig.chartType);
 
