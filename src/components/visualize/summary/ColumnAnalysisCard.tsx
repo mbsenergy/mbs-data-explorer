@@ -106,29 +106,29 @@ export const ColumnAnalysisCard = ({ column, data, summary }: ColumnAnalysisCard
   };
 
   return (
-    <Card className="p-4 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
-      <h4 className="font-medium text-lg text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+    <Card className="p-4 metallic-card">
+      <h4 className="font-medium text-lg">
         {getColumnHeader()}
       </h4>
       <div className="mt-4 grid grid-cols-2 gap-4">
         <div className="space-y-2 text-sm">
-          <p className="text-slate-300">Type: <span className="text-white">{summary.type}</span></p>
-          <p className="text-slate-300">Null values: <span className="text-white">{summary.nullCount}</span></p>
+          <p className="text-muted-foreground">Type: <span className="text-foreground">{summary.type}</span></p>
+          <p className="text-muted-foreground">Null values: <span className="text-foreground">{summary.nullCount}</span></p>
           {summary.type === 'number' && (
             <>
-              <p className="text-slate-300">Min: <span className="text-white">{summary.min?.toLocaleString()}</span></p>
-              <p className="text-slate-300">Max: <span className="text-white">{summary.max?.toLocaleString()}</span></p>
-              <p className="text-slate-300">Mean: <span className="text-white">
+              <p className="text-muted-foreground">Min: <span className="text-foreground">{summary.min?.toLocaleString()}</span></p>
+              <p className="text-muted-foreground">Max: <span className="text-foreground">{summary.max?.toLocaleString()}</span></p>
+              <p className="text-muted-foreground">Mean: <span className="text-foreground">
                 {summary.mean?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
               </span></p>
             </>
           )}
           {summary.type === 'text' && summary.uniqueValues && (
             <div>
-              <p className="text-slate-300">Unique values ({Math.min(10, summary.uniqueValues.length)} of {summary.uniqueValues.length}):</p>
+              <p className="text-muted-foreground">Unique values ({Math.min(10, summary.uniqueValues.length)} of {summary.uniqueValues.length}):</p>
               <ul className="mt-1 list-disc list-inside">
                 {summary.uniqueValues.map((value, index) => (
-                  <li key={index} className="text-slate-400">{value}</li>
+                  <li key={index} className="text-muted-foreground">{value}</li>
                 ))}
               </ul>
             </div>
