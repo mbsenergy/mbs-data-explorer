@@ -1,18 +1,19 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Code } from "lucide-react";
 import { DataControls } from "./DataControls";
-import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
+import { VisualizeSqlQuery } from "./VisualizeSqlQuery";
+import type { ColumnDef } from "@tanstack/react-table";
 
 interface DataInputTabsProps {
   onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onExecuteQuery: () => void;
+  onDataReceived: (data: any[], columns: ColumnDef<any>[]) => void;
   isLoading: boolean;
   selectedTable: string;
 }
 
 export const DataInputTabs = ({
   onUpload,
-  onExecuteQuery,
+  onDataReceived,
   isLoading,
   selectedTable,
 }: DataInputTabsProps) => {
@@ -31,13 +32,13 @@ export const DataInputTabs = ({
       <TabsContent value="upload">
         <DataControls
           onUpload={onUpload}
-          onExecuteQuery={onExecuteQuery}
+          onExecuteQuery={() => {}}
           isLoading={isLoading}
           selectedTable={selectedTable}
         />
       </TabsContent>
       <TabsContent value="query">
-        <SqlQueryBox onExecute={onExecuteQuery} />
+        <VisualizeSqlQuery onDataReceived={onDataReceived} />
       </TabsContent>
     </Tabs>
   );

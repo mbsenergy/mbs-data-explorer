@@ -263,6 +263,15 @@ const Visualize = () => {
     setState(prev => ({ ...prev, plotData: chartOptions }));
   }, [state.showChart, plotConfig, state.filteredData]);
 
+  const handleDataReceived = (data: any[], cols: ColumnDef<any>[]) => {
+    setState(prev => ({
+      ...prev,
+      originalData: data,
+      filteredData: data,
+      columns: cols,
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
@@ -288,7 +297,7 @@ const Visualize = () => {
 
       <DataInputTabs
         onUpload={handleFileUpload}
-        onExecuteQuery={handleQueryData}
+        onDataReceived={handleDataReceived}
         isLoading={state.isLoading}
         selectedTable={state.selectedTable}
       />
