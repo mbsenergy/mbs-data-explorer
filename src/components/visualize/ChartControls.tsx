@@ -36,6 +36,7 @@ export const ChartControls = ({
     xAxis: plotConfig.xAxis,
     yAxis: plotConfig.yAxis,
     groupBy: plotConfig.groupBy,
+    aggregation: plotConfig.aggregation,
     xAxisLabel: '',
     yAxisLabel: '',
     reverseAxis: false,
@@ -79,7 +80,7 @@ export const ChartControls = ({
 
   const handleAxisConfigChange = (key: string, value: any) => {
     setAxisConfig(prev => ({ ...prev, [key]: value }));
-    if (['xAxis', 'yAxis', 'groupBy'].includes(key)) {
+    if (['xAxis', 'yAxis', 'groupBy', 'aggregation'].includes(key)) {
       onConfigChange({
         ...plotConfig,
         [key]: value
