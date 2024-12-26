@@ -2070,6 +2070,15 @@ export type Database = {
         }
         Returns: number
       }
+      get_user_features: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: {
+          feature_name: string
+          is_enabled: boolean
+        }[]
+      }
     }
     Enums: {
       user_level: "basic" | "plus" | "premium"
