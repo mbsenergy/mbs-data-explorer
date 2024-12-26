@@ -69,7 +69,7 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
           width: 250,
         },
       ],
-      position: 'right',
+      position: 'right' as const, // Explicitly type as 'left' | 'right'
       defaultToolPanel: 'columns',
     },
   };
