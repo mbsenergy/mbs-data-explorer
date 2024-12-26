@@ -111,7 +111,7 @@ export const ChatInterface = () => {
           <Button 
             type="submit" 
             disabled={isLoading}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 rounded-full"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

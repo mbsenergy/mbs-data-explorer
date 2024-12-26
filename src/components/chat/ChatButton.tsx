@@ -20,7 +20,7 @@ export const ChatButton = () => {
           <Bot className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[600px] metallic-card border-l border-border/40">
+      <SheetContent className="w-[500px] sm:w-[800px] metallic-card border-l border-border/40">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2 text-lg">
             <Bot className="h-6 w-6 text-primary" />
