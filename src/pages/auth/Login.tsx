@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,19 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Check if we're returning from a password reset
+    const reset = searchParams.get('reset');
+    if (reset === 'true') {
+      toast({
+        title: "Success",
+        description: "Your password has been reset successfully. Please log in with your new password.",
+        style: { backgroundColor: "#57D7E2", color: "white" }
+      });
+    }
+  }, [searchParams, toast]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
