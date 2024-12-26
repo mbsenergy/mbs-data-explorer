@@ -1,7 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mail, File, Database, LineChart, Key, User, Bell } from "lucide-react";
+import { 
+  Mail, 
+  Database, 
+  LineChart, 
+  Key, 
+  User, 
+  Bell, 
+  Search,
+  FileText,
+  Download,
+  BarChart2,
+  Settings,
+  Code,
+  Terminal,
+  HelpCircle,
+  MessageSquare,
+  Users,
+  Lock
+} from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { CollapsibleCard } from "@/components/ui/collapsible-card";
 
 const Guide = () => {
   const { toast } = useToast();
@@ -30,111 +49,187 @@ const Guide = () => {
         </Button>
       </div>
 
-      <Card className="p-6 bg-card metallic-card">
-        <div className="space-y-8">
-          {/* Data Access Section */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Database className="h-6 w-6" />
-              <h2 className="text-xl font-semibold">Data Access & Query</h2>
-            </div>
-            <div className="space-y-2 text-muted-foreground">
-              <p>Access and analyze data through multiple interfaces:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Dataset Explorer:</strong> Browse and filter datasets with an intuitive interface.</li>
-                <li><strong>SQL Query Interface:</strong> Write custom SQL queries with syntax highlighting and query saving.</li>
-                <li><strong>API Access:</strong> Generate and manage API tokens for programmatic data access.</li>
-                <li><strong>Saved Queries:</strong> Save and organize frequently used queries with tags.</li>
-              </ul>
-            </div>
-          </section>
+      <div className="grid gap-6">
+        {/* Data Access Section */}
+        <CollapsibleCard
+          title="Data Access & Query"
+          icon={<Database className="h-6 w-6" />}
+        >
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <div className="flex items-center gap-2">
+                <Search className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Dataset Explorer</h3>
+                  <p className="text-sm text-muted-foreground">Browse through our comprehensive collection of datasets with an intuitive interface. Filter, sort, and preview data before querying.</p>
+                </div>
+              </div>
 
-          {/* Visualization Section */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <LineChart className="h-6 w-6" />
-              <h2 className="text-xl font-semibold">Data Visualization</h2>
-            </div>
-            <div className="space-y-2 text-muted-foreground">
-              <p>Create and customize visualizations:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Interactive Charts:</strong> Generate dynamic charts with Highcharts integration.</li>
-                <li><strong>Column Selection:</strong> Choose specific columns for visualization.</li>
-                <li><strong>Advanced Filtering:</strong> Apply multiple filters with AND/OR conditions.</li>
-                <li><strong>Data Summary:</strong> View statistical summaries and distributions of your data.</li>
-                <li><strong>Export Options:</strong> Export charts as HTML or copy configurations for reuse.</li>
-                <li><strong>Code Generation:</strong> Get ready-to-use code snippets in React, Python, and R.</li>
-              </ul>
-            </div>
-          </section>
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">SQL Query Interface</h3>
+                  <p className="text-sm text-muted-foreground">Write and execute custom SQL queries with syntax highlighting, query validation, and the ability to save frequently used queries.</p>
+                </div>
+              </div>
 
-          {/* User Management Section */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <User className="h-6 w-6" />
-              <h2 className="text-xl font-semibold">User Management</h2>
-            </div>
-            <div className="space-y-2 text-muted-foreground">
-              <p>Manage your profile and preferences:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Profile Settings:</strong> Update personal and professional information.</li>
-                <li><strong>Avatar Upload:</strong> Customize your profile with an avatar image.</li>
-                <li><strong>Subscription Management:</strong> View and manage your subscription level.</li>
-                <li><strong>Social Links:</strong> Connect your GitHub and LinkedIn profiles.</li>
-              </ul>
-            </div>
-          </section>
+              <div className="flex items-center gap-2">
+                <Key className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">API Access</h3>
+                  <p className="text-sm text-muted-foreground">Generate and manage API tokens for programmatic data access. Perfect for integrating Flux data into your applications.</p>
+                </div>
+              </div>
 
-          {/* Developer Tools Section */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Key className="h-6 w-6" />
-              <h2 className="text-xl font-semibold">Developer Tools</h2>
+              <div className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Data Export</h3>
+                  <p className="text-sm text-muted-foreground">Export query results in multiple formats including CSV and Excel. Save and organize your exports for future reference.</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2 text-muted-foreground">
-              <p>Access developer-specific features:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>API Token Management:</strong> Generate and manage API tokens for data access.</li>
-                <li><strong>Code Snippets:</strong> Access example code in multiple languages.</li>
-                <li><strong>Documentation:</strong> View detailed API documentation and usage examples.</li>
-                <li><strong>Developer Resources:</strong> Access scripts and tools for data analysis.</li>
-              </ul>
-            </div>
-          </section>
+          </div>
+        </CollapsibleCard>
 
-          {/* Notifications Section */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Bell className="h-6 w-6" />
-              <h2 className="text-xl font-semibold">Notifications</h2>
-            </div>
-            <div className="space-y-2 text-muted-foreground">
-              <p>Stay updated with platform changes:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Dataset Updates:</strong> Receive notifications about new or updated datasets.</li>
-                <li><strong>Report Notifications:</strong> Get alerts when new reports are available.</li>
-                <li><strong>System Alerts:</strong> Stay informed about platform maintenance and updates.</li>
-              </ul>
-            </div>
-          </section>
+        {/* Visualization Section */}
+        <CollapsibleCard
+          title="Data Visualization"
+          icon={<LineChart className="h-6 w-6" />}
+        >
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <div className="flex items-center gap-2">
+                <BarChart2 className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Interactive Charts</h3>
+                  <p className="text-sm text-muted-foreground">Create dynamic visualizations using Highcharts with features like zooming, panning, and export capabilities. Customize colors, styles, and layouts.</p>
+                </div>
+              </div>
 
-          {/* Support Section */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Mail className="h-6 w-6" />
-              <h2 className="text-xl font-semibold">Support</h2>
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Advanced Configuration</h3>
+                  <p className="text-sm text-muted-foreground">Fine-tune your visualizations with advanced options for axes, legends, tooltips, and data aggregation. Save configurations for reuse.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Code Generation</h3>
+                  <p className="text-sm text-muted-foreground">Get ready-to-use code snippets in React, Python, and R to recreate your visualizations in your preferred environment.</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2 text-muted-foreground">
-              <p>Get help when you need it:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Email Support:</strong> Contact our support team directly through the platform.</li>
-                <li><strong>Documentation:</strong> Access comprehensive guides and tutorials.</li>
-                <li><strong>Feature Requests:</strong> Submit suggestions for platform improvements.</li>
-              </ul>
+          </div>
+        </CollapsibleCard>
+
+        {/* User Management Section */}
+        <CollapsibleCard
+          title="User Management"
+          icon={<User className="h-6 w-6" />}
+        >
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Profile Management</h3>
+                  <p className="text-sm text-muted-foreground">Customize your profile with personal and professional information. Upload an avatar and manage your preferences.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Security Settings</h3>
+                  <p className="text-sm text-muted-foreground">Manage your account security settings, API tokens, and access permissions. Enable two-factor authentication for enhanced security.</p>
+                </div>
+              </div>
             </div>
-          </section>
-        </div>
-      </Card>
+          </div>
+        </CollapsibleCard>
+
+        {/* Developer Tools Section */}
+        <CollapsibleCard
+          title="Developer Tools"
+          icon={<Terminal className="h-6 w-6" />}
+        >
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <div className="flex items-center gap-2">
+                <Key className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">API Management</h3>
+                  <p className="text-sm text-muted-foreground">Generate and manage API tokens, view usage statistics, and access detailed API documentation with example requests.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Code Resources</h3>
+                  <p className="text-sm text-muted-foreground">Access example scripts, SDKs, and integration guides for popular programming languages. Download starter templates and utilities.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CollapsibleCard>
+
+        {/* Notifications Section */}
+        <CollapsibleCard
+          title="Notifications"
+          icon={<Bell className="h-6 w-6" />}
+        >
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Dataset Updates</h3>
+                  <p className="text-sm text-muted-foreground">Stay informed about new datasets, updates to existing data, and changes to the platform. Customize your notification preferences.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">System Alerts</h3>
+                  <p className="text-sm text-muted-foreground">Receive important system notifications about maintenance, updates, and service status. Configure alert preferences by category.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CollapsibleCard>
+
+        {/* Support Section */}
+        <CollapsibleCard
+          title="Support"
+          icon={<HelpCircle className="h-6 w-6" />}
+        >
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Contact Support</h3>
+                  <p className="text-sm text-muted-foreground">Reach out to our support team for assistance with technical issues, feature requests, or general inquiries. Track your support tickets.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <h3 className="font-medium">Documentation</h3>
+                  <p className="text-sm text-muted-foreground">Access comprehensive guides, tutorials, and FAQs. Find detailed information about features, best practices, and troubleshooting.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CollapsibleCard>
+      </div>
     </div>
   );
 };
