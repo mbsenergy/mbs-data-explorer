@@ -1,15 +1,24 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { DataPoint } from "@/types/visualize";
 
-const inferColumnType = (value: string): 'number' | 'date' | 'text' => {
+const inferColumnType = (value: any): 'number' | 'date' | 'text' => {
+  if (value === null || value === undefined) {
+    return 'text';
+  }
+
+  // If it's already a number type
+  if (typeof value === 'number') {
+    return 'number';
+  }
+
   // Try parsing as number first
-  if (!isNaN(Number(value)) && value.trim() !== '') {
+  if (!isNaN(Number(value)) && String(value).trim() !== '') {
     return 'number';
   }
   
   // Try parsing as date
   const dateValue = new Date(value);
-  if (!isNaN(dateValue.getTime()) && value.includes('-')) {
+  if (!isNaN(dateValue.getTime()) && String(value).includes('-')) {
     return 'date';
   }
   
@@ -17,8 +26,8 @@ const inferColumnType = (value: string): 'number' | 'date' | 'text' => {
   return 'text';
 };
 
-const convertValue = (value: string, type: 'number' | 'date' | 'text'): any => {
-  if (value === null || value === undefined || value.trim() === '') {
+const convertValue = (value: any, type: 'number' | 'date' | 'text'): any => {
+  if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
     return null;
   }
 
@@ -30,7 +39,16 @@ const convertValue = (value: string, type: 'number' | 'date' | 'text'): any => {
       const date = new Date(value);
       return isNaN(date.getTime()) ? null : date;
     default:
-      return value;
+      return String(value);
+  }
+};
+
+const tryParseJSON = (text: string): any[] | null => {
+  try {
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
   }
 };
 
@@ -39,10 +57,56 @@ export const processCsvFile = async (file: File): Promise<{
   columns: ColumnDef<any>[];
 }> => {
   const text = await file.text();
+  
+  // First try to parse as JSON
+  const jsonData = tryParseJSON(text);
+  
+  if (jsonData) {
+    // Handle JSON data
+    if (jsonData.length === 0) {
+      throw new Error('No data found in file');
+    }
+
+    // Get headers from first object
+    const headers = Object.keys(jsonData[0]);
+    
+    // Infer types from first row
+    const columnTypes = headers.map(header => ({
+      header,
+      type: inferColumnType(jsonData[0][header])
+    }));
+
+    // Convert all values according to their types
+    const data = jsonData.map(row => {
+      return headers.reduce((obj, header) => {
+        obj[header] = convertValue(row[header], inferColumnType(row[header]));
+        return obj;
+      }, {} as Record<string, any>);
+    });
+
+    // Create column definitions
+    const columns: ColumnDef<any>[] = columnTypes.map(({ header, type }) => ({
+      id: header,
+      accessorKey: header,
+      header: header,
+      cell: (info: any) => {
+        const value = info.getValue();
+        if (value === null) return 'NULL';
+        if (type === 'date' && value instanceof Date) {
+          return value.toLocaleDateString();
+        }
+        return String(value);
+      }
+    }));
+
+    return { data, columns };
+  }
+
+  // If not JSON, process as CSV
   const rows = text.split('\n').filter(row => row.trim());
   
   if (rows.length === 0) {
-    throw new Error('CSV file is empty');
+    throw new Error('File is empty');
   }
 
   // Parse headers (first row)
@@ -64,9 +128,7 @@ export const processCsvFile = async (file: File): Promise<{
     const values = row.split(',');
     return headers.reduce((obj, header, index) => {
       let value = values[index] || '';
-      // Remove quotes and trim
       value = value.replace(/["']/g, '').trim();
-      // Convert value based on inferred type
       obj[header] = convertValue(value, columnTypes[index].type);
       return obj;
     }, {} as Record<string, any>);
@@ -76,7 +138,7 @@ export const processCsvFile = async (file: File): Promise<{
     throw new Error('No valid data rows found in CSV file');
   }
 
-  // Create column definitions with proper types
+  // Create column definitions
   const columns: ColumnDef<any>[] = columnTypes.map(({ header, type }) => ({
     id: header,
     accessorKey: header,
