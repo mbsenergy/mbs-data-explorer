@@ -129,9 +129,11 @@ const Visualize = () => {
             setFilters(filters.filter(f => f.id !== filterId));
           }}
           onApplyFilters={() => {
+            const newFilteredData = applyFilters(state.originalData);
+            console.log("Applying filters, new filtered data:", newFilteredData);
             setState(prev => ({ 
               ...prev, 
-              filteredData: applyFilters(state.originalData) 
+              filteredData: newFilteredData 
             }));
           }}
           originalCount={state.originalData.length}
