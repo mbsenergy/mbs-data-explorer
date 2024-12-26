@@ -1,4 +1,4 @@
-import { DataPoint, PlotConfig, ChartSeries } from "@/types/visualize";
+import { DataPoint, PlotConfig } from "@/types/visualize";
 import { Options } from "highcharts";
 
 export const aggregateValues = (values: number[], aggregation: string): number[] => {
@@ -16,7 +16,7 @@ export const aggregateValues = (values: number[], aggregation: string): number[]
   }
 };
 
-export const getSeriesType = (chartType: string): ChartSeries["type"] => {
+export const getSeriesType = (chartType: string): string => {
   switch (chartType) {
     case 'bar':
       return 'column';
@@ -33,7 +33,7 @@ export const generateChartOptions = (
   filteredData: DataPoint[],
   plotConfig: PlotConfig
 ): Options => {
-  const getSeriesData = (): ChartSeries[] => {
+  const getSeriesData = () => {
     if (plotConfig.groupBy) {
       const groups = filteredData.reduce((acc, item) => {
         const group = item[plotConfig.groupBy];
@@ -42,7 +42,7 @@ export const generateChartOptions = (
         return acc;
       }, {} as Record<string, DataPoint[]>);
 
-      return Object.entries(groups).map(([group, items]): ChartSeries => {
+      return Object.entries(groups).map(([group, items]) => {
         const xValues = items.map(item => item[plotConfig.xAxis]);
         const yValues = items.map(item => Number(item[plotConfig.yAxis]));
 

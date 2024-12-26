@@ -1,9 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { SeriesOptionsType } from "highcharts";
+import { Options } from "highcharts";
 
-export interface DataPoint {
-  [key: string]: any;
-}
+export type DataPoint = Record<string, any>;
 
 export interface VisualizeState {
   originalData: DataPoint[];
@@ -12,23 +10,53 @@ export interface VisualizeState {
   isLoading: boolean;
   selectedTable: string;
   showChart: boolean;
-  plotData: any[];
+  plotData: Options;
   searchTerm: string;
   selectedField: string;
   selectedType: string;
   showOnlyFavorites: boolean;
 }
 
+export type ChartType = "scatter" | "bar" | "line" | "box";
+export type AggregationType = "none" | "sum" | "mean" | "max" | "min";
+
 export interface PlotConfig {
   xAxis: string;
   yAxis: string;
-  chartType: "scatter" | "bar" | "line" | "box";
+  chartType: ChartType;
   groupBy: string;
-  aggregation: "none" | "sum" | "mean" | "max" | "min";
+  aggregation: AggregationType;
 }
 
-export interface ChartSeries extends SeriesOptionsType {
-  name?: string;
-  type: "scatter" | "column" | "line" | "boxplot";
-  data: Array<[number | string, number]> | number[][];
+export interface ChartControlsProps {
+  columns: ColumnDef<DataPoint>[];
+  plotConfig: PlotConfig;
+  onConfigChange: (config: PlotConfig) => void;
+  onGenerateChart: () => void;
+}
+
+export interface DataControlsProps {
+  onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onExecuteQuery: () => void;
+  isLoading: boolean;
+  selectedTable: string;
+}
+
+export interface FilterControlsProps {
+  columns: string[];
+  filters: Filter[];
+  onFilterChange: (filterId: string, field: keyof Filter, value: string) => void;
+  onAddFilter: () => void;
+  onRemoveFilter: (filterId: string) => void;
+  onApplyFilters: () => void;
+  originalCount: number;
+  filteredCount: number;
+}
+
+export interface Filter {
+  id: string;
+  searchTerm: string;
+  selectedColumn: string;
+  operator: "AND" | "OR";
+  comparisonOperator: "=" | ">" | "<" | ">=" | "<=" | "!=" | "IN" | "NOT IN";
 }
