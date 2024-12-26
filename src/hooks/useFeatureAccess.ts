@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import type { UserLevel } from "@/components/datasets/types";
 
 export const useFeatureAccess = (featureName: string) => {
   const { user } = useAuth();
