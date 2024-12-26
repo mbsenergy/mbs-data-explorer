@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Database, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -12,6 +12,18 @@ export const Navbar = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
+  };
+
+  const handleSearchClick = () => {
+    navigate('/datasets');
+    // Add a small delay to ensure navigation is complete
+    setTimeout(() => {
+      // Scroll to the search section
+      const searchSection = document.querySelector('[data-search-section]');
+      if (searchSection) {
+        searchSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
@@ -39,7 +51,7 @@ export const Navbar = () => {
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => navigate("/datasets")}
+          onClick={handleSearchClick}
           className="hidden md:flex items-center gap-2"
         >
           <Search className="h-4 w-4" />
