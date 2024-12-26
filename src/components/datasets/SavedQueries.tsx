@@ -6,10 +6,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import { TagBadge } from "./query-tags/TagBadge";
-import { TagInput } from "./query-tags/TagInput";
+import { TagEditor } from "./query-tags/TagEditor";
 import {
   Carousel,
   CarouselContent,
@@ -33,8 +31,6 @@ export interface SavedQueriesProps {
 
 export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => {
   const [queries, setQueries] = useState<SavedQuery[]>([]);
-  const [selectedQuery, setSelectedQuery] = useState<SavedQuery | null>(null);
-  const [newTag, setNewTag] = useState("");
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -89,69 +85,6 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
     }
   };
 
-  const handleAddTag = async (queryId: string) => {
-    if (!newTag.trim()) return;
-
-    try {
-      const query = queries.find(q => q.id === queryId);
-      if (!query) return;
-
-      const updatedTags = [...(query.tags || []), newTag.trim()];
-      
-      const { error } = await supabase
-        .from("saved_queries")
-        .update({ tags: updatedTags })
-        .eq("id", queryId);
-
-      if (error) throw error;
-
-      setNewTag("");
-      await loadSavedQueries();
-      
-      toast({
-        title: "Success",
-        description: "Tag added successfully",
-      });
-    } catch (error: any) {
-      console.error("Error adding tag:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to add tag",
-      });
-    }
-  };
-
-  const handleRemoveTag = async (queryId: string, tagToRemove: string) => {
-    try {
-      const query = queries.find(q => q.id === queryId);
-      if (!query) return;
-
-      const updatedTags = query.tags.filter(tag => tag !== tagToRemove);
-      
-      const { error } = await supabase
-        .from("saved_queries")
-        .update({ tags: updatedTags })
-        .eq("id", queryId);
-
-      if (error) throw error;
-
-      await loadSavedQueries();
-      
-      toast({
-        title: "Success",
-        description: "Tag removed successfully",
-      });
-    } catch (error: any) {
-      console.error("Error removing tag:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to remove tag",
-      });
-    }
-  };
-
   const handleSelect = (query: string) => {
     if (onSelect) onSelect(query);
     if (onSelectQuery) onSelectQuery(query);
@@ -180,21 +113,12 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
               <Card className="p-4 space-y-4">
                 <div>
                   <h3 className="font-semibold mb-2">{query.name}</h3>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {query.tags?.map((tag) => (
-                      <TagBadge
-                        key={tag}
-                        tag={tag}
-                        onRemove={(tag) => handleRemoveTag(query.id, tag)}
-                      />
-                    ))}
-                    <TagInput
-                      value={newTag}
-                      onChange={setNewTag}
-                      onAdd={() => handleAddTag(query.id)}
-                    />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
+                  <TagEditor
+                    queryId={query.id}
+                    tags={query.tags || []}
+                    onUpdate={loadSavedQueries}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
                     Saved on {new Date(query.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -243,20 +167,11 @@ export const SavedQueries = ({ onSelectQuery, onSelect }: SavedQueriesProps) => 
                   </Button>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {query.tags?.map((tag) => (
-                  <TagBadge
-                    key={tag}
-                    tag={tag}
-                    onRemove={(tag) => handleRemoveTag(query.id, tag)}
-                  />
-                ))}
-                <TagInput
-                  value={newTag}
-                  onChange={setNewTag}
-                  onAdd={() => handleAddTag(query.id)}
-                />
-              </div>
+              <TagEditor
+                queryId={query.id}
+                tags={query.tags || []}
+                onUpdate={loadSavedQueries}
+              />
               <p className="text-sm text-muted-foreground mt-2">
                 Saved on {new Date(query.created_at).toLocaleDateString()}
               </p>
