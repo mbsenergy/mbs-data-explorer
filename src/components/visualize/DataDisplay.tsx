@@ -30,8 +30,6 @@ export const DataDisplay = ({
   const [chartOptions, setChartOptions] = useState<Options>(plotData);
 
   useEffect(() => {
-    console.log("Filtered data in DataDisplay:", filteredData);
-    console.log("Plot data in DataDisplay:", plotData);
     setChartOptions(plotData);
   }, [plotData, filteredData]);
 
@@ -58,7 +56,7 @@ export const DataDisplay = ({
         </Button>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-xl">
         <Tabs defaultValue="summary" className="w-full">
           <TabsList>
             <TabsTrigger value="summary" className="flex items-center gap-2">
