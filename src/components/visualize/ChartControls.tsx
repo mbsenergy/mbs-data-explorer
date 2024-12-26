@@ -2,6 +2,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChartControlsProps, ChartType, AggregationType } from "@/types/visualize";
 import { BarChart, LineChart, ScatterChart, BoxSelect } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const chartTypes = [
   { value: "scatter", label: "Scatter", icon: ScatterChart },
@@ -117,13 +118,13 @@ export const ChartControls = ({ columns, plotConfig, onConfigChange, onGenerateC
       </div>
 
       <div className="flex justify-end space-x-2">
-        <button
+        <Button
           onClick={onGenerateChart}
           disabled={!plotConfig.xAxis || !plotConfig.yAxis}
-          className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-[#e11d48] hover:bg-[#be123c] text-white disabled:opacity-50"
         >
           Generate Chart
-        </button>
+        </Button>
       </div>
     </div>
   );
