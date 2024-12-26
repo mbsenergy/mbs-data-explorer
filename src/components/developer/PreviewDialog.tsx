@@ -101,12 +101,12 @@ export const PreviewDialog = ({
     // Add line numbers
     const lines = highlighted.split('\n');
     return lines.map((line, i) => (
-      <div key={i} className="flex">
-        <span className="text-gray-500 mr-4 select-none w-[40px] text-right">
+      <div key={i} className="flex font-jetbrains-mono">
+        <span className="text-gray-500 mr-4 select-none w-[40px] text-right font-jetbrains-mono">
           {(i + 1).toString().padStart(3, ' ')}
         </span>
         <span 
-          className="flex-1"
+          className="flex-1 font-jetbrains-mono"
           dangerouslySetInnerHTML={{ __html: line || '&nbsp;' }} 
         />
       </div>
