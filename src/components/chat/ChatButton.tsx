@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { ChatInterface } from "./ChatInterface";
 import { useState } from "react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 export const ChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,16 +21,22 @@ export const ChatButton = () => {
           <Bot className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[800px] sm:w-[1200px] metallic-card border-l border-border/40">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2 text-lg">
-            <Bot className="h-6 w-6 text-primary" />
-            <span className="bg-gradient-to-r from-primary to-primary/50 text-transparent bg-clip-text">
-              FluxerBuddy
-            </span>
-          </SheetTitle>
-        </SheetHeader>
-        <ChatInterface />
+      <SheetContent side="right" className="p-0 metallic-card border-l border-border/40">
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="invisible" />
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={80} minSize={40} className="p-6">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-2 text-lg">
+                <Bot className="h-6 w-6 text-primary" />
+                <span className="bg-gradient-to-r from-primary to-primary/50 text-transparent bg-clip-text">
+                  FluxerBuddy
+                </span>
+              </SheetTitle>
+            </SheetHeader>
+            <ChatInterface />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </SheetContent>
     </Sheet>
   );
