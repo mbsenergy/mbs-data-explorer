@@ -1,6 +1,6 @@
 import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { Button } from "@/components/ui/button";
-import { Download, ChartBar, Table } from "lucide-react";
+import { Download, ChartBar, Table, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -8,6 +8,8 @@ import { DatasetActionDialog } from "@/components/datasets/explore/DatasetAction
 import { useState, useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Options } from "highcharts";
+import { Card } from "@/components/ui/card";
+import { DataSummary } from "./DataSummary";
 
 interface DataDisplayProps {
   plotData: Options;
@@ -44,17 +46,6 @@ export const DataDisplay = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-3 rounded-md bg-card border border-border">
-          <div className="text-sm text-muted-foreground">Number of Rows</div>
-          <div className="text-lg font-semibold">{filteredData.length}</div>
-        </div>
-        <div className="p-3 rounded-md bg-card border border-border">
-          <div className="text-sm text-muted-foreground">Number of Columns</div>
-          <div className="text-lg font-semibold">{columns.length}</div>
-        </div>
-      </div>
-
       <div className="flex justify-end">
         <Button
           variant="outline"
@@ -67,9 +58,13 @@ export const DataDisplay = ({
         </Button>
       </div>
 
-      <Tabs defaultValue="plot" className="w-full">
-        <div className="flex justify-between items-center">
+      <Card className="p-6">
+        <Tabs defaultValue="summary" className="w-full">
           <TabsList>
+            <TabsTrigger value="summary" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Summary
+            </TabsTrigger>
             <TabsTrigger value="plot" className="flex items-center gap-2">
               <ChartBar className="h-4 w-4" />
               Plot
@@ -79,26 +74,30 @@ export const DataDisplay = ({
               Table
             </TabsTrigger>
           </TabsList>
-        </div>
 
-        <TabsContent value="plot">
-          <div className="w-full h-[600px]">
-            <HighchartsReact
-              highcharts={Highcharts}
-              options={chartOptions}
-              containerProps={{ style: { height: '100%' } }}
+          <TabsContent value="summary">
+            <DataSummary data={filteredData} columns={columns} />
+          </TabsContent>
+
+          <TabsContent value="plot">
+            <div className="w-full h-[600px]">
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={chartOptions}
+                containerProps={{ style: { height: '100%' } }}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="table">
+            <DataGrid
+              data={filteredData}
+              columns={columns}
+              isLoading={isLoading}
             />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="table">
-          <DataGrid
-            data={filteredData}
-            columns={columns}
-            isLoading={isLoading}
-          />
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </Card>
 
       <DatasetActionDialog
         isOpen={showExportDialog}
