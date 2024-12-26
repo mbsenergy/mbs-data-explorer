@@ -12,22 +12,55 @@ export const ForgotPassword = ({ onBack }: { onBack: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
+  const [cooldownTime, setCooldownTime] = useState(0);
   const { toast } = useToast();
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown) {
+      toast({
+        title: "Please wait",
+        description: `You can try again in ${cooldownTime} seconds`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      // Get the current URL without any hash or query parameters
       const baseUrl = window.location.origin;
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${baseUrl}/login`,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a rate limit error
+        if (error.message.includes('rate_limit')) {
+          const timeMatch = error.message.match(/\d+/);
+          const waitTime = timeMatch ? parseInt(timeMatch[0]) : 60;
+          setCooldownTime(waitTime);
+          setCooldown(true);
+          
+          // Start countdown
+          const timer = setInterval(() => {
+            setCooldownTime((prev) => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                setCooldown(false);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          throw new Error(`Please wait ${waitTime} seconds before requesting another reset link.`);
+        }
+        throw error;
+      }
 
       setSuccess(true);
       toast({
@@ -87,20 +120,22 @@ export const ForgotPassword = ({ onBack }: { onBack: () => void }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
-              disabled={loading}
+              disabled={loading || cooldown}
             />
           </div>
 
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-corporate-blue to-corporate-teal hover:opacity-90 transition-opacity"
-            disabled={loading}
+            disabled={loading || cooldown}
           >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Sending...
               </>
+            ) : cooldown ? (
+              `Wait ${cooldownTime}s`
             ) : (
               "Send Reset Link"
             )}
