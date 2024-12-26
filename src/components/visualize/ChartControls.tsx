@@ -66,7 +66,7 @@ export const ChartControls = ({
       },
       chart: {
         zooming: {
-          type: chartOptions.enableZoom ? 'xy' : 'none'
+          type: chartOptions.enableZoom ? 'xy' : undefined
         }
       }
     };
