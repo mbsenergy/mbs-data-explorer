@@ -44,6 +44,7 @@ export const DatasetQuery = ({
 
   const handleExecuteQuery = async (query: string) => {
     setIsLoading(true);
+    // Clear previous results immediately to show loading state
     setQueryResults(null);
     setColumns([]);
 
