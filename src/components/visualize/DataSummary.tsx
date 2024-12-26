@@ -145,11 +145,14 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
         <h3 className="text-lg font-semibold">Column Analysis</h3>
         <div className="grid gap-4">
           {columns.map(col => {
-            const summary = getColumnSummary(String(col.id));
+            const columnId = String(col.id);
+            const columnHeader = typeof col.header === 'function' ? col.header({}) : col.header;
+            const summary = getColumnSummary(columnId);
+            
             return (
-              <Card key={String(col.id)} className="p-4 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
+              <Card key={columnId} className="p-4 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
                 <h4 className="font-medium text-lg text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                  {col.header}
+                  {columnHeader}
                 </h4>
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div className="space-y-2 text-sm">

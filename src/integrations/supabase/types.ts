@@ -807,6 +807,30 @@ export type Database = {
         }
         Relationships: []
       }
+      gdp_eurozone: {
+        Row: {
+          country: string
+          created_at: string | null
+          gdp_per_capita: number
+          id: number
+          year: number
+        }
+        Insert: {
+          country: string
+          created_at?: string | null
+          gdp_per_capita: number
+          id?: never
+          year: number
+        }
+        Update: {
+          country?: string
+          created_at?: string | null
+          gdp_per_capita?: number
+          id?: never
+          year?: number
+        }
+        Relationships: []
+      }
       level_features: {
         Row: {
           created_at: string
