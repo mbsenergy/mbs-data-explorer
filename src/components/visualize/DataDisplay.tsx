@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { DataGrid } from "@/components/datasets/query/DataGrid";
+import { DatasetActionDialog } from "@/components/datasets/explore/DatasetActionDialog";
+import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Options } from "highcharts";
 
@@ -23,6 +25,17 @@ export const DataDisplay = ({
   isLoading,
   onExport
 }: DataDisplayProps) => {
+  const [showExportDialog, setShowExportDialog] = useState(false);
+
+  const handleExport = () => {
+    setShowExportDialog(true);
+  };
+
+  const handleConfirmExport = () => {
+    onExport();
+    setShowExportDialog(false);
+  };
+
   return (
     <Card className="p-6 metallic-card">
       <div className="flex justify-between items-center mb-6">
@@ -39,7 +52,7 @@ export const DataDisplay = ({
               </TabsTrigger>
             </TabsList>
             <Button
-              onClick={onExport}
+              onClick={handleExport}
               disabled={!filteredData.length}
               className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
             >
@@ -67,6 +80,15 @@ export const DataDisplay = ({
           </TabsContent>
         </Tabs>
       </div>
+
+      <DatasetActionDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        onConfirm={handleConfirmExport}
+        title="Export Data"
+        description="Are you sure you want to export this data?"
+        actionLabel="Export"
+      />
     </Card>
   );
 };
