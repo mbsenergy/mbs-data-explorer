@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { DatasetOverview } from "./DatasetOverview";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Activity, Star, History, FileSearch } from "lucide-react";
+import { ChevronDown, ChevronUp, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TableInfo, TableNames } from "./types";
 
@@ -49,7 +49,7 @@ export const DatasetActivity = ({
           <DatasetOverview 
             favorites={favorites} 
             tables={tables}
-            selectedDataset={selectedDataset}
+            selectedDataset={selectedDataset as string}
             onPreview={onPreview}
             onDownload={onDownload}
             onSelect={onSelect}

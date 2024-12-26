@@ -17,7 +17,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { SqlQueryBox } from "../SqlQueryBox";
 
 interface DatasetQueryProps {
-  selectedDataset: string | null;
+  selectedDataset: TableNames | null;
   selectedColumns: string[];
 }
 
@@ -160,7 +160,7 @@ export const DatasetQuery = ({
             onFavoriteChange={setShowOnlyFavorites}
             availableFields={Array.from(new Set(tables?.map(t => t.tablename.slice(0, 2)) || []))}
             availableTypes={Array.from(new Set(tables?.map(t => t.tablename.slice(2, 4)) || []))}
-            selectedDataset={selectedDataset || ""}
+            selectedDataset={selectedDataset as string || ""}
           />
         )}
       </div>

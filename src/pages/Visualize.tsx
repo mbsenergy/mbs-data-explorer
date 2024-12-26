@@ -22,6 +22,7 @@ import { generateChartOptions } from "@/utils/chart";
 import type { VisualizeState, PlotConfig, Filter, DataPoint } from "@/types/visualize";
 import type { TableInfo } from "@/components/datasets/types";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { TableNames } from "@/components/datasets/types";
 
 const Visualize = () => {
   const { toast } = useToast();
@@ -141,7 +142,7 @@ const Visualize = () => {
     setState(prev => ({ ...prev, isLoading: true }));
     try {
       const { data: queryData, error } = await supabase
-        .from(state.selectedTable)
+        .from(state.selectedTable as TableNames)
         .select('*')
         .limit(1000);
 

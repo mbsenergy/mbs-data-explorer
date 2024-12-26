@@ -1,6 +1,9 @@
-export type TableInfo = {
+import type { ColumnDef } from "@tanstack/react-table";
+import type { Database } from "@/integrations/supabase/types";
+
+export interface TableInfo {
   tablename: string;
-};
+}
 
 export interface DatasetFiltersProps {
   onSearchChange: (search: string) => void;
@@ -33,6 +36,11 @@ export interface DatasetSearchProps {
   availableTypes: string[];
   selectedDataset: string;
   onLoad?: (tableName: string) => void;
+}
+
+export interface DatasetQueryProps {
+  selectedDataset: TableNames | null;
+  selectedColumns: string[];
 }
 
 export type TableNames = keyof Database['public']['Tables'];
