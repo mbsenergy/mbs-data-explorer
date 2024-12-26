@@ -66,3 +66,10 @@ export interface FilterControlsProps {
   originalCount: number;
   filteredCount: number;
 }
+
+export interface ColumnTypeConfig {
+  name: string;
+  type: ColumnDataType;
+}
+
+export type ColumnDataType = 'text' | 'number' | 'date' | 'boolean';

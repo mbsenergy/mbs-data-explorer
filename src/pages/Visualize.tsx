@@ -35,9 +35,15 @@ const Visualize = () => {
 
     setColumnTypes(initialColumnTypes);
 
-    const typedColumns = rawColumns.map(col => ({
-      ...col,
-      show: true
+    const typedColumns: ColumnDef<DataPoint>[] = rawColumns.map(col => ({
+      id: String(col.id),
+      accessorKey: String(col.id),
+      header: String(col.header),
+      show: true,
+      cell: (info: any) => {
+        const value = info.getValue();
+        return value === null ? 'NULL' : String(value);
+      }
     }));
 
     setState(prev => ({
