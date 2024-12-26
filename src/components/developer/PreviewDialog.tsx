@@ -41,7 +41,9 @@ export const PreviewDialog = ({
   
   try {
     if (displayContent) {
-      parsedData = JSON.parse(displayContent);
+      const parsed = JSON.parse(displayContent);
+      // Check if parsed data is an array, if not, wrap it in an array
+      parsedData = Array.isArray(parsed) ? parsed : [parsed];
       isJson = true;
     }
   } catch (e) {
@@ -117,7 +119,7 @@ export const PreviewDialog = ({
             {error && !directData && (
               <div className="text-red-500">Error loading file content</div>
             )}
-            {isJson ? (
+            {isJson && parsedData.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
