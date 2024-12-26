@@ -4,10 +4,13 @@ import { ChartControls } from "@/components/visualize/ChartControls";
 import { FilterControls } from "@/components/visualize/FilterControls";
 import { DataDisplay } from "@/components/visualize/DataDisplay";
 import { useVisualizeState } from "@/components/visualize/VisualizeState";
+import { v4 as uuidv4 } from 'uuid';
+import type { DataPoint } from "@/types/visualize";
 
 const Visualize = () => {
   const {
     state,
+    setState,
     plotConfig,
     filters,
     setFilters,
