@@ -1,15 +1,19 @@
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
 import { Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Toggle } from "@/components/ui/toggle";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import { DataControlsProps } from "@/types/visualize";
 import * as XLSX from 'xlsx';
 import { useToast } from "@/hooks/use-toast";
-import { Toggle } from "@/components/ui/toggle";
-import { useState } from "react";
 
 export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControlsProps) => {
   const { toast } = useToast();
   const [fileType, setFileType] = useState<'excel' | 'csv'>('excel');
+  const [selectedSheet, setSelectedSheet] = useState<string>('');
+  const [headerRow, setHeaderRow] = useState<string>('1');
+  const [availableSheets, setAvailableSheets] = useState<string[]>([]);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -17,37 +21,31 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
 
     try {
       let data: any[] = [];
-      const isExcelFile = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
-      const isCsvFile = file.name.endsWith('.csv');
+      
+      if (fileType === 'excel') {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        
+        // If sheets haven't been loaded yet, load them and select the first one
+        if (!selectedSheet) {
+          const sheets = workbook.SheetNames;
+          setAvailableSheets(sheets);
+          setSelectedSheet(sheets[0]);
+          return; // Wait for user to select sheet
+        }
 
-      if (!isExcelFile && !isCsvFile) {
-        toast({
-          variant: "destructive",
-          title: "Invalid file type",
-          description: `Please upload ${fileType === 'excel' ? 'an Excel (.xlsx, .xls)' : 'a CSV'} file`,
+        const worksheet = workbook.Sheets[selectedSheet];
+        const headerRowNum = parseInt(headerRow) - 1; // Convert to 0-based index
+        
+        // Read data starting from specified header row
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+          range: headerRowNum,
+          raw: false,
+          defval: ''
         });
-        return;
-      }
-
-      if (fileType === 'excel' && !isExcelFile) {
-        toast({
-          variant: "destructive",
-          title: "Invalid file type",
-          description: "Please upload an Excel file (.xlsx, .xls)",
-        });
-        return;
-      }
-
-      if (fileType === 'csv' && !isCsvFile) {
-        toast({
-          variant: "destructive",
-          title: "Invalid file type",
-          description: "Please upload a CSV file",
-        });
-        return;
-      }
-
-      if (isCsvFile) {
+        
+        data = jsonData;
+      } else {
         const text = await file.text();
         const rows = text.split('\n');
         const headers = rows[0].split(',').map(h => h.trim());
@@ -61,12 +59,6 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
               return obj;
             }, {} as Record<string, string>);
           });
-      } else if (isExcelFile) {
-        const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        data = XLSX.utils.sheet_to_json(worksheet);
       }
 
       const syntheticEvent = {
@@ -117,11 +109,44 @@ export const DataControls = ({ onUpload, isLoading, selectedTable }: DataControl
             </Toggle>
           </div>
         </div>
+
+        {fileType === 'excel' && (
+          <div className="space-y-4 mb-4">
+            {availableSheets.length > 0 && (
+              <Select value={selectedSheet} onValueChange={setSelectedSheet}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a sheet" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSheets.map((sheet) => (
+                    <SelectItem key={sheet} value={sheet}>
+                      {sheet}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            
+            <Select value={headerRow} onValueChange={setHeaderRow}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select header row" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    Row {num}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <Input
           type="file"
           accept={fileType === 'excel' ? '.xlsx,.xls' : '.csv'}
           onChange={handleFileChange}
-          disabled={isLoading}
+          disabled={isLoading || (fileType === 'excel' && availableSheets.length > 0 && !selectedSheet)}
           className="cursor-pointer"
         />
         <p className="text-sm text-muted-foreground mt-2">
