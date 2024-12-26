@@ -9,16 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ForgotPassword } from "@/components/auth/ForgotPassword";
+import { NewPasswordForm } from "@/components/auth/NewPasswordForm";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [showNewPasswordForm, setShowNewPasswordForm] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -27,7 +26,7 @@ const Login = () => {
     // Check if we're returning from a password reset
     const fragment = window.location.hash;
     if (fragment.includes('type=recovery')) {
-      setIsResettingPassword(true);
+      setShowNewPasswordForm(true);
       // Clear the hash without triggering a reload
       window.history.replaceState(null, '', window.location.pathname);
     }
@@ -41,41 +40,6 @@ const Login = () => {
       });
     }
   }, [searchParams, toast]);
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Your password has been updated successfully. Please log in with your new password.",
-        style: { backgroundColor: "#57D7E2", color: "white" }
-      });
-
-      setIsResettingPassword(false);
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (error: any) {
-      console.error("Password update error:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,7 +91,7 @@ const Login = () => {
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-corporate-blue rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" />
       <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-corporate-teal rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ animationDelay: "2s" }} />
 
-      {/* New logo above the card */}
+      {/* Logo */}
       <div className="absolute top-10 left-1/2 transform -translate-x-1/2 mb-6">
         <img 
           src="/brand/mbs_logo.png" 
@@ -137,66 +101,8 @@ const Login = () => {
       </div>
       
       <Card className="w-full max-w-md p-8 metallic-card relative z-10 shimmer">
-        {isResettingPassword ? (
-          <div className="space-y-6">
-            <div className="flex flex-col items-center space-y-2">
-              <h1 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-corporate-teal">
-                Set New Password
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Please enter your new password
-              </p>
-            </div>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="bg-background/50 border-white/10 focus:border-corporate-teal transition-colors"
-                  disabled={loading}
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-corporate-blue to-corporate-teal hover:opacity-90 transition-opacity"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating Password...
-                  </>
-                ) : (
-                  "Update Password"
-                )}
-              </Button>
-            </form>
-          </div>
+        {showNewPasswordForm ? (
+          <NewPasswordForm />
         ) : showForgotPassword ? (
           <ForgotPassword onBack={() => setShowForgotPassword(false)} />
         ) : (
