@@ -11,6 +11,7 @@ import type { Options } from "highcharts";
 import { Card } from "@/components/ui/card";
 import { DataSummary } from "./DataSummary";
 import { useToast } from "@/hooks/use-toast";
+import theme from "@/integrations/highcharts/highchartsConfig";
 
 interface DataDisplayProps {
   plotData: Options;
@@ -59,6 +60,11 @@ export const DataDisplay = ({
 <body>
   <div id="container">${svg}</div>
   <script>
+    // Apply the theme
+    const theme = ${JSON.stringify(theme, null, 2)};
+    Highcharts.setOptions(theme);
+    
+    // Create the chart
     const options = ${JSON.stringify(chartOptions, null, 2)};
     Highcharts.chart('container', options);
   </script>
