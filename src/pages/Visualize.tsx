@@ -9,14 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 import "@/integrations/highcharts/highchartsConfig";
 import { ChartControls } from "@/components/visualize/ChartControls";
 import { FilterControls } from "@/components/visualize/FilterControls";
+import { generateChartOptions } from "@/utils/chart";
 import { DataInputTabs } from "@/components/visualize/DataInputTabs";
 import { CollapsibleCard } from "@/components/visualize/CollapsibleCard";
 import { DataDisplay } from "@/components/visualize/DataDisplay";
-import type { VisualizeState, PlotConfig, Filter } from "@/types/visualize";
+import type { VisualizeState, PlotConfig, Filter, DataPoint } from "@/types/visualize";
 import type { TableInfo } from "@/components/datasets/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Database } from "@/integrations/supabase/types";
-import { FilterIcon, ChartBar } from "lucide-react";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -266,6 +266,7 @@ const Visualize = () => {
   }, [state.showChart, plotConfig, state.filteredData]);
 
   const handleDataReceived = (data: DataPoint[], rawColumns: ColumnDef<any>[]) => {
+    // Transform the columns to ensure they match DataPoint type
     const typedColumns: ColumnDef<DataPoint>[] = rawColumns.map(col => ({
       id: String(col.id),
       header: col.header,
@@ -314,7 +315,7 @@ const Visualize = () => {
         selectedTable={state.selectedTable}
       />
 
-      <CollapsibleCard title="Filters" icon={<FilterIcon className="h-5 w-5" />}>
+      <CollapsibleCard title="Filters">
         <FilterControls
           columns={state.columns.map(col => col.id as string)}
           filters={filters}
@@ -348,7 +349,7 @@ const Visualize = () => {
         />
       </CollapsibleCard>
 
-      <CollapsibleCard title="Chart Configuration" icon={<ChartBar className="h-5 w-5" />}>
+      <CollapsibleCard title="Chart Configuration">
         <ChartControls
           columns={state.columns}
           plotConfig={plotConfig}
@@ -369,3 +370,4 @@ const Visualize = () => {
 };
 
 export default Visualize;
+

@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FilterControlsProps } from "@/types/visualize";
 import { DatasetFilters } from "@/components/datasets/explore/DatasetFilters";
-import { Filter } from "lucide-react";
 
 export const FilterControls = ({
   columns,
@@ -16,10 +15,6 @@ export const FilterControls = ({
 }: FilterControlsProps) => {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">Filters</h2>
-      </div>
       <DatasetFilters
         columns={columns}
         filters={filters}
