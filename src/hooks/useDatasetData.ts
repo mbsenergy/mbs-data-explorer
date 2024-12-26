@@ -6,7 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
-const BATCH_THRESHOLD = 250000;
+const BATCH_THRESHOLD = 250000; // Changed from 250,000 to match requirement
 const INITIAL_SAMPLE_SIZE = 1000;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
@@ -57,6 +57,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
+      console.log('Total rows:', totalRows); // Debug log
 
       const columnsToUse = selectedColumns.length > 0 ? 
         selectedColumns : 
@@ -64,8 +65,17 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       setColumns(columnsToUse);
 
-      // If batch processing is requested and table is large enough
-      if (useBatchProcessing && totalRows > BATCH_THRESHOLD) {
+      // Check if batch processing should be used
+      const shouldUseBatchProcessing = useBatchProcessing && totalRows > BATCH_THRESHOLD;
+      console.log('Should use batch processing:', shouldUseBatchProcessing); // Debug log
+      
+      if (shouldUseBatchProcessing) {
+        toast({
+          title: "Large Dataset Detected",
+          description: `Loading ${totalRows.toLocaleString()} rows using batch processing...`,
+          duration: 5000,
+        });
+
         const batchData = await fetchDataInBatches(
           tableName, 
           columnsToUse,
