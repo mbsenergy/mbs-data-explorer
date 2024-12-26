@@ -1697,6 +1697,7 @@ export type Database = {
           is_cerved: boolean | null
           it_skills: string[] | null
           last_name: string | null
+          level: string
           linkedin_url: string | null
           preferred_data: string[] | null
           role: string | null
@@ -1716,6 +1717,7 @@ export type Database = {
           is_cerved?: boolean | null
           it_skills?: string[] | null
           last_name?: string | null
+          level?: string
           linkedin_url?: string | null
           preferred_data?: string[] | null
           role?: string | null
@@ -1735,6 +1737,7 @@ export type Database = {
           is_cerved?: boolean | null
           it_skills?: string[] | null
           last_name?: string | null
+          level?: string
           linkedin_url?: string | null
           preferred_data?: string[] | null
           role?: string | null

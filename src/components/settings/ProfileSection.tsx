@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { AvatarSection } from "./profile/AvatarSection";
 import { PersonalInfoSection } from "./profile/PersonalInfoSection";
 import { ProfessionalInfoSection } from "./profile/ProfessionalInfoSection";
+import { Badge } from "@/components/ui/badge";
 
 interface Profile {
   first_name: string | null;
@@ -19,7 +20,19 @@ interface Profile {
   github_url: string | null;
   linkedin_url: string | null;
   avatar_url: string | null;
+  level: string;
 }
+
+const getLevelColor = (level: string) => {
+  switch (level) {
+    case 'Premium':
+      return 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600';
+    case 'Plus':
+      return 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600';
+    default:
+      return 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600';
+  }
+};
 
 export const ProfileSection = () => {
   const { user } = useAuth();
@@ -35,6 +48,7 @@ export const ProfileSection = () => {
     github_url: "",
     linkedin_url: "",
     avatar_url: "",
+    level: "Basic",
   });
 
   const { refetch } = useQuery({
@@ -48,7 +62,6 @@ export const ProfileSection = () => {
 
       if (error) throw error;
       
-      // Update the profile state when data is fetched
       if (data) {
         setProfile(data);
       }
@@ -68,7 +81,6 @@ export const ProfileSection = () => {
   const handleSave = async () => {
     if (!user) return;
 
-    // Ensure date_of_birth is null if empty string
     const updatedProfile = {
       ...profile,
       date_of_birth: profile.date_of_birth || null,
@@ -99,7 +111,12 @@ export const ProfileSection = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile Information</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Profile Information</CardTitle>
+          <Badge className={`${getLevelColor(profile.level)} border-none`}>
+            {profile.level}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
