@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import DatasetFilters from "./DatasetFilters";
@@ -21,7 +21,7 @@ interface DatasetSearchProps {
   availableFields: string[];
   availableTypes: string[];
   selectedDataset?: string;
-  onLoad?: (tableName: string) => void;  // Added this line
+  onLoad?: (tableName: string) => void;
 }
 
 export const DatasetSearch = ({ 
@@ -43,6 +43,10 @@ export const DatasetSearch = ({
   const [isOpen, setIsOpen] = React.useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 7;
+
+  // Extract unique fields and types from table names
+  const fields = Array.from(new Set(tables.map(table => table.tablename.slice(0, 2)))).sort();
+  const types = Array.from(new Set(tables.map(table => table.tablename.slice(2, 4)))).sort();
 
   // Filter tables to only include those matching XX00_ pattern
   const filteredTables = tables.filter(table => {
@@ -78,8 +82,8 @@ export const DatasetSearch = ({
             onFieldChange={onFieldChange}
             onTypeChange={onTypeChange}
             onFavoriteChange={onFavoriteChange}
-            availableFields={availableFields}
-            availableTypes={availableTypes}
+            availableFields={fields}
+            availableTypes={types}
           />
           <div className="mt-6">
             <DatasetTable

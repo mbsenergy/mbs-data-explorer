@@ -46,6 +46,10 @@ export const DatamartSearch = ({
 }: DatamartSearchProps) => {
   const [isOpen, setIsOpen] = useState(false); // Default to closed
 
+  // Extract unique fields and types from table names
+  const fields = Array.from(new Set(tables.map(t => t.tablename.slice(0, 2)))).sort();
+  const types = Array.from(new Set(tables.map(t => t.tablename.slice(2, 4)))).sort();
+
   return (
     <Card className="p-6 metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -81,7 +85,7 @@ export const DatamartSearch = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All fields</SelectItem>
-                  {availableFields.map((field) => (
+                  {fields.map((field) => (
                     <SelectItem key={field} value={field}>{field}</SelectItem>
                   ))}
                 </SelectContent>
@@ -92,7 +96,7 @@ export const DatamartSearch = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All types</SelectItem>
-                  {availableTypes.map((type) => (
+                  {types.map((type) => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
                   ))}
                 </SelectContent>
