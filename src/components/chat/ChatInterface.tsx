@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -45,17 +45,24 @@ export const ChatInterface = () => {
     }
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   const components: Components = {
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return match ? (
-        <pre className="bg-muted-foreground/20 p-2 rounded-lg overflow-x-auto">
+        <pre className="bg-muted/20 p-2 rounded-lg overflow-x-auto">
           <code className={className} {...props}>
             {children}
           </code>
         </pre>
       ) : (
-        <code className="bg-muted-foreground/20 rounded px-1" {...props}>
+        <code className="bg-muted/20 rounded px-1" {...props}>
           {children}
         </code>
       );
@@ -74,14 +81,14 @@ export const ChatInterface = () => {
               }`}
             >
               <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                className={`rounded-lg px-4 py-2 max-w-[80%] text-sm ${
                   message.role === 'user'
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                    : 'bg-muted/50 backdrop-blur-sm'
                 }`}
               >
                 <ReactMarkdown 
-                  className="prose prose-invert max-w-none"
+                  className="prose prose-invert prose-sm max-w-none"
                   components={components}
                 >
                   {message.content}
@@ -97,8 +104,9 @@ export const ChatInterface = () => {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="How can I help?"
-            className="min-h-[80px]"
+            className="min-h-[80px] text-sm"
           />
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (
