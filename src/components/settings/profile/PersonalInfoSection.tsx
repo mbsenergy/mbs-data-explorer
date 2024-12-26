@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { User, Calendar, Globe } from "lucide-react";
 
 interface PersonalInfoSectionProps {
   isEditing: boolean;
@@ -20,7 +21,10 @@ export const PersonalInfoSection = ({
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
-        <Label htmlFor="firstName">First Name</Label>
+        <div className="flex items-center gap-2 mb-2">
+          <User className="h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="firstName">First Name</Label>
+        </div>
         {isEditing ? (
           <Input
             id="firstName"
@@ -32,7 +36,10 @@ export const PersonalInfoSection = ({
         )}
       </div>
       <div>
-        <Label htmlFor="lastName">Last Name</Label>
+        <div className="flex items-center gap-2 mb-2">
+          <User className="h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="lastName">Last Name</Label>
+        </div>
         {isEditing ? (
           <Input
             id="lastName"
@@ -44,7 +51,10 @@ export const PersonalInfoSection = ({
         )}
       </div>
       <div>
-        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+        <div className="flex items-center gap-2 mb-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+        </div>
         {isEditing ? (
           <Input
             id="dateOfBirth"
@@ -59,7 +69,10 @@ export const PersonalInfoSection = ({
         )}
       </div>
       <div>
-        <Label htmlFor="country">Country</Label>
+        <div className="flex items-center gap-2 mb-2">
+          <Globe className="h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="country">Country</Label>
+        </div>
         {isEditing ? (
           <Input
             id="country"
