@@ -1,4 +1,5 @@
 import { SavedQueriesDisplay } from "@/components/developer/SavedQueriesDisplay";
+import { BucketUpload } from "@/components/developer/BucketUpload";
 import { useToast } from "@/hooks/use-toast";
 
 export const PersonalContent = () => {
@@ -15,6 +16,7 @@ export const PersonalContent = () => {
   return (
     <div className="space-y-6">
       <SavedQueriesDisplay onSelectQuery={handleSelectQuery} />
+      <BucketUpload />
     </div>
   );
 };
