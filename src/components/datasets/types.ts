@@ -44,5 +44,3 @@ export interface DatasetQueryProps {
 }
 
 export type TableNames = keyof Database['public']['Tables'];
-
-export type UserLevel = 'basic' | 'plus' | 'premium';

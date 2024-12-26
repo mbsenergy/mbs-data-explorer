@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { v4 as uuidv4 } from 'uuid';
 import "@/integrations/highcharts/highchartsConfig";
 import { ChartControls } from "@/components/visualize/ChartControls";
@@ -22,28 +21,8 @@ import type { Database } from "@/integrations/supabase/types";
 type TableNames = keyof Database['public']['Tables'];
 
 const Visualize = () => {
-  const { isEnabled: canVisualize } = useFeatureAccess("visualize");
   const { toast } = useToast();
   const { user } = useAuth();
-
-  // If user doesn't have access, show upgrade message
-  if (!canVisualize) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
-          Visualize Data
-        </h1>
-        <div className="p-6 text-center">
-          <h2 className="text-xl font-semibold mb-2">Feature Not Available</h2>
-          <p className="text-muted-foreground">
-            The Visualize feature is only available for Plus and Premium users.
-            Please upgrade your account to access this feature.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const [state, setState] = useState<VisualizeState>({
     originalData: [],
     filteredData: [],
@@ -391,3 +370,4 @@ const Visualize = () => {
 };
 
 export default Visualize;
+

@@ -807,33 +807,6 @@ export type Database = {
         }
         Relationships: []
       }
-      level_features: {
-        Row: {
-          created_at: string
-          feature_name: string
-          id: string
-          is_enabled: boolean | null
-          level: Database["public"]["Enums"]["user_level"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          feature_name: string
-          id?: string
-          is_enabled?: boolean | null
-          level: Database["public"]["Enums"]["user_level"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          feature_name?: string
-          id?: string
-          is_enabled?: boolean | null
-          level?: Database["public"]["Enums"]["user_level"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
       ME01_gme_mb_altriservizi: {
         Row: {
           DATE: string | null
@@ -1982,13 +1955,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_feature_access: {
-        Args: {
-          feature_name: string
-          user_id: string
-        }
-        Returns: boolean
-      }
       execute_query: {
         Args: {
           query_text: string
@@ -2021,7 +1987,7 @@ export type Database = {
       }
     }
     Enums: {
-      user_level: "basic" | "plus" | "premium"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
