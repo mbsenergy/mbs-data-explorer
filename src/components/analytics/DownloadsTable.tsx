@@ -41,6 +41,21 @@ export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: Downl
   const endIndex = startIndex + itemsPerPage;
   const currentData = data?.slice(startIndex, endIndex) || [];
 
+  const getFileInfo = (item: any) => {
+    if (getDatasetInfo && item.dataset_name) {
+      return getDatasetInfo(item.dataset_name);
+    }
+    
+    // Handle case where file_name might be undefined
+    const fileName = item.file_name || '';
+    const fileExtension = fileName.includes('.') ? fileName.split('.').pop() : '';
+    
+    return { 
+      type: item.file_section || 'Unknown', 
+      tags: fileExtension ? [fileExtension] : [] 
+    };
+  };
+
   return (
     <Card className="p-6 bg-card metallic-card">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -82,13 +97,12 @@ export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: Downl
                   </TableRow>
                 ) : (
                   currentData.map((item) => {
-                    const info = getDatasetInfo 
-                      ? getDatasetInfo(item.dataset_name)
-                      : { type: item.file_section, tags: [item.file_name.split('.').pop()] };
+                    const info = getFileInfo(item);
+                    const displayName = getDatasetInfo ? item.dataset_name : item.file_name;
                     
                     return (
                       <TableRow key={item.id}>
-                        <TableCell>{getDatasetInfo ? item.dataset_name : item.file_name}</TableCell>
+                        <TableCell>{displayName || 'Unnamed'}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{info.type}</Badge>
                         </TableCell>
@@ -100,7 +114,7 @@ export const DownloadsTable = ({ data, isLoading, title, getDatasetInfo }: Downl
                           </div>
                         </TableCell>
                         <TableCell>
-                          {format(new Date(item.downloaded_at), 'dd MMM yyyy HH:mm')}
+                          {format(new Date(item.downloaded_at || item.created_at), 'dd MMM yyyy HH:mm')}
                         </TableCell>
                       </TableRow>
                     );
