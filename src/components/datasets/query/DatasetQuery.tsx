@@ -10,6 +10,7 @@ import { SqlQueryBox } from "../SqlQueryBox";
 import { SavedQueries } from "../SavedQueries";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { fetchDataInBatches } from "@/utils/batchProcessing";
+import type { ColumnDef } from "@tanstack/react-table";
 
 interface DatasetQueryProps {
   selectedDataset?: TableNames | null;
@@ -21,6 +22,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedQuery, setSelectedQuery] = useState("");
+  const [queryColumns, setQueryColumns] = useState<ColumnDef<any>[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -88,6 +90,16 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
         queryResults = Array.isArray(data) ? data : [];
       }
 
+      // Generate columns from the first result
+      if (queryResults.length > 0) {
+        const cols: ColumnDef<any>[] = Object.keys(queryResults[0]).map(key => ({
+          id: key,
+          header: key,
+          accessorKey: key,
+        }));
+        setQueryColumns(cols);
+      }
+
       setResults(queryResults);
       
       toast({
@@ -110,6 +122,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
         description: error.message || "Failed to execute query"
       });
       setResults([]);
+      setQueryColumns([]);
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +176,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
       {results.length > 0 ? (
         <DatasetQueryResults 
           queryResults={results}
-          columns={columns}
+          columns={queryColumns}
           isLoading={isLoading} 
         />
       ) : (
