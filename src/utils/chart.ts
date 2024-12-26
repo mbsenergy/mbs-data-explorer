@@ -1,18 +1,18 @@
 import { DataPoint, PlotConfig } from "@/types/visualize";
 import type { Options, SeriesOptionsType, AxisTypeValue } from "highcharts";
 
-export const aggregateValues = (values: number[], aggregation: string): number[] => {
+export const aggregateValues = (values: number[], aggregation: string): number => {
   switch (aggregation) {
     case 'sum':
-      return [values.reduce((a, b) => a + b, 0)];
+      return values.reduce((a, b) => a + b, 0);
     case 'mean':
-      return [values.reduce((a, b) => a + b, 0) / values.length];
+      return values.reduce((a, b) => a + b, 0) / values.length;
     case 'max':
-      return [Math.max(...values)];
+      return Math.max(...values);
     case 'min':
-      return [Math.min(...values)];
+      return Math.min(...values);
     default:
-      return values;
+      return values[0];
   }
 };
 
@@ -73,22 +73,19 @@ export const generateChartOptions = (
       }, {} as Record<string, DataPoint[]>);
 
       return Object.entries(groups).map(([group, items]) => {
-        // For each group, create a series with ALL data points
         const data = items.map(item => {
           const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
-          const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
+          const yValue = Number(item[plotConfig.yAxis]);
           return [xValue, yValue];
-        });
+        }).filter(point => !isNaN(point[1]));
 
-        // Sort data points
         data.sort((a, b) => (a[0] as number) - (b[0] as number));
 
         const type = getSeriesType(plotConfig.chartType);
 
-        // Only apply aggregation if explicitly requested
         if (plotConfig.aggregation !== 'none') {
           const yValues = items.map(item => Number(item[plotConfig.yAxis]));
-          const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
+          const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation);
           return {
             name: group,
             type,
@@ -96,7 +93,6 @@ export const generateChartOptions = (
           };
         }
 
-        // Return all data points for the group
         return {
           name: group,
           type,
@@ -105,28 +101,26 @@ export const generateChartOptions = (
       });
     }
 
-    // If no grouping, create a single series with all data points
+    // If no grouping, create a single series
     const data = filteredData.map(item => {
       const xValue = formatValue(item[plotConfig.xAxis], plotConfig.xAxisType);
-      const yValue = formatValue(item[plotConfig.yAxis], plotConfig.yAxisType);
+      const yValue = Number(item[plotConfig.yAxis]);
       return [xValue, yValue];
-    });
+    }).filter(point => !isNaN(point[1]));
 
     data.sort((a, b) => (a[0] as number) - (b[0] as number));
 
     const type = getSeriesType(plotConfig.chartType);
 
-    // Only apply aggregation if explicitly requested
     if (plotConfig.aggregation !== 'none') {
       const yValues = filteredData.map(item => Number(item[plotConfig.yAxis]));
-      const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation)[0];
+      const aggregatedValue = aggregateValues(yValues, plotConfig.aggregation);
       return [{
         type,
         data: [[formatValue(filteredData[0][plotConfig.xAxis], plotConfig.xAxisType), aggregatedValue]]
       }];
     }
 
-    // Return all data points
     return [{
       type,
       data
