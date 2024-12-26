@@ -17,6 +17,7 @@ import type { VisualizeState, PlotConfig, Filter, DataPoint } from "@/types/visu
 import type { TableInfo } from "@/components/datasets/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Database } from "@/integrations/supabase/types";
+import { Filter, ChartBar } from "lucide-react";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -315,7 +316,7 @@ const Visualize = () => {
         selectedTable={state.selectedTable}
       />
 
-      <CollapsibleCard title="Filters">
+      <CollapsibleCard title="Filters" icon={<Filter className="h-5 w-5" />}>
         <FilterControls
           columns={state.columns.map(col => col.id as string)}
           filters={filters}
@@ -349,7 +350,7 @@ const Visualize = () => {
         />
       </CollapsibleCard>
 
-      <CollapsibleCard title="Chart Configuration">
+      <CollapsibleCard title="Chart Configuration" icon={<ChartBar className="h-5 w-5" />}>
         <ChartControls
           columns={state.columns}
           plotConfig={plotConfig}
@@ -370,4 +371,3 @@ const Visualize = () => {
 };
 
 export default Visualize;
-
