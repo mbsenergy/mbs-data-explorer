@@ -26,7 +26,7 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
 
   const columnDefs = useMemo(() => {
     return columns.map((col): ColDef => ({
-      field: col.accessorKey as string,
+      field: (col as any).accessorKey || col.id as string,
       headerName: String(col.header),
       minWidth: 150,
       width: 200,

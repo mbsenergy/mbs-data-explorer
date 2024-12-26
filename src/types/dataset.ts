@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import type { SeriesOptionsType } from "highcharts";
 
 export interface DataGridProps {
   data: any[];
