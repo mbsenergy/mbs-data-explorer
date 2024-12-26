@@ -70,8 +70,8 @@ export const ChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <ScrollArea className="flex-1 pr-4">
+    <div className="flex flex-col h-full">
+      <ScrollArea className="flex-1 pr-4 mb-4">
         <div className="space-y-6 mt-4">
           {messages.map((message, index) => (
             <div
@@ -99,29 +99,31 @@ export const ChatInterface = () => {
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSubmit} className="mt-4">
-        <div className="flex gap-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="How can I help?"
-            className="min-h-[80px] text-base metallic-card"
-          />
-          <Button 
-            type="submit" 
-            disabled={isLoading}
-            className="bg-primary hover:bg-primary/90 rounded-full"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Send'
-            )}
-          </Button>
-        </div>
-        <p className="text-sm text-muted-foreground mt-2 text-center">AI Powered by MBS-Energy</p>
-      </form>
+      <div className="px-6 pb-6">
+        <form onSubmit={handleSubmit}>
+          <div className="flex gap-2">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="How can I help?"
+              className="min-h-[80px] text-base metallic-card"
+            />
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="bg-primary hover:bg-primary/90 rounded-full"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Send'
+              )}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2 text-center">AI Powered by MBS-Energy</p>
+        </form>
+      </div>
     </div>
   );
 };
