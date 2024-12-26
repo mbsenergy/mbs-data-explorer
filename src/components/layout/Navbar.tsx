@@ -11,10 +11,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useQuery } from "@tanstack/react-query";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Fetch profile data including avatar_url
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user?.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -22,6 +39,9 @@ export const Navbar = () => {
   };
 
   const getInitials = (email: string) => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
+    }
     return email?.substring(0, 2).toUpperCase() || "U";
   };
 
@@ -40,7 +60,7 @@ export const Navbar = () => {
         {/* Welcome Message */}
         <div className="hidden md:block">
           <span className="text-sm text-muted-foreground">
-            Welcome, {user?.email}
+            Welcome, {profile?.first_name || user?.email}
           </span>
         </div>
       </div>
@@ -64,7 +84,7 @@ export const Navbar = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ""} />
+                  <AvatarImage src={profile?.avatar_url} alt={user.email || ""} />
                   <AvatarFallback className="bg-muted">
                     {getInitials(user.email || "")}
                   </AvatarFallback>
