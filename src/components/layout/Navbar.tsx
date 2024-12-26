@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -67,6 +67,16 @@ export const Navbar = () => {
 
       {/* Navigation Buttons */}
       <div className="flex items-center space-x-4">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => navigate("/datasets?tab=query")}
+          className="hidden md:flex items-center gap-2"
+        >
+          <Database className="h-4 w-4" />
+          Dataset Query
+        </Button>
+
         <Button 
           variant="ghost" 
           size="sm"
