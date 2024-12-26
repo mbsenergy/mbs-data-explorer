@@ -7,6 +7,7 @@ import { Layout } from "./components/layout/Layout";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { RequireAuth } from "./components/auth/RequireAuth";
 import Login from "./pages/auth/Login";
+import ResetPassword from "./pages/auth/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Datasets from "./pages/Datasets";
 import Analytics from "./pages/Analytics";
@@ -28,6 +29,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/resetpassword" element={<ResetPassword />} />
             <Route element={
               <RequireAuth>
                 <Layout />
