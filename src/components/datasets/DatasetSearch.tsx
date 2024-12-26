@@ -44,9 +44,9 @@ export const DatasetSearch = ({
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 7;
 
-  // Extract unique fields and types from table names
-  const fields = Array.from(new Set(tables.map(table => table.tablename.slice(0, 2)))).sort();
-  const types = Array.from(new Set(tables.map(table => table.tablename.slice(2, 4)))).sort();
+  // Use fixed lists for fields and types, matching the Visualize component
+  const fields = ["EC", "ME", "MS", "TS"];
+  const types = ["01", "02", "03"];
 
   // Filter tables to only include those matching XX00_ pattern
   const filteredTables = tables.filter(table => {
