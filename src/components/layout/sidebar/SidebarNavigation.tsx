@@ -11,28 +11,35 @@ import {
   Code,
   LineChart,
   User,
+  Briefcase,
+  Navigation,
+  UserCircle,
+  FolderKanban,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
-const navigationItems = [
+const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/" },
   { title: "Scenario", icon: LineChart, url: "/scenario" },
   { title: "Osservatorio", icon: Zap, url: "/osservatorio" },
+];
+
+const workItems = [
   { title: "Datasets", icon: Database, url: "/datasets" },
-  { title: "Developer", icon: Code, url: "/developer" },
   { title: "Visualize", icon: BarChart2, url: "/visualize" },
+  { title: "Developer", icon: Code, url: "/developer" },
 ];
 
 const profileItems = [
-  { title: "Analytics", icon: BarChart3, url: "/analytics" },
   { title: "User", icon: User, url: "/user" },
+  { title: "Analytics", icon: BarChart3, url: "/analytics" },
 ];
 
-const infoItems = [
+const otherItems = [
   { title: "Company", icon: Building2, url: "/company" },
-  { title: "Settings", icon: Settings, url: "/settings" },
   { title: "Help", icon: HelpCircle, url: "/guide" },
+  { title: "Settings", icon: Settings, url: "/settings" },
 ];
 
 interface SidebarNavigationProps {
@@ -66,18 +73,35 @@ export const SidebarNavigation = ({ state }: SidebarNavigationProps) => {
     </SidebarMenuItem>
   );
 
+  const renderSectionLabel = (label: string) => (
+    <div className={cn(
+      "px-4 py-2 text-xs font-medium text-muted-foreground",
+      state === "collapsed" ? "opacity-0" : "opacity-100"
+    )}>
+      {label}
+    </div>
+  );
+
   return (
     <>
       <SidebarMenu>
-        {navigationItems.map(renderNavigationItem)}
+        {renderSectionLabel("Navigation")}
+        {navItems.map(renderNavigationItem)}
       </SidebarMenu>
 
       <SidebarMenu>
+        {renderSectionLabel("Work")}
+        {workItems.map(renderNavigationItem)}
+      </SidebarMenu>
+
+      <SidebarMenu>
+        {renderSectionLabel("Profile")}
         {profileItems.map(renderNavigationItem)}
       </SidebarMenu>
 
       <SidebarMenu>
-        {infoItems.map(renderNavigationItem)}
+        {renderSectionLabel("Other")}
+        {otherItems.map(renderNavigationItem)}
       </SidebarMenu>
     </>
   );
