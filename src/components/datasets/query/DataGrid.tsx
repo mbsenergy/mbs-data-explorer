@@ -25,35 +25,60 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
           type: 'string'
         }));
 
-        // Initialize WebDataRocks
+        // Initialize WebDataRocks with theme matching
         pivotInstance.current = new WebDataRocks({
           container: pivotRef.current,
-          toolbar: true,
+          toolbar: false,
           height: 600,
           width: '100%',
           report: {
             dataSource: {
               data: data
             },
-            slice: {
-              rows: fields.map(field => ({
-                uniqueName: field.name
-              })),
-              measures: [{
-                uniqueName: "Count",
-                aggregation: "count"
-              }]
-            },
+            formats: [{
+              name: "customFormat",
+              thousandsSeparator: ",",
+              decimalSeparator: ".",
+              decimalPlaces: 2,
+              currencySymbol: "",
+              currencySymbolAlign: "left",
+              nullValue: "",
+              textAlign: "right",
+              isPercent: false
+            }],
             options: {
               grid: {
                 type: "flat",
                 showTotals: "off",
-                showGrandTotals: "off"
-              }
+                showGrandTotals: "off",
+                showHeaders: false,
+              },
+              configuratorButton: false,
+              showAggregations: false,
+              showCalculatedValuesButton: false,
+              showDrillThroughConfigurator: false,
+              sorting: false,
+              showFilter: false,
+              showHeaders: false,
+              showMeasures: false,
+              showReportFiltersArea: false,
             }
           },
-          reportcomplete: function() {
-            console.log("WebDataRocks report completed");
+          global: {
+            localization: "off"
+          },
+          customizeCell: function(cell: any) {
+            // Apply theme colors
+            if (cell.isClassicView) {
+              cell.style = {
+                "background": "hsl(var(--background))",
+                "color": "hsl(var(--foreground))",
+                "border-color": "hsl(var(--border))",
+                "font-family": "var(--font-sans)",
+                "font-size": "13px",
+                "padding": "8px 12px"
+              };
+            }
           }
         });
 
