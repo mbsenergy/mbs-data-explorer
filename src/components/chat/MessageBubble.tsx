@@ -68,7 +68,7 @@ export const MessageBubble = ({ message, segment, index, idx }: MessageBubblePro
       <div className={`rounded-lg px-4 py-2.5 max-w-[85%] text-sm ${
         message.role === 'assistant' 
           ? 'bg-[#222222] border-l-2 border-l-primary w-full' 
-          : 'bg-black/10 text-foreground'
+          : 'bg-[#1a2f1a]/80 backdrop-blur-sm border border-emerald-800/30 shadow-lg text-emerald-50'
       }`}>
         <ReactMarkdown 
           className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed"
