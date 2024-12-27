@@ -1,6 +1,6 @@
 import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { Button } from "@/components/ui/button";
-import { Download, ChartBar, Table, FileText, Code } from "lucide-react";
+import { Download, ChartBar, Table, FileText, Code, Grid } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -13,6 +13,7 @@ import { DataSummary } from "./DataSummary";
 import { useToast } from "@/hooks/use-toast";
 import theme from "@/integrations/highcharts/highchartsConfig";
 import { CodeSnippetModal } from "./code-display/CodeSnippetModal";
+import { PivotGrid } from "./pivot/PivotGrid";
 
 interface DataDisplayProps {
   plotData: Options;
@@ -111,6 +112,10 @@ export const DataDisplay = ({
                 <ChartBar className="h-4 w-4" />
                 Plot
               </TabsTrigger>
+              <TabsTrigger value="pivot" className="flex items-center gap-2">
+                <Grid className="h-4 w-4" />
+                Pivot
+              </TabsTrigger>
               <TabsTrigger value="table" className="flex items-center gap-2">
                 <Table className="h-4 w-4" />
                 Table
@@ -158,6 +163,10 @@ export const DataDisplay = ({
                 containerProps={{ style: { height: '100%' } }}
               />
             </div>
+          </TabsContent>
+
+          <TabsContent value="pivot">
+            <PivotGrid data={filteredData} columns={columns} />
           </TabsContent>
 
           <TabsContent value="table">
