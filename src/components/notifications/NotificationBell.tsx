@@ -16,20 +16,14 @@ export const NotificationBell = () => {
   const [lastCheck, setLastCheck] = useState(Date.now());
   const [notificationCount, setNotificationCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [clearedTimestamp, setClearedTimestamp] = useState<number | null>(() => {
-    // Initialize from localStorage if available
-    const stored = localStorage.getItem('lastNotificationClear');
-    return stored ? parseInt(stored, 10) : null;
-  });
-
-  const { data: notifications } = useNotifications(lastCheck);
+  const { data: notifications, clearTimestamp, setClearTimestamp } = useNotifications();
 
   useEffect(() => {
     if (notifications?.length && !isOpen) {
       const newItems = notifications.filter(
         item => {
           const itemTime = new Date(item.created_at).getTime();
-          return itemTime > lastCheck && (!clearedTimestamp || itemTime > clearedTimestamp);
+          return itemTime > lastCheck && (!clearTimestamp || itemTime > clearTimestamp);
         }
       );
       
@@ -42,7 +36,7 @@ export const NotificationBell = () => {
         });
       }
     }
-  }, [notifications, lastCheck, toast, isOpen, clearedTimestamp]);
+  }, [notifications, lastCheck, toast, isOpen, clearTimestamp]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -51,18 +45,16 @@ export const NotificationBell = () => {
     }
   };
 
-  const clearNotifications = () => {
+  const handleClearNotifications = () => {
     const now = Date.now();
     setLastCheck(now);
-    setClearedTimestamp(now);
+    setClearTimestamp(now);
     setHasNewItems(false);
     setNotificationCount(0);
-    // Store the clear timestamp in localStorage
-    localStorage.setItem('lastNotificationClear', now.toString());
   };
 
   const filteredNotifications = notifications?.filter(
-    item => !clearedTimestamp || new Date(item.created_at).getTime() > clearedTimestamp
+    item => !clearTimestamp || new Date(item.created_at).getTime() > clearTimestamp
   );
 
   return (
@@ -85,7 +77,7 @@ export const NotificationBell = () => {
       <DropdownMenuContent align="end" className="w-80">
         <NotificationList 
           notifications={filteredNotifications} 
-          onClear={clearNotifications}
+          onClear={handleClearNotifications}
         />
       </DropdownMenuContent>
     </DropdownMenu>
