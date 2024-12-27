@@ -18,7 +18,7 @@ import Guide from "./pages/Guide";
 import Scenario from "./pages/Scenario";
 import Osservatorio from "./pages/Osservatorio";
 import Developer from "./pages/Developer";
-import DataWrangle from "./pages/Visualize";
+import DataWrangle from "./pages/DataWrangle";
 
 const queryClient = new QueryClient();
 
