@@ -93,7 +93,7 @@ const Landing = () => {
           </div>
 
           <div className="text-center mb-20">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-corporate-teal via-cyan-400 to-blue-400">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-[linear-gradient(135deg,#1EAEDB_0%,#98F5E1_30%,#1EAEDB_70%,#98F5E1_100%)] animate-gradient">
               Flux Data Platform
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">

@@ -6,7 +6,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 220 100% 2%;
@@ -48,6 +48,23 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 400% 400%;
+  animation: gradient 8s ease infinite;
 }
 
 /* Field type pills */
