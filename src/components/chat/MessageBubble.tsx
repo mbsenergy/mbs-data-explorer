@@ -43,14 +43,14 @@ export const MessageBubble = ({ message, segment, index, idx }: MessageBubblePro
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
-          <pre className="bg-card/50 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs w-full px-4 py-3">
+          <pre className="bg-card/50 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs w-full px-4 py-3 [font-feature-settings:'ss01','ss02','ss03','ss06'] [-webkit-font-smoothing:antialiased] [text-rendering:optimizeLegibility]">
             <code className={className} {...props}>
               {children}
             </code>
           </pre>
         </div>
       ) : (
-        <code className="bg-card/50 px-1.5 py-0.5 rounded font-jetbrains-mono text-primary text-xs" {...props}>
+        <code className="bg-card/50 px-1.5 py-0.5 rounded font-jetbrains-mono text-primary text-xs [font-feature-settings:'ss01','ss02','ss03','ss06'] [-webkit-font-smoothing:antialiased] [text-rendering:optimizeLegibility]" {...props}>
           {children}
         </code>
       );
