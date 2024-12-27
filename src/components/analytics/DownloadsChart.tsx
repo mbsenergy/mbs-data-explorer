@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Line } from "recharts";
-import { LineChart } from "@/components/ui/chart";
+import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { subMonths, format, parseISO, isAfter, isBefore, startOfMonth } from "date-fns";
 
@@ -113,44 +112,46 @@ export const DownloadsChart = ({
   return (
     <Card className="p-6">
       <div className="h-[350px] w-full">
-        <LineChart data={chartData}>
-          <Line 
-            type="monotone" 
-            dataKey="Dataset Downloads" 
-            stroke="#10b981" 
-            strokeWidth={2} 
-          />
-          <Line 
-            type="monotone" 
-            dataKey="Developer Files" 
-            stroke="#3b82f6" 
-            strokeWidth={2} 
-          />
-          <Line 
-            type="monotone" 
-            dataKey="Exports" 
-            stroke="#6366f1" 
-            strokeWidth={2} 
-          />
-          <Line 
-            type="monotone" 
-            dataKey="Uploads" 
-            stroke="#8b5cf6" 
-            strokeWidth={2} 
-          />
-          <Line 
-            type="monotone" 
-            dataKey="Queries" 
-            stroke="#ec4899" 
-            strokeWidth={2} 
-          />
-          <Line 
-            type="monotone" 
-            dataKey="Chat Messages" 
-            stroke="#f43f5e" 
-            strokeWidth={2} 
-          />
-        </LineChart>
+        <ResponsiveContainer>
+          <LineChart data={chartData}>
+            <Line 
+              type="monotone" 
+              dataKey="Dataset Downloads" 
+              stroke="#10b981" 
+              strokeWidth={2} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Developer Files" 
+              stroke="#3b82f6" 
+              strokeWidth={2} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Exports" 
+              stroke="#6366f1" 
+              strokeWidth={2} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Uploads" 
+              stroke="#8b5cf6" 
+              strokeWidth={2} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Queries" 
+              stroke="#ec4899" 
+              strokeWidth={2} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Chat Messages" 
+              stroke="#f43f5e" 
+              strokeWidth={2} 
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </Card>
   );
