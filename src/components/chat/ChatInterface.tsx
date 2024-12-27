@@ -110,7 +110,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                 <div
                   className={`rounded-lg px-3 py-1.5 max-w-[90%] text-sm ${
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[#F2FCE2] text-gray-900'
                       : 'bg-card border-l-2 border-l-primary'
                   }`}
                 >
