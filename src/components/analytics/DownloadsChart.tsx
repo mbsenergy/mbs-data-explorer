@@ -49,7 +49,7 @@ export const DownloadsChart = ({
 
   const months = dateRange.from && dateRange.to ? 
     Array.from({ length: 6 }, (_, i) => {
-      const d = subMonths(dateRange.to, i);
+      const d = subMonths(dateRange.to!, i);
       return format(d, 'MMM yyyy');
     }).reverse() : [];
 
