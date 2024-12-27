@@ -2,11 +2,12 @@ import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
 import { Message } from "./types";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatInterfaceProps {
   messages: Message[];
@@ -16,6 +17,7 @@ interface ChatInterfaceProps {
 export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +38,11 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       setMessages([...messages, { role: 'user', content: userMessage }, { role: 'assistant', content: data.response }]);
     } catch (error) {
       console.error('Error calling Mistral AI:', error);
-      setMessages([...messages, { role: 'user', content: userMessage }, { 
-        role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.' 
-      }]);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to get a response. Please try again."
+      });
     } finally {
       setIsLoading(false);
     }
@@ -54,19 +57,22 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
   const clearChat = () => {
     setMessages([]);
+    toast({
+      description: "Chat history cleared"
+    });
   };
 
   const components: Components = {
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return match ? (
-        <pre className="bg-card p-2 rounded-lg overflow-x-auto border border-border/40 font-jetbrains-mono text-sm">
+        <pre className="bg-card/50 p-2 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs">
           <code className={className} {...props}>
             {children}
           </code>
         </pre>
       ) : (
-        <code className="bg-card px-1.5 py-0.5 rounded font-jetbrains-mono text-primary text-sm" {...props}>
+        <code className="bg-card/50 px-1.5 py-0.5 rounded font-jetbrains-mono text-primary text-xs" {...props}>
           {children}
         </code>
       );
@@ -74,9 +80,9 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(600px-4rem)]">
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40">
-        <p className="text-xs text-muted-foreground">Chat History</p>
+    <div className="flex flex-col h-full max-h-[calc(600px-3rem)]">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-background/50">
+        <p className="text-xs text-muted-foreground">Messages</p>
         <Button 
           variant="ghost" 
           size="sm" 
@@ -86,57 +92,62 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </div>
-      <ScrollArea className="flex-1 px-3">
-        <div className="space-y-1.5 py-2">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
+
+      <ScrollArea className="flex-1">
+        <div className="space-y-1 p-3">
+          {messages.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-4">
+              No messages yet. Start a conversation!
+            </p>
+          ) : (
+            messages.map((message, index) => (
               <div
-                className={`rounded-lg px-3 py-1.5 max-w-[85%] text-sm ${
-                  message.role === 'user'
-                    ? 'metallic-card text-primary-foreground'
-                    : 'glass-panel border-l-2 border-l-primary'
+                key={index}
+                className={`flex ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                <ReactMarkdown 
-                  className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-0.5"
-                  components={components}
+                <div
+                  className={`rounded-lg px-3 py-1.5 max-w-[90%] text-sm ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'glass-panel border-l-2 border-l-primary'
+                  }`}
                 >
-                  {message.content}
-                </ReactMarkdown>
+                  <ReactMarkdown 
+                    className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-0.5"
+                    components={components}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </ScrollArea>
 
-      <div className="p-3 border-t border-border/40 bg-background/50">
-        <form onSubmit={handleSubmit} className="space-y-1.5">
-          <div className="flex gap-2">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="How can I help?"
-              className="min-h-[45px] max-h-[120px] text-sm metallic-card resize-none"
-            />
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 h-[45px] px-3"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                'Send'
-              )}
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground text-center">AI Powered by MBS-Energy</p>
+      <div className="p-2 border-t border-border/40 bg-card/50">
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type your message..."
+            className="min-h-[40px] max-h-[120px] text-sm metallic-card resize-none"
+          />
+          <Button 
+            type="submit" 
+            size="icon"
+            disabled={isLoading}
+            className="bg-primary hover:bg-primary/90 h-[40px] w-[40px] shrink-0"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
         </form>
       </div>
     </div>

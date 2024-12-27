@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Bot } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,17 +18,21 @@ export const ChatButton = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bot className="h-5 w-5" />
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="relative hover:bg-primary/10 transition-colors"
+        >
+          <MessageSquare className="h-5 w-5 text-primary" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-0 metallic-card border border-border/40 w-[500px] max-h-[600px]">
+      <DialogContent className="p-0 metallic-card border border-border/40 w-[400px] max-h-[600px] gap-0">
         <div className="h-full flex flex-col">
-          <DialogHeader className="px-3 py-2 border-b border-border/40">
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <Bot className="h-4 w-4 text-primary" />
+          <DialogHeader className="px-3 py-2 border-b border-border/40 bg-card/50">
+            <DialogTitle className="flex items-center gap-2 text-sm font-medium">
+              <MessageSquare className="h-4 w-4 text-primary" />
               <span className="bg-gradient-to-r from-primary to-primary/50 text-transparent bg-clip-text">
-                FluxerBuddy
+                FluxerBuddy Assistant
               </span>
             </DialogTitle>
           </DialogHeader>
