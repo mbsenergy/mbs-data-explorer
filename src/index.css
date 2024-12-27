@@ -119,7 +119,6 @@
     rgba(255, 255, 255, 0)
   );
   animation: shimmer 2s infinite;
-  content: '';
 }
 
 .scrollbar-custom {
@@ -160,14 +159,14 @@
   --ag-background-color: transparent;
   --ag-header-height: 50px;
   --ag-row-height: 35px;
-  --ag-header-background-color: #1A1F2C;
-  --ag-odd-row-background-color: rgba(26, 31, 44, 0.7);
+  --ag-header-background-color: #020817;
+  --ag-odd-row-background-color: rgba(2, 8, 23, 0.7);
   --ag-header-foreground-color: hsl(210 40% 98%);
   --ag-foreground-color: hsl(210 40% 98%);
-  --ag-border-color: rgba(255, 255, 255, 0.1);
-  --ag-secondary-border-color: rgba(255, 255, 255, 0.1);
-  --ag-row-hover-color: rgba(42, 47, 60, 0.8);
-  --ag-selected-row-background-color: rgba(42, 47, 60, 0.5);
+  --ag-border-color: #0c1d3b;
+  --ag-secondary-border-color: #0c1d3b;
+  --ag-row-hover-color: rgba(28, 36, 52, 0.8);
+  --ag-selected-row-background-color: rgba(28, 36, 52, 0.5);
   --ag-font-family: theme('fontFamily.sans');
   --ag-font-size: 12px;
   --ag-grid-size: 5px;
@@ -177,13 +176,13 @@
 .ag-theme-alpine-dark .ag-header-cell {
   border-right: 1px solid var(--ag-border-color);
   font-size: 12px;
-  background: linear-gradient(180deg, #1A1F2C 0%, #222632 100%);
+  background: linear-gradient(180deg, #020817 0%, #0c1d3b 100%);
 }
 
 .ag-theme-alpine-dark .ag-cell {
   border-right: 1px solid var(--ag-border-color);
   font-size: 12px;
-  background: linear-gradient(145deg, rgba(26, 31, 44, 0.9) 0%, rgba(34, 38, 50, 0.9) 100%);
+  background: linear-gradient(145deg, rgba(2, 8, 23, 0.9) 0%, rgba(12, 29, 59, 0.9) 100%);
 }
 
 .ag-theme-alpine-dark .ag-row {
@@ -192,18 +191,18 @@
 }
 
 .ag-theme-alpine-dark .ag-row-odd {
-  background: linear-gradient(145deg, rgba(26, 31, 44, 0.7) 0%, rgba(34, 38, 50, 0.7) 100%);
+  background: linear-gradient(145deg, rgba(2, 8, 23, 0.7) 0%, rgba(12, 29, 59, 0.7) 100%);
 }
 
 .ag-theme-alpine-dark .ag-row:hover {
-  background: linear-gradient(145deg, rgba(42, 47, 60, 0.8) 0%, rgba(50, 55, 70, 0.8) 100%);
+  background: linear-gradient(145deg, rgba(28, 36, 52, 0.8) 0%, rgba(38, 46, 62, 0.8) 100%);
 }
 
 .ag-theme-alpine-dark .ag-side-bar {
   border-left: 1px solid var(--ag-border-color);
-  background: linear-gradient(145deg, #1A1F2C 0%, #222632 100%);
+  background: linear-gradient(145deg, #020817 0%, #0c1d3b 100%);
 }
 
 .ag-theme-alpine-dark .ag-tool-panel-wrapper {
-  background: linear-gradient(145deg, #1A1F2C 0%, #222632 100%);
+  background: linear-gradient(145deg, #020817 0%, #0c1d3b 100%);
 }
