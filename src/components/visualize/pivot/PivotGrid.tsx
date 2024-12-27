@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import 'devextreme/dist/css/dx.dark.css';
 import PivotGridDataSource from 'devextreme/ui/pivot_grid/data_source';
+import type { PivotGridDataSourceField } from 'devextreme/ui/pivot_grid/data_source';
 import $ from 'jquery';
 import 'devextreme/integration/jquery';
 import { Card } from '@/components/ui/card';
@@ -15,7 +16,7 @@ export const PivotGrid = ({ data }: PivotGridProps) => {
   useEffect(() => {
     if (!containerRef.current || !data.length) return;
 
-    const fields = Object.keys(data[0]).map(field => ({
+    const fields: PivotGridDataSourceField[] = Object.keys(data[0]).map(field => ({
       caption: field,
       dataField: field,
       dataType: typeof data[0][field] === 'number' ? 'number' : 'string',
