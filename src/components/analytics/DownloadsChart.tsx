@@ -32,11 +32,21 @@ export const DownloadsChart = ({
   ]);
 
   const getMonthlyCount = (data: any[], dateField: string) => {
-    console.log(`Processing ${dateField} data:`, data);
+    if (!data || !Array.isArray(data)) {
+      console.warn(`Invalid data received for ${dateField}:`, data);
+      return {};
+    }
+
     const monthlyCounts: { [key: string]: number } = {};
     
     data.forEach(item => {
+      if (!item[dateField]) {
+        console.warn(`Missing ${dateField} for item:`, item);
+        return;
+      }
+
       const date = parseISO(item[dateField]);
+      
       if (dateRange.from && dateRange.to &&
           isAfter(startOfDay(date), startOfDay(dateRange.from)) && 
           isBefore(endOfDay(date), endOfDay(dateRange.to))) {
@@ -45,7 +55,7 @@ export const DownloadsChart = ({
       }
     });
 
-    console.log('Monthly counts:', monthlyCounts);
+    console.log(`Monthly counts for ${dateField}:`, monthlyCounts);
     return monthlyCounts;
   };
 
@@ -55,6 +65,7 @@ export const DownloadsChart = ({
       return format(d, 'MMM yyyy');
     }).reverse() : [];
 
+  // Use correct date fields for each data type
   const analyticsMonthly = getMonthlyCount(analyticsData, 'downloaded_at');
   const developerMonthly = getMonthlyCount(developerData, 'downloaded_at');
   const exportsMonthly = getMonthlyCount(exportsData, 'downloaded_at');
