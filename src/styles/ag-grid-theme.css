@@ -1,0 +1,55 @@
+.ag-theme-alpine-dark {
+  --ag-background-color: transparent;
+  --ag-header-height: 50px;
+  --ag-row-height: 35px;
+  --ag-header-background-color: transparent;
+  --ag-odd-row-background-color: transparent;
+  --ag-header-foreground-color: hsl(210 40% 98%);
+  --ag-foreground-color: hsl(210 40% 98%);
+  --ag-border-color: #0c1d3b;
+  --ag-secondary-border-color: #0c1d3b;
+  --ag-row-hover-color: rgba(28, 36, 52, 0.8);
+  --ag-selected-row-background-color: rgba(28, 36, 52, 0.5);
+  --ag-font-family: theme('fontFamily.sans');
+  --ag-font-size: 12px;
+  --ag-grid-size: 5px;
+  --ag-list-item-height: 30px;
+}
+
+.ag-theme-alpine-dark .ag-header-cell {
+  border-right: 1px solid var(--ag-border-color);
+  font-size: 12px;
+  background: transparent;
+  backdrop-filter: blur(4px);
+}
+
+.ag-theme-alpine-dark .ag-cell {
+  border-right: 1px solid var(--ag-border-color);
+  font-size: 12px;
+  background: transparent;
+  backdrop-filter: blur(4px);
+}
+
+.ag-theme-alpine-dark .ag-row {
+  border-bottom: 1px solid var(--ag-border-color);
+  backdrop-filter: blur(4px);
+}
+
+.ag-theme-alpine-dark .ag-row-odd {
+  background: transparent;
+}
+
+.ag-theme-alpine-dark .ag-row:hover {
+  background: rgba(28, 36, 52, 0.8);
+}
+
+.ag-theme-alpine-dark .ag-side-bar {
+  border-left: 1px solid var(--ag-border-color);
+  background: transparent;
+  backdrop-filter: blur(4px);
+}
+
+.ag-theme-alpine-dark .ag-tool-panel-wrapper {
+  background: transparent;
+  backdrop-filter: blur(4px);
+}
