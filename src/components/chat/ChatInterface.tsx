@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Message } from "./types";
 import { useToast } from "@/hooks/use-toast";
@@ -112,17 +110,11 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       </ScrollArea>
 
       <div className="p-2 border-t border-border/40 bg-card/50">
-        <div className="flex gap-2">
-          <ChatInput isLoading={isLoading} onSubmit={handleSubmit} />
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={clearChat}
-            className="h-[40px] w-[40px] text-muted-foreground hover:text-destructive shrink-0"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <ChatInput 
+          isLoading={isLoading} 
+          onSubmit={handleSubmit}
+          onClear={clearChat}
+        />
       </div>
     </div>
   );
