@@ -1,0 +1,67 @@
+/* DevExtreme Dark Theme Customization */
+.dx-datagrid {
+  background-color: transparent;
+  color: hsl(210 40% 98%);
+}
+
+.dx-datagrid-headers {
+  background-color: hsl(222 84% 5%);
+  color: hsl(210 40% 98%);
+  border-bottom: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-rowsview {
+  border: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-borders > .dx-datagrid-headers,
+.dx-datagrid-borders > .dx-datagrid-rowsview,
+.dx-datagrid-borders > .dx-datagrid-total-footer {
+  border-left: 1px solid hsl(217 100% 15%);
+  border-right: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-borders > .dx-datagrid-rowsview,
+.dx-datagrid-borders > .dx-datagrid-total-footer {
+  border-bottom: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-headers .dx-datagrid-table .dx-row > td {
+  border-bottom: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-filter-row .dx-editor-cell .dx-editor-with-menu {
+  background-color: hsl(222 84% 5%);
+}
+
+.dx-datagrid .dx-row-alt > td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.dx-datagrid-filter-panel {
+  border-top: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid .dx-row-alt > tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dx-datagrid-pager {
+  background-color: transparent;
+  padding: 8px;
+  border-top: 1px solid hsl(217 100% 15%);
+}
+
+.dx-pager .dx-page-sizes .dx-selection,
+.dx-pager .dx-pages .dx-selection {
+  background-color: hsl(191 87% 58%);
+}
+
+/* Horizontal scrollbar styles */
+.dx-scrollable-scroll {
+  background-color: theme('colors.corporate.teal');
+}
+
+.dx-scrollable-scroll.dx-state-invisible {
+  opacity: 0;
+}
