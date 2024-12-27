@@ -34,16 +34,16 @@ export const MessageBubble = ({ message, segment, index, idx }: MessageBubblePro
       const match = /language-(\w+)/.exec(className || '');
       const codeContent = children.toString();
       return match ? (
-        <div className="relative w-full">
+        <div className="w-full">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-2 top-2 h-6 w-6 bg-primary/10 hover:bg-primary/20"
+            className="absolute right-1 top-1 h-6 w-6 bg-primary/10 hover:bg-primary/20"
             onClick={() => handleCopyCode(codeContent)}
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
-          <pre className="bg-card/50 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs w-full">
+          <pre className="bg-card/50 rounded-md border border-border/40 font-jetbrains-mono text-xs w-full">
             <code className={className} {...props}>
               {children}
             </code>
