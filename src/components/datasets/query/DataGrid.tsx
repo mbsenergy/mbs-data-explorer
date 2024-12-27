@@ -25,10 +25,10 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
           type: 'string'
         }));
 
-        // Initialize WebDataRocks
+        // Initialize WebDataRocks with minimal UI
         pivotInstance.current = new WebDataRocks({
           container: pivotRef.current,
-          toolbar: true,
+          toolbar: false,
           height: 600,
           width: '100%',
           report: {
@@ -37,20 +37,24 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
             },
             slice: {
               rows: fields.map(field => ({
-                uniqueName: field.name
+                uniqueName: field.name,
+                caption: field.caption
               })),
-              measures: [{
-                uniqueName: "Count",
-                aggregation: "count"
-              }]
+              measures: []
             },
             options: {
               grid: {
                 type: "flat",
                 showTotals: "off",
-                showGrandTotals: "off"
-              }
-            }
+                showGrandTotals: "off",
+                showHeaders: false,
+                showHierarchies: false,
+                showFilter: false,
+                showReportFiltersArea: false
+              },
+              configuratorButton: false
+            },
+            formats: []
           },
           reportcomplete: function() {
             console.log("WebDataRocks report completed");
