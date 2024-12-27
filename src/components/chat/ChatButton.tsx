@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { ChatInterface } from "./ChatInterface";
 import { useState } from "react";
-import { Message } from "./types";
+import { Message, ExpertiseMode } from "./types";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const ChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [expertiseMode, setExpertiseMode] = useState<ExpertiseMode>('data');
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -35,8 +37,18 @@ export const ChatButton = () => {
                 FluxerBuddy Assistant
               </span>
             </DialogTitle>
+            <Tabs value={expertiseMode} onValueChange={(value) => setExpertiseMode(value as ExpertiseMode)} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="data">Data & Code Expert</TabsTrigger>
+                <TabsTrigger value="energy">Energy Expert</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </DialogHeader>
-          <ChatInterface messages={messages} setMessages={setMessages} />
+          <ChatInterface 
+            messages={messages} 
+            setMessages={setMessages} 
+            expertiseMode={expertiseMode}
+          />
         </div>
       </DialogContent>
     </Dialog>

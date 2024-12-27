@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
-import { Message } from "./types";
+import { Message, ExpertiseMode } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
@@ -10,9 +10,10 @@ import { useAuth } from "@/components/auth/AuthProvider";
 interface ChatInterfaceProps {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
+  expertiseMode: ExpertiseMode;
 }
 
-export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => {
+export const ChatInterface = ({ messages, setMessages, expertiseMode }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -44,7 +45,12 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       }
 
       const { data, error } = await supabase.functions.invoke('chat-with-mistral', {
-        body: { message: userMessage }
+        body: { 
+          message: userMessage,
+          mode: expertiseMode,
+          // Include document search if in energy mode
+          includeDocuments: expertiseMode === 'energy'
+        }
       });
 
       if (error) throw error;
