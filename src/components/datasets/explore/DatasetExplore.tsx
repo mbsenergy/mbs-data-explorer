@@ -37,14 +37,23 @@ export const DatasetExplore = ({
     loadData
   } = useDatasetData(selectedDataset);
 
-  // Update selected columns whenever columns change or new data is loaded
+  // Ensure all columns are selected by default whenever columns or data changes
   useEffect(() => {
     if (columns.length > 0) {
       console.log("Setting all columns as selected:", columns);
       setSelectedColumns(columns);
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange, data]); // Added data as dependency to trigger on data load
+  }, [columns, onColumnsChange]);
+
+  // Also ensure columns are selected when new data is loaded
+  useEffect(() => {
+    if (data.length > 0 && columns.length > 0) {
+      console.log("Data loaded, ensuring all columns are selected:", columns);
+      setSelectedColumns(columns);
+      onColumnsChange(columns);
+    }
+  }, [data, columns, onColumnsChange]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
