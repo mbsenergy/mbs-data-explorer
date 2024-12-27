@@ -30,9 +30,10 @@ const navigation = [
 
 interface SidebarNavigationProps {
   className?: string;
+  state?: "expanded" | "collapsed";
 }
 
-export function SidebarNavigation({ className }: SidebarNavigationProps) {
+export function SidebarNavigation({ className, state }: SidebarNavigationProps) {
   return (
     <nav className={cn("space-y-1", className)}>
       {navigation.map((item) => (
@@ -45,7 +46,7 @@ export function SidebarNavigation({ className }: SidebarNavigationProps) {
             className="w-6 h-6 mr-3 text-corporate-teal"
             aria-hidden="true"
           />
-          {item.name}
+          {state !== "collapsed" && item.name}
         </Link>
       ))}
     </nav>
