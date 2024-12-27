@@ -15,18 +15,27 @@ import {
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-corporate-navy to-corporate-blue/90">
+    <div className="min-h-screen bg-gradient-to-b from-corporate-navy via-corporate-navy/95 to-corporate-blue/90">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-20">
+      <div className="container mx-auto px-4 py-12">
+        {/* Logo Section */}
+        <div className="flex justify-center mb-8">
+          <img 
+            src="/brand/flux_logo_01.png" 
+            alt="Flux Logo" 
+            className="h-16 md:h-20"
+          />
+        </div>
+
         <div className="text-center mb-20">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-corporate-teal via-cyan-400 to-blue-400">
             Flux Data Platform
           </h1>
-          <p className="text-xl text-gray-300 mb-8">
-            Your comprehensive solution for energy market data analysis and visualization
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Your comprehensive solution for energy market data analysis and visualization, powered by advanced analytics and AI
           </p>
           <Link to="/login">
-            <Button className="bg-corporate-teal hover:bg-corporate-teal/90 text-white">
+            <Button className="bg-gradient-to-r from-corporate-teal to-corporate-teal/80 hover:from-corporate-teal/90 hover:to-corporate-teal/70 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               Get Started
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
@@ -34,7 +43,7 @@ const Landing = () => {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
           <FeatureCard
             icon={<Database className="h-8 w-8 text-corporate-teal" />}
             title="Comprehensive Datasets"
@@ -99,10 +108,14 @@ const FeatureCard = ({ icon, title, description }: {
   description: string;
 }) => {
   return (
-    <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-colors">
+    <Card className="p-6 metallic-card hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-white/[0.03]">
       <div className="flex flex-col items-center text-center">
-        {icon}
-        <h3 className="mt-4 mb-2 text-xl font-semibold text-white">{title}</h3>
+        <div className="rounded-full p-3 bg-gradient-to-b from-white/10 to-transparent backdrop-blur-sm border border-white/10 mb-4">
+          {icon}
+        </div>
+        <h3 className="mt-2 mb-2 text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
+          {title}
+        </h3>
         <p className="text-gray-300">{description}</p>
       </div>
     </Card>
