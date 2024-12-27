@@ -2,7 +2,7 @@ import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
@@ -52,6 +52,10 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     }
   };
 
+  const clearChat = () => {
+    setMessages([]);
+  };
+
   const components: Components = {
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
@@ -71,8 +75,19 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
   return (
     <div className="flex flex-col h-full max-h-[calc(600px-4rem)]">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border/40">
+        <p className="text-xs text-muted-foreground">Chat History</p>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={clearChat}
+          className="h-8 px-2 text-muted-foreground hover:text-destructive"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
       <ScrollArea className="flex-1 px-4">
-        <div className="space-y-4 py-4">
+        <div className="space-y-2 py-4">
           {messages.map((message, index) => (
             <div
               key={index}
