@@ -34,7 +34,7 @@ export const MessageBubble = ({ message, segment, index, idx }: MessageBubblePro
       const match = /language-(\w+)/.exec(className || '');
       const codeContent = children.toString();
       return match ? (
-        <div className="relative w-full -mx-4">
+        <div className="relative w-full -mx-4 -my-2.5">
           <Button
             variant="ghost"
             size="icon"
@@ -43,7 +43,7 @@ export const MessageBubble = ({ message, segment, index, idx }: MessageBubblePro
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
-          <pre className="bg-card/50 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs w-full px-4">
+          <pre className="bg-card/50 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs w-full px-4 py-3">
             <code className={className} {...props}>
               {children}
             </code>
