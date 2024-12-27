@@ -63,16 +63,17 @@ export const PivotGrid = ({ data, columns }: PivotGridProps) => {
   const handleReset = useCallback(() => {
     if (gridApi) {
       gridApi.setFilterModel(null);
-      // Use the correct method to reset pivot mode and sort
+      // Use the correct method for AG Grid Enterprise
       gridApi.setPivotMode(true);
-      gridApi.setSortModel([]);
+      // For sorting, use the correct method
+      gridApi.setRowData(data);
       setQuickFilter('');
       toast({
         title: "Reset Complete",
         description: "Pivot grid settings have been reset",
       });
     }
-  }, [gridApi, toast]);
+  }, [gridApi, toast, data]);
 
   const handleQuickFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

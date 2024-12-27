@@ -53,14 +53,40 @@ export const useNotifications = () => {
   const { data: preferences } = useQuery({
     queryKey: ["notificationPreferences"],
     queryFn: async () => {
+      const user = supabase.auth.getUser();
+      const userId = (await user).data.user?.id;
+      
+      if (!userId) {
+        throw new Error("No user found");
+      }
+
       const { data, error } = await supabase
         .from('notification_preferences')
         .select('*')
-        .single();
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      if (error) {
         console.error("Error fetching preferences:", error);
+        return null;
       }
+
+      // If no preferences exist, create them
+      if (!data) {
+        const { data: newPrefs, error: createError } = await supabase
+          .from('notification_preferences')
+          .insert({ user_id: userId })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error("Error creating preferences:", createError);
+          return null;
+        }
+
+        return newPrefs;
+      }
+
       return data;
     },
   });
@@ -68,13 +94,17 @@ export const useNotifications = () => {
   // Update clear timestamp in the database
   const updateClearTimestamp = useMutation({
     mutationFn: async (timestamp: number) => {
+      const user = supabase.auth.getUser();
+      const userId = (await user).data.user?.id;
+      
+      if (!userId) {
+        throw new Error("No user found");
+      }
+
       const { error } = await supabase
         .from('notification_preferences')
-        .upsert({
-          last_cleared_at: new Date(timestamp).toISOString(),
-        }, {
-          onConflict: 'user_id'
-        });
+        .update({ last_cleared_at: new Date(timestamp).toISOString() })
+        .eq('user_id', userId);
 
       if (error) throw error;
     },
