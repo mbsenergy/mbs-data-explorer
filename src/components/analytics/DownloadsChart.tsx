@@ -2,68 +2,11 @@ import { Card } from "@/components/ui/card";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { subMonths, format, parseISO, isAfter, isBefore, startOfMonth, startOfDay, endOfDay } from "date-fns";
-import { DatePickerWithRange } from "@/components/ui/date-range-picker";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { addDays } from "date-fns";
-
-interface DownloadsChartProps {
-  analyticsData: {
-    created_at: string;
-    dataset_name: string;
-    downloaded_at: string;
-    id: string;
-    is_custom_query: boolean;
-    user_id: string;
-  }[];
-  developerData: {
-    created_at: string;
-    downloaded_at: string;
-    file_name: string;
-    file_section: string;
-    id: string;
-    user_id: string;
-  }[];
-  exportsData: {
-    created_at: string;
-    downloaded_at: string;
-    export_name: string;
-    export_type: string;
-    id: string;
-    user_id: string;
-  }[];
-  storageData: {
-    created_at: string;
-    id: string;
-    original_name: string;
-    storage_id: string;
-    tags: string[] | null;
-    user_id: string;
-  }[];
-  queryData: {
-    created_at: string;
-    dataset_name: string;
-    downloaded_at: string;
-    id: string;
-    is_custom_query: boolean;
-    user_id: string;
-  }[];
-  chatData: {
-    created_at: string;
-    id: string;
-    message_content: string;
-    user_id: string;
-  }[];
-  isLoading: boolean;
-}
-
-interface LineConfig {
-  id: string;
-  name: string;
-  color: string;
-  enabled: boolean;
-}
+import { DateRange } from "react-day-picker";
+import { DateRangeSelector } from "./DateRangeSelector";
+import { LineToggleList } from "./LineToggleList";
+import { DownloadsChartProps, LineConfig } from "./types";
 
 export const DownloadsChart = ({
   analyticsData,
@@ -74,10 +17,7 @@ export const DownloadsChart = ({
   chatData,
   isLoading
 }: DownloadsChartProps) => {
-  const [dateRange, setDateRange] = useState<{
-    from: Date;
-    to: Date;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: subMonths(new Date(), 6),
     to: new Date(),
   });
@@ -96,7 +36,8 @@ export const DownloadsChart = ({
     
     data.forEach(item => {
       const date = parseISO(item[dateField]);
-      if (isAfter(startOfDay(date), startOfDay(dateRange.from)) && 
+      if (dateRange.from && dateRange.to &&
+          isAfter(startOfDay(date), startOfDay(dateRange.from)) && 
           isBefore(endOfDay(date), endOfDay(dateRange.to))) {
         const monthKey = format(startOfMonth(date), 'MMM yyyy');
         monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
@@ -106,10 +47,11 @@ export const DownloadsChart = ({
     return monthlyCounts;
   };
 
-  const months = Array.from({ length: 6 }, (_, i) => {
-    const d = subMonths(dateRange.to, i);
-    return format(d, 'MMM yyyy');
-  }).reverse();
+  const months = dateRange.from && dateRange.to ? 
+    Array.from({ length: 6 }, (_, i) => {
+      const d = subMonths(dateRange.to, i);
+      return format(d, 'MMM yyyy');
+    }).reverse() : [];
 
   const analyticsMonthly = getMonthlyCount(analyticsData, 'downloaded_at');
   const developerMonthly = getMonthlyCount(developerData, 'downloaded_at');
@@ -134,6 +76,15 @@ export const DownloadsChart = ({
     ));
   };
 
+  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+    if (newDateRange?.from) {
+      setDateRange({
+        from: newDateRange.from,
+        to: newDateRange.to || newDateRange.from
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <Card className="p-6">
@@ -145,27 +96,14 @@ export const DownloadsChart = ({
   return (
     <Card className="p-6 space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:justify-between">
-        <DatePickerWithRange
-          date={dateRange}
-          onDateChange={setDateRange}
+        <DateRangeSelector
+          dateRange={dateRange}
+          onDateChange={handleDateRangeChange}
         />
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {lines.map(line => (
-            <div key={line.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={line.id}
-                checked={line.enabled}
-                onCheckedChange={() => toggleLine(line.id)}
-              />
-              <Label
-                htmlFor={line.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {line.name}
-              </Label>
-            </div>
-          ))}
-        </div>
+        <LineToggleList
+          lines={lines}
+          onToggle={toggleLine}
+        />
       </div>
 
       <div className="h-[350px] w-full">
