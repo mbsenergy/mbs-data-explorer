@@ -1,11 +1,11 @@
 import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { Button } from "@/components/ui/button";
-import { Download, ChartBar, Table, FileText, Code, Grid3X3 } from "lucide-react";
+import { Download, ChartBar, Table, FileText, Code } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { DatasetActionDialog } from "@/components/datasets/explore/DatasetActionDialog";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Options } from "highcharts";
 import { Card } from "@/components/ui/card";
@@ -13,7 +13,6 @@ import { DataSummary } from "./DataSummary";
 import { useToast } from "@/hooks/use-toast";
 import theme from "@/integrations/highcharts/highchartsConfig";
 import { CodeSnippetModal } from "./code-display/CodeSnippetModal";
-import { PivotGrid } from "./pivot/PivotGrid";
 
 interface DataDisplayProps {
   plotData: Options;
@@ -116,10 +115,6 @@ export const DataDisplay = ({
                 <Table className="h-4 w-4" />
                 Table
               </TabsTrigger>
-              <TabsTrigger value="pivot" className="flex items-center gap-2">
-                <Grid3X3 className="h-4 w-4" />
-                Pivot
-              </TabsTrigger>
             </TabsList>
             <div className="flex gap-2">
               <Button
@@ -171,10 +166,6 @@ export const DataDisplay = ({
               columns={columns}
               isLoading={isLoading}
             />
-          </TabsContent>
-
-          <TabsContent value="pivot">
-            <PivotGrid data={filteredData} />
           </TabsContent>
         </Tabs>
       </Card>

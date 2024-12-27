@@ -1,13 +1,21 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { DatasetPagination } from "@/components/datasets/explore/DatasetPagination";
-import { DatasetStats } from "@/components/datasets/explore/DatasetStats";
-import { DatasetTable } from "@/components/datasets/explore/DatasetTable";
-import { DatasetControls } from "@/components/datasets/explore/DatasetControls";
-import { DatasetColumnSelect } from "@/components/datasets/explore/DatasetColumnSelect";
-import { DatasetExploreActions } from "@/components/datasets/explore/DatasetExploreActions";
+import { Button } from "@/components/ui/button";
+import { DatasetStats } from "./DatasetStats";
+import { DatasetTable } from "./DatasetTable";
+import { DatasetFilters } from "./DatasetFilters";
+import { DatasetColumnSelect } from "./DatasetColumnSelect";
+import { DatasetQueryModal } from "./DatasetQueryModal";
+import { DatasetExploreActions } from "./DatasetExploreActions";
 import { useDatasetData } from "@/hooks/useDatasetData";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import type { Filter } from "./types";
+import { v4 as uuidv4 } from 'uuid';
+import { Code } from "lucide-react";
+import { Compass } from "lucide-react";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -22,11 +30,23 @@ export const DatasetExplore = ({
   onColumnsChange,
   onLoad 
 }: DatasetExploreProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedColumn, setSelectedColumn] = useState("");
+  const [filters, setFilters] = useState<Filter[]>([
+    { 
+      id: uuidv4(), 
+      searchTerm: "", 
+      selectedColumn: "", 
+      operator: "AND",
+      comparisonOperator: "=" 
+    }
+  ]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 10;
+  const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [pageSize] = useState(20);
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
 
   const {
     data,
@@ -37,50 +57,97 @@ export const DatasetExplore = ({
     loadData
   } = useDatasetData(selectedDataset);
 
-  // Ensure all columns are selected by default whenever columns or data changes
   useEffect(() => {
     if (columns.length > 0) {
-      console.log("Setting all columns as selected:", columns);
       setSelectedColumns(columns);
       onColumnsChange(columns);
     }
   }, [columns, onColumnsChange]);
 
-  // Also ensure columns are selected when new data is loaded
   useEffect(() => {
-    if (data.length > 0 && columns.length > 0) {
-      console.log("Data loaded, ensuring all columns are selected:", columns);
-      setSelectedColumns(columns);
-      onColumnsChange(columns);
-    }
-  }, [data, columns, onColumnsChange]);
+    setFilteredData(data);
+    setShouldApplyFilters(false);
+  }, [data]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData(selectedDataset);
+      // Call loadData with batch processing enabled
+      await loadData(selectedDataset, selectedColumns, true);
       if (onLoad) {
         onLoad(selectedDataset);
       }
     }
   };
 
-  const filteredData = data.filter((item) =>
-    selectedColumn
-      ? String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      : Object.entries(item)
-          .filter(([key]) => !key.startsWith('md_'))
-          .some(([_, value]) => 
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
-          )
-  );
+  const compareValues = (itemValue: any, filterValue: string, operator: string): boolean => {
+    const normalizedItemValue = String(itemValue).toLowerCase();
+    const normalizedFilterValue = filterValue.toLowerCase();
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = filteredData.slice(
-    currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage
-  );
+    switch (operator) {
+      case '=':
+        return normalizedItemValue === normalizedFilterValue;
+      case '>':
+        return Number(itemValue) > Number(filterValue);
+      case '<':
+        return Number(itemValue) < Number(filterValue);
+      case '>=':
+        return Number(itemValue) >= Number(filterValue);
+      case '<=':
+        return Number(itemValue) <= Number(filterValue);
+      case '!=':
+        return normalizedItemValue !== normalizedFilterValue;
+      case 'IN':
+        const inValues = filterValue.split(',').map(v => v.trim().toLowerCase());
+        return inValues.includes(normalizedItemValue);
+      case 'NOT IN':
+        const notInValues = filterValue.split(',').map(v => v.trim().toLowerCase());
+        return !notInValues.includes(normalizedItemValue);
+      default:
+        return normalizedItemValue.includes(normalizedFilterValue);
+    }
+  };
+
+  const applyFilters = (dataToFilter: any[]) => {
+    return dataToFilter.filter((item) =>
+      filters.reduce((pass, filter, index) => {
+        if (!filter.searchTerm || !filter.selectedColumn) {
+          return index === 0 ? true : pass;
+        }
+
+        const itemValue = item[filter.selectedColumn];
+        const matches = compareValues(itemValue, filter.searchTerm, filter.comparisonOperator);
+
+        if (index === 0) return matches;
+        return filter.operator === 'AND' ? pass && matches : pass || matches;
+      }, false)
+    );
+  };
+
+  const handleFilterChange = (
+    filterId: string,
+    field: keyof Filter,
+    value: string
+  ) => {
+    setFilters(filters.map(f =>
+      f.id === filterId
+        ? { ...f, [field]: value }
+        : f
+    ));
+  };
+
+  const handleAddFilter = () => {
+    setFilters([...filters, { 
+      id: uuidv4(), 
+      searchTerm: "", 
+      selectedColumn: "", 
+      operator: "AND",
+      comparisonOperator: "=" 
+    }]);
+  };
+
+  const handleRemoveFilter = (filterId: string) => {
+    setFilters(filters.filter(f => f.id !== filterId));
+  };
 
   const handleColumnSelect = (column: string) => {
     const newColumns = selectedColumns.includes(column)
@@ -92,17 +159,142 @@ export const DatasetExplore = ({
   };
 
   const handlePageChange = async (newPage: number) => {
-    const pageData = await fetchPage(newPage, itemsPerPage);
+    const pageData = await fetchPage(newPage, pageSize);
     if (pageData) {
       setCurrentPage(newPage);
     }
   };
 
+  const handleApplyFilters = () => {
+    const newFilteredData = applyFilters(data);
+    setFilteredData(newFilteredData);
+    setShouldApplyFilters(true);
+    setCurrentPage(0);
+  };
+
+  const handleSampleDownload = async () => {
+    if (!selectedDataset || !user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a dataset and ensure you're logged in.",
+      });
+      return;
+    }
+
+    try {
+      const dataToDownload = shouldApplyFilters ? filteredData : data;
+      
+      if (!dataToDownload || !dataToDownload.length) {
+        throw new Error("No data available for download");
+      }
+
+      if (dataToDownload.length > 100000) {
+        toast({
+          variant: "destructive",
+          title: "Too many rows",
+          description: "Cannot export more than 500,000 rows. Please apply filters to reduce the dataset size."
+        });
+        return;
+      }
+
+      const { error: analyticsError } = await supabase
+        .from("analytics")
+        .insert({
+          user_id: user.id,
+          dataset_name: selectedDataset,
+          is_custom_query: false,
+        });
+
+      if (analyticsError) {
+        console.error("Error tracking download:", analyticsError);
+      }
+
+      const headers = selectedColumns.join(',');
+      const rows = dataToDownload.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
+      const csv = [headers, ...rows].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedDataset}_sample.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Dataset sample downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error("Error downloading dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to download dataset.",
+      });
+    }
+  };
+
+  const generateFilterQuery = () => {
+    if (!selectedDataset) return "";
+    
+    let query = `SELECT ${selectedColumns.map(col => `"${col}"`).join(', ')} FROM "${selectedDataset}"`;
+    
+    if (filters.length > 0) {
+      const filterConditions = filters
+        .filter(f => f.searchTerm && f.selectedColumn)
+        .map((filter, index) => {
+          const comparison = filter.comparisonOperator;
+          let condition = "";
+          
+          if (comparison === 'IN' || comparison === 'NOT IN') {
+            const values = filter.searchTerm.split(',').map(v => `'${v.trim()}'`).join(',');
+            condition = `"${filter.selectedColumn}" ${comparison} (${values})`;
+          } else {
+            condition = `"${filter.selectedColumn}" ${comparison} '${filter.searchTerm}'`;
+          }
+          
+          return index === 0 ? condition : `${filter.operator} ${condition}`;
+        });
+      
+      if (filterConditions.length > 0) {
+        query += ` WHERE ${filterConditions.join(' ')}`;
+      }
+    }
+    
+    return query;
+  };
+
+  const handleShowQuery = () => {
+    const query = generateFilterQuery();
+    const apiCall = `await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.map(col => `"${col}"`).join(', ')}')`
+    + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "");
+
+    setIsQueryModalOpen(true);
+  };
+
   return (
-    <Card className="p-6 space-y-6 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-xl metallic-card">
+    <Card className="p-6 space-y-6 metallic-card">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">Explore</h2>
+        <div className="flex items-center gap-2">
+            <Compass className="h-6 w-6" />
+            <h2 className="text-2xl font-semibold">Explore</h2>
+          </div>
           {selectedDataset && (
             <p className="text-muted-foreground">
               Selected dataset: <span className="font-medium">{selectedDataset}</span>
@@ -112,8 +304,8 @@ export const DatasetExplore = ({
         <DatasetExploreActions
           selectedDataset={selectedDataset}
           onRetrieve={handleLoad}
-          onExport={() => window.location.href = '#sample'}
-          onShowQuery={() => window.location.href = '#query'}
+          onExport={handleSampleDownload}
+          onShowQuery={() => setIsQueryModalOpen(true)}
           isLoading={isLoading}
         />
       </div>
@@ -131,30 +323,44 @@ export const DatasetExplore = ({
         </div>
       ) : (
         <>
-          <DatasetControls
-            columns={columns}
-            searchTerm={searchTerm}
-            selectedColumn={selectedColumn}
-            onSearchChange={setSearchTerm}
-            onColumnChange={setSelectedColumn}
-          />
+          <div className="space-y-4">
+            <DatasetFilters
+              columns={columns}
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onAddFilter={handleAddFilter}
+              onRemoveFilter={handleRemoveFilter}
+            />
+            <div className="flex justify-end">
+              <Button 
+                onClick={handleApplyFilters}
+                variant="default"
+                className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
+              >
+                Apply Filters
+              </Button>
+            </div>
+          </div>
 
           <DatasetColumnSelect
             columns={columns}
             selectedColumns={selectedColumns}
             onColumnSelect={handleColumnSelect}
           />
-
           <DatasetTable
             columns={columns}
-            data={paginatedData}
+            data={filteredData}
             selectedColumns={selectedColumns}
           />
 
-          <DatasetPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
+          <DatasetQueryModal
+            isOpen={isQueryModalOpen}
+            onClose={() => setIsQueryModalOpen(false)}
+            query={generateFilterQuery()}
+            apiCall={`await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.join(', ')}')`
+    + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "")}
           />
         </>
       )}

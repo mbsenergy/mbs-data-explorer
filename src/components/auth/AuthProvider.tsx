@@ -20,39 +20,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let mounted = true;
-
     // Check active sessions
     const initializeAuth = async () => {
       try {
         console.log("Checking session...");
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Session check error:", error);
-          throw error;
-        }
-
+        const { data: { session } } = await supabase.auth.getSession();
         console.log("Session check result:", session ? "Session found" : "No session");
         
-        if (session?.user && mounted) {
+        if (session?.user) {
           setUser(session.user);
         } else {
-          if (mounted) {
-            setUser(null);
-            // Only clear tokens if we're sure there's no session
-            localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
-          }
+          setUser(null);
+          // Clear any stale tokens
+          await supabase.auth.signOut();
         }
       } catch (error) {
         console.error("Error checking session:", error);
-        if (mounted) {
-          setUser(null);
-        }
+        setUser(null);
+        // Clear any stale tokens on error
+        await supabase.auth.signOut();
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
@@ -64,30 +52,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Auth state change:", event, session?.user?.email);
         
         if (event === "SIGNED_OUT") {
-          if (mounted) {
-            console.log("User signed out, clearing state and redirecting...");
-            setUser(null);
-            // Clear auth-related items from localStorage
-            localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
-            navigate("/login");
-          }
+          console.log("User signed out, clearing state and redirecting...");
+          setUser(null);
+          // Clear auth-related items from localStorage
+          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
+          navigate("/login");
         } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-          if (mounted && session?.user) {
-            console.log("User signed in or token refreshed, updating state...");
+          console.log("User signed in or token refreshed, updating state...");
+          if (session?.user) {
             setUser(session.user);
           }
         }
         
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     );
 
-    // Cleanup function
     return () => {
       console.log("Cleaning up auth subscriptions");
-      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);

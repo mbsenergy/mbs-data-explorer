@@ -8,7 +8,7 @@ import { useVisualizeState } from "@/components/visualize/VisualizeState";
 import { v4 as uuidv4 } from 'uuid';
 import type { DataPoint } from "@/types/visualize";
 
-const DataWrangle = () => {
+const Visualize = () => {
   const {
     state,
     setState,
@@ -103,9 +103,9 @@ const DataWrangle = () => {
   };
 
   return (
-    <div className="space-y-6 bg-transparent">
+    <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-green-500">
-        Data Wrangle
+        Visualize Data
       </h1>
 
       <DataInputTabs
@@ -172,4 +172,4 @@ const DataWrangle = () => {
   );
 };
 
-export default DataWrangle;
+export default Visualize;

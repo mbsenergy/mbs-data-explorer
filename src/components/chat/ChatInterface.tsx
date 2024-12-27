@@ -66,7 +66,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return match ? (
-        <pre className="bg-card/50 p-2 rounded-md overflow-x-auto font-jetbrains-mono text-xs">
+        <pre className="bg-card/50 p-2 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs">
           <code className={className} {...props}>
             {children}
           </code>
@@ -81,7 +81,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
   return (
     <div className="flex flex-col h-full max-h-[calc(600px-3rem)]">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-background/50">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-background/50">
         <p className="text-xs text-muted-foreground">Messages</p>
         <Button 
           variant="ghost" 
@@ -111,7 +111,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                   className={`rounded-lg px-3 py-1.5 max-w-[90%] text-sm ${
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-card'
+                      : 'bg-card border-l-2 border-l-primary'
                   }`}
                 >
                   <ReactMarkdown 
@@ -127,7 +127,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
         </div>
       </ScrollArea>
 
-      <div className="p-2 bg-card/50">
+      <div className="p-2 border-t border-border/40 bg-card/50">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Textarea
             value={input}
