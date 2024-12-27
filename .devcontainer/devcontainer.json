@@ -1,5 +1,5 @@
 {
-	"name": "My DevContainer",
+	"name": "FLUX",
 	"image": "alejandrocerved/mbs-data-explorer:v0.1.0",  // Reference your locally built image
 	"extensions": [
 	  "ms-vscode.cpptools",
