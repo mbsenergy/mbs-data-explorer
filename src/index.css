@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-alpine.css';
 
 @tailwind base;
 @tailwind components;
@@ -151,4 +153,45 @@
 
 [data-sonner-toaster][data-theme="dark"] [data-sonner-toast][data-type="warning"] {
   background: theme('colors.corporate.orange') !important;
+}
+
+/* AG Grid Dark Theme Customization */
+.ag-theme-alpine-dark {
+  --ag-background-color: transparent;
+  --ag-header-height: 50px;
+  --ag-row-height: 35px;
+  --ag-header-background-color: hsl(222 84% 5%);
+  --ag-odd-row-background-color: rgba(255, 255, 255, 0.02);
+  --ag-header-foreground-color: hsl(210 40% 98%);
+  --ag-foreground-color: hsl(210 40% 98%);
+  --ag-border-color: hsl(217 100% 15%);
+  --ag-secondary-border-color: hsl(217 100% 15%);
+  --ag-row-hover-color: rgba(255, 255, 255, 0.1);
+  --ag-selected-row-background-color: rgba(255, 255, 255, 0.05);
+  --ag-font-family: theme('fontFamily.sans');
+  --ag-font-size: 12px;
+  --ag-grid-size: 5px;
+  --ag-list-item-height: 30px;
+}
+
+.ag-theme-alpine-dark .ag-header-cell {
+  border-right: 1px solid var(--ag-border-color);
+  font-size: 12px;
+}
+
+.ag-theme-alpine-dark .ag-cell {
+  border-right: 1px solid var(--ag-border-color);
+  font-size: 12px;
+}
+
+.ag-theme-alpine-dark .ag-row {
+  border-bottom: 1px solid var(--ag-border-color);
+}
+
+.ag-theme-alpine-dark .ag-side-bar {
+  border-left: 1px solid var(--ag-border-color);
+}
+
+.ag-theme-alpine-dark .ag-tool-panel-wrapper {
+  background-color: hsl(222 84% 5%);
 }
