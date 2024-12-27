@@ -82,7 +82,6 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     )
   };
 
-  // Function to split message into text and code segments
   const splitMessageContent = (content: string) => {
     const segments = [];
     let currentText = '';
@@ -132,22 +131,14 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
             </p>
           ) : (
             messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`rounded-lg px-4 py-2.5 max-w-[85%] text-sm ${
-                    message.role === 'user'
-                      ? 'bg-black/10 text-foreground'
-                      : 'bg-card/80 border-l-2 border-l-primary'
-                  }`}
-                >
-                  {message.role === 'assistant' ? (
-                    splitMessageContent(message.content).map((segment, idx) => (
-                      <div key={idx} className="mb-3 last:mb-0">
+              <div key={index} className="space-y-2">
+                {message.role === 'assistant' ? (
+                  splitMessageContent(message.content).map((segment, idx) => (
+                    <div
+                      key={`${index}-${idx}`}
+                      className="flex justify-start"
+                    >
+                      <div className="rounded-lg px-4 py-2.5 max-w-[85%] text-sm bg-card/80 border-l-2 border-l-primary">
                         <ReactMarkdown 
                           className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
                           components={components}
@@ -155,16 +146,20 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                           {segment.content}
                         </ReactMarkdown>
                       </div>
-                    ))
-                  ) : (
-                    <ReactMarkdown 
-                      className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
-                      components={components}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  )}
-                </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex justify-end">
+                    <div className="rounded-lg px-4 py-2.5 max-w-[85%] text-sm bg-black/10 text-foreground">
+                      <ReactMarkdown 
+                        className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
+                        components={components}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}
