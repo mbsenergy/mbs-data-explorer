@@ -26,7 +26,6 @@ export const PivotGrid = ({ data, columns }: PivotGridProps) => {
     sortable: true,
     filter: true,
     resizable: true,
-    enablePivot: true,
     enableRowGroup: true,
     enableValue: true,
     floatingFilter: true,
@@ -64,8 +63,8 @@ export const PivotGrid = ({ data, columns }: PivotGridProps) => {
   const handleReset = useCallback(() => {
     if (gridApi) {
       gridApi.setFilterModel(null);
-      gridApi.setPivotMode(true);
-      gridApi.setSortModel(null);
+      gridApi.setGridOption('pivotMode', true);
+      gridApi.setGridOption('sortModel', null);
       setQuickFilter('');
       toast({
         title: "Reset Complete",
