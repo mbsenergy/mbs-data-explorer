@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DatasetPagination } from "@/components/datasets/explore/DatasetPagination";
 import { DatasetStats } from "@/components/datasets/explore/DatasetStats";
 import { DatasetTable } from "@/components/datasets/explore/DatasetTable";
 import { DatasetControls } from "@/components/datasets/explore/DatasetControls";
 import { DatasetColumnSelect } from "@/components/datasets/explore/DatasetColumnSelect";
+import { DatasetExploreActions } from "@/components/datasets/explore/DatasetExploreActions";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -99,7 +99,7 @@ export const DatasetExplore = ({
   };
 
   return (
-    <Card className="p-6 space-y-6">
+    <Card className="p-6 space-y-6 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-xl metallic-card">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">Explore</h2>
@@ -109,26 +109,13 @@ export const DatasetExplore = ({
             </p>
           )}
         </div>
-        <div className="space-x-2">
-          {onLoad && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleLoad}
-              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-            >
-              Load
-            </Button>
-          )}
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={() => window.location.href = '#sample'}
-            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-          >
-            Sample
-          </Button>
-        </div>
+        <DatasetExploreActions
+          selectedDataset={selectedDataset}
+          onRetrieve={handleLoad}
+          onExport={() => window.location.href = '#sample'}
+          onShowQuery={() => window.location.href = '#query'}
+          isLoading={isLoading}
+        />
       </div>
       
       <DatasetStats 
