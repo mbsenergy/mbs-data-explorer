@@ -34,28 +34,28 @@ const features: FeatureDetails[] = [
     to: "/scenario",
     title: "Scenario",
     description: "Access our scenario analysis and forecasting tools",
-    longDescription: "Our advanced scenario analysis tools enable you to create, analyze, and compare different market scenarios. Features include:\n\n• Custom scenario creation with multiple variables\n• Advanced forecasting algorithms\n• Comparative analysis tools\n• Historical data integration\n• Export capabilities for reports and presentations\n• Real-time updates and calculations",
+    longDescription: "Step into the future of market analysis with our advanced scenario planning suite. At its core, this powerful tool empowers you to:\n\nVisualize Tomorrow's Markets\n• Create and compare multiple market scenarios simultaneously\n• Leverage cutting-edge forecasting algorithms\n• Integrate historical data for enhanced accuracy\n\nMake Data-Driven Decisions\n• Access comprehensive comparative analysis tools\n• Generate professional reports and presentations\n• Track real-time market changes\n\nStay Ahead of the Curve\n• Receive instant calculations and updates\n• Monitor scenario performance metrics\n• Adapt strategies based on emerging trends",
     icon: <LineChart className="h-8 w-8 text-corporate-teal" />
   },
   {
     to: "/osservatorio",
     title: "Osservatorio",
     description: "Explore energy market insights and analysis",
-    longDescription: "The Osservatorio provides comprehensive energy market insights and analysis through:\n\n• Real-time market monitoring\n• Detailed trend analysis\n• Expert commentary and reports\n• Interactive data visualizations\n• Regular market updates\n• Custom alert settings for market changes",
+    longDescription: "Welcome to your window into the energy market's pulse. The Osservatorio delivers:\n\nReal-Time Market Intelligence\n• Live monitoring of market dynamics\n• In-depth trend analysis with visual insights\n• Expert commentary on market movements\n\nComprehensive Market Coverage\n• Interactive data visualizations\n• Regular market updates and briefings\n• Customizable alert systems\n\nStrategic Advantage\n• Early trend identification\n• Market opportunity spotting\n• Risk assessment tools",
     icon: <Eye className="h-8 w-8 text-corporate-teal" />
   },
   {
     to: "/datasets",
     title: "Datasets",
     description: "Browse and download our comprehensive datasets",
-    longDescription: "Access our extensive collection of energy market datasets including:\n\n• Historical price data\n• Consumption patterns\n• Production statistics\n• Market indicators\n• Custom query builder\n• Multiple export formats\n• API access for integration",
+    longDescription: "Unlock the power of our extensive data collection. Our dataset hub provides:\n\nComprehensive Data Access\n• Historical price trends and patterns\n• Consumption behavior analytics\n• Production statistics and forecasts\n\nPowerful Tools\n• Advanced query builder for precise data extraction\n• Multiple export format options\n• Seamless API integration capabilities\n\nData Intelligence\n• Custom filtering and sorting\n• Cross-reference capabilities\n• Real-time data updates",
     icon: <Database className="h-8 w-8 text-corporate-teal" />
   },
   {
     to: "/company",
     title: "Company Products",
     description: "Discover our suite of professional solutions",
-    longDescription: "Explore our comprehensive suite of professional energy market solutions:\n\n• Enterprise-grade analytics tools\n• Custom reporting solutions\n• Integration services\n• Professional consulting\n• Training and support\n• Dedicated account management",
+    longDescription: "Experience excellence with our comprehensive suite of enterprise solutions:\n\nEnterprise Excellence\n• State-of-the-art analytics platforms\n• Customizable reporting systems\n• Seamless integration services\n\nProfessional Support\n• Expert consulting services\n• Comprehensive training programs\n• Dedicated account management\n\nInnovative Solutions\n• Cutting-edge technology integration\n• Scalable infrastructure\n• Regular feature updates",
     icon: <Building2 className="h-8 w-8 text-corporate-teal" />
   }
 ];
@@ -148,7 +148,7 @@ const Landing = () => {
                 {selectedFeature?.title}
               </span>
             </DialogTitle>
-            <DialogDescription className="text-left whitespace-pre-line pt-4">
+            <DialogDescription className="text-left whitespace-pre-line pt-4 space-y-6">
               {selectedFeature?.longDescription}
             </DialogDescription>
           </DialogHeader>
