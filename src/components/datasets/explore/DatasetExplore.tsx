@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DatasetPagination } from "./explore/DatasetPagination";
-import { DatasetStats } from "./explore/DatasetStats";
-import { DatasetTable } from "./explore/DatasetTable";
-import { DatasetControls } from "./explore/DatasetControls";
-import { DatasetColumnSelect } from "./explore/DatasetColumnSelect";
+import { DatasetPagination } from "@/components/datasets/explore/DatasetPagination";
+import { DatasetStats } from "@/components/datasets/explore/DatasetStats";
+import { DatasetTable } from "@/components/datasets/explore/DatasetTable";
+import { DatasetControls } from "@/components/datasets/explore/DatasetControls";
+import { DatasetColumnSelect } from "@/components/datasets/explore/DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
 
