@@ -63,8 +63,9 @@ export const PivotGrid = ({ data, columns }: PivotGridProps) => {
   const handleReset = useCallback(() => {
     if (gridApi) {
       gridApi.setFilterModel(null);
-      gridApi.setGridOption('pivotMode', true);
-      gridApi.setGridOption('sortModel', null);
+      // Use the correct method to reset pivot mode and sort
+      gridApi.setPivotMode(true);
+      gridApi.setSortModel([]);
       setQuickFilter('');
       toast({
         title: "Reset Complete",
