@@ -1,12 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
-@import 'ag-grid-community/styles/ag-grid.css';
-@import 'ag-grid-community/styles/ag-theme-alpine.css';
+@import 'devextreme/dist/css/dx.dark.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 220 100% 2%;
@@ -155,43 +154,61 @@
   background: theme('colors.corporate.orange') !important;
 }
 
-/* AG Grid Dark Theme Customization */
-.ag-theme-alpine-dark {
-  --ag-background-color: transparent;
-  --ag-header-height: 50px;
-  --ag-row-height: 35px;
-  --ag-header-background-color: hsl(222 84% 5%);
-  --ag-odd-row-background-color: rgba(255, 255, 255, 0.02);
-  --ag-header-foreground-color: hsl(210 40% 98%);
-  --ag-foreground-color: hsl(210 40% 98%);
-  --ag-border-color: hsl(217 100% 15%);
-  --ag-secondary-border-color: hsl(217 100% 15%);
-  --ag-row-hover-color: rgba(255, 255, 255, 0.1);
-  --ag-selected-row-background-color: rgba(255, 255, 255, 0.05);
-  --ag-font-family: theme('fontFamily.sans');
-  --ag-font-size: 12px;
-  --ag-grid-size: 5px;
-  --ag-list-item-height: 30px;
+/* DevExtreme Dark Theme Customization */
+.dx-datagrid {
+  background-color: transparent;
+  color: hsl(210 40% 98%);
 }
 
-.ag-theme-alpine-dark .ag-header-cell {
-  border-right: 1px solid var(--ag-border-color);
-  font-size: 12px;
-}
-
-.ag-theme-alpine-dark .ag-cell {
-  border-right: 1px solid var(--ag-border-color);
-  font-size: 12px;
-}
-
-.ag-theme-alpine-dark .ag-row {
-  border-bottom: 1px solid var(--ag-border-color);
-}
-
-.ag-theme-alpine-dark .ag-side-bar {
-  border-left: 1px solid var(--ag-border-color);
-}
-
-.ag-theme-alpine-dark .ag-tool-panel-wrapper {
+.dx-datagrid-headers {
   background-color: hsl(222 84% 5%);
+  color: hsl(210 40% 98%);
+  border-bottom: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-rowsview {
+  border: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-borders > .dx-datagrid-headers,
+.dx-datagrid-borders > .dx-datagrid-rowsview,
+.dx-datagrid-borders > .dx-datagrid-total-footer {
+  border-left: 1px solid hsl(217 100% 15%);
+  border-right: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-borders > .dx-datagrid-rowsview,
+.dx-datagrid-borders > .dx-datagrid-total-footer {
+  border-bottom: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-headers .dx-datagrid-table .dx-row > td {
+  border-bottom: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid-filter-row .dx-editor-cell .dx-editor-with-menu {
+  background-color: hsl(222 84% 5%);
+}
+
+.dx-datagrid .dx-row-alt > td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.dx-datagrid-filter-panel {
+  border-top: 1px solid hsl(217 100% 15%);
+}
+
+.dx-datagrid .dx-row-alt > tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dx-datagrid-pager {
+  background-color: transparent;
+  padding: 8px;
+  border-top: 1px solid hsl(217 100% 15%);
+}
+
+.dx-pager .dx-page-sizes .dx-selection,
+.dx-pager .dx-pages .dx-selection {
+  background-color: hsl(191 87% 58%);
 }
