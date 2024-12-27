@@ -56,13 +56,13 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return match ? (
-        <pre className="bg-card p-4 rounded-lg overflow-x-auto border border-border/40 font-jetbrains-mono text-base">
+        <pre className="bg-card p-2 rounded-lg overflow-x-auto border border-border/40 font-jetbrains-mono text-sm">
           <code className={className} {...props}>
             {children}
           </code>
         </pre>
       ) : (
-        <code className="bg-card px-2 py-1 rounded font-jetbrains-mono text-primary text-base" {...props}>
+        <code className="bg-card px-1.5 py-0.5 rounded font-jetbrains-mono text-primary text-sm" {...props}>
           {children}
         </code>
       );
@@ -70,9 +70,9 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1 pr-4 mb-4">
-        <div className="space-y-6 mt-4">
+    <div className="flex flex-col h-full max-h-[calc(600px-4rem)]">
+      <ScrollArea className="flex-1 px-4">
+        <div className="space-y-4 py-4">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -81,14 +81,14 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               }`}
             >
               <div
-                className={`rounded-2xl px-6 py-3 max-w-[85%] text-base shadow-lg backdrop-blur-sm ${
+                className={`rounded-lg px-4 py-2 max-w-[60%] text-sm ${
                   message.role === 'user'
-                    ? 'metallic-card text-primary-foreground ml-12'
-                    : 'glass-panel mr-12 border-l-4 border-l-primary'
+                    ? 'metallic-card text-primary-foreground'
+                    : 'glass-panel border-l-2 border-l-primary'
                 }`}
               >
                 <ReactMarkdown 
-                  className="prose prose-invert prose-base max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-1"
+                  className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-1"
                   components={components}
                 >
                   {message.content}
@@ -99,20 +99,20 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
         </div>
       </ScrollArea>
 
-      <div className="px-6 pb-6">
-        <form onSubmit={handleSubmit}>
+      <div className="p-4 border-t border-border/40 bg-background/50">
+        <form onSubmit={handleSubmit} className="space-y-2">
           <div className="flex gap-2">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="How can I help?"
-              className="min-h-[80px] text-base metallic-card"
+              className="min-h-[60px] max-h-[120px] text-sm metallic-card resize-none"
             />
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 rounded-full"
+              className="bg-primary hover:bg-primary/90 h-[60px] px-4"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -121,7 +121,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               )}
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground mt-2 text-center">AI Powered by MBS-Energy</p>
+          <p className="text-xs text-muted-foreground text-center">AI Powered by MBS-Energy</p>
         </form>
       </div>
     </div>
