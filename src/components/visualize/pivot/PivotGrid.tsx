@@ -25,11 +25,11 @@ export const PivotGrid = ({ data, columns }: PivotGridProps) => {
   // Convert ColumnDef to AG Grid ColDef
   const agColumns: ColDef[] = useMemo(() => 
     columns.map(col => ({
-      field: String(col.accessorKey || col.id),
+      field: String(col.id),
       headerName: String(col.header),
       enablePivot: true,
       enableRowGroup: true,
-      enableValue: typeof data[0]?.[String(col.accessorKey || col.id)] === 'number',
+      enableValue: typeof data[0]?.[String(col.id)] === 'number',
     })),
   [columns, data]);
 
@@ -59,7 +59,6 @@ export const PivotGrid = ({ data, columns }: PivotGridProps) => {
         }}
         suppressAggFuncInHeader={true}
         enableRangeSelection={true}
-        enablePivot={true}
         pivotPanelShow={'always'}
         statusBar={{
           statusPanels: [
