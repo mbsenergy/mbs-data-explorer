@@ -111,7 +111,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                   className={`rounded-lg px-3 py-1.5 max-w-[90%] text-sm ${
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground'
-                      : 'glass-panel border-l-2 border-l-primary'
+                      : 'bg-card border-l-2 border-l-primary'
                   }`}
                 >
                   <ReactMarkdown 
