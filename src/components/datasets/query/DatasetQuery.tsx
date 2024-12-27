@@ -46,7 +46,10 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
         throw new Error(validation.error);
       }
 
-      if (query.toLowerCase().includes('count(*)') || !query.toLowerCase().includes('limit')) {
+      // Remove any trailing semicolons and clean up the query
+      const cleanedQuery = query.trim().replace(/;+$/, '');
+
+      if (cleanedQuery.toLowerCase().includes('count(*)') || !cleanedQuery.toLowerCase().includes('limit')) {
         toast({
           title: "Warning",
           description: "Large queries may take longer to execute. Consider adding a LIMIT clause.",
@@ -58,7 +61,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
       let queryResults: any[] = [];
       
       if (useBatchProcessing) {
-        const tableMatch = query.match(/FROM\s+["']?(\w+)["']?/i);
+        const tableMatch = cleanedQuery.match(/FROM\s+["']?(\w+)["']?/i);
         if (!tableMatch) {
           throw new Error("Could not determine table name from query");
         }
@@ -78,7 +81,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
         );
       } else {
         const { data, error } = await supabase.rpc('execute_query', {
-          query_text: query
+          query_text: cleanedQuery
         });
 
         if (error) {
@@ -87,7 +90,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
               'Query timed out. Try adding filters or LIMIT clause to reduce the result set.'
             );
           }
-          throw new Error(error.message);
+          throw error;
         }
 
         queryResults = Array.isArray(data) ? data : [];
