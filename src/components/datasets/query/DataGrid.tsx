@@ -40,7 +40,7 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
         wordWrapEnabled={true}
         filterRow={{ visible: true }}
         headerFilter={{ visible: true }}
-        searchPanel={{ visible: true }}
+        searchPanel={{ visible: false }} // Removed search panel
         paging={{ pageSize: 20 }}
         pager={{
           showPageSizeSelector: true,

@@ -34,16 +34,23 @@
   background-color: hsl(222 84% 5%);
 }
 
+.dx-datagrid .dx-row > td {
+  background-color: #1A1F2C;
+  color: hsl(210 40% 98%);
+  border-bottom: 1px solid hsl(217 100% 15%);
+}
+
 .dx-datagrid .dx-row-alt > td {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: #222632;
 }
 
 .dx-datagrid-filter-panel {
   border-top: 1px solid hsl(217 100% 15%);
 }
 
-.dx-datagrid .dx-row-alt > tr:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.dx-datagrid .dx-row:hover > td {
+  background-color: #2A2F3C;
+  color: hsl(210 40% 98%);
 }
 
 .dx-datagrid-pager {
