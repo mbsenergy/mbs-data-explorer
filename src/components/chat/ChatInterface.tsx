@@ -66,7 +66,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return match ? (
-        <pre className="bg-card/50 p-4 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs my-3">
+        <pre className="bg-card/50 p-2 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs">
           <code className={className} {...props}>
             {children}
           </code>
@@ -76,10 +76,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
           {children}
         </code>
       );
-    },
-    p: ({ children }) => (
-      <p className="mb-2 leading-relaxed">{children}</p>
-    )
+    }
   };
 
   return (
@@ -97,7 +94,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="space-y-4 p-4">
+        <div className="space-y-1 p-3">
           {messages.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-4">
               No messages yet. Start a conversation!
@@ -111,10 +108,10 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                 }`}
               >
                 <div
-                  className={`rounded-lg px-4 py-2 max-w-[90%] text-sm ${
+                  className={`rounded-lg px-3 py-1.5 max-w-[90%] text-sm ${
                     message.role === 'user'
                       ? 'bg-[#F2FCE2] text-gray-900'
-                      : 'bg-card/90 border-l-2 border-l-primary'
+                      : 'bg-card border-l-2 border-l-primary'
                   }`}
                 >
                   <ReactMarkdown 
