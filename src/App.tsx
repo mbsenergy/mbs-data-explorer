@@ -34,23 +34,23 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/resetpassword" element={<ResetPassword />} />
             
-            {/* Protected routes */}
+            {/* Protected routes with Layout (including Dashboard) */}
             <Route element={
               <RequireAuth>
                 <Layout />
               </RequireAuth>
             }>
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="scenario" element={<Scenario />} />
-              <Route path="osservatorio" element={<Osservatorio />} />
-              <Route path="datasets" element={<Datasets />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="company" element={<Company />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="user" element={<User />} />
-              <Route path="guide" element={<Guide />} />
-              <Route path="developer" element={<Developer />} />
-              <Route path="datawrangle" element={<DataWrangle />} />
+              <Route path="/scenario" element={<Scenario />} />
+              <Route path="/osservatorio" element={<Osservatorio />} />
+              <Route path="/datasets" element={<Datasets />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/company" element={<Company />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/user" element={<User />} />
+              <Route path="/guide" element={<Guide />} />
+              <Route path="/developer" element={<Developer />} />
+              <Route path="/datawrangle" element={<DataWrangle />} />
             </Route>
           </Routes>
         </AuthProvider>
