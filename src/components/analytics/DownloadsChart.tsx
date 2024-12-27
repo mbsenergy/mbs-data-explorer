@@ -87,14 +87,35 @@ export const DownloadsChart = ({
 
   if (isLoading) {
     return (
-      <Card className="p-6">
+      <Card className="p-6 metallic-card">
         <Skeleton className="h-[350px] w-full" />
       </Card>
     );
   }
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+          <p className="text-sm font-medium text-foreground mb-2">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={`item-${index}`} className="flex items-center gap-2 text-sm">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-muted-foreground">{entry.name}:</span>
+              <span className="font-medium text-foreground">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Card className="p-6 space-y-4">
+    <Card className="p-6 space-y-4 metallic-card">
       <div className="flex flex-col gap-4 md:flex-row md:justify-between">
         <DateRangeSelector
           dateRange={dateRange}
@@ -123,7 +144,7 @@ export const DownloadsChart = ({
               axisLine={false}
               tickFormatter={(value) => `${value}`}
             />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             {lines.map(line => line.enabled && (
               <Line
