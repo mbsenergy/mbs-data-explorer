@@ -20,6 +20,17 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     setIsLoading(true);
 
     try {
+      // Track the chat message
+      const { error: analyticsError } = await supabase
+        .from('chat_analytics')
+        .insert({
+          message_content: userMessage
+        });
+
+      if (analyticsError) {
+        console.error('Error tracking chat message:', analyticsError);
+      }
+
       const { data, error } = await supabase.functions.invoke('chat-with-mistral', {
         body: { message: userMessage }
       });

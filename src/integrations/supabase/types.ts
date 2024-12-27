@@ -66,6 +66,27 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_analytics: {
+        Row: {
+          created_at: string
+          id: string
+          message_content: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_content: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_content?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       developer_analytics: {
         Row: {
           created_at: string | null

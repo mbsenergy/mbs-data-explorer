@@ -167,6 +167,29 @@ const Analytics = () => {
     enabled: !!user?.id,
   });
 
+  const { data: chatData, isLoading: chatLoading } = useQuery({
+    queryKey: ["chatAnalytics", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chat_analytics")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Chat analytics error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch chat analytics data.",
+        });
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-500">
@@ -182,10 +205,12 @@ const Analytics = () => {
           (exportsData?.length || 0) +
           (storageData?.length || 0)
         }
+        totalChats={chatData?.length || 0}
         isLoading={{
           lastConnection: lastConnectionLoading,
           connections: connectionsLoading,
-          analytics: analyticsLoading || developerAnalyticsLoading || exportsLoading || storageLoading
+          analytics: analyticsLoading || developerAnalyticsLoading || exportsLoading || storageLoading,
+          chat: chatLoading
         }}
       />
 
@@ -195,7 +220,8 @@ const Analytics = () => {
         exportsData={exportsData || []}
         storageData={storageData || []}
         queryData={queryData || []}
-        isLoading={analyticsLoading || developerAnalyticsLoading || exportsLoading || storageLoading || queryLoading}
+        chatData={chatData || []}
+        isLoading={analyticsLoading || developerAnalyticsLoading || exportsLoading || storageLoading || queryLoading || chatLoading}
       />
 
       <AnalyticsTables
@@ -204,12 +230,14 @@ const Analytics = () => {
         exportsData={exportsData || []}
         storageData={storageData || []}
         queryData={queryData || []}
+        chatData={chatData || []}
         isLoading={{
           analytics: analyticsLoading,
           developer: developerAnalyticsLoading,
           exports: exportsLoading,
           storage: storageLoading,
-          queries: queryLoading
+          queries: queryLoading,
+          chat: chatLoading
         }}
       />
     </div>
