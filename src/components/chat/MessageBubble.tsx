@@ -1,5 +1,5 @@
 import { Message } from "./types";
-import { ReactMarkdown } from "react-markdown";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
