@@ -163,7 +163,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                       key={`${index}-${idx}`}
                       className="flex justify-start"
                     >
-                      <div className="rounded-lg px-4 py-2.5 max-w-[85%] text-sm bg-card/80 border-l-2 border-l-primary w-full">
+                      <div className="rounded-lg px-4 py-2.5 max-w-[85%] text-sm bg-[#222222] border-l-2 border-l-primary w-full">
                         <ReactMarkdown 
                           className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
                           components={components}
