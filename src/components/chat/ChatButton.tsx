@@ -23,10 +23,10 @@ export const ChatButton = () => {
         </Button>
       </DialogTrigger>
       <DialogContent className="p-0 metallic-card border border-border/40 w-[800px] min-w-[600px] max-w-[1200px]">
-        <div className="flex flex-col h-[80vh]">
-          <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <Bot className="h-5 w-5 text-primary" />
+        <div className="h-[80vh]">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Bot className="h-6 w-6 text-primary" />
               <span className="bg-gradient-to-r from-primary to-primary/50 text-transparent bg-clip-text">
                 FluxerBuddy
               </span>
