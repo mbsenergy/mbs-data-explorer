@@ -1,41 +1,79 @@
-import { useMemo } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, GridReadyEvent } from 'ag-grid-community';
+import { useEffect, useRef } from 'react';
+import * as WebDataRocks from 'webdatarocks';
 import type { ColumnDef } from "@tanstack/react-table";
 import type { DataGridProps } from '@/types/dataset';
-import '@ag-grid-community/styles/ag-grid.css';
-import '@ag-grid-community/styles/ag-theme-alpine.css';
+import { useToast } from '@/hooks/use-toast';
+import 'webdatarocks/webdatarocks.min.css';
 
 export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
-  const gridStyle = useMemo(() => ({ 
-    height: '600px', 
-    width: '100%', 
-    ...style 
-  }), [style]);
+  const pivotRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const pivotInstance = useRef<any>(null);
 
-  const defaultColDef = useMemo<ColDef>(() => ({
-    sortable: true,
-    filter: true,
-    resizable: true,
-    floatingFilter: true,
-    filterParams: {
-      buttons: ['reset', 'apply'],
-      closeOnApply: true,
-    },
-  }), []);
+  useEffect(() => {
+    if (!isLoading && data && data.length > 0 && pivotRef.current) {
+      try {
+        // Clean up previous instance if it exists
+        if (pivotInstance.current) {
+          pivotInstance.current.dispose();
+        }
 
-  const columnDefs = useMemo(() => {
-    return columns.map((col): ColDef => ({
-      field: (col as any).accessorKey || col.id as string,
-      headerName: String(col.header),
-      minWidth: 150,
-      width: 200,
-    }));
-  }, [columns]);
+        // Create field configurations from columns
+        const fields = columns.map((col: ColumnDef<any>) => ({
+          name: (col as any).accessorKey || col.id as string,
+          caption: String(col.header),
+          type: 'string'
+        }));
 
-  const onGridReady = (params: GridReadyEvent) => {
-    params.api.sizeColumnsToFit();
-  };
+        // Initialize WebDataRocks
+        pivotInstance.current = new WebDataRocks({
+          container: pivotRef.current,
+          toolbar: true,
+          height: 600,
+          width: '100%',
+          report: {
+            dataSource: {
+              data: data
+            },
+            slice: {
+              rows: fields.map(field => ({
+                uniqueName: field.name
+              })),
+              measures: [{
+                uniqueName: "Count",
+                aggregation: "count"
+              }]
+            },
+            options: {
+              grid: {
+                type: "flat",
+                showTotals: "off",
+                showGrandTotals: "off"
+              }
+            }
+          },
+          reportcomplete: function() {
+            console.log("WebDataRocks report completed");
+          }
+        });
+
+      } catch (error) {
+        console.error('Error initializing WebDataRocks:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to initialize pivot table"
+        });
+      }
+    }
+
+    // Cleanup function
+    return () => {
+      if (pivotInstance.current) {
+        pivotInstance.current.dispose();
+      }
+    };
+  }, [data, columns, isLoading]);
 
   if (isLoading) {
     return (
@@ -46,24 +84,8 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
   }
 
   return (
-    <div className="ag-theme-alpine-dark" style={gridStyle}>
-      <AgGridReact
-        rowData={data}
-        columnDefs={columnDefs}
-        defaultColDef={defaultColDef}
-        enableRangeSelection={true}
-        animateRows={true}
-        rowSelection="multiple"
-        suppressRowClickSelection={true}
-        suppressCellFocus={true}
-        onGridReady={onGridReady}
-        suppressColumnVirtualisation={false}
-        suppressRowVirtualisation={false}
-        pagination={true}
-        paginationPageSize={20}
-        suppressPaginationPanel={false}
-        suppressScrollOnNewData={true}
-      />
+    <div className="border rounded-md overflow-hidden bg-background">
+      <div ref={pivotRef} style={{ ...style }} />
     </div>
   );
 }
