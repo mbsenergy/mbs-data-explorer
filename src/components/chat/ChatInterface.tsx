@@ -75,19 +75,19 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
   return (
     <div className="flex flex-col h-full max-h-[calc(600px-4rem)]">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border/40">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40">
         <p className="text-xs text-muted-foreground">Chat History</p>
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={clearChat}
-          className="h-8 px-2 text-muted-foreground hover:text-destructive"
+          className="h-6 px-2 text-muted-foreground hover:text-destructive"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </div>
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-2 py-4">
+      <ScrollArea className="flex-1 px-3">
+        <div className="space-y-1.5 py-2">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -96,14 +96,14 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
               }`}
             >
               <div
-                className={`rounded-lg px-4 py-2 max-w-[60%] text-sm ${
+                className={`rounded-lg px-3 py-1.5 max-w-[85%] text-sm ${
                   message.role === 'user'
                     ? 'metallic-card text-primary-foreground'
                     : 'glass-panel border-l-2 border-l-primary'
                 }`}
               >
                 <ReactMarkdown 
-                  className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-1"
+                  className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-0.5"
                   components={components}
                 >
                   {message.content}
@@ -114,20 +114,20 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t border-border/40 bg-background/50">
-        <form onSubmit={handleSubmit} className="space-y-2">
+      <div className="p-3 border-t border-border/40 bg-background/50">
+        <form onSubmit={handleSubmit} className="space-y-1.5">
           <div className="flex gap-2">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="How can I help?"
-              className="min-h-[60px] max-h-[120px] text-sm metallic-card resize-none"
+              className="min-h-[45px] max-h-[120px] text-sm metallic-card resize-none"
             />
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 h-[60px] px-4"
+              className="bg-primary hover:bg-primary/90 h-[45px] px-3"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
