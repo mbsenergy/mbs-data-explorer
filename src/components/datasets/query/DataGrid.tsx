@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import * as WebDataRocks from 'webdatarocks';
+import * as WebDataRocksReact from 'webdatarocks';
 import type { ColumnDef } from "@tanstack/react-table";
 import type { DataGridProps } from '@/types/dataset';
 import { useToast } from '@/hooks/use-toast';
@@ -9,7 +9,7 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
   const pivotRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const pivotInstance = useRef<any>(null);
-
+  
   useEffect(() => {
     if (!isLoading && data && data.length > 0 && pivotRef.current) {
       try {
@@ -26,7 +26,7 @@ export function DataGrid({ data, columns, isLoading, style }: DataGridProps) {
         }));
 
         // Initialize WebDataRocks
-        pivotInstance.current = new WebDataRocks({
+        pivotInstance.current = new WebDataRocksReact.Pivot({
           container: pivotRef.current,
           toolbar: true,
           height: 600,
