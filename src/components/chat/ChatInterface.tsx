@@ -82,6 +82,34 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     )
   };
 
+  // Function to split message into text and code segments
+  const splitMessageContent = (content: string) => {
+    const segments = [];
+    let currentText = '';
+    const codeBlockRegex = /```[\s\S]*?```/g;
+    let lastIndex = 0;
+
+    content.replace(codeBlockRegex, (match, index) => {
+      // Add text before code block
+      if (index > lastIndex) {
+        const text = content.slice(lastIndex, index).trim();
+        if (text) segments.push({ type: 'text', content: text });
+      }
+      // Add code block
+      segments.push({ type: 'code', content: match });
+      lastIndex = index + match.length;
+      return match;
+    });
+
+    // Add remaining text after last code block
+    if (lastIndex < content.length) {
+      const text = content.slice(lastIndex).trim();
+      if (text) segments.push({ type: 'text', content: text });
+    }
+
+    return segments.length > 0 ? segments : [{ type: 'text', content }];
+  };
+
   return (
     <div className="flex flex-col h-full max-h-[calc(80vh-3rem)]">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-background/50">
@@ -117,12 +145,25 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                       : 'bg-card/80 border-l-2 border-l-primary'
                   }`}
                 >
-                  <ReactMarkdown 
-                    className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
-                    components={components}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
+                  {message.role === 'assistant' ? (
+                    splitMessageContent(message.content).map((segment, idx) => (
+                      <div key={idx} className="mb-3 last:mb-0">
+                        <ReactMarkdown 
+                          className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
+                          components={components}
+                        >
+                          {segment.content}
+                        </ReactMarkdown>
+                      </div>
+                    ))
+                  ) : (
+                    <ReactMarkdown 
+                      className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
+                      components={components}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))
