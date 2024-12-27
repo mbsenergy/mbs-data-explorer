@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import {
   BarChart2,
@@ -12,8 +19,50 @@ import {
   Building2,
   ChevronRight,
 } from "lucide-react";
+import { useState } from "react";
+
+interface FeatureDetails {
+  title: string;
+  description: string;
+  longDescription: string;
+  icon: React.ReactNode;
+  to: string;
+}
+
+const features: FeatureDetails[] = [
+  {
+    to: "/scenario",
+    title: "Scenario",
+    description: "Access our scenario analysis and forecasting tools",
+    longDescription: "Our advanced scenario analysis tools enable you to create, analyze, and compare different market scenarios. Features include:\n\n• Custom scenario creation with multiple variables\n• Advanced forecasting algorithms\n• Comparative analysis tools\n• Historical data integration\n• Export capabilities for reports and presentations\n• Real-time updates and calculations",
+    icon: <LineChart className="h-8 w-8 text-corporate-teal" />
+  },
+  {
+    to: "/osservatorio",
+    title: "Osservatorio",
+    description: "Explore energy market insights and analysis",
+    longDescription: "The Osservatorio provides comprehensive energy market insights and analysis through:\n\n• Real-time market monitoring\n• Detailed trend analysis\n• Expert commentary and reports\n• Interactive data visualizations\n• Regular market updates\n• Custom alert settings for market changes",
+    icon: <Eye className="h-8 w-8 text-corporate-teal" />
+  },
+  {
+    to: "/datasets",
+    title: "Datasets",
+    description: "Browse and download our comprehensive datasets",
+    longDescription: "Access our extensive collection of energy market datasets including:\n\n• Historical price data\n• Consumption patterns\n• Production statistics\n• Market indicators\n• Custom query builder\n• Multiple export formats\n• API access for integration",
+    icon: <Database className="h-8 w-8 text-corporate-teal" />
+  },
+  {
+    to: "/company",
+    title: "Company Products",
+    description: "Discover our suite of professional solutions",
+    longDescription: "Explore our comprehensive suite of professional energy market solutions:\n\n• Enterprise-grade analytics tools\n• Custom reporting solutions\n• Integration services\n• Professional consulting\n• Training and support\n• Dedicated account management",
+    icon: <Building2 className="h-8 w-8 text-corporate-teal" />
+  }
+];
 
 const Landing = () => {
+  const [selectedFeature, setSelectedFeature] = useState<FeatureDetails | null>(null);
+
   return (
     <div className="min-h-screen relative bg-corporate-navy">
       {/* Background pattern overlay */}
@@ -59,54 +108,25 @@ const Landing = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
-            <FeatureCard
-              icon={<Database className="h-8 w-8 text-corporate-teal" />}
-              title="Comprehensive Datasets"
-              description="Access a wide range of energy market datasets, from prices to consumption patterns"
-            />
-            
-            <FeatureCard
-              icon={<BarChart2 className="h-8 w-8 text-corporate-teal" />}
-              title="Advanced Analytics"
-              description="Powerful analytics tools for data visualization and market insights"
-            />
-            
-            <FeatureCard
-              icon={<FileText className="h-8 w-8 text-corporate-teal" />}
-              title="Scenario Analysis"
-              description="Create and analyze different market scenarios with our advanced tools"
-            />
-            
-            <FeatureCard
-              icon={<MessageSquare className="h-8 w-8 text-corporate-teal" />}
-              title="AI Assistant"
-              description="Get help from FluxerBuddy, our AI assistant for data analysis and queries"
-            />
-            
-            <FeatureCard
-              icon={<Code className="h-8 w-8 text-corporate-teal" />}
-              title="Developer Tools"
-              description="Access APIs, documentation, and developer resources"
-            />
-            
-            <FeatureCard
-              icon={<LineChart className="h-8 w-8 text-corporate-teal" />}
-              title="Data Wrangling"
-              description="Transform and analyze data with our powerful wrangling tools"
-            />
-            
-            <FeatureCard
-              icon={<Eye className="h-8 w-8 text-corporate-teal" />}
-              title="Osservatorio"
-              description="Stay updated with the latest energy market observations and trends"
-            />
-            
-            <FeatureCard
-              icon={<Building2 className="h-8 w-8 text-corporate-teal" />}
-              title="Company Products"
-              description="Explore our suite of professional energy market solutions"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+            {features.map((feature) => (
+              <div key={feature.to} className="flex flex-col flex-1">
+                <Card 
+                  className="p-6 h-full hover:bg-muted/50 transition-colors cursor-pointer metallic-card transform hover:-translate-y-1 duration-300"
+                  onClick={() => setSelectedFeature(feature)}
+                >
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">
+                      {feature.title}
+                    </h3>
+                    {feature.icon}
+                  </div>
+                  <p className="text-muted-foreground mt-2">
+                    {feature.description}
+                  </p>
+                </Card>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -117,27 +137,32 @@ const Landing = () => {
           </p>
         </footer>
       </div>
-    </div>
-  );
-};
 
-const FeatureCard = ({ icon, title, description }: { 
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) => {
-  return (
-    <Card className="p-6 metallic-card hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-white/[0.03]">
-      <div className="flex flex-col items-center text-center">
-        <div className="rounded-full p-3 bg-gradient-to-b from-white/10 to-transparent backdrop-blur-sm border border-white/10 mb-4">
-          {icon}
-        </div>
-        <h3 className="mt-2 mb-2 text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
-          {title}
-        </h3>
-        <p className="text-gray-300">{description}</p>
-      </div>
-    </Card>
+      {/* Feature Detail Modal */}
+      <Dialog open={!!selectedFeature} onOpenChange={() => setSelectedFeature(null)}>
+        <DialogContent className="metallic-card max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              {selectedFeature?.icon}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">
+                {selectedFeature?.title}
+              </span>
+            </DialogTitle>
+            <DialogDescription className="text-left whitespace-pre-line pt-4">
+              {selectedFeature?.longDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end mt-4">
+            <Link to={selectedFeature?.to || "/"}>
+              <Button className="bg-gradient-to-r from-corporate-teal to-corporate-teal/80 hover:from-corporate-teal/90 hover:to-corporate-teal/70 text-white">
+                Explore {selectedFeature?.title}
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
