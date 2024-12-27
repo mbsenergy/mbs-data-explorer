@@ -80,7 +80,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(600px-3rem)]">
+    <div className="flex flex-col h-full max-h-[calc(80vh-3rem)]">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-background/50">
         <p className="text-xs text-muted-foreground">Messages</p>
         <Button 

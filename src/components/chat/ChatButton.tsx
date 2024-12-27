@@ -26,7 +26,7 @@ export const ChatButton = () => {
           <MessageSquare className="h-5 w-5 text-primary" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-0 metallic-card border-2 border-border/60 w-[1000px] max-h-[800px] gap-0">
+      <DialogContent className="p-0 metallic-card border-2 border-border/60 w-[80vw] max-w-[1200px] h-[80vh] gap-0">
         <div className="h-full flex flex-col">
           <DialogHeader className="px-4 py-3 border-b border-border/40 bg-card/50">
             <DialogTitle className="flex items-center gap-2 text-sm font-medium">
