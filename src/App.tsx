@@ -18,7 +18,7 @@ import Guide from "./pages/Guide";
 import Scenario from "./pages/Scenario";
 import Osservatorio from "./pages/Osservatorio";
 import Developer from "./pages/Developer";
-import Visualize from "./pages/Visualize";
+import DataWrangle from "./pages/DataWrangle";
 
 const queryClient = new QueryClient();
 
@@ -45,7 +45,7 @@ const App = () => (
               <Route path="user" element={<User />} />
               <Route path="guide" element={<Guide />} />
               <Route path="developer" element={<Developer />} />
-              <Route path="visualize" element={<Visualize />} />
+              <Route path="datawrangle" element={<DataWrangle />} />
             </Route>
           </Routes>
         </AuthProvider>

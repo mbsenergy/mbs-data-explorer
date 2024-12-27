@@ -23,7 +23,7 @@ const navItems = [
 
 const workItems = [
   { title: "Datasets", icon: Database, url: "/datasets" },
-  { title: "Visualize", icon: BarChart2, url: "/visualize" },
+  { title: "Data Wrangle", icon: BarChart2, url: "/datawrangle" },
   { title: "Developer", icon: Code, url: "/developer" },
 ];
 
