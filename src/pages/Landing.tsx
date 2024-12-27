@@ -95,8 +95,10 @@ const Landing = () => {
       </div>
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 text-center text-gray-400">
-        <p>© 2024 Flux Data Platform. All rights reserved.</p>
+      <footer className="container mx-auto px-4 py-8 text-center">
+        <p className="text-gray-400">
+          © 2025 MBS Consulting. All rights reserved. <span className="text-corporate-teal">AI Powered</span>.
+        </p>
       </footer>
     </div>
   );
