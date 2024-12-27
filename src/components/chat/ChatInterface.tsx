@@ -76,14 +76,6 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     <div className="flex flex-col h-full max-h-[calc(80vh-3rem)]">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-background/50">
         <p className="text-xs text-muted-foreground">Messages</p>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={clearChat}
-          className="h-6 px-2 text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
       </div>
 
       <ScrollArea className="flex-1">
@@ -120,7 +112,17 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       </ScrollArea>
 
       <div className="p-2 border-t border-border/40 bg-card/50">
-        <ChatInput isLoading={isLoading} onSubmit={handleSubmit} />
+        <div className="flex gap-2">
+          <ChatInput isLoading={isLoading} onSubmit={handleSubmit} />
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={clearChat}
+            className="h-[40px] w-[40px] text-muted-foreground hover:text-destructive shrink-0"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
