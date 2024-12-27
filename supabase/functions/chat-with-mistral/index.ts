@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const MISTRAL_API_KEY = Deno.env.get('MISTRAL_API_KEY');
 const MISTRAL_API_URL = 'https://api.mistral.ai/v1/chat/completions';
@@ -18,6 +19,25 @@ serve(async (req) => {
   try {
     const { message } = await req.json();
 
+    // Create Supabase client
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Get available tables
+    const { data: tables, error: tablesError } = await supabaseAdmin
+      .rpc('get_available_tables');
+
+    if (tablesError) {
+      throw tablesError;
+    }
+
+    // Create a context about available tables
+    const tableContext = tables
+      .map((t: { tablename: string }) => t.tablename)
+      .join(', ');
+
     const response = await fetch(MISTRAL_API_URL, {
       method: 'POST',
       headers: {
@@ -29,7 +49,24 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a helpful PostgreSQL expert with knowledge of R and Python. Your primary focus is helping users write and translate between PostgreSQL, R, and Python code. Your capabilities include:\n\n1. Writing PostgreSQL queries\n2. Translating PostgreSQL queries to equivalent R code using libraries like DBI and RPostgres\n3. Translating PostgreSQL queries to equivalent Python code using libraries like pandas and SQLAlchemy\n4. Converting R and Python data manipulation code to PostgreSQL queries\n\nKeep your responses focused on query writing and translations. Provide concise, English-only responses. If asked about other topics, politely redirect the conversation to database-related matters. Format all code examples in code blocks and include brief explanations of the translations. Keep explanations brief and to the point."
+            content: `You are a helpful database assistant for the Flux Data Platform. You help users understand and query the available datasets.
+
+Available tables in the database: ${tableContext}
+
+Your capabilities include:
+1. Explaining what data is available in specific tables
+2. Helping users write SQL queries for their data needs
+3. Providing guidance on which tables to use for specific analyses
+4. Explaining the meaning of columns and data fields
+5. Suggesting relevant tables based on user questions
+
+Table naming convention:
+- EC01_* tables contain Eurostat economic data
+- ME01_* tables contain market and energy data
+- MS01_* tables contain miscellaneous data
+- TS01_* tables contain time series data
+
+Keep responses focused and concise. Format SQL queries in code blocks. If you're unsure about specific column names, suggest general query structures and advise users to check the actual schema.`
           },
           {
             role: "user",
