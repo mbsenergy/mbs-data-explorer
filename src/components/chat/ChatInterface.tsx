@@ -2,7 +2,7 @@ import { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, Trash2 } from "lucide-react";
+import { Loader2, Send, Copy, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
@@ -62,15 +62,40 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     });
   };
 
+  const handleCopyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast({
+        description: "Code copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy code",
+      });
+    }
+  };
+
   const components: Components = {
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
+      const codeContent = children.toString();
       return match ? (
-        <pre className="bg-card/50 p-4 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs my-3">
-          <code className={className} {...props}>
-            {children}
-          </code>
-        </pre>
+        <div className="relative w-full">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-2 h-6 w-6 bg-primary/10 hover:bg-primary/20"
+            onClick={() => handleCopyCode(codeContent)}
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+          <pre className="bg-card/50 p-4 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs my-3 w-full">
+            <code className={className} {...props}>
+              {children}
+            </code>
+          </pre>
+        </div>
       ) : (
         <code className="bg-card/50 px-1.5 py-0.5 rounded font-jetbrains-mono text-primary text-xs" {...props}>
           {children}
@@ -138,7 +163,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
                       key={`${index}-${idx}`}
                       className="flex justify-start"
                     >
-                      <div className="rounded-lg px-4 py-2.5 max-w-[85%] text-sm bg-card/80 border-l-2 border-l-primary">
+                      <div className="rounded-lg px-4 py-2.5 max-w-[85%] text-sm bg-card/80 border-l-2 border-l-primary w-full">
                         <ReactMarkdown 
                           className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-3"
                           components={components}
