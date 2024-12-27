@@ -1,206 +1,157 @@
 import { Card } from "@/components/ui/card";
+import { Line } from "recharts";
+import { LineChart } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
-import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
-
-interface ChartDataItem {
-  date: string;
-  'Dataset Samples': number;
-  'Developer Files': number;
-  'Dataset Exports': number;
-  'File Uploads': number;
-  'Query Executions': number;
-}
+import { subMonths, format, parseISO, isAfter, isBefore, startOfMonth } from "date-fns";
 
 interface DownloadsChartProps {
-  analyticsData: any[];
-  developerData: any[];
-  exportsData: any[];
-  storageData: any[];
-  queryData: any[];
+  analyticsData: {
+    created_at: string;
+    dataset_name: string;
+    downloaded_at: string;
+    id: string;
+    is_custom_query: boolean;
+    user_id: string;
+  }[];
+  developerData: {
+    created_at: string;
+    downloaded_at: string;
+    file_name: string;
+    file_section: string;
+    id: string;
+    user_id: string;
+  }[];
+  exportsData: {
+    created_at: string;
+    downloaded_at: string;
+    export_name: string;
+    export_type: string;
+    id: string;
+    user_id: string;
+  }[];
+  storageData: {
+    created_at: string;
+    id: string;
+    original_name: string;
+    storage_id: string;
+    tags: string[] | null;
+    user_id: string;
+  }[];
+  queryData: {
+    created_at: string;
+    dataset_name: string;
+    downloaded_at: string;
+    id: string;
+    is_custom_query: boolean;
+    user_id: string;
+  }[];
+  chatData: {
+    created_at: string;
+    id: string;
+    message_content: string;
+    user_id: string;
+  }[];
   isLoading: boolean;
 }
 
-export const DownloadsChart = ({ 
-  analyticsData, 
+export const DownloadsChart = ({
+  analyticsData,
   developerData,
   exportsData,
   storageData,
   queryData,
-  isLoading 
+  chatData,
+  isLoading
 }: DownloadsChartProps) => {
-  const [isOpen, setIsOpen] = useState(true);
-  
-  const chartData: ChartDataItem[] = Object.entries(
-    [...(analyticsData || []), 
-     ...(developerData || []), 
-     ...(exportsData || []),
-     ...(storageData || []),
-     ...(queryData || [])]
-    .reduce((acc: Record<string, ChartDataItem>, curr) => {
-      const date = new Date(curr.downloaded_at || curr.created_at).toISOString().split('T')[0];
-      if (!acc[date]) {
-        acc[date] = {
-          date,
-          'Dataset Samples': 0,
-          'Developer Files': 0,
-          'Dataset Exports': 0,
-          'File Uploads': 0,
-          'Query Executions': 0
-        };
-      }
-      
-      if ('dataset_name' in curr) {
-        if (curr.is_custom_query) {
-          acc[date]['Query Executions']++;
-        } else {
-          acc[date]['Dataset Samples']++;
-        }
-      } else if ('file_name' in curr) {
-        acc[date]['Developer Files']++;
-      } else if ('export_name' in curr) {
-        acc[date]['Dataset Exports']++;
-      } else if ('storage_id' in curr) {
-        acc[date]['File Uploads']++;
-      }
-      
-      return acc;
-    }, {} as Record<string, ChartDataItem>)
-  )
-  .map(([date, counts]) => ({
-    date,
-    'Dataset Samples': counts['Dataset Samples'],
-    'Developer Files': counts['Developer Files'],
-    'Dataset Exports': counts['Dataset Exports'],
-    'File Uploads': counts['File Uploads'],
-    'Query Executions': counts['Query Executions']
-  }))
-  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const now = new Date();
+  const sixMonthsAgo = subMonths(now, 6);
 
-  const chartOptions: Highcharts.Options = {
-    chart: {
-      type: 'bar',
-      height: 500,
-      backgroundColor: 'transparent',
-    },
-    title: {
-      text: undefined
-    },
-    xAxis: {
-      categories: chartData.map(item => item.date),
-      labels: {
-        rotation: -45,
-        style: {
-          fontSize: '10px'
-        }
+  const getMonthlyCount = (data: any[], dateField: string) => {
+    const monthlyCounts: { [key: string]: number } = {};
+    
+    data.forEach(item => {
+      const date = parseISO(item[dateField]);
+      if (isAfter(date, sixMonthsAgo) && isBefore(date, now)) {
+        const monthKey = format(startOfMonth(date), 'MMM yyyy');
+        monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
       }
-    },
-    yAxis: {
-      title: {
-        text: 'Number of Actions'
-      },
-      allowDecimals: false
-    },
-    plotOptions: {
-      bar: {
-        stacking: 'normal',
-        borderRadius: 4,
-        borderWidth: 0,
-        dataLabels: {
-          enabled: true,
-          color: '#ffffff'
-        }
-      }
-    },
-    series: [{
-      name: 'Dataset Samples',
-      type: 'bar',
-      data: chartData.map(item => item['Dataset Samples']),
-      color: '#57D7E2',
-      visible: true
-    }, {
-      name: 'Developer Files',
-      type: 'bar',
-      data: chartData.map(item => item['Developer Files']),
-      color: '#FEC6A1',
-      visible: true
-    }, {
-      name: 'Dataset Exports',
-      type: 'bar',
-      data: chartData.map(item => item['Dataset Exports']),
-      color: '#A78BFA',
-      visible: true
-    }, {
-      name: 'File Uploads',
-      type: 'bar',
-      data: chartData.map(item => item['File Uploads']),
-      color: '#34D399',
-      visible: true
-    }, {
-      name: 'Query Executions',
-      type: 'bar',
-      data: chartData.map(item => item['Query Executions']),
-      color: '#F472B6',
-      visible: true
-    }],
-    legend: {
-      align: 'center',
-      verticalAlign: 'bottom',
-      layout: 'horizontal',
-      itemStyle: {
-        color: '#fff',
-        fontWeight: '400'
-      },
-      itemHoverStyle: {
-        color: '#ccc'
-      },
-      backgroundColor: 'transparent',
-      borderWidth: 0,
-      padding: 20,
-      margin: 20,
-      enabled: true
-    },
-    credits: {
-      enabled: false
-    }
+    });
+
+    return monthlyCounts;
   };
 
+  const months = Array.from({ length: 6 }, (_, i) => {
+    const d = subMonths(now, i);
+    return format(d, 'MMM yyyy');
+  }).reverse();
+
+  const analyticsMonthly = getMonthlyCount(analyticsData, 'downloaded_at');
+  const developerMonthly = getMonthlyCount(developerData, 'downloaded_at');
+  const exportsMonthly = getMonthlyCount(exportsData, 'downloaded_at');
+  const storageMonthly = getMonthlyCount(storageData, 'created_at');
+  const queryMonthly = getMonthlyCount(queryData, 'downloaded_at');
+  const chatMonthly = getMonthlyCount(chatData, 'created_at');
+
+  const chartData = months.map(month => ({
+    name: month,
+    'Dataset Downloads': analyticsMonthly[month] || 0,
+    'Developer Files': developerMonthly[month] || 0,
+    'Exports': exportsMonthly[month] || 0,
+    'Uploads': storageMonthly[month] || 0,
+    'Queries': queryMonthly[month] || 0,
+    'Chat Messages': chatMonthly[month] || 0,
+  }));
+
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <Skeleton className="h-[350px] w-full" />
+      </Card>
+    );
+  }
+
   return (
-    <Card className="p-6 bg-card metallic-card">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Daily Activity</h2>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm">
-              {isOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-        </div>
-        <CollapsibleContent>
-          <div className="h-[400px]">
-            {isLoading ? (
-              <Skeleton className="w-full h-full" />
-            ) : chartData.length > 0 ? (
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={chartOptions}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                No activity data available
-              </div>
-            )}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+    <Card className="p-6">
+      <div className="h-[350px] w-full">
+        <LineChart data={chartData}>
+          <Line 
+            type="monotone" 
+            dataKey="Dataset Downloads" 
+            stroke="#10b981" 
+            strokeWidth={2} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="Developer Files" 
+            stroke="#3b82f6" 
+            strokeWidth={2} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="Exports" 
+            stroke="#6366f1" 
+            strokeWidth={2} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="Uploads" 
+            stroke="#8b5cf6" 
+            strokeWidth={2} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="Queries" 
+            stroke="#ec4899" 
+            strokeWidth={2} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="Chat Messages" 
+            stroke="#f43f5e" 
+            strokeWidth={2} 
+          />
+        </LineChart>
+      </div>
     </Card>
   );
 };

@@ -5,6 +5,7 @@ import { Message } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface ChatInterfaceProps {
   messages: Message[];
@@ -14,8 +15,18 @@ interface ChatInterfaceProps {
 export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubmit = async (userMessage: string) => {
+    if (!user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to send messages."
+      });
+      return;
+    }
+
     setMessages([...messages, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
@@ -24,7 +35,8 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       const { error: analyticsError } = await supabase
         .from('chat_analytics')
         .insert({
-          message_content: userMessage
+          message_content: userMessage,
+          user_id: user.id
         });
 
       if (analyticsError) {
