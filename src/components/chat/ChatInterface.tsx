@@ -23,7 +23,7 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
     const userMessage = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setMessages([...messages, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
     try {
@@ -33,10 +33,10 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
 
       if (error) throw error;
 
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+      setMessages([...messages, { role: 'user', content: userMessage }, { role: 'assistant', content: data.response }]);
     } catch (error) {
       console.error('Error calling Mistral AI:', error);
-      setMessages(prev => [...prev, { 
+      setMessages([...messages, { role: 'user', content: userMessage }, { 
         role: 'assistant', 
         content: 'Sorry, I encountered an error. Please try again.' 
       }]);
