@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import type { ColumnDef } from "@tanstack/react-table";
+import { SqlQueryBox } from "@/components/datasets/SqlQueryBox";
 import { DatasetQueryResults } from "./DatasetQueryResults";
 import { DatasetQueryEmptyState } from "./DatasetQueryEmptyState";
 import { useQuery } from "@tanstack/react-query";
 import type { TableInfo, TableNames } from "../types";
-import { SqlQueryBox } from "../SqlQueryBox";
 import { SavedQueries } from "../SavedQueries";
 import { PreviewDialog } from "@/components/developer/PreviewDialog";
 import { fetchDataInBatches } from "@/utils/batchProcessing";
-import type { ColumnDef } from "@tanstack/react-table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Grid, Table } from "lucide-react";
+import { PivotGrid } from "@/components/visualize/pivot/PivotGrid";
 
 interface DatasetQueryProps {
   selectedDataset?: TableNames | null;
@@ -174,11 +177,33 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
       />
 
       {results.length > 0 ? (
-        <DatasetQueryResults 
-          queryResults={results}
-          columns={queryColumns}
-          isLoading={isLoading} 
-        />
+        <Tabs defaultValue="table" className="w-full">
+          <TabsList>
+            <TabsTrigger value="table" className="flex items-center gap-2">
+              <Table className="h-4 w-4" />
+              Table
+            </TabsTrigger>
+            <TabsTrigger value="pivot" className="flex items-center gap-2">
+              <Grid className="h-4 w-4" />
+              Pivot
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="table">
+            <DatasetQueryResults
+              queryResults={results}
+              columns={queryColumns}
+              isLoading={isLoading}
+            />
+          </TabsContent>
+          
+          <TabsContent value="pivot">
+            <PivotGrid
+              data={results}
+              columns={queryColumns}
+            />
+          </TabsContent>
+        </Tabs>
       ) : (
         <DatasetQueryEmptyState />
       )}
