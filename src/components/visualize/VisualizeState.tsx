@@ -53,6 +53,7 @@ export const useVisualizeState = () => {
   }, [state.showChart]);
 
   const handleDataReceived = (data: DataPoint[], rawColumns: ColumnDef<any>[]) => {
+    // Create columns with show property set to true by default
     const typedColumns: ColumnDef<DataPoint>[] = rawColumns.map(col => ({
       id: String(col.id),
       header: col.header,
@@ -60,7 +61,8 @@ export const useVisualizeState = () => {
       cell: (info: any) => {
         const value = info.getValue();
         return value === null ? 'NULL' : String(value);
-      }
+      },
+      show: true // Set show to true by default for all columns
     }));
 
     setState(prev => ({
@@ -90,10 +92,12 @@ export const useVisualizeState = () => {
           }, {} as Record<string, string>);
         });
 
+      // Create columns with show property set to true by default
       const cols: ColumnDef<DataPoint>[] = headers.map(header => ({
         id: header,
         header,
         accessorKey: header,
+        show: true // Set show to true by default for all columns
       }));
 
       setState(prev => ({
@@ -102,6 +106,7 @@ export const useVisualizeState = () => {
         filteredData: parsedData,
         columns: cols,
       }));
+      
       toast({
         title: "Success",
         description: `Loaded ${parsedData.length} rows of data`,
