@@ -26,6 +26,9 @@ export const AnalyticsTables = ({
   chatData,
   isLoading
 }: AnalyticsTablesProps) => {
+  console.log('Chat data:', chatData);
+  console.log('Exports data:', exportsData);
+  
   return (
     <div className="space-y-6">
       <DownloadsTable

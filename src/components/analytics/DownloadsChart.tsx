@@ -32,6 +32,7 @@ export const DownloadsChart = ({
   ]);
 
   const getMonthlyCount = (data: any[], dateField: string) => {
+    console.log(`Processing ${dateField} data:`, data);
     const monthlyCounts: { [key: string]: number } = {};
     
     data.forEach(item => {
@@ -44,6 +45,7 @@ export const DownloadsChart = ({
       }
     });
 
+    console.log('Monthly counts:', monthlyCounts);
     return monthlyCounts;
   };
 
