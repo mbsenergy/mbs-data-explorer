@@ -16,11 +16,11 @@ import {
 
 const navigation = [
   { name: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { name: "Analytics", to: "/analytics", icon: BarChart2 },
-  { name: "Datasets", to: "/datasets", icon: Database },
-  { name: "Data Wrangle", to: "/datawrangle", icon: Wand2 },
   { name: "Scenario", to: "/scenario", icon: LineChart },
   { name: "Osservatorio", to: "/osservatorio", icon: Eye },
+  { name: "Datasets", to: "/datasets", icon: Database },
+  { name: "Analytics", to: "/analytics", icon: BarChart2 },
+  { name: "Data Wrangle", to: "/datawrangle", icon: Wand2 },
   { name: "Developer", to: "/developer", icon: Code },
   { name: "Company", to: "/company", icon: Building2 },
   { name: "Guide", to: "/guide", icon: FileText },
