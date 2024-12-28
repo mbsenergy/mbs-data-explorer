@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, AuthError } from "@supabase/supabase-js";
 
@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check active sessions
@@ -29,6 +30,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user) {
           setUser(session.user);
+          // If user is authenticated and on landing or login page, redirect to dashboard
+          if (location.pathname === '/' || location.pathname === '/login') {
+            navigate('/dashboard');
+          }
         } else {
           setUser(null);
           // Clear any stale tokens
@@ -61,6 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log("User signed in or token refreshed, updating state...");
           if (session?.user) {
             setUser(session.user);
+            navigate("/dashboard");
           }
         }
         
@@ -72,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("Cleaning up auth subscriptions");
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
