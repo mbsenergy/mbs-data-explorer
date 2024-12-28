@@ -16,16 +16,16 @@ import {
 
 const navigation = [
   { name: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { name: "Analytics", to: "/analytics", icon: BarChart2 },
+  { name: "Datasets", to: "/datasets", icon: Database },
+  { name: "Data Wrangle", to: "/datawrangle", icon: Wand2 },
   { name: "Scenario", to: "/scenario", icon: LineChart },
   { name: "Osservatorio", to: "/osservatorio", icon: Eye },
-  { name: "Datasets", to: "/datasets", icon: Database },
-  { name: "Analytics", to: "/analytics", icon: BarChart2 },
-  { name: "Company", to: "/company", icon: Building2 },
-  { name: "Settings", to: "/settings", icon: Settings },
-  { name: "User", to: "/user", icon: UserIcon },
-  { name: "Guide", to: "/guide", icon: FileText },
   { name: "Developer", to: "/developer", icon: Code },
-  { name: "Data Wrangle", to: "/datawrangle", icon: Wand2 },
+  { name: "Company", to: "/company", icon: Building2 },
+  { name: "Guide", to: "/guide", icon: FileText },
+  { name: "User", to: "/user", icon: UserIcon },
+  { name: "Settings", to: "/settings", icon: Settings },
 ];
 
 interface SidebarNavigationProps {
