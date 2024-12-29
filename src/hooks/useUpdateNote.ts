@@ -8,6 +8,7 @@ interface UpdateNoteData {
   title: string;
   content: string;
   tags?: string[];
+  is_favorite?: boolean;
 }
 
 export const useUpdateNote = () => {
@@ -21,7 +22,9 @@ export const useUpdateNote = () => {
         .update({
           title: noteData.title,
           content: noteData.content,
-          tags: noteData.tags,
+          tags: noteData.tags || [],
+          is_favorite: noteData.is_favorite,
+          updated_at: new Date().toISOString()
         })
         .eq("id", noteData.id)
         .select()

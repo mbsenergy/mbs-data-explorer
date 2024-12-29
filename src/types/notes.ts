@@ -6,4 +6,5 @@ export interface Note {
   tags?: string[];
   created_at: string;
   updated_at: string;
+  is_favorite: boolean;
 }

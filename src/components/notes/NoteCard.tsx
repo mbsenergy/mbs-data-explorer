@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Eye, Download } from "lucide-react";
+import { Edit, Trash, Eye, Download, Star } from "lucide-react";
 import { format } from "date-fns";
 import { NoteEditor } from "./NoteEditor";
 import { NotePreview } from "./NotePreview";
@@ -9,6 +9,7 @@ import { useDeleteNote } from "@/hooks/useDeleteNote";
 import { Badge } from "@/components/ui/badge";
 import { Note } from "@/types/notes";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useUpdateNote } from "@/hooks/useUpdateNote";
 
 interface NoteCardProps {
   note: Note;
@@ -18,6 +19,7 @@ export const NoteCard = ({ note }: NoteCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const { deleteNote, isDeleting } = useDeleteNote();
+  const { updateNote } = useUpdateNote();
 
   const handleExport = () => {
     const blob = new Blob([note.content], { type: "text/markdown" });
@@ -31,11 +33,31 @@ export const NoteCard = ({ note }: NoteCardProps) => {
     URL.revokeObjectURL(url);
   };
 
+  const toggleFavorite = async () => {
+    await updateNote({
+      id: note.id,
+      title: note.title,
+      content: note.content,
+      tags: note.tags,
+      is_favorite: !note.is_favorite
+    });
+  };
+
   return (
     <>
       <Card className="p-4 space-y-4 metallic-card">
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">{note.title}</h3>
+          <div className="flex justify-between items-start">
+            <h3 className="font-semibold text-lg">{note.title}</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleFavorite}
+              className={note.is_favorite ? "text-yellow-500" : "text-muted-foreground"}
+            >
+              <Star className="h-4 w-4" />
+            </Button>
+          </div>
           <p className="text-sm text-muted-foreground">
             {format(new Date(note.created_at), "PPP")}
           </p>
