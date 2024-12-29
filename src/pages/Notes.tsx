@@ -6,11 +6,31 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DeveloperSearch } from "@/components/developer/DeveloperSearch";
+import { Note } from "@/types/notes";
 
 const Notes = () => {
   const [isCreating, setIsCreating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTag, setSelectedTag] = useState("all");
+  const [showFavorites, setShowFavorites] = useState(false);
   const { toast } = useToast();
-  const { isLoading, error } = useNotes();
+  const { notes, isLoading, error } = useNotes();
+
+  // Get unique tags from all notes
+  const availableTags = Array.from(
+    new Set(notes?.flatMap((note) => note.tags || []) || [])
+  );
+
+  // Filter notes based on search criteria
+  const filteredNotes = notes?.filter((note) => {
+    const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         note.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTag = selectedTag === "all" || note.tags?.includes(selectedTag);
+    // For now, we'll skip favorites since it's not implemented yet
+    // You can add a 'is_favorite' field to the notes table later
+    return matchesSearch && matchesTag;
+  });
 
   if (error) {
     toast({
@@ -35,6 +55,14 @@ const Notes = () => {
         </Button>
       </div>
 
+      <DeveloperSearch
+        title="Search Notes"
+        onSearchChange={setSearchTerm}
+        onTagChange={setSelectedTag}
+        onFavoriteChange={setShowFavorites}
+        availableTags={availableTags}
+      />
+
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
         <DialogContent className="max-w-4xl">
           <NoteEditor
@@ -44,7 +72,7 @@ const Notes = () => {
         </DialogContent>
       </Dialog>
 
-      <NotesList isLoading={isLoading} />
+      <NotesList isLoading={isLoading} notes={filteredNotes} />
     </div>
   );
 };

@@ -21,7 +21,8 @@ export const useCreateNote = () => {
         .from("notes")
         .insert([{ 
           ...noteData,
-          user_id: user.id 
+          user_id: user.id,
+          tags: noteData.tags || [] // Ensure tags is always an array
         }])
         .select()
         .single();

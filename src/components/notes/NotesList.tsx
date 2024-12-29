@@ -1,14 +1,14 @@
 import { useNotes } from "@/hooks/useNotes";
 import { NoteCard } from "./NoteCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Note } from "@/types/notes";
 
 interface NotesListProps {
   isLoading: boolean;
+  notes?: Note[];
 }
 
-export const NotesList = ({ isLoading }: NotesListProps) => {
-  const { notes } = useNotes();
-
+export const NotesList = ({ isLoading, notes }: NotesListProps) => {
   if (isLoading) {
     return (
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -22,7 +22,7 @@ export const NotesList = ({ isLoading }: NotesListProps) => {
   if (!notes?.length) {
     return (
       <div className="text-center py-10 text-muted-foreground">
-        No notes yet. Create your first note!
+        No notes found. Create your first note!
       </div>
     );
   }
