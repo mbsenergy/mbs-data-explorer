@@ -8,6 +8,7 @@ import { NotePreview } from "./NotePreview";
 import { useDeleteNote } from "@/hooks/useDeleteNote";
 import { Badge } from "@/components/ui/badge";
 import { Note } from "@/types/notes";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface NoteCardProps {
   note: Note;
@@ -30,71 +31,73 @@ export const NoteCard = ({ note }: NoteCardProps) => {
     URL.revokeObjectURL(url);
   };
 
-  if (isEditing) {
-    return (
-      <NoteEditor
-        mode="edit"
-        note={note}
-        onClose={() => setIsEditing(false)}
-      />
-    );
-  }
-
-  if (isPreviewing) {
-    return (
-      <NotePreview
-        note={note}
-        onClose={() => setIsPreviewing(false)}
-      />
-    );
-  }
-
   return (
-    <Card className="p-4 space-y-4 metallic-card">
-      <div className="space-y-2">
-        <h3 className="font-semibold text-lg">{note.title}</h3>
-        <p className="text-sm text-muted-foreground">
-          {format(new Date(note.created_at), "PPP")}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {note.tags?.map((tag) => (
-            <Badge key={tag} variant="secondary">
-              {tag}
-            </Badge>
-          ))}
+    <>
+      <Card className="p-4 space-y-4 metallic-card">
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">{note.title}</h3>
+          <p className="text-sm text-muted-foreground">
+            {format(new Date(note.created_at), "PPP")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {note.tags?.map((tag) => (
+              <Badge key={tag} variant="secondary">
+                {tag}
+              </Badge>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsPreviewing(true)}
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsEditing(true)}
-        >
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExport}
-        >
-          <Download className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => deleteNote(note.id)}
-          disabled={isDeleting}
-        >
-          <Trash className="h-4 w-4" />
-        </Button>
-      </div>
-    </Card>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsPreviewing(true)}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => deleteNote(note.id)}
+            disabled={isDeleting}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </div>
+      </Card>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="max-w-4xl">
+          <NoteEditor
+            mode="edit"
+            note={note}
+            onClose={() => setIsEditing(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isPreviewing} onOpenChange={setIsPreviewing}>
+        <DialogContent className="max-w-4xl">
+          <NotePreview
+            note={note}
+            onClose={() => setIsPreviewing(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

@@ -5,6 +5,7 @@ import { useNotes } from "@/hooks/useNotes";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const Notes = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -34,12 +35,14 @@ const Notes = () => {
         </Button>
       </div>
 
-      {isCreating && (
-        <NoteEditor
-          mode="create"
-          onClose={() => setIsCreating(false)}
-        />
-      )}
+      <Dialog open={isCreating} onOpenChange={setIsCreating}>
+        <DialogContent className="max-w-4xl">
+          <NoteEditor
+            mode="create"
+            onClose={() => setIsCreating(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       <NotesList isLoading={isLoading} />
     </div>
