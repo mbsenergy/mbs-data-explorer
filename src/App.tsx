@@ -20,6 +20,7 @@ import Scenario from "./pages/Scenario";
 import Osservatorio from "./pages/Osservatorio";
 import Developer from "./pages/Developer";
 import DataWrangle from "./pages/DataWrangle";
+import Notes from "./pages/Notes";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/guide" element={<Guide />} />
               <Route path="/developer" element={<Developer />} />
               <Route path="/datawrangle" element={<DataWrangle />} />
+              <Route path="/notes" element={<Notes />} />
               
               {/* Redirect any unknown routes to dashboard when authenticated */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />

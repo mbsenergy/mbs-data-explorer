@@ -12,6 +12,7 @@ import {
   FileText,
   Code,
   Wand2,
+  StickyNote,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Datasets", to: "/datasets", icon: Database },
   { name: "Data Wrangle", to: "/datawrangle", icon: Wand2 },
   { name: "Developer", to: "/developer", icon: Code },
+  { name: "Notes", to: "/notes", icon: StickyNote },
   { type: "separator" },
   // User section
   { name: "User", to: "/user", icon: UserIcon },
