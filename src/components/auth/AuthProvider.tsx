@@ -24,26 +24,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Check active sessions
     const initializeAuth = async () => {
       try {
-        console.log("Checking session...");
         const { data: { session } } = await supabase.auth.getSession();
-        console.log("Session check result:", session ? "Session found" : "No session");
         
         if (session?.user) {
           setUser(session.user);
-          // If user is authenticated and on landing or login page, redirect to dashboard
+          // Only redirect if on public routes
           if (location.pathname === '/' || location.pathname === '/login') {
-            navigate('/dashboard');
+            navigate('/dashboard', { replace: true });
           }
         } else {
           setUser(null);
-          // Clear any stale tokens
-          await supabase.auth.signOut();
+          if (location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/resetpassword') {
+            navigate('/login', { replace: true });
+          }
         }
       } catch (error) {
         console.error("Error checking session:", error);
         setUser(null);
-        // Clear any stale tokens on error
-        await supabase.auth.signOut();
+        navigate('/login', { replace: true });
       } finally {
         setLoading(false);
       }
@@ -54,19 +52,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state change:", event, session?.user?.email);
+        console.log("Auth state change:", event);
         
-        if (event === "SIGNED_OUT") {
-          console.log("User signed out, clearing state and redirecting...");
+        if (session?.user) {
+          setUser(session.user);
+          if (event === 'SIGNED_IN') {
+            navigate('/dashboard', { replace: true });
+          }
+        } else {
           setUser(null);
-          // Clear auth-related items from localStorage
-          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
-          navigate("/login");
-        } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-          console.log("User signed in or token refreshed, updating state...");
-          if (session?.user) {
-            setUser(session.user);
-            navigate("/dashboard");
+          if (event === 'SIGNED_OUT') {
+            // Clear auth-related items from localStorage
+            localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
+            navigate('/login', { replace: true });
           }
         }
         
@@ -75,10 +73,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     return () => {
-      console.log("Cleaning up auth subscriptions");
       subscription.unsubscribe();
     };
-  }, [navigate, location]);
+  }, [navigate, location.pathname]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
