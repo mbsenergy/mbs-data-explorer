@@ -14,9 +14,15 @@ export const useCreateNote = () => {
 
   const mutation = useMutation({
     mutationFn: async (noteData: CreateNoteData) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("notes")
-        .insert([{ ...noteData }])
+        .insert([{ 
+          ...noteData,
+          user_id: user.id 
+        }])
         .select()
         .single();
 
@@ -31,6 +37,7 @@ export const useCreateNote = () => {
       });
     },
     onError: (error) => {
+      console.error("Error creating note:", error);
       toast({
         variant: "destructive",
         title: "Error",
