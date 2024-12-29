@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 const Notes = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
-  const { notes, isLoading, error } = useNotes();
+  const { isLoading, error } = useNotes();
 
   if (error) {
     toast({
