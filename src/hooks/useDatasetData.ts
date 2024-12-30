@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { fetchDataInBatches } from "@/utils/batchProcessing";
+import { useQuery } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -10,14 +11,50 @@ const BATCH_THRESHOLD = 250000;
 const INITIAL_SAMPLE_SIZE = 1000;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
-  const [data, setData] = useState<any[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
   const [totalRowCount, setTotalRowCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const { toast } = useToast();
   
   const pageSize = 1000;
+
+  // Use React Query for data fetching and caching
+  const { data = [], isLoading, refetch } = useQuery({
+    queryKey: ['dataset', selectedDataset],
+    queryFn: async () => {
+      if (!selectedDataset) return [];
+      
+      try {
+        const { data: countResult } = await supabase
+          .rpc('get_table_row_count', { table_name: selectedDataset });
+        
+        setTotalRowCount(countResult || 0);
+
+        // Get initial sample data
+        const columnList = await fetchColumns(selectedDataset);
+        setColumns(columnList);
+
+        const { data: sampleData, error } = await supabase.rpc('execute_query', {
+          query_text: `SELECT ${columnList.map(col => `"${col}"`).join(',')} FROM "${selectedDataset}" LIMIT ${INITIAL_SAMPLE_SIZE}`
+        });
+
+        if (error) throw error;
+        return Array.isArray(sampleData) ? sampleData : [];
+
+      } catch (error: any) {
+        console.error("Error loading data:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to load data"
+        });
+        return [];
+      }
+    },
+    enabled: !!selectedDataset,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // Keep unused data in cache for 30 minutes
+  });
 
   const fetchColumns = async (tableName: TableNames) => {
     const { data: queryResult, error } = await supabase.rpc('execute_query', {
@@ -32,45 +69,17 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     return [];
   };
 
-  // Function to load initial sample data
-  const loadSampleData = async (tableName: TableNames, columnsToUse: string[]) => {
-    const columnList = columnsToUse.map(col => `"${col}"`).join(',');
-    const query = `SELECT ${columnList} FROM "${tableName}" LIMIT ${INITIAL_SAMPLE_SIZE}`;
-
-    const { data: sampleData, error } = await supabase.rpc('execute_query', {
-      query_text: query
-    });
-
-    if (error) throw error;
-    return Array.isArray(sampleData) ? sampleData : [];
-  };
-
-  // Function to load full dataset without batch processing
-  const loadFullData = async (tableName: TableNames, columnsToUse: string[]) => {
-    const columnList = columnsToUse.map(col => `"${col}"`).join(',');
-    const query = `SELECT ${columnList} FROM "${tableName}"`;
-
-    const { data: fullData, error } = await supabase.rpc('execute_query', {
-      query_text: query
-    });
-
-    if (error) throw error;
-    return Array.isArray(fullData) ? fullData : [];
-  };
-
   const loadData = async (tableName: TableNames, selectedColumns: string[] = [], useBatchProcessing: boolean = false) => {
-    setIsLoading(true);
+    if (!tableName) return;
+    
     setLoadingProgress(0);
     
     try {
-      const { data: countResult, error: countError } = await supabase
+      const { data: countResult } = await supabase
         .rpc('get_table_row_count', { table_name: tableName });
-      
-      if (countError) throw countError;
       
       const totalRows = countResult || 0;
       setTotalRowCount(totalRows);
-      console.log('Total rows:', totalRows);
 
       const columnsToUse = selectedColumns.length > 0 ? 
         selectedColumns : 
@@ -78,11 +87,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       setColumns(columnsToUse);
 
-      // Determine if batch processing should be used
-      const shouldUseBatchProcessing = useBatchProcessing && totalRows > BATCH_THRESHOLD;
-      console.log('Should use batch processing:', shouldUseBatchProcessing);
-
-      if (shouldUseBatchProcessing) {
+      if (useBatchProcessing && totalRows > BATCH_THRESHOLD) {
         toast({
           title: "Large Dataset Detected",
           description: `Loading ${totalRows.toLocaleString()} rows using batch processing...`,
@@ -102,30 +107,17 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
             }
           }
         );
-        setData(batchData);
+        
+        // Invalidate the query cache to trigger a refetch
+        refetch();
         
         toast({
           title: "Success",
           description: `Loaded ${batchData.length} rows using batch processing`
         });
-      } else if (useBatchProcessing) {
-        // For datasets under threshold, load all data at once
-        const fullData = await loadFullData(tableName, columnsToUse);
-        setData(fullData);
-        
-        toast({
-          title: "Success",
-          description: `Loaded ${fullData.length} rows`
-        });
       } else {
-        // For initial load, fetch sample data
-        const sampleData = await loadSampleData(tableName, columnsToUse);
-        setData(sampleData);
-        
-        toast({
-          title: "Success",
-          description: `Loaded ${sampleData.length} sample rows`
-        });
+        // For smaller datasets, trigger a refetch
+        refetch();
       }
 
     } catch (error: any) {
@@ -135,25 +127,10 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         title: "Error",
         description: error.message || "Failed to load data"
       });
-      setData([]);
-      setColumns([]);
     } finally {
-      setIsLoading(false);
       setLoadingProgress(0);
     }
   };
-
-  useEffect(() => {
-    if (!selectedDataset) {
-      setData([]);
-      setColumns([]);
-      setTotalRowCount(0);
-      return;
-    }
-
-    // Initial load with sample data
-    loadData(selectedDataset, [], false);
-  }, [selectedDataset]);
 
   const fetchPage = async (page: number, itemsPerPage: number) => {
     if (!selectedDataset) return;
@@ -168,10 +145,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       if (error) throw error;
       
-      if (pageData && Array.isArray(pageData)) {
-        return pageData;
-      }
-      return [];
+      return Array.isArray(pageData) ? pageData : [];
     } catch (error: any) {
       toast({
         variant: "destructive",
