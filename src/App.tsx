@@ -22,7 +22,18 @@ import Developer from "./pages/Developer";
 import DataWrangle from "./pages/DataWrangle";
 import Notes from "./pages/Notes";
 
-const queryClient = new QueryClient();
+// Configure the query client with caching settings
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // Data remains fresh for 5 minutes
+      cacheTime: 1000 * 60 * 30, // Cache persists for 30 minutes
+      refetchOnWindowFocus: false, // Prevent refetch on window focus
+      refetchOnMount: false, // Prevent refetch when component mounts
+      retry: 1, // Only retry failed requests once
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
