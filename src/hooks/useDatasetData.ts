@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { fetchDataInBatches } from "@/utils/batchProcessing";
@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
+type DataItem = Record<string, any>;
 
 const BATCH_THRESHOLD = 250000;
 const INITIAL_SAMPLE_SIZE = 1000;
@@ -18,7 +19,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   
   const pageSize = 1000;
 
-  // Use React Query for data fetching and caching
   const { data = [], isLoading, refetch } = useQuery({
     queryKey: ['dataset', selectedDataset],
     queryFn: async () => {
@@ -30,7 +30,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         
         setTotalRowCount(countResult || 0);
 
-        // Get initial sample data
         const columnList = await fetchColumns(selectedDataset);
         setColumns(columnList);
 
@@ -39,7 +38,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         });
 
         if (error) throw error;
-        return Array.isArray(sampleData) ? sampleData : [];
+        return (Array.isArray(sampleData) ? sampleData : []) as DataItem[];
 
       } catch (error: any) {
         console.error("Error loading data:", error);
@@ -52,8 +51,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       }
     },
     enabled: !!selectedDataset,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    gcTime: 1000 * 60 * 30, // Keep unused data in cache for 30 minutes
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
   });
 
   const fetchColumns = async (tableName: TableNames) => {
