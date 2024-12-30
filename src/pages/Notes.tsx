@@ -24,12 +24,13 @@ const Notes = () => {
 
   // Filter notes based on search criteria
   const filteredNotes = notes?.filter((note) => {
-    const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         note.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTag = selectedTag === "all" || note.tags?.includes(selectedTag);
-    // For now, we'll skip favorites since it's not implemented yet
-    // You can add a 'is_favorite' field to the notes table later
-    return matchesSearch && matchesTag;
+    const matchesSearch = 
+      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTag = selectedTag === "all" || (note.tags && note.tags.includes(selectedTag));
+    const matchesFavorite = !showFavorites || note.is_favorite;
+    
+    return matchesSearch && matchesTag && matchesFavorite;
   });
 
   if (error) {
