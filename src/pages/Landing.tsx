@@ -86,7 +86,7 @@ const Landing = () => {
           {/* Logo Section */}
           <div className="flex justify-center mb-8">
             <img 
-              src="/brand/flux_logo_01.png" 
+              src="/brand/flux_logo_02.png" 
               alt="Flux Logo" 
               className="h-16 md:h-20"
             />
