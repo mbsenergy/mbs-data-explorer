@@ -21,13 +21,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { VideoTutorials } from "@/components/guide/VideoTutorials";
 
 const Guide = () => {
   const { toast } = useToast();
@@ -66,42 +60,8 @@ const Guide = () => {
 
       {/* Main Content */}
       <div className="grid gap-6">
-        {/* Video Carousel Section */}
-        <Card className="p-4 metallic-card">
-          <h2 className="text-2xl font-semibold mb-4">Video Tutorials</h2>
-          <Carousel
-            className="w-full mx-auto my-6 border border-card bg-card rounded-lg p-4 relative"
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-          >
-            <CarouselContent>
-              {iframeVideos.map((src, index) => (
-                <CarouselItem
-                  key={index}
-                  className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
-                >
-                  <iframe
-                    width="700px"
-                    height="400px"
-                    src={src}
-                    title={`Video Tutorial ${index + 1}`}
-                    frameBorder="0"
-                    referrerPolicy="unsafe-url"
-                    allowFullScreen
-                    allow="clipboard-write"
-                    sandbox="allow-popups allow-popups-to-escape-sandbox allow-scripts allow-forms allow-same-origin allow-presentation"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="flex justify-center gap-2 mt-4">
-              <CarouselPrevious className="static translate-y-0" />
-              <CarouselNext className="static translate-y-0" />
-            </div>
-          </Carousel>
-        </Card>
+        {/* Video Tutorials Section */}
+        <VideoTutorials videos={iframeVideos} />
 
         {/* Other Sections */}
         <CollapsibleCard
