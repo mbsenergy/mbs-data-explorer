@@ -1,206 +1,177 @@
 import { Card } from "@/components/ui/card";
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { subMonths, format, parseISO, isAfter, isBefore, startOfMonth, startOfDay, endOfDay } from "date-fns";
 import { useState } from "react";
-import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
+import { DateRange } from "react-day-picker";
+import { DateRangeSelector } from "./DateRangeSelector";
+import { LineToggleList } from "./LineToggleList";
+import { DownloadsChartProps, LineConfig } from "./types";
 
-interface ChartDataItem {
-  date: string;
-  'Dataset Samples': number;
-  'Developer Files': number;
-  'Dataset Exports': number;
-  'File Uploads': number;
-  'Query Executions': number;
-}
-
-interface DownloadsChartProps {
-  analyticsData: any[];
-  developerData: any[];
-  exportsData: any[];
-  storageData: any[];
-  queryData: any[];
-  isLoading: boolean;
-}
-
-export const DownloadsChart = ({ 
-  analyticsData, 
+export const DownloadsChart = ({
+  analyticsData,
   developerData,
   exportsData,
   storageData,
   queryData,
-  isLoading 
+  chatData,
+  isLoading
 }: DownloadsChartProps) => {
-  const [isOpen, setIsOpen] = useState(true);
-  
-  const chartData: ChartDataItem[] = Object.entries(
-    [...(analyticsData || []), 
-     ...(developerData || []), 
-     ...(exportsData || []),
-     ...(storageData || []),
-     ...(queryData || [])]
-    .reduce((acc: Record<string, ChartDataItem>, curr) => {
-      const date = new Date(curr.downloaded_at || curr.created_at).toISOString().split('T')[0];
-      if (!acc[date]) {
-        acc[date] = {
-          date,
-          'Dataset Samples': 0,
-          'Developer Files': 0,
-          'Dataset Exports': 0,
-          'File Uploads': 0,
-          'Query Executions': 0
-        };
-      }
-      
-      if ('dataset_name' in curr) {
-        if (curr.is_custom_query) {
-          acc[date]['Query Executions']++;
-        } else {
-          acc[date]['Dataset Samples']++;
-        }
-      } else if ('file_name' in curr) {
-        acc[date]['Developer Files']++;
-      } else if ('export_name' in curr) {
-        acc[date]['Dataset Exports']++;
-      } else if ('storage_id' in curr) {
-        acc[date]['File Uploads']++;
-      }
-      
-      return acc;
-    }, {} as Record<string, ChartDataItem>)
-  )
-  .map(([date, counts]) => ({
-    date,
-    'Dataset Samples': counts['Dataset Samples'],
-    'Developer Files': counts['Developer Files'],
-    'Dataset Exports': counts['Dataset Exports'],
-    'File Uploads': counts['File Uploads'],
-    'Query Executions': counts['Query Executions']
-  }))
-  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subMonths(new Date(), 6),
+    to: new Date(),
+  });
 
-  const chartOptions: Highcharts.Options = {
-    chart: {
-      type: 'bar',
-      height: 500,
-      backgroundColor: 'transparent',
-    },
-    title: {
-      text: undefined
-    },
-    xAxis: {
-      categories: chartData.map(item => item.date),
-      labels: {
-        rotation: -45,
-        style: {
-          fontSize: '10px'
-        }
+  const [lines, setLines] = useState<LineConfig[]>([
+    { id: 'downloads', name: 'Dataset Downloads', color: '#10b981', enabled: true },
+    { id: 'developer', name: 'Developer Files', color: '#3b82f6', enabled: true },
+    { id: 'exports', name: 'Exports', color: '#6366f1', enabled: true },
+    { id: 'uploads', name: 'Uploads', color: '#8b5cf6', enabled: true },
+    { id: 'queries', name: 'Queries', color: '#ec4899', enabled: true },
+    { id: 'chats', name: 'Chat Messages', color: '#f43f5e', enabled: true },
+  ]);
+
+  const getMonthlyCount = (data: any[], dateField: string) => {
+    if (!data || !Array.isArray(data)) {
+      console.warn(`Invalid data received for ${dateField}:`, data);
+      return {};
+    }
+
+    const monthlyCounts: { [key: string]: number } = {};
+    
+    data.forEach(item => {
+      if (!item[dateField]) {
+        console.warn(`Missing ${dateField} for item:`, item);
+        return;
       }
-    },
-    yAxis: {
-      title: {
-        text: 'Number of Actions'
-      },
-      allowDecimals: false
-    },
-    plotOptions: {
-      bar: {
-        stacking: 'normal',
-        borderRadius: 4,
-        borderWidth: 0,
-        dataLabels: {
-          enabled: true,
-          color: '#ffffff'
-        }
+
+      const date = parseISO(item[dateField]);
+      
+      if (dateRange.from && dateRange.to &&
+          isAfter(startOfDay(date), startOfDay(dateRange.from)) && 
+          isBefore(endOfDay(date), endOfDay(dateRange.to))) {
+        const monthKey = format(startOfMonth(date), 'MMM yyyy');
+        monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
       }
-    },
-    series: [{
-      name: 'Dataset Samples',
-      type: 'bar',
-      data: chartData.map(item => item['Dataset Samples']),
-      color: '#57D7E2',
-      visible: true
-    }, {
-      name: 'Developer Files',
-      type: 'bar',
-      data: chartData.map(item => item['Developer Files']),
-      color: '#FEC6A1',
-      visible: true
-    }, {
-      name: 'Dataset Exports',
-      type: 'bar',
-      data: chartData.map(item => item['Dataset Exports']),
-      color: '#A78BFA',
-      visible: true
-    }, {
-      name: 'File Uploads',
-      type: 'bar',
-      data: chartData.map(item => item['File Uploads']),
-      color: '#34D399',
-      visible: true
-    }, {
-      name: 'Query Executions',
-      type: 'bar',
-      data: chartData.map(item => item['Query Executions']),
-      color: '#F472B6',
-      visible: true
-    }],
-    legend: {
-      align: 'center',
-      verticalAlign: 'bottom',
-      layout: 'horizontal',
-      itemStyle: {
-        color: '#fff',
-        fontWeight: '400'
-      },
-      itemHoverStyle: {
-        color: '#ccc'
-      },
-      backgroundColor: 'transparent',
-      borderWidth: 0,
-      padding: 20,
-      margin: 20,
-      enabled: true
-    },
-    credits: {
-      enabled: false
+    });
+
+    console.log(`Monthly counts for ${dateField}:`, monthlyCounts);
+    return monthlyCounts;
+  };
+
+  const months = dateRange.from && dateRange.to ? 
+    Array.from({ length: 6 }, (_, i) => {
+      const d = subMonths(dateRange.to!, i);
+      return format(d, 'MMM yyyy');
+    }).reverse() : [];
+
+  // Use correct date fields for each data type
+  const analyticsMonthly = getMonthlyCount(analyticsData, 'downloaded_at');
+  const developerMonthly = getMonthlyCount(developerData, 'downloaded_at');
+  const exportsMonthly = getMonthlyCount(exportsData, 'downloaded_at');
+  const storageMonthly = getMonthlyCount(storageData, 'created_at');
+  const queryMonthly = getMonthlyCount(queryData, 'downloaded_at');
+  const chatMonthly = getMonthlyCount(chatData, 'created_at');
+
+  const chartData = months.map(month => ({
+    name: month,
+    ...(lines.find(l => l.id === 'downloads')?.enabled && { 'Dataset Downloads': analyticsMonthly[month] || 0 }),
+    ...(lines.find(l => l.id === 'developer')?.enabled && { 'Developer Files': developerMonthly[month] || 0 }),
+    ...(lines.find(l => l.id === 'exports')?.enabled && { 'Exports': exportsMonthly[month] || 0 }),
+    ...(lines.find(l => l.id === 'uploads')?.enabled && { 'Uploads': storageMonthly[month] || 0 }),
+    ...(lines.find(l => l.id === 'queries')?.enabled && { 'Queries': queryMonthly[month] || 0 }),
+    ...(lines.find(l => l.id === 'chats')?.enabled && { 'Chat Messages': chatMonthly[month] || 0 }),
+  }));
+
+  const toggleLine = (lineId: string) => {
+    setLines(prev => prev.map(line => 
+      line.id === lineId ? { ...line, enabled: !line.enabled } : line
+    ));
+  };
+
+  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+    if (newDateRange?.from) {
+      setDateRange({
+        from: newDateRange.from,
+        to: newDateRange.to || newDateRange.from
+      });
     }
   };
 
-  return (
-    <Card className="p-6 bg-card metallic-card">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Daily Activity</h2>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm">
-              {isOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-        </div>
-        <CollapsibleContent>
-          <div className="h-[400px]">
-            {isLoading ? (
-              <Skeleton className="w-full h-full" />
-            ) : chartData.length > 0 ? (
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={chartOptions}
+  if (isLoading) {
+    return (
+      <Card className="p-6 metallic-card">
+        <Skeleton className="h-[350px] w-full" />
+      </Card>
+    );
+  }
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+          <p className="text-sm font-medium text-foreground mb-2">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={`item-${index}`} className="flex items-center gap-2 text-sm">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: entry.color }}
               />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                No activity data available
-              </div>
-            )}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+              <span className="text-muted-foreground">{entry.name}:</span>
+              <span className="font-medium text-foreground">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <Card className="p-6 space-y-4 metallic-card">
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between">
+        <DateRangeSelector
+          dateRange={dateRange}
+          onDateChange={handleDateRangeChange}
+        />
+        <LineToggleList
+          lines={lines}
+          onToggle={toggleLine}
+        />
+      </div>
+
+      <div className="h-[350px] w-full">
+        <ResponsiveContainer>
+          <LineChart data={chartData}>
+            <XAxis 
+              dataKey="name"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `${value}`}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            {lines.map(line => line.enabled && (
+              <Line
+                key={line.id}
+                type="monotone"
+                dataKey={line.name}
+                stroke={line.color}
+                strokeWidth={2}
+                dot={false}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </Card>
   );
 };

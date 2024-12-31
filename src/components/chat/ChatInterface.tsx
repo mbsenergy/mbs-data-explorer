@@ -1,36 +1,56 @@
-import { useState, KeyboardEvent } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import ReactMarkdown from 'react-markdown';
-import type { Components } from 'react-markdown';
-import { Message } from "./types";
+import { Message, ExpertiseMode } from "./types";
 import { useToast } from "@/hooks/use-toast";
+import { MessageBubble } from "./MessageBubble";
+import { ChatInput } from "./ChatInput";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface ChatInterfaceProps {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
+  expertiseMode: ExpertiseMode;
 }
 
-export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => {
-  const [input, setInput] = useState('');
+export const ChatInterface = ({ messages, setMessages, expertiseMode }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const handleSubmit = async (userMessage: string) => {
+    if (!user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to send messages."
+      });
+      return;
+    }
 
-    const userMessage = input.trim();
-    setInput('');
     setMessages([...messages, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
     try {
+      // Track the chat message
+      const { error: analyticsError } = await supabase
+        .from('chat_analytics')
+        .insert({
+          message_content: userMessage,
+          user_id: user.id
+        });
+
+      if (analyticsError) {
+        console.error('Error tracking chat message:', analyticsError);
+      }
+
       const { data, error } = await supabase.functions.invoke('chat-with-mistral', {
-        body: { message: userMessage }
+        body: { 
+          message: userMessage,
+          mode: expertiseMode,
+          // Include document search if in energy mode
+          includeDocuments: expertiseMode === 'energy'
+        }
       });
 
       if (error) throw error;
@@ -48,13 +68,6 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
   const clearChat = () => {
     setMessages([]);
     toast({
@@ -62,65 +75,63 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
     });
   };
 
-  const components: Components = {
-    code: ({ className, children, ...props }) => {
-      const match = /language-(\w+)/.exec(className || '');
-      return match ? (
-        <pre className="bg-card/50 p-2 rounded-md overflow-x-auto border border-border/40 font-jetbrains-mono text-xs">
-          <code className={className} {...props}>
-            {children}
-          </code>
-        </pre>
-      ) : (
-        <code className="bg-card/50 px-1.5 py-0.5 rounded font-jetbrains-mono text-primary text-xs" {...props}>
-          {children}
-        </code>
-      );
+  const splitMessageContent = (content: string) => {
+    const segments = [];
+    let currentText = '';
+    const codeBlockRegex = /```[\s\S]*?```/g;
+    let lastIndex = 0;
+
+    content.replace(codeBlockRegex, (match, index) => {
+      if (index > lastIndex) {
+        const text = content.slice(lastIndex, index).trim();
+        if (text) segments.push({ type: 'text', content: text });
+      }
+      segments.push({ type: 'code', content: match });
+      lastIndex = index + match.length;
+      return match;
+    });
+
+    if (lastIndex < content.length) {
+      const text = content.slice(lastIndex).trim();
+      if (text) segments.push({ type: 'text', content: text });
     }
+
+    return segments.length > 0 ? segments : [{ type: 'text', content }];
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(600px-3rem)]">
+    <div className="flex flex-col h-full max-h-[calc(80vh-3rem)]">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-background/50">
         <p className="text-xs text-muted-foreground">Messages</p>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={clearChat}
-          className="h-6 px-2 text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="space-y-1 p-3">
+        <div className="space-y-4 p-4">
           {messages.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-4">
               No messages yet. Start a conversation!
             </p>
           ) : (
             messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`rounded-lg px-3 py-1.5 max-w-[90%] text-sm ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-card border-l-2 border-l-primary'
-                  }`}
-                >
-                  <ReactMarkdown 
-                    className="prose prose-invert prose-sm max-w-none prose-pre:my-0 prose-p:leading-relaxed prose-p:my-0.5"
-                    components={components}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                </div>
+              <div key={index} className="space-y-2">
+                {message.role === 'assistant' ? (
+                  splitMessageContent(message.content).map((segment, idx) => (
+                    <MessageBubble
+                      key={`${index}-${idx}`}
+                      message={message}
+                      segment={segment}
+                      index={index}
+                      idx={idx}
+                    />
+                  ))
+                ) : (
+                  <MessageBubble
+                    message={message}
+                    segment={{ type: 'text', content: message.content }}
+                    index={index}
+                    idx={0}
+                  />
+                )}
               </div>
             ))
           )}
@@ -128,27 +139,11 @@ export const ChatInterface = ({ messages, setMessages }: ChatInterfaceProps) => 
       </ScrollArea>
 
       <div className="p-2 border-t border-border/40 bg-card/50">
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            className="min-h-[40px] max-h-[120px] text-sm metallic-card resize-none"
-          />
-          <Button 
-            type="submit" 
-            size="icon"
-            disabled={isLoading}
-            className="bg-primary hover:bg-primary/90 h-[40px] w-[40px] shrink-0"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </form>
+        <ChatInput 
+          isLoading={isLoading} 
+          onSubmit={handleSubmit}
+          onClear={clearChat}
+        />
       </div>
     </div>
   );

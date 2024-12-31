@@ -2,6 +2,9 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/a3533c70-08db-4e85-9edb-a40942871206/deploy-status)](https://app.netlify.com/sites/fluxdata/deploys)
 
+<iframe width="700px" height="400px" src="https://embed.app.guidde.com/playbooks/6anAsRXVUCMorYJmk8CgHK" title="We will show how to login into Flux and then the main areas and features in the app." frameborder="0" referrerpolicy="unsafe-url" allowfullscreen="true" allow="clipboard-write" sandbox="allow-popups allow-popups-to-escape-sandbox allow-scripts allow-forms allow-same-origin allow-presentation"></iframe>
+<p style="display: none">
+
 **Use your preferred IDE**
 
 If you want to work locally using your own IDE, you can clone this repo and push changes.

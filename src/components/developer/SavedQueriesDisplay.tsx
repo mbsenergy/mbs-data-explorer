@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -29,6 +30,7 @@ export const SavedQueriesDisplay = ({ onSelectQuery }: SavedQueriesDisplayProps)
       const { data, error } = await supabase
         .from('saved_queries')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;

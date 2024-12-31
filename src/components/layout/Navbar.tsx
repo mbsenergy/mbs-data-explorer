@@ -47,7 +47,6 @@ export const Navbar = () => {
   };
 
   const getLevelColor = (level: string) => {
-    // Normalize the level to match database values
     const normalizedLevel = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
     
     switch (normalizedLevel) {
@@ -79,7 +78,8 @@ export const Navbar = () => {
         <img 
           src="/brand/flux_logo_02.png" 
           alt="Company Logo" 
-          className="h-8"
+          className="h-8 cursor-pointer"
+          onClick={() => navigate("/dashboard")}
         />
       </div>
 
@@ -87,22 +87,20 @@ export const Navbar = () => {
       <div className="flex-1 flex items-center justify-end space-x-4">
         <Button 
           variant="ghost" 
-          size="sm"
+          size="icon"
           onClick={() => navigate("/datasets?tab=query")}
-          className="hidden md:flex items-center gap-2"
+          className="hidden md:flex"
         >
           <Database className="h-4 w-4" />
-          Query
         </Button>
 
         <Button 
           variant="ghost" 
-          size="sm"
+          size="icon"
           onClick={() => navigate("/guide")}
-          className="hidden md:flex items-center gap-2"
+          className="hidden md:flex"
         >
           <HelpCircle className="h-4 w-4" />
-          Help
         </Button>
 
         <NotificationBell />
