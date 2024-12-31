@@ -48,6 +48,7 @@
     "@tanstack/react-table": "^8.20.6",
     "@tanstack/react-virtual": "^3.11.2",
     "@types/uuid": "^10.0.0",
+    "@xyflow/react": "^12.3.6",
     "ag-grid-community": "^31.0.3",
     "ag-grid-enterprise": "^31.0.3",
     "ag-grid-react": "^31.0.3",
