@@ -22,7 +22,7 @@ export const useUpdateNote = () => {
         .update({
           title: noteData.title,
           content: noteData.content,
-          tags: noteData.tags || [],
+          tags: noteData.tags || [], // Ensure tags is always an array
           is_favorite: noteData.is_favorite,
           updated_at: new Date().toISOString()
         })

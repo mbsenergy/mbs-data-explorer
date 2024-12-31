@@ -25,10 +25,16 @@ export const NoteEditor = ({ mode, note, onClose }: NoteEditorProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const noteData = {
+      title,
+      content,
+      tags // Ensure tags are included in the data
+    };
+    
     if (mode === "create") {
-      await createNote({ title, content, tags });
+      await createNote(noteData);
     } else if (note) {
-      await updateNote({ id: note.id, title, content, tags });
+      await updateNote({ id: note.id, ...noteData });
     }
     
     onClose();
