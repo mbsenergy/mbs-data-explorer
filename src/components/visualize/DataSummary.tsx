@@ -10,7 +10,8 @@ interface DataSummaryProps {
 
 export const DataSummary = ({ data, columns }: DataSummaryProps) => {
   const getColumnSummary = (columnId: string) => {
-    if (!data.length) {
+    // Early return for empty data
+    if (!data || !data.length) {
       return {
         type: 'unknown',
         nullCount: 0,
@@ -18,11 +19,13 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
       };
     }
 
-    const values = data.map(row => row[columnId]);
+    // Safely extract values and handle nulls
+    const values = data.map(row => row?.[columnId]);
     const nonNullValues = values.filter(v => v !== null && v !== undefined);
     const nullCount = values.length - nonNullValues.length;
 
-    if (nonNullValues.length === 0) {
+    // Handle case with no valid values
+    if (!nonNullValues.length) {
       return {
         type: 'unknown',
         nullCount,
@@ -30,11 +33,25 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
       };
     }
 
+    // Determine type from first non-null value
     const firstNonNullValue = nonNullValues[0];
     const type = typeof firstNonNullValue;
 
-    if (type === 'number') {
-      const numericValues = nonNullValues.map(Number).filter(n => !isNaN(n));
+    // Handle numeric data
+    if (type === 'number' || (!isNaN(Number(firstNonNullValue)) && firstNonNullValue !== '')) {
+      const numericValues = nonNullValues
+        .map(v => Number(v))
+        .filter(n => !isNaN(n));
+
+      if (!numericValues.length) {
+        return {
+          type: 'text',
+          uniqueValues: Array.from(new Set(nonNullValues)).slice(0, 10),
+          nullCount,
+          distribution: getCategoryDistribution(nonNullValues)
+        };
+      }
+
       return {
         type: 'number',
         min: Math.min(...numericValues),
@@ -43,15 +60,16 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
         nullCount,
         distribution: getNumericDistribution(numericValues)
       };
-    } else {
-      const uniqueValues = Array.from(new Set(nonNullValues));
-      return {
-        type: 'text',
-        uniqueValues: uniqueValues.slice(0, 10),
-        nullCount,
-        distribution: getCategoryDistribution(nonNullValues)
-      };
     }
+
+    // Handle text data
+    const uniqueValues = Array.from(new Set(nonNullValues));
+    return {
+      type: 'text',
+      uniqueValues: uniqueValues.slice(0, 10),
+      nullCount,
+      distribution: getCategoryDistribution(nonNullValues)
+    };
   };
 
   const getNumericDistribution = (values: number[]): Record<string, number> => {
@@ -75,7 +93,7 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
   const getCategoryDistribution = (values: any[]): Record<string, number> => {
     const distribution: Record<string, number> = {};
     values.forEach(value => {
-      const strValue = String(value);
+      const strValue = String(value).slice(0, 100); // Limit string length to prevent memory issues
       distribution[strValue] = (distribution[strValue] || 0) + 1;
     });
     return distribution;
