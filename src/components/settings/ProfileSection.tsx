@@ -8,6 +8,9 @@ import { useQuery } from "@tanstack/react-query";
 import { AvatarSection } from "./profile/AvatarSection";
 import { PersonalInfoSection } from "./profile/PersonalInfoSection";
 import { ProfessionalInfoSection } from "./profile/ProfessionalInfoSection";
+import { SkillsAndSubscriptions } from "./profile/SkillsAndSubscriptions";
+import { SubscriptionsCard } from "./profile/SubscriptionsCard";
+import { TechStackCard } from "./profile/TechStackCard";
 import { Badge } from "@/components/ui/badge";
 
 interface Profile {
@@ -21,10 +24,11 @@ interface Profile {
   linkedin_url: string | null;
   avatar_url: string | null;
   level: string;
+  it_skills: string[] | null;
+  subscriptions: string[] | null;
 }
 
 const getLevelColor = (level: string) => {
-  // Normalize the level to match database values
   const normalizedLevel = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
   
   switch (normalizedLevel) {
@@ -51,7 +55,9 @@ export const ProfileSection = () => {
     github_url: "",
     linkedin_url: "",
     avatar_url: "",
-    level: "Basic", // Default value with proper casing
+    level: "Basic",
+    it_skills: [],
+    subscriptions: [],
   });
 
   const { refetch } = useQuery({
@@ -112,7 +118,7 @@ export const ProfileSection = () => {
   };
 
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Profile Information</CardTitle>
@@ -166,6 +172,27 @@ export const ProfileSection = () => {
             profile={profile}
             onProfileChange={handleProfileChange}
           />
+
+          {isEditing && (
+            <SkillsAndSubscriptions
+              isEditing={isEditing}
+              subscriptions={profile.subscriptions}
+              itSkills={profile.it_skills}
+              onSubscriptionsChange={(subscriptions) => 
+                handleProfileChange("subscriptions", subscriptions)
+              }
+              onSkillsChange={(skills) => 
+                handleProfileChange("it_skills", skills)
+              }
+            />
+          )}
+
+          {!isEditing && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <SubscriptionsCard subscriptions={profile.subscriptions} />
+              <TechStackCard skills={profile.it_skills} />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
