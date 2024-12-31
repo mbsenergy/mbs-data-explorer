@@ -41,6 +41,7 @@ export const useUpdateNote = () => {
       });
     },
     onError: (error) => {
+      console.error("Error updating note:", error);
       toast({
         variant: "destructive",
         title: "Error",
