@@ -10,15 +10,31 @@ interface DataSummaryProps {
 
 export const DataSummary = ({ data, columns }: DataSummaryProps) => {
   const getColumnSummary = (columnId: string) => {
+    if (!data.length) {
+      return {
+        type: 'unknown',
+        nullCount: 0,
+        distribution: {}
+      };
+    }
+
     const values = data.map(row => row[columnId]);
     const nonNullValues = values.filter(v => v !== null && v !== undefined);
     const nullCount = values.length - nonNullValues.length;
+
+    if (nonNullValues.length === 0) {
+      return {
+        type: 'unknown',
+        nullCount,
+        distribution: {}
+      };
+    }
 
     const firstNonNullValue = nonNullValues[0];
     const type = typeof firstNonNullValue;
 
     if (type === 'number') {
-      const numericValues = nonNullValues.map(Number);
+      const numericValues = nonNullValues.map(Number).filter(n => !isNaN(n));
       return {
         type: 'number',
         min: Math.min(...numericValues),
@@ -39,6 +55,8 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
   };
 
   const getNumericDistribution = (values: number[]): Record<string, number> => {
+    if (!values.length) return {};
+    
     const min = Math.min(...values);
     const max = Math.max(...values);
     const range = max - min;
@@ -57,7 +75,8 @@ export const DataSummary = ({ data, columns }: DataSummaryProps) => {
   const getCategoryDistribution = (values: any[]): Record<string, number> => {
     const distribution: Record<string, number> = {};
     values.forEach(value => {
-      distribution[value] = (distribution[value] || 0) + 1;
+      const strValue = String(value);
+      distribution[strValue] = (distribution[strValue] || 0) + 1;
     });
     return distribution;
   };
