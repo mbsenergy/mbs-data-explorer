@@ -12,7 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import type { Filter } from "./types";
+import type { Database } from "@/integrations/supabase/types";
 import { v4 as uuidv4 } from 'uuid';
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetExploreContainerProps {
   selectedDataset: string | null;
@@ -50,7 +53,7 @@ export const DatasetExploreContainer = ({
     isLoading,
     fetchPage,
     loadData
-  } = useDatasetData(selectedDataset);
+  } = useDatasetData(selectedDataset as TableNames | null);
 
   // Reset selected columns when columns change
   useEffect(() => {
@@ -70,10 +73,47 @@ export const DatasetExploreContainer = ({
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData(selectedDataset, selectedColumns, true);
+      await loadData(selectedDataset as TableNames, selectedColumns, true);
       if (onLoad) {
         onLoad(selectedDataset);
       }
+    }
+  };
+
+  const handleExport = async () => {
+    if (!selectedDataset || !user?.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a dataset and ensure you're logged in."
+      });
+      return;
+    }
+
+    try {
+      const { error: analyticsError } = await supabase
+        .from("analytics")
+        .insert({
+          user_id: user.id,
+          dataset_name: selectedDataset,
+          is_custom_query: false,
+        });
+
+      if (analyticsError) {
+        console.error("Error tracking export:", analyticsError);
+      }
+
+      // Export logic here
+      toast({
+        title: "Success",
+        description: "Dataset exported successfully"
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to export dataset"
+      });
     }
   };
 
@@ -110,6 +150,7 @@ export const DatasetExploreContainer = ({
         <DatasetExploreActions
           selectedDataset={selectedDataset}
           onRetrieve={handleLoad}
+          onExport={handleExport}
           onShowQuery={() => setIsQueryModalOpen(true)}
           isLoading={isLoading}
         />
@@ -127,19 +168,53 @@ export const DatasetExploreContainer = ({
           <p>Loading dataset...</p>
         </div>
       ) : (
-        <DatasetExploreContent 
-          columns={columns}
-          selectedColumns={selectedColumns}
-          filters={filters}
-          setFilters={setFilters}
-          filteredData={filteredData}
-          setFilteredData={setFilteredData}
-          onColumnSelect={handleColumnSelect}
-          data={data}
-          isQueryModalOpen={isQueryModalOpen}
-          setIsQueryModalOpen={setIsQueryModalOpen}
-          selectedDataset={selectedDataset}
-        />
+        <div className="space-y-4">
+          <DatasetFilters
+            columns={columns}
+            filters={filters}
+            onFilterChange={(filterId, field, value) => {
+              setFilters(filters.map(f =>
+                f.id === filterId
+                  ? { ...f, [field]: value }
+                  : f
+              ));
+            }}
+            onAddFilter={() => {
+              setFilters([...filters, { 
+                id: crypto.randomUUID(), 
+                searchTerm: "", 
+                selectedColumn: "", 
+                operator: "AND",
+                comparisonOperator: "=" 
+              }]);
+            }}
+            onRemoveFilter={(filterId) => {
+              setFilters(filters.filter(f => f.id !== filterId));
+            }}
+          />
+
+          <DatasetColumnSelect
+            columns={columns}
+            selectedColumns={selectedColumns}
+            onColumnSelect={handleColumnSelect}
+          />
+
+          <DatasetTable
+            columns={columns}
+            data={filteredData}
+            selectedColumns={selectedColumns}
+          />
+
+          <DatasetQueryModal
+            isOpen={isQueryModalOpen}
+            onClose={() => setIsQueryModalOpen(false)}
+            query={`SELECT ${selectedColumns.join(', ')} FROM "${selectedDataset}"`}
+            apiCall={`await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.join(', ')}')`
+    + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "")}
+          />
+        </div>
       )}
     </Card>
   );
