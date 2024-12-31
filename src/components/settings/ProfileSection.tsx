@@ -80,7 +80,7 @@ export const ProfileSection = () => {
     enabled: !!user?.id,
   });
 
-  const handleProfileChange = (field: string, value: string | null) => {
+  const handleProfileChange = (field: keyof Profile, value: string | string[] | null) => {
     setProfile((prev) => ({
       ...prev,
       [field]: value,
