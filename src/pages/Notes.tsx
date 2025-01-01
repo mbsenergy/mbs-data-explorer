@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DeveloperSearch } from "@/components/developer/DeveloperSearch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FlowEditor } from "@/components/notes/FlowEditor";
+import { FlowWrapper } from "@/components/notes/flow/FlowWrapper";
 
 const Notes = () => {
   const [isCreatingNote, setIsCreatingNote] = useState(false);
@@ -86,7 +86,7 @@ const Notes = () => {
 
       <Dialog open={isCreatingFlow} onOpenChange={setIsCreatingFlow}>
         <DialogContent className="max-w-[90vw] max-h-[90vh]">
-          <FlowEditor
+          <FlowWrapper
             onClose={() => setIsCreatingFlow(false)}
           />
         </DialogContent>
