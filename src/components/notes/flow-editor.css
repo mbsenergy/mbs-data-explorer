@@ -4,6 +4,24 @@
   border: 1px solid hsl(var(--border));
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  transition: none;
+}
+
+.react-flow__node:hover {
+  border-color: hsl(var(--primary));
+}
+
+.react-flow__node.annotation-node {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  border-left: 4px solid hsl(var(--primary));
+  color: hsl(var(--muted-foreground));
+}
+
+.react-flow__node-group {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px dashed hsl(var(--border));
 }
 
 .react-flow__node-input {
@@ -43,6 +61,17 @@
   stroke: hsl(var(--primary));
 }
 
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
 .react-flow__panel {
   background-color: transparent;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
 }

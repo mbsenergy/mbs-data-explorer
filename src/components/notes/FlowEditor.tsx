@@ -11,16 +11,17 @@ import {
   useNodesState,
   useEdgesState,
   Panel,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Plus } from 'lucide-react';
+import { Plus, Type, Box, Group } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const initialNodes: Node[] = [
   {
     id: '1',
     type: 'input',
-    data: { label: 'Input Node' },
+    data: { label: 'Start Here' },
     position: { x: 250, y: 25 },
   },
 ];
@@ -36,19 +37,44 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => setEdges((eds) => addEdge({ 
+      ...params, 
+      markerEnd: { type: MarkerType.ArrowClosed },
+      animated: true 
+    }, eds)),
     [setEdges],
   );
 
-  const addNewNode = useCallback(() => {
+  const addNode = useCallback((type: string) => {
     const newNode: Node = {
       id: `${nodes.length + 1}`,
-      data: { label: `Node ${nodes.length + 1}` },
+      data: { label: `${type} Node` },
       position: {
         x: Math.random() * 500,
         y: Math.random() * 300,
       },
+      type: type === 'Group' ? 'group' : 'default',
+      style: type === 'Group' ? {
+        width: 200,
+        height: 200,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        border: '1px dashed hsl(var(--border))',
+      } : undefined,
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+  }, [nodes.length, setNodes]);
+
+  const addAnnotation = useCallback(() => {
+    const newNode: Node = {
+      id: `annotation-${nodes.length + 1}`,
       type: 'default',
+      data: { label: 'Add your note here' },
+      position: {
+        x: Math.random() * 500,
+        y: Math.random() * 300,
+      },
+      className: 'annotation-node',
     };
 
     setNodes((nds) => [...nds, newNode]);
@@ -63,15 +89,32 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         fitView
+        deleteKeyCode="Delete"
       >
-        <Panel position="top-right" className="bg-background/50 p-2 rounded-lg">
+        <Panel position="top-right" className="flex gap-2 bg-background/50 p-2 rounded-lg">
           <Button 
-            onClick={addNewNode}
+            onClick={() => addNode('Default')}
             variant="outline"
             className="gap-2"
           >
             <Plus className="h-4 w-4" />
             Add Node
+          </Button>
+          <Button 
+            onClick={() => addNode('Group')}
+            variant="outline"
+            className="gap-2"
+          >
+            <Group className="h-4 w-4" />
+            Add Group
+          </Button>
+          <Button 
+            onClick={addAnnotation}
+            variant="outline"
+            className="gap-2"
+          >
+            <Type className="h-4 w-4" />
+            Add Note
           </Button>
         </Panel>
         <Background />
