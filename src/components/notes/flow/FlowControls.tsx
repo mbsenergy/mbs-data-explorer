@@ -7,7 +7,7 @@ interface FlowControlsProps {
   onThemeToggle: () => void;
   onDownload: () => void;
   onAddNode: (type: string) => void;
-  onAddAnnotation: () => void;
+  onAddNote: () => void;
 }
 
 export const FlowControls = ({
@@ -15,7 +15,7 @@ export const FlowControls = ({
   onThemeToggle,
   onDownload,
   onAddNode,
-  onAddAnnotation,
+  onAddNote,
 }: FlowControlsProps) => {
   return (
     <Panel position="top-right" className="flex gap-2 bg-background/50 p-2 rounded-lg">
@@ -50,7 +50,7 @@ export const FlowControls = ({
         Add Group
       </Button>
       <Button 
-        onClick={onAddAnnotation}
+        onClick={onAddNote}
         variant="outline"
         className="gap-2"
       >

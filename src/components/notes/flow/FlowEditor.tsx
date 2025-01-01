@@ -17,24 +17,31 @@ import { toPng } from 'html-to-image';
 import { FlowControls } from './FlowControls';
 import { NodeEditor } from './NodeEditor';
 import { CustomNode, NodeData } from './types';
+import { Button } from '@/components/ui/button';
+import { Save } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const initialNodes: CustomNode[] = [
   {
     id: '1',
     type: 'input',
-    data: { label: 'Start Here' },
+    data: { 
+      label: 'Start Here',
+      details: 'Begin your flow here',
+      color: '#1EAEDB'
+    },
     position: { x: 250, y: 25 },
   },
 ];
 
 const initialEdges: Edge[] = [];
 
-const imageWidth = 1024;
-const imageHeight = 768;
-
 interface FlowEditorProps {
   onClose: () => void;
 }
+
+const imageWidth = 1024;
+const imageHeight = 768;
 
 export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -43,6 +50,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   const [editLabel, setEditLabel] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const { getNodes } = useReactFlow();
+  const { toast } = useToast();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ 
@@ -54,35 +62,58 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   );
 
   const addNode = useCallback((type: string) => {
+    const colors = {
+      'Default': '#1EAEDB',
+      'Group': '#F97316',
+      'Note': '#8B5CF6'
+    };
+    
     const newNode: CustomNode = {
       id: `${nodes.length + 1}`,
-      data: { label: `${type} Node` },
+      data: { 
+        label: `${type} Node`,
+        details: 'Add your details here',
+        color: colors[type as keyof typeof colors] || colors.Default
+      },
       position: {
         x: Math.random() * 500,
         y: Math.random() * 300,
       },
       type: type === 'Group' ? 'group' : 'default',
-      style: type === 'Group' ? {
-        width: 200,
-        height: 200,
-        backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-        border: '1px dashed hsl(var(--border))',
-      } : undefined,
+      style: {
+        backgroundColor: colors[type as keyof typeof colors] || colors.Default,
+        color: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        minWidth: '150px',
+        border: 'none',
+      },
     };
 
     setNodes((nds) => [...nds, newNode]);
-  }, [nodes.length, setNodes, isDarkMode]);
+  }, [nodes.length, setNodes]);
 
-  const addAnnotation = useCallback(() => {
+  const addNote = useCallback(() => {
     const newNode: CustomNode = {
-      id: `annotation-${nodes.length + 1}`,
+      id: `note-${nodes.length + 1}`,
       type: 'default',
-      data: { label: 'Add your note here' },
+      data: { 
+        label: 'New Note',
+        details: 'Add note details here',
+        color: '#8B5CF6'
+      },
       position: {
         x: Math.random() * 500,
         y: Math.random() * 300,
       },
-      className: 'annotation-node',
+      style: {
+        backgroundColor: '#8B5CF6',
+        color: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        minWidth: '150px',
+        border: 'none',
+      },
     };
 
     setNodes((nds) => [...nds, newNode]);
@@ -107,24 +138,30 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
     }
   }, [selectedNode, editLabel, setNodes]);
 
+  const saveFlow = useCallback(() => {
+    // Here you would typically save to your backend
+    // For now, we'll just show a success toast
+    toast({
+      title: "Flow saved",
+      description: "Your flow has been saved successfully",
+    });
+  }, [toast]);
+
   const downloadImage = useCallback(() => {
     const element = document.querySelector('.react-flow__viewport') as HTMLElement;
     if (!element) return;
 
-    // Calculate the bounding box of all nodes
     const nodeElements = getNodes();
     const xMin = Math.min(...nodeElements.map(node => node.position.x));
     const xMax = Math.max(...nodeElements.map(node => node.position.x + (node.width || 0)));
     const yMin = Math.min(...nodeElements.map(node => node.position.y));
     const yMax = Math.max(...nodeElements.map(node => node.position.y + (node.height || 0)));
 
-    // Calculate scale to fit content
     const padding = 50;
     const contentWidth = xMax - xMin + padding * 2;
     const contentHeight = yMax - yMin + padding * 2;
     const scale = Math.min(imageWidth / contentWidth, imageHeight / contentHeight);
 
-    // Calculate translation to center content
     const xOffset = (imageWidth - contentWidth * scale) / 2 - xMin * scale;
     const yOffset = (imageHeight - contentHeight * scale) / 2 - yMin * scale;
 
@@ -146,8 +183,19 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
       });
   }, [getNodes, isDarkMode]);
 
+  const nodeTypes = {
+    default: ({ data }: { data: NodeData }) => (
+      <div className="flex flex-col gap-2">
+        <div className="font-bold">{data.label}</div>
+        {data.details && (
+          <div className="text-sm opacity-80">{data.details}</div>
+        )}
+      </div>
+    ),
+  };
+
   return (
-    <div className="w-full h-[80vh] bg-background">
+    <div className="w-full h-[80vh] bg-background relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -155,6 +203,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        nodeTypes={nodeTypes}
         fitView
         deleteKeyCode="Delete"
         className={isDarkMode ? 'dark' : ''}
@@ -164,7 +213,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
           onThemeToggle={() => setIsDarkMode(!isDarkMode)}
           onDownload={downloadImage}
           onAddNode={addNode}
-          onAddAnnotation={addAnnotation}
+          onAddNote={addNote}
         />
         {selectedNode && (
           <NodeEditor
@@ -177,6 +226,15 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
         <Controls />
         <MiniMap />
       </ReactFlow>
+      <div className="absolute bottom-4 right-4">
+        <Button 
+          onClick={saveFlow}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          Save Flow
+        </Button>
+      </div>
     </div>
   );
 };
