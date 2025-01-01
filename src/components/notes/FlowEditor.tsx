@@ -13,9 +13,8 @@ import {
   Panel,
   MarkerType,
   NodeTypes,
-  getRectOfNodes,
-  getTransformForBounds,
   useReactFlow,
+  useViewport,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Plus, Type, Box, Group, Edit2, Sun, Moon, Download } from 'lucide-react';
@@ -53,6 +52,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   const [editLabel, setEditLabel] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const { getNodes } = useReactFlow();
+  const viewport = useViewport();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ 
@@ -118,11 +118,25 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   }, [selectedNode, editLabel, setNodes]);
 
   const downloadImage = useCallback(() => {
-    const nodesBounds = getRectOfNodes(getNodes());
-    const transform = getTransformForBounds(nodesBounds, imageWidth, imageHeight, 0.5);
-    
     const element = document.querySelector('.react-flow__viewport') as HTMLElement;
     if (!element) return;
+
+    // Calculate the bounding box of all nodes
+    const nodeElements = getNodes();
+    const xMin = Math.min(...nodeElements.map(node => node.position.x));
+    const xMax = Math.max(...nodeElements.map(node => node.position.x + (node.width || 0)));
+    const yMin = Math.min(...nodeElements.map(node => node.position.y));
+    const yMax = Math.max(...nodeElements.map(node => node.position.y + (node.height || 0)));
+
+    // Calculate scale to fit content
+    const padding = 50;
+    const contentWidth = xMax - xMin + padding * 2;
+    const contentHeight = yMax - yMin + padding * 2;
+    const scale = Math.min(imageWidth / contentWidth, imageHeight / contentHeight);
+
+    // Calculate translation to center content
+    const xOffset = (imageWidth - contentWidth * scale) / 2 - xMin * scale;
+    const yOffset = (imageHeight - contentHeight * scale) / 2 - yMin * scale;
 
     toPng(element, {
       backgroundColor: isDarkMode ? '#020817' : '#ffffff',
@@ -131,7 +145,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
       style: {
         width: imageWidth.toString(),
         height: imageHeight.toString(),
-        transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
+        transform: `translate(${xOffset}px, ${yOffset}px) scale(${scale})`,
       },
     })
       .then((dataUrl) => {
