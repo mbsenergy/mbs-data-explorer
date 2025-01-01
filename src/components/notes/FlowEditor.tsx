@@ -14,8 +14,9 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Plus, Type, Box, Group } from 'lucide-react';
+import { Plus, Type, Box, Group, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const initialNodes: Node[] = [
   {
@@ -35,6 +36,8 @@ interface FlowEditorProps {
 export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [editLabel, setEditLabel] = useState('');
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ 
@@ -80,6 +83,25 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
     setNodes((nds) => [...nds, newNode]);
   }, [nodes.length, setNodes]);
 
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    setSelectedNode(node);
+    setEditLabel(node.data.label);
+  }, []);
+
+  const updateNodeLabel = useCallback(() => {
+    if (selectedNode && editLabel.trim()) {
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === selectedNode.id
+            ? { ...node, data: { ...node.data, label: editLabel } }
+            : node
+        )
+      );
+      setSelectedNode(null);
+      setEditLabel('');
+    }
+  }, [selectedNode, editLabel, setNodes]);
+
   return (
     <div className="w-full h-[80vh] bg-background">
       <ReactFlow
@@ -88,6 +110,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={onNodeClick}
         fitView
         deleteKeyCode="Delete"
       >
@@ -117,6 +140,24 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
             Add Note
           </Button>
         </Panel>
+        {selectedNode && (
+          <Panel position="top-left" className="flex gap-2 bg-background/50 p-2 rounded-lg">
+            <Input
+              value={editLabel}
+              onChange={(e) => setEditLabel(e.target.value)}
+              placeholder="Node label"
+              className="w-48"
+            />
+            <Button 
+              onClick={updateNodeLabel}
+              variant="outline"
+              className="gap-2"
+            >
+              <Edit2 className="h-4 w-4" />
+              Update
+            </Button>
+          </Panel>
+        )}
         <Background />
         <Controls />
         <MiniMap />
