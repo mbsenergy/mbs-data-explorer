@@ -13,11 +13,15 @@ import {
   Panel,
   MarkerType,
   NodeTypes,
+  getRectOfNodes,
+  getTransformForBounds,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Plus, Type, Box, Group, Edit2 } from 'lucide-react';
+import { Plus, Type, Box, Group, Edit2, Sun, Moon, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toPng } from 'html-to-image';
 
 // Define the type for node data that extends Record<string, unknown>
 interface NodeData extends Record<string, unknown> {
@@ -39,11 +43,16 @@ interface FlowEditorProps {
   onClose: () => void;
 }
 
+const imageWidth = 1024;
+const imageHeight = 768;
+
 export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [editLabel, setEditLabel] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const { getNodes } = useReactFlow();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ 
@@ -66,13 +75,13 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
       style: type === 'Group' ? {
         width: 200,
         height: 200,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         border: '1px dashed hsl(var(--border))',
       } : undefined,
     };
 
     setNodes((nds) => [...nds, newNode]);
-  }, [nodes.length, setNodes]);
+  }, [nodes.length, setNodes, isDarkMode]);
 
   const addAnnotation = useCallback(() => {
     const newNode: Node<NodeData> = {
@@ -108,6 +117,31 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
     }
   }, [selectedNode, editLabel, setNodes]);
 
+  const downloadImage = useCallback(() => {
+    const nodesBounds = getRectOfNodes(getNodes());
+    const transform = getTransformForBounds(nodesBounds, imageWidth, imageHeight, 0.5);
+    
+    const element = document.querySelector('.react-flow__viewport') as HTMLElement;
+    if (!element) return;
+
+    toPng(element, {
+      backgroundColor: isDarkMode ? '#020817' : '#ffffff',
+      width: imageWidth,
+      height: imageHeight,
+      style: {
+        width: imageWidth.toString(),
+        height: imageHeight.toString(),
+        transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
+      },
+    })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = 'flow.png';
+        link.href = dataUrl;
+        link.click();
+      });
+  }, [getNodes, isDarkMode]);
+
   return (
     <div className="w-full h-[80vh] bg-background">
       <ReactFlow
@@ -119,8 +153,23 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
         onNodeClick={onNodeClick}
         fitView
         deleteKeyCode="Delete"
+        className={isDarkMode ? 'dark' : ''}
       >
         <Panel position="top-right" className="flex gap-2 bg-background/50 p-2 rounded-lg">
+          <Button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            variant="outline"
+            size="icon"
+          >
+            {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <Button 
+            onClick={downloadImage}
+            variant="outline"
+            size="icon"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
           <Button 
             onClick={() => addNode('Default')}
             variant="outline"
