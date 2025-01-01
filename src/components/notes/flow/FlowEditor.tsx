@@ -11,17 +11,18 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  Node as FlowNode,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { toPng } from 'html-to-image';
 import { FlowControls } from './FlowControls';
 import { NodeEditor } from './NodeEditor';
 
-interface NodeData extends Record<string, unknown> {
+interface NodeData {
   label: string;
 }
 
-const initialNodes: Node<NodeData>[] = [
+const initialNodes: FlowNode<NodeData>[] = [
   {
     id: '1',
     type: 'input',
@@ -40,9 +41,9 @@ interface FlowEditorProps {
 }
 
 export const FlowEditor = ({ onClose }: FlowEditorProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode<NodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
+  const [selectedNode, setSelectedNode] = useState<FlowNode<NodeData> | null>(null);
   const [editLabel, setEditLabel] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(true);
   const { getNodes } = useReactFlow();
@@ -57,7 +58,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   );
 
   const addNode = useCallback((type: string) => {
-    const newNode: Node<NodeData> = {
+    const newNode: FlowNode<NodeData> = {
       id: `${nodes.length + 1}`,
       data: { label: `${type} Node` },
       position: {
@@ -77,7 +78,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   }, [nodes.length, setNodes, isDarkMode]);
 
   const addAnnotation = useCallback(() => {
-    const newNode: Node<NodeData> = {
+    const newNode: FlowNode<NodeData> = {
       id: `annotation-${nodes.length + 1}`,
       type: 'default',
       data: { label: 'Add your note here' },
@@ -91,7 +92,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
     setNodes((nds) => [...nds, newNode]);
   }, [nodes.length, setNodes]);
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node<NodeData>) => {
+  const onNodeClick = useCallback((event: React.MouseEvent, node: FlowNode<NodeData>) => {
     setSelectedNode(node);
     setEditLabel(node.data.label);
   }, []);
