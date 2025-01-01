@@ -12,14 +12,15 @@ import {
   useEdgesState,
   Panel,
   MarkerType,
+  NodeTypes,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Plus, Type, Box, Group, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// Define the type for node data
-interface NodeData {
+// Define the type for node data that extends Record<string, unknown>
+interface NodeData extends Record<string, unknown> {
   label: string;
 }
 
@@ -39,7 +40,7 @@ interface FlowEditorProps {
 }
 
 export const FlowEditor = ({ onClose }: FlowEditorProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [editLabel, setEditLabel] = useState('');
