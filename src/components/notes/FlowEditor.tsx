@@ -18,7 +18,12 @@ import { Plus, Type, Box, Group, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-const initialNodes: Node[] = [
+// Define the type for node data
+interface NodeData {
+  label: string;
+}
+
+const initialNodes: Node<NodeData>[] = [
   {
     id: '1',
     type: 'input',
@@ -36,7 +41,7 @@ interface FlowEditorProps {
 export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const [editLabel, setEditLabel] = useState('');
 
   const onConnect = useCallback(
@@ -49,7 +54,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   );
 
   const addNode = useCallback((type: string) => {
-    const newNode: Node = {
+    const newNode: Node<NodeData> = {
       id: `${nodes.length + 1}`,
       data: { label: `${type} Node` },
       position: {
@@ -69,7 +74,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
   }, [nodes.length, setNodes]);
 
   const addAnnotation = useCallback(() => {
-    const newNode: Node = {
+    const newNode: Node<NodeData> = {
       id: `annotation-${nodes.length + 1}`,
       type: 'default',
       data: { label: 'Add your note here' },
@@ -83,7 +88,7 @@ export const FlowEditor = ({ onClose }: FlowEditorProps) => {
     setNodes((nds) => [...nds, newNode]);
   }, [nodes.length, setNodes]);
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node<NodeData>) => {
     setSelectedNode(node);
     setEditLabel(node.data.label);
   }, []);
