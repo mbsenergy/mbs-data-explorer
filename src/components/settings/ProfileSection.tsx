@@ -12,6 +12,7 @@ import { SkillsAndSubscriptions } from "./profile/SkillsAndSubscriptions";
 import { SubscriptionsCard } from "./profile/SubscriptionsCard";
 import { TechStackCard } from "./profile/TechStackCard";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 
 interface Profile {
   first_name: string | null;
@@ -45,22 +46,8 @@ export const ProfileSection = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<Profile>({
-    first_name: "",
-    last_name: "",
-    company: "",
-    role: "",
-    date_of_birth: null,
-    country: "",
-    github_url: "",
-    linkedin_url: "",
-    avatar_url: "",
-    level: "Basic",
-    it_skills: [],
-    subscriptions: [],
-  });
 
-  const { refetch } = useQuery({
+  const { data: profile, isLoading, error, refetch } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -70,25 +57,37 @@ export const ProfileSection = () => {
         .single();
 
       if (error) throw error;
-      
-      if (data) {
-        setProfile(data);
-      }
-      
       return data as Profile;
     },
     enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    placeholderData: {
+      first_name: "",
+      last_name: "",
+      company: "",
+      role: "",
+      date_of_birth: null,
+      country: "",
+      github_url: "",
+      linkedin_url: "",
+      avatar_url: "",
+      level: "Basic",
+      it_skills: [],
+      subscriptions: [],
+    },
   });
 
   const handleProfileChange = (field: keyof Profile, value: string | string[] | null) => {
-    setProfile((prev) => ({
-      ...prev,
+    if (!profile) return;
+    const updatedProfile = {
+      ...profile,
       [field]: value,
-    }));
+    };
+    setProfile(updatedProfile);
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || !profile) return;
 
     const updatedProfile = {
       ...profile,
@@ -116,6 +115,40 @@ export const ProfileSection = () => {
       description: "Your profile information has been saved.",
     });
   };
+
+  if (isLoading) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
+        <CardContent className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
+        <CardContent className="p-8">
+          <div className="text-center text-red-500">
+            Error loading profile: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
+        <CardContent className="p-8">
+          <div className="text-center text-muted-foreground">
+            No profile data available
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
