@@ -55,7 +55,6 @@ export const DatasetExploreContainer = ({
     loadData
   } = useDatasetData(selectedDataset as TableNames | null);
 
-  // Reset selected columns when columns change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -63,7 +62,6 @@ export const DatasetExploreContainer = ({
     }
   }, [columns, onColumnsChange]);
 
-  // Update filtered data when raw data changes
   useEffect(() => {
     if (data) {
       setFilteredData(data);
@@ -73,7 +71,7 @@ export const DatasetExploreContainer = ({
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData(selectedDataset as TableNames, selectedColumns, true);
+      await loadData();
       if (onLoad) {
         onLoad(selectedDataset);
       }
@@ -103,7 +101,6 @@ export const DatasetExploreContainer = ({
         console.error("Error tracking export:", analyticsError);
       }
 
-      // Export logic here
       toast({
         title: "Success",
         description: "Dataset exported successfully"
@@ -133,6 +130,14 @@ export const DatasetExploreContainer = ({
     }
   };
 
+  const getLastUpdate = (data: any[]) => {
+    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
+      const item = data[0] as Record<string, unknown>;
+      return item.md_last_update as string | null;
+    }
+    return null;
+  };
+
   return (
     <Card className="p-6 space-y-6 metallic-card">
       <div className="flex justify-between items-center">
@@ -160,7 +165,7 @@ export const DatasetExploreContainer = ({
         totalRows={totalRowCount}
         columnsCount={columns.length}
         filteredRows={filteredData.length}
-        lastUpdate={data[0]?.md_last_update || null}
+        lastUpdate={getLastUpdate(data)}
       />
 
       {isLoading ? (
