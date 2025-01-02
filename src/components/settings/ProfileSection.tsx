@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AvatarSection } from "./profile/AvatarSection";
 import { PersonalInfoSection } from "./profile/PersonalInfoSection";
 import { ProfessionalInfoSection } from "./profile/ProfessionalInfoSection";
@@ -46,6 +46,8 @@ export const ProfileSection = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const queryClient = useQueryClient();
+  const [editedProfile, setEditedProfile] = useState<Profile | null>(null);
 
   const { data: profile, isLoading, error, refetch } = useQuery({
     queryKey: ["profile", user?.id],
@@ -77,21 +79,26 @@ export const ProfileSection = () => {
     },
   });
 
+  // Initialize editedProfile when entering edit mode
+  const handleEditClick = () => {
+    setEditedProfile(profile);
+    setIsEditing(true);
+  };
+
   const handleProfileChange = (field: keyof Profile, value: string | string[] | null) => {
-    if (!profile) return;
-    const updatedProfile = {
-      ...profile,
+    if (!editedProfile) return;
+    setEditedProfile({
+      ...editedProfile,
       [field]: value,
-    };
-    setProfile(updatedProfile);
+    });
   };
 
   const handleSave = async () => {
-    if (!user || !profile) return;
+    if (!user || !editedProfile) return;
 
     const updatedProfile = {
-      ...profile,
-      date_of_birth: profile.date_of_birth || null,
+      ...editedProfile,
+      date_of_birth: editedProfile.date_of_birth || null,
     };
 
     const { error } = await supabase
@@ -109,7 +116,7 @@ export const ProfileSection = () => {
     }
 
     setIsEditing(false);
-    refetch();
+    queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
     toast({
       title: "Profile updated successfully",
       description: "Your profile information has been saved.",
@@ -150,6 +157,8 @@ export const ProfileSection = () => {
     );
   }
 
+  const currentProfile = isEditing ? editedProfile : profile;
+
   return (
     <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
       <CardHeader>
@@ -186,7 +195,7 @@ export const ProfileSection = () => {
                 if (isEditing) {
                   handleSave();
                 } else {
-                  setIsEditing(true);
+                  handleEditClick();
                 }
               }}
             >
@@ -196,21 +205,21 @@ export const ProfileSection = () => {
 
           <PersonalInfoSection
             isEditing={isEditing}
-            profile={profile}
+            profile={currentProfile!}
             onProfileChange={handleProfileChange}
           />
 
           <ProfessionalInfoSection
             isEditing={isEditing}
-            profile={profile}
+            profile={currentProfile!}
             onProfileChange={handleProfileChange}
           />
 
           {isEditing && (
             <SkillsAndSubscriptions
               isEditing={isEditing}
-              subscriptions={profile.subscriptions}
-              itSkills={profile.it_skills}
+              subscriptions={currentProfile!.subscriptions}
+              itSkills={currentProfile!.it_skills}
               onSubscriptionsChange={(subscriptions) => 
                 handleProfileChange("subscriptions", subscriptions)
               }
