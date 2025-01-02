@@ -25,17 +25,11 @@ import Notes from "./pages/Notes";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Keep cached data for 5 minutes
-      staleTime: 5 * 60 * 1000,
-      // Keep unused data in cache for 10 minutes
-      gcTime: 10 * 60 * 1000,
-      // Retry failed requests 3 times
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000,   // 10 minutes
       retry: 3,
-      // Keep previous data visible while fetching new data
-      keepPreviousData: true,
-      // Refetch on window focus
+      placeholderData: (previousData) => previousData, // Replace keepPreviousData
       refetchOnWindowFocus: true,
-      // Refetch on reconnect
       refetchOnReconnect: true,
     },
   },

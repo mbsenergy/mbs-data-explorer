@@ -37,7 +37,6 @@ export const DatasetExplore = ({
     loadData
   } = useDatasetData(selectedDataset);
 
-  // Pre-select all columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -47,7 +46,7 @@ export const DatasetExplore = ({
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData(selectedDataset);
+      await loadData();
       if (onLoad) {
         onLoad(selectedDataset);
       }
@@ -88,8 +87,16 @@ export const DatasetExplore = ({
     }
   };
 
+  const getLastUpdate = (data: any[]) => {
+    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
+      const item = data[0] as Record<string, unknown>;
+      return item.md_last_update as string | null;
+    }
+    return null;
+  };
+
   return (
-    <Card className="p-6 space-y-6<">
+    <Card className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">Explore</h2>
@@ -125,7 +132,7 @@ export const DatasetExplore = ({
         totalRows={totalRowCount}
         columnsCount={columns.length}
         filteredRows={filteredData.length}
-        lastUpdate={data[0]?.md_last_update || null}
+        lastUpdate={getLastUpdate(data)}
       />
 
       {isLoading ? (
