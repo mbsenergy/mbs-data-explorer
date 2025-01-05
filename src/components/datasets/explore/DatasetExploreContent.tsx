@@ -3,6 +3,7 @@ import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetPagination } from "./DatasetPagination";
+import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface DatasetExploreContentProps {
@@ -46,6 +47,12 @@ export const DatasetExploreContent = ({
     return null;
   };
 
+  // Memoize the filtered columns to prevent unnecessary re-renders
+  const filteredColumns = useMemo(() => 
+    columns.filter(col => selectedColumns.includes(col.id as string)),
+    [columns, selectedColumns]
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -78,7 +85,7 @@ export const DatasetExploreContent = ({
       />
 
       <DatasetTable
-        columns={columns}
+        columns={filteredColumns}
         data={data}
         selectedColumns={selectedColumns}
       />
