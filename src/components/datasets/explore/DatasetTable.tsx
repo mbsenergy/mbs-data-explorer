@@ -3,22 +3,22 @@ import { DataGrid } from "@/components/datasets/query/DataGrid";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface DatasetTableProps {
-  columns: ColumnDef<any, any>[];
+  columns: string[];
   data: any[];
   selectedColumns: string[];
 }
 
 export const DatasetTable = ({ columns, data, selectedColumns }: DatasetTableProps) => {
-  // Memoize the table columns to prevent unnecessary re-renders
   const tableColumns = useMemo(() => {
-    return columns.map((col): ColumnDef<any> => ({
-      ...col,
+    return selectedColumns.map((col): ColumnDef<any> => ({
+      accessorKey: col,
+      header: col,
       cell: info => {
         const value = info.getValue();
         return value === null ? 'NULL' : String(value);
       },
     }));
-  }, [columns]);
+  }, [selectedColumns]);
 
   return (
     <div className="border rounded-md">

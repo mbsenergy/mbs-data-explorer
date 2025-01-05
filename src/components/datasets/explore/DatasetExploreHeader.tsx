@@ -1,17 +1,17 @@
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 interface DatasetExploreHeaderProps {
   selectedDataset: string | null;
   onLoad?: (tableName: string) => void;
+  onSample?: (tableName: string) => void;
 }
 
-export const DatasetExploreHeader = ({ selectedDataset, onLoad }: DatasetExploreHeaderProps) => {
-  const handleLoad = () => {
-    if (selectedDataset && onLoad) {
-      onLoad(selectedDataset);
-    }
-  };
-
+export const DatasetExploreHeader = ({ 
+  selectedDataset, 
+  onLoad,
+  onSample
+}: DatasetExploreHeaderProps) => {
   return (
     <div className="flex justify-between items-center">
       <div className="space-y-2">
@@ -23,24 +23,27 @@ export const DatasetExploreHeader = ({ selectedDataset, onLoad }: DatasetExplore
         )}
       </div>
       <div className="space-x-2">
-        {onLoad && (
+        {onLoad && selectedDataset && (
           <Button 
             variant="outline"
             size="sm"
-            onClick={handleLoad}
+            onClick={() => onLoad(selectedDataset)}
             className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
           >
             Load
           </Button>
         )}
-        <Button 
-          variant="outline"
-          size="sm"
-          onClick={() => window.location.href = '#sample'}
-          className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-        >
-          Sample
-        </Button>
+        {onSample && selectedDataset && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onSample(selectedDataset)}
+            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Sample
+          </Button>
+        )}
       </div>
     </div>
   );
