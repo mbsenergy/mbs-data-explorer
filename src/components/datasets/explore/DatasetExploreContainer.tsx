@@ -11,6 +11,8 @@ import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setSelectedColumns } from "@/store/slices/datasetSlice";
 import type { Filter } from "./types";
 import type { Database } from "@/integrations/supabase/types";
 import { v4 as uuidv4 } from 'uuid';
@@ -46,6 +48,9 @@ export const DatasetExploreContainer = ({
   const { user } = useAuth();
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
 
+  const dispatch = useAppDispatch();
+  const { data: reduxData, columns: reduxColumns } = useAppSelector(state => state.dataset);
+
   const {
     data,
     columns,
@@ -57,10 +62,10 @@ export const DatasetExploreContainer = ({
 
   useEffect(() => {
     if (columns.length > 0) {
-      setSelectedColumns(columns);
+      dispatch(setSelectedColumns(columns));
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange]);
+  }, [columns, dispatch, onColumnsChange]);
 
   useEffect(() => {
     if (data) {

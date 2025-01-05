@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setData, setColumns, cacheQuery } from "@/store/slices/datasetSlice";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -9,6 +11,8 @@ type TableNames = keyof Database['public']['Tables'];
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const { toast } = useToast();
+  const dispatch = useAppDispatch();
+  const cachedQueries = useAppSelector(state => state.dataset.cachedQueries);
 
   const { data: columns = [], isLoading: columnsLoading } = useQuery({
     queryKey: ['columns', selectedDataset],
@@ -16,6 +20,13 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (!selectedDataset) return [];
       
       console.log('Fetching columns for:', selectedDataset);
+      
+      // Check cache first
+      const cacheKey = `columns_${selectedDataset}`;
+      const cached = cachedQueries[cacheKey];
+      if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
+        return cached.columns;
+      }
       
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: `SELECT * FROM "${selectedDataset}" LIMIT 1`
@@ -29,6 +40,14 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (queryResult && Array.isArray(queryResult) && queryResult.length > 0) {
         const cols = Object.keys(queryResult[0]).filter(col => !col.startsWith('md_'));
         console.log('Retrieved columns:', cols);
+        
+        // Cache the result
+        dispatch(cacheQuery({
+          query: cacheKey,
+          data: queryResult,
+          columns: cols,
+        }));
+        
         return cols;
       }
       return [];
@@ -69,6 +88,14 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       
       console.log('Fetching data for:', selectedDataset);
       
+      // Check cache first
+      const cacheKey = `data_${selectedDataset}`;
+      const cached = cachedQueries[cacheKey];
+      if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
+        dispatch(setData(cached.data));
+        return cached.data;
+      }
+      
       const { data: sampleData, error } = await supabase
         .from(selectedDataset)
         .select('*')
@@ -80,6 +107,17 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       }
       
       console.log('Retrieved data rows:', sampleData?.length);
+      
+      // Cache the result
+      if (sampleData) {
+        dispatch(cacheQuery({
+          query: cacheKey,
+          data: sampleData,
+          columns: columns,
+        }));
+        dispatch(setData(sampleData));
+      }
+      
       return sampleData || [];
     },
     enabled: false,
