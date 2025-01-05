@@ -10,6 +10,7 @@ import { useDatasetData } from "@/hooks/useDatasetData";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setData, setColumns, setSelectedColumns } from "@/store/slices/datasetSlice";
 import type { Database } from "@/integrations/supabase/types";
+import type { ColumnDef } from "@tanstack/react-table";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -34,12 +35,18 @@ export const DatasetExplore = ({
 
   const {
     data,
-    columns,
+    columns: rawColumns,
     totalRowCount,
     isLoading,
     fetchPage,
     loadData
   } = useDatasetData(selectedDataset);
+
+  // Convert raw column names to ColumnDef objects
+  const columns: ColumnDef<any>[] = rawColumns.map(col => ({
+    accessorKey: col,
+    header: col,
+  }));
 
   useEffect(() => {
     if (data.length > 0) {
@@ -50,8 +57,10 @@ export const DatasetExplore = ({
   useEffect(() => {
     if (columns.length > 0) {
       dispatch(setColumns(columns));
-      dispatch(setSelectedColumns(columns));
-      onColumnsChange(columns);
+      // Convert ColumnDef array to string array for selected columns
+      const columnNames = columns.map(col => String(col.accessorKey));
+      dispatch(setSelectedColumns(columnNames));
+      onColumnsChange(columnNames);
     }
   }, [columns, dispatch, onColumnsChange]);
 
@@ -108,6 +117,9 @@ export const DatasetExplore = ({
     return null;
   };
 
+  // Get column names as strings for components that expect string arrays
+  const columnNames = columns.map(col => String(col.accessorKey));
+
   return (
     <Card className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -143,7 +155,7 @@ export const DatasetExplore = ({
       
       <DatasetStats 
         totalRows={totalRowCount}
-        columnsCount={reduxColumns.length}
+        columnsCount={columnNames.length}
         filteredRows={filteredData.length}
         lastUpdate={getLastUpdate(reduxData)}
       />
@@ -155,7 +167,7 @@ export const DatasetExplore = ({
       ) : (
         <>
           <DatasetControls
-            columns={reduxColumns}
+            columns={columnNames}
             searchTerm={searchTerm}
             selectedColumn={selectedColumn}
             onSearchChange={setSearchTerm}
@@ -163,13 +175,13 @@ export const DatasetExplore = ({
           />
 
           <DatasetColumnSelect
-            columns={reduxColumns}
+            columns={columnNames}
             selectedColumns={useAppSelector(state => state.dataset.selectedColumns)}
             onColumnSelect={handleColumnSelect}
           />
 
           <DatasetTable
-            columns={reduxColumns}
+            columns={columns}
             data={paginatedData}
             selectedColumns={useAppSelector(state => state.dataset.selectedColumns)}
           />
