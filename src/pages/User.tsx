@@ -1,8 +1,6 @@
 import { PasswordSection } from "@/components/settings/PasswordSection";
 import { ContactSection } from "@/components/settings/ContactSection";
 import { ProfileSection } from "@/components/settings/ProfileSection";
-import { SubscriptionsCard } from "@/components/settings/profile/SubscriptionsCard";
-import { TechStackCard } from "@/components/settings/profile/TechStackCard";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,10 +31,6 @@ const User = () => {
       
       <div className="grid gap-6">
         <ProfileSection />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SubscriptionsCard subscriptions={profile?.subscriptions} />
-          <TechStackCard skills={profile?.it_skills} />
-        </div>
         <PasswordSection />
         <ContactSection />
       </div>
