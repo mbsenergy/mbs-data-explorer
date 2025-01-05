@@ -42,9 +42,10 @@ export const DatasetExplore = ({
     loadData
   } = useDatasetData(selectedDataset);
 
-  // Convert raw column names to ColumnDef objects
-  const columns: ColumnDef<any>[] = rawColumns.map(col => ({
-    accessorKey: col,
+  // Convert raw column names to ColumnDef objects with proper typing
+  const columns: ColumnDef<any, any>[] = rawColumns.map(col => ({
+    id: col,
+    accessorFn: (row: any) => row[col],
     header: col,
   }));
 
@@ -57,8 +58,8 @@ export const DatasetExplore = ({
   useEffect(() => {
     if (columns.length > 0) {
       dispatch(setColumns(columns));
-      // Convert ColumnDef array to string array for selected columns
-      const columnNames = columns.map(col => String(col.accessorKey));
+      // Convert column definitions to string array for selected columns
+      const columnNames = columns.map(col => col.id as string);
       dispatch(setSelectedColumns(columnNames));
       onColumnsChange(columnNames);
     }
@@ -118,7 +119,7 @@ export const DatasetExplore = ({
   };
 
   // Get column names as strings for components that expect string arrays
-  const columnNames = columns.map(col => String(col.accessorKey));
+  const columnNames = columns.map(col => col.id as string);
 
   return (
     <Card className="p-6 space-y-6">
