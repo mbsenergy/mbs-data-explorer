@@ -1,146 +1,92 @@
-import { DatasetFilters } from "./DatasetFilters";
+import { DatasetStats } from "./DatasetStats";
+import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
-import { DatasetQueryModal } from "./DatasetQueryModal";
-import { Button } from "@/components/ui/button";
-import type { Filter } from "./types";
-import { compareValues } from "@/utils/datasetUtils";
+import { DatasetPagination } from "./DatasetPagination";
+import type { ColumnDef } from "@tanstack/react-table";
 
 interface DatasetExploreContentProps {
-  columns: string[];
-  selectedColumns: string[];
-  filters: Filter[];
-  setFilters: (filters: Filter[]) => void;
-  filteredData: any[];
-  setFilteredData: (data: any[]) => void;
-  onColumnSelect: (column: string) => void;
+  isLoading: boolean;
   data: any[];
-  isQueryModalOpen: boolean;
-  setIsQueryModalOpen: (isOpen: boolean) => void;
-  selectedDataset: string | null;
+  columns: ColumnDef<any, any>[];
+  columnNames: string[];
+  selectedColumn: string;
+  searchTerm: string;
+  currentPage: number;
+  totalPages: number;
+  selectedColumns: string[];
+  totalRowCount: number;
+  onSearchChange: (value: string) => void;
+  onColumnChange: (value: string) => void;
+  onColumnSelect: (column: string) => void;
+  onPageChange: (page: number) => void;
 }
 
 export const DatasetExploreContent = ({
-  columns,
-  selectedColumns,
-  filters,
-  setFilters,
-  filteredData,
-  setFilteredData,
-  onColumnSelect,
+  isLoading,
   data,
-  isQueryModalOpen,
-  setIsQueryModalOpen,
-  selectedDataset
+  columns,
+  columnNames,
+  selectedColumn,
+  searchTerm,
+  currentPage,
+  totalPages,
+  selectedColumns,
+  totalRowCount,
+  onSearchChange,
+  onColumnChange,
+  onColumnSelect,
+  onPageChange,
 }: DatasetExploreContentProps) => {
-  const applyFilters = (dataToFilter: any[]) => {
-    return dataToFilter.filter((item) =>
-      filters.reduce((pass, filter, index) => {
-        if (!filter.searchTerm || !filter.selectedColumn) {
-          return index === 0 ? true : pass;
-        }
-
-        const itemValue = item[filter.selectedColumn];
-        const matches = compareValues(itemValue, filter.searchTerm, filter.comparisonOperator);
-
-        if (index === 0) return matches;
-        return filter.operator === 'AND' ? pass && matches : pass || matches;
-      }, false)
-    );
-  };
-
-  const handleApplyFilters = () => {
-    const newFilteredData = applyFilters(data);
-    setFilteredData(newFilteredData);
-  };
-
-  const generateFilterQuery = () => {
-    if (!selectedDataset) return "";
-    
-    let query = `SELECT ${selectedColumns.map(col => `"${col}"`).join(', ')} FROM "${selectedDataset}"`;
-    
-    if (filters.length > 0) {
-      const filterConditions = filters
-        .filter(f => f.searchTerm && f.selectedColumn)
-        .map((filter, index) => {
-          const comparison = filter.comparisonOperator;
-          let condition = "";
-          
-          if (comparison === 'IN' || comparison === 'NOT IN') {
-            const values = filter.searchTerm.split(',').map(v => `'${v.trim()}'`).join(',');
-            condition = `"${filter.selectedColumn}" ${comparison} (${values})`;
-          } else {
-            condition = `"${filter.selectedColumn}" ${comparison} '${filter.searchTerm}'`;
-          }
-          
-          return index === 0 ? condition : `${filter.operator} ${condition}`;
-        });
-      
-      if (filterConditions.length > 0) {
-        query += ` WHERE ${filterConditions.join(' ')}`;
-      }
+  const getLastUpdate = (data: any[]) => {
+    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
+      const item = data[0] as Record<string, unknown>;
+      return item.md_last_update as string | null;
     }
-    
-    return query;
+    return null;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <p>Loading dataset...</p>
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="space-y-4">
-        <DatasetFilters
-          columns={columns}
-          filters={filters}
-          onFilterChange={(filterId, field, value) => {
-            setFilters(filters.map(f =>
-              f.id === filterId
-                ? { ...f, [field]: value }
-                : f
-            ));
-          }}
-          onAddFilter={() => {
-            setFilters([...filters, { 
-              id: crypto.randomUUID(), 
-              searchTerm: "", 
-              selectedColumn: "", 
-              operator: "AND",
-              comparisonOperator: "=" 
-            }]);
-          }}
-          onRemoveFilter={(filterId) => {
-            setFilters(filters.filter(f => f.id !== filterId));
-          }}
-        />
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleApplyFilters}
-            variant="default"
-            className="bg-[#4fd9e8] hover:bg-[#4fd9e8]/90 text-white"
-          >
-            Apply Filters
-          </Button>
-        </div>
-      </div>
+      <DatasetStats 
+        totalRows={totalRowCount}
+        columnsCount={columnNames.length}
+        filteredRows={data.length}
+        lastUpdate={getLastUpdate(data)}
+      />
+
+      <DatasetControls
+        columns={columnNames}
+        searchTerm={searchTerm}
+        selectedColumn={selectedColumn}
+        onSearchChange={onSearchChange}
+        onColumnChange={onColumnChange}
+      />
 
       <DatasetColumnSelect
-        columns={columns}
+        columns={columnNames}
         selectedColumns={selectedColumns}
         onColumnSelect={onColumnSelect}
       />
 
       <DatasetTable
         columns={columns}
-        data={filteredData}
+        data={data}
         selectedColumns={selectedColumns}
       />
 
-      <DatasetQueryModal
-        isOpen={isQueryModalOpen}
-        onClose={() => setIsQueryModalOpen(false)}
-        query={generateFilterQuery()}
-        apiCall={`await supabase
-  .from('${selectedDataset}')
-  .select('${selectedColumns.join(', ')}')`
-    + (filters.length > 0 ? "\n  // Filters would need to be applied in JavaScript" : "")}
+      <DatasetPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
       />
     </>
   );
