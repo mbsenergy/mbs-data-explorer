@@ -7,6 +7,8 @@ import { DatasetTable } from "./explore/DatasetTable";
 import { DatasetControls } from "./explore/DatasetControls";
 import { DatasetColumnSelect } from "./explore/DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setData, setColumns, setSelectedColumns } from "@/store/slices/datasetSlice";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -22,9 +24,11 @@ export const DatasetExplore = ({
   onColumnsChange,
   onLoad 
 }: DatasetExploreProps) => {
+  const dispatch = useAppDispatch();
+  const { data: reduxData, columns: reduxColumns } = useAppSelector(state => state.dataset);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
 
@@ -38,11 +42,18 @@ export const DatasetExplore = ({
   } = useDatasetData(selectedDataset);
 
   useEffect(() => {
+    if (data.length > 0) {
+      dispatch(setData(data));
+    }
+  }, [data, dispatch]);
+
+  useEffect(() => {
     if (columns.length > 0) {
-      setSelectedColumns(columns);
+      dispatch(setColumns(columns));
+      dispatch(setSelectedColumns(columns));
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange]);
+  }, [columns, dispatch, onColumnsChange]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
@@ -53,7 +64,7 @@ export const DatasetExplore = ({
     }
   };
 
-  const filteredData = data.filter((item) =>
+  const filteredData = reduxData.filter((item) =>
     selectedColumn
       ? String(item[selectedColumn])
           .toLowerCase()
@@ -72,11 +83,12 @@ export const DatasetExplore = ({
   );
 
   const handleColumnSelect = (column: string) => {
+    const selectedColumns = useAppSelector(state => state.dataset.selectedColumns);
     const newColumns = selectedColumns.includes(column)
       ? selectedColumns.filter(col => col !== column)
       : [...selectedColumns, column];
     
-    setSelectedColumns(newColumns);
+    dispatch(setSelectedColumns(newColumns));
     onColumnsChange(newColumns);
   };
 
@@ -84,6 +96,7 @@ export const DatasetExplore = ({
     const pageData = await fetchPage(newPage, itemsPerPage);
     if (pageData) {
       setCurrentPage(newPage);
+      dispatch(setData(pageData));
     }
   };
 
@@ -130,9 +143,9 @@ export const DatasetExplore = ({
       
       <DatasetStats 
         totalRows={totalRowCount}
-        columnsCount={columns.length}
+        columnsCount={reduxColumns.length}
         filteredRows={filteredData.length}
-        lastUpdate={getLastUpdate(data)}
+        lastUpdate={getLastUpdate(reduxData)}
       />
 
       {isLoading ? (
@@ -142,7 +155,7 @@ export const DatasetExplore = ({
       ) : (
         <>
           <DatasetControls
-            columns={columns}
+            columns={reduxColumns}
             searchTerm={searchTerm}
             selectedColumn={selectedColumn}
             onSearchChange={setSearchTerm}
@@ -150,15 +163,15 @@ export const DatasetExplore = ({
           />
 
           <DatasetColumnSelect
-            columns={columns}
-            selectedColumns={selectedColumns}
+            columns={reduxColumns}
+            selectedColumns={useAppSelector(state => state.dataset.selectedColumns)}
             onColumnSelect={handleColumnSelect}
           />
 
           <DatasetTable
-            columns={columns}
+            columns={reduxColumns}
             data={paginatedData}
-            selectedColumns={selectedColumns}
+            selectedColumns={useAppSelector(state => state.dataset.selectedColumns)}
           />
 
           <DatasetPagination
