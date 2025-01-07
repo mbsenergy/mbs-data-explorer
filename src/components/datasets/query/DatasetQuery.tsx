@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ import { fetchDataInBatches } from "@/utils/batchProcessing";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Grid, Table } from "lucide-react";
 import { PivotGrid } from "@/components/visualize/pivot/PivotGrid";
+import { useDatasetStore } from "@/stores/datasetStore";
 
 interface DatasetQueryProps {
   selectedDataset?: TableNames | null;
@@ -21,13 +22,29 @@ interface DatasetQueryProps {
 }
 
 export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryProps) => {
-  const [results, setResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedQuery, setSelectedQuery] = useState("");
-  const [queryColumns, setQueryColumns] = useState<ColumnDef<any>[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Get store actions
+  const { setCurrentQuery, getCurrentQuery } = useDatasetStore();
+
+  // Initialize state from store
+  const storedQuery = getCurrentQuery();
+  const [results, setResults] = useState<any[]>(storedQuery?.results || []);
+  const [queryColumns, setQueryColumns] = useState<ColumnDef<any>[]>(storedQuery?.columns || []);
+
+  useEffect(() => {
+    // Load saved query on component mount
+    const savedQuery = getCurrentQuery();
+    if (savedQuery) {
+      setResults(savedQuery.results || []);
+      setQueryColumns(savedQuery.columns || []);
+      setSelectedQuery(savedQuery.queryText);
+    }
+  }, []);
 
   const { data: tables } = useQuery({
     queryKey: ["tables"],
@@ -46,7 +63,6 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
         throw new Error(validation.error);
       }
 
-      // Remove any trailing semicolons and clean up the query
       const cleanedQuery = query.trim().replace(/;+$/, '');
 
       if (cleanedQuery.toLowerCase().includes('count(*)') || !cleanedQuery.toLowerCase().includes('limit')) {
@@ -97,16 +113,25 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
       }
 
       // Generate columns from the first result
+      let cols: ColumnDef<any>[] = [];
       if (queryResults.length > 0) {
-        const cols: ColumnDef<any>[] = Object.keys(queryResults[0]).map(key => ({
+        cols = Object.keys(queryResults[0]).map(key => ({
           id: key,
           header: key,
           accessorKey: key,
         }));
-        setQueryColumns(cols);
       }
 
       setResults(queryResults);
+      setQueryColumns(cols);
+      
+      // Save to store
+      setCurrentQuery({
+        queryText: query,
+        results: queryResults,
+        columns: cols,
+        timestamp: Date.now()
+      });
       
       toast({
         title: "Query executed successfully",
@@ -175,7 +200,7 @@ export const DatasetQuery = ({ selectedDataset, selectedColumns }: DatasetQueryP
       
       <SqlQueryBox
         onExecute={handleExecuteQuery}
-        defaultValue="SELECT * FROM your_table LIMIT 100"
+        defaultValue={selectedQuery || "SELECT * FROM your_table LIMIT 100"}
         isLoading={isLoading}
       />
 

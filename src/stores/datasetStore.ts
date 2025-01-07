@@ -12,8 +12,16 @@ interface QueryResult {
   timestamp: number;
 }
 
+interface SavedQuery {
+  queryText: string;
+  results: any[] | null;
+  columns: ColumnDef<any>[];
+  timestamp: number;
+}
+
 interface DatasetState {
   queries: Record<string, QueryResult>;
+  currentQuery: SavedQuery | null;
   addQueryResult: (
     tableName: TableNames, 
     data: any[], 
@@ -25,6 +33,8 @@ interface DatasetState {
     columns: ColumnDef<any>[];
     totalRowCount: number;
   } | null;
+  setCurrentQuery: (query: SavedQuery) => void;
+  getCurrentQuery: () => SavedQuery | null;
   clearCache: () => void;
 }
 
@@ -34,6 +44,7 @@ export const useDatasetStore = create<DatasetState>()(
   persist(
     (set, get) => ({
       queries: {},
+      currentQuery: null,
       
       addQueryResult: (tableName, data, columns, totalRowCount) => {
         set((state) => ({
@@ -65,8 +76,25 @@ export const useDatasetStore = create<DatasetState>()(
         };
       },
 
+      setCurrentQuery: (query) => {
+        set({ currentQuery: query });
+      },
+
+      getCurrentQuery: () => {
+        const query = get().currentQuery;
+        if (!query) return null;
+
+        // Check if cache is still valid
+        if (Date.now() - query.timestamp > CACHE_DURATION) {
+          set({ currentQuery: null });
+          return null;
+        }
+
+        return query;
+      },
+
       clearCache: () => {
-        set({ queries: {} });
+        set({ queries: {}, currentQuery: null });
       },
     }),
     {
