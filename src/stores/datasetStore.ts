@@ -5,14 +5,21 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
+interface QueryResult {
+  data: any[];
+  columns: ColumnDef<any>[];
+  totalRowCount: number;
+  timestamp: number;
+}
+
 interface DatasetState {
-  queries: Record<string, {
-    data: any[];
-    columns: ColumnDef<any>[];
-    timestamp: number;
-    totalRowCount: number;
-  }>;
-  addQueryResult: (tableName: TableNames, data: any[], columns: ColumnDef<any>[], totalRowCount: number) => void;
+  queries: Record<string, QueryResult>;
+  addQueryResult: (
+    tableName: TableNames, 
+    data: any[], 
+    columns: ColumnDef<any>[], 
+    totalRowCount: number
+  ) => void;
   getQueryResult: (tableName: TableNames) => {
     data: any[];
     columns: ColumnDef<any>[];
