@@ -1,21 +1,29 @@
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Compass } from "lucide-react";
 
 interface DatasetExploreHeaderProps {
   selectedDataset: string | null;
-  onLoad?: (tableName: string) => void;
-  onSample?: (tableName: string) => void;
+  onLoad?: () => void;
+  onExport: () => void;
+  onShowQuery: () => void;
+  isLoading: boolean;
 }
 
-export const DatasetExploreHeader = ({ 
-  selectedDataset, 
+export const DatasetExploreHeader = ({
+  selectedDataset,
   onLoad,
-  onSample
+  onExport,
+  onShowQuery,
+  isLoading
 }: DatasetExploreHeaderProps) => {
   return (
     <div className="flex justify-between items-center">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Explore</h2>
+        <div className="flex items-center gap-2">
+          <Compass className="h-6 w-6" />
+          <h2 className="text-2xl font-semibold">Explore</h2>
+        </div>
         {selectedDataset && (
           <p className="text-muted-foreground">
             Selected dataset: <span className="font-medium">{selectedDataset}</span>
@@ -23,27 +31,35 @@ export const DatasetExploreHeader = ({
         )}
       </div>
       <div className="space-x-2">
-        {onLoad && selectedDataset && (
+        {onLoad && (
           <Button 
             variant="outline"
             size="sm"
-            onClick={() => onLoad(selectedDataset)}
+            onClick={onLoad}
+            disabled={isLoading}
             className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
           >
             Load
           </Button>
         )}
-        {onSample && selectedDataset && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onSample(selectedDataset)}
-            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Sample
-          </Button>
-        )}
+        <Button 
+          variant="outline"
+          size="sm"
+          onClick={onExport}
+          disabled={isLoading}
+          className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+        >
+          Export
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onShowQuery}
+          disabled={isLoading}
+          className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+        >
+          Show Query
+        </Button>
       </div>
     </div>
   );

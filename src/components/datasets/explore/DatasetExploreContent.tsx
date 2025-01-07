@@ -4,7 +4,6 @@ import { DatasetTable } from "./DatasetTable";
 import { DatasetQueryModal } from "./DatasetQueryModal";
 import { Button } from "@/components/ui/button";
 import type { Filter } from "./types";
-import { compareValues } from "@/utils/datasetUtils";
 
 interface DatasetExploreContentProps {
   columns: string[];
