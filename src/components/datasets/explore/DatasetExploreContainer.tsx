@@ -11,6 +11,7 @@ import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import { useDatasetStore } from "@/stores/datasetStore";
 import type { Filter } from "./types";
 import type { Database } from "@/integrations/supabase/types";
 import { v4 as uuidv4 } from 'uuid';
@@ -28,22 +29,29 @@ export const DatasetExploreContainer = ({
   onColumnsChange,
   onLoad
 }: DatasetExploreContainerProps) => {
-  const [filters, setFilters] = useState<Filter[]>([
-    { 
-      id: uuidv4(), 
-      searchTerm: "", 
-      selectedColumn: "", 
-      operator: "AND",
-      comparisonOperator: "=" 
-    }
-  ]);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
-  const [filteredData, setFilteredData] = useState<any[]>([]);
-  const [pageSize] = useState(20);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { setExploreState, getExploreState } = useDatasetStore();
+
+  // Initialize state from store
+  const savedState = getExploreState();
+  const [filters, setFilters] = useState<Filter[]>(
+    savedState?.filters || [
+      { 
+        id: uuidv4(), 
+        searchTerm: "", 
+        selectedColumn: "", 
+        operator: "AND",
+        comparisonOperator: "=" 
+      }
+    ]
+  );
+  const [selectedColumns, setSelectedColumns] = useState<string[]>(
+    savedState?.selectedColumns || []
+  );
+  const [currentPage, setCurrentPage] = useState(0);
+  const [filteredData, setFilteredData] = useState<any[]>(savedState?.data || []);
+  const [pageSize] = useState(20);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
 
   const {
@@ -55,6 +63,19 @@ export const DatasetExploreContainer = ({
     loadData
   } = useDatasetData(selectedDataset as TableNames | null);
 
+  // Save state to store whenever it changes
+  useEffect(() => {
+    if (selectedDataset) {
+      setExploreState({
+        selectedDataset: selectedDataset as TableNames,
+        selectedColumns,
+        filters,
+        data: filteredData,
+        timestamp: Date.now()
+      });
+    }
+  }, [selectedDataset, selectedColumns, filters, filteredData]);
+
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -65,7 +86,6 @@ export const DatasetExploreContainer = ({
   useEffect(() => {
     if (data) {
       setFilteredData(data);
-      setShouldApplyFilters(false);
     }
   }, [data]);
 

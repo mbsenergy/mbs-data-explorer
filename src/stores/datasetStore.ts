@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Database } from "@/integrations/supabase/types";
+import type { Filter } from "@/components/datasets/explore/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -19,9 +20,18 @@ interface SavedQuery {
   timestamp: number;
 }
 
+interface ExploreState {
+  selectedDataset: TableNames | null;
+  selectedColumns: string[];
+  filters: Filter[];
+  data: any[];
+  timestamp: number;
+}
+
 interface DatasetState {
   queries: Record<string, QueryResult>;
   currentQuery: SavedQuery | null;
+  exploreState: ExploreState | null;
   addQueryResult: (
     tableName: TableNames, 
     data: any[], 
@@ -35,6 +45,8 @@ interface DatasetState {
   } | null;
   setCurrentQuery: (query: SavedQuery) => void;
   getCurrentQuery: () => SavedQuery | null;
+  setExploreState: (state: ExploreState) => void;
+  getExploreState: () => ExploreState | null;
   clearCache: () => void;
 }
 
@@ -45,6 +57,7 @@ export const useDatasetStore = create<DatasetState>()(
     (set, get) => ({
       queries: {},
       currentQuery: null,
+      exploreState: null,
       
       addQueryResult: (tableName, data, columns, totalRowCount) => {
         set((state) => ({
@@ -93,8 +106,25 @@ export const useDatasetStore = create<DatasetState>()(
         return query;
       },
 
+      setExploreState: (state) => {
+        set({ exploreState: { ...state, timestamp: Date.now() } });
+      },
+
+      getExploreState: () => {
+        const state = get().exploreState;
+        if (!state) return null;
+
+        // Check if cache is still valid
+        if (Date.now() - state.timestamp > CACHE_DURATION) {
+          set({ exploreState: null });
+          return null;
+        }
+
+        return state;
+      },
+
       clearCache: () => {
-        set({ queries: {}, currentQuery: null });
+        set({ queries: {}, currentQuery: null, exploreState: null });
       },
     }),
     {
