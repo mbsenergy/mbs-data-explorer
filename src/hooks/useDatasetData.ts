@@ -2,13 +2,16 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDatasetStore } from "@/stores/datasetStore";
 import type { Database } from "@/integrations/supabase/types";
+import type { ColumnDef } from "@tanstack/react-table";
 
 type TableNames = keyof Database['public']['Tables'];
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const { toast } = useToast();
+  const { addQueryResult, getQueryResult } = useDatasetStore();
 
   const { data: columns = [] } = useQuery({
     queryKey: ['columns', selectedDataset],
@@ -45,12 +48,29 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     queryKey: ['tableData', selectedDataset],
     queryFn: async () => {
       if (!selectedDataset) return [];
+
+      // Check cache first
+      const cachedResult = getQueryResult(selectedDataset);
+      if (cachedResult) {
+        return cachedResult.data;
+      }
+
       const { data: sampleData, error } = await supabase
         .from(selectedDataset)
         .select('*')
         .limit(1000);
 
       if (error) throw error;
+
+      // Create columns definition
+      const cols: ColumnDef<any>[] = Object.keys(sampleData?.[0] || {}).map(key => ({
+        accessorKey: key,
+        header: key,
+      }));
+
+      // Store in cache
+      addQueryResult(selectedDataset, sampleData || [], cols, totalRowCount);
+
       return sampleData || [];
     },
     enabled: false

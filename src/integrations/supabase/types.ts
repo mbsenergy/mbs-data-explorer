@@ -1695,7 +1695,7 @@ export type Database = {
         }
         Relationships: []
       }
-      MS01_dt_alba_gas: {
+      MS01_alba_gas: {
         Row: {
           DATE: string | null
           md_last_update: string | null
@@ -1725,7 +1725,7 @@ export type Database = {
         }
         Relationships: []
       }
-      MS01_dt_alba_power: {
+      MS01_alba_power: {
         Row: {
           DATE: string | null
           md_last_update: string | null
