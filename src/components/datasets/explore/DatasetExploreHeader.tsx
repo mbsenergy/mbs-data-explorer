@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Compass } from "lucide-react";
+import { Compass, Database, Download, Code } from "lucide-react";
 
 interface DatasetExploreHeaderProps {
   selectedDataset: string | null;
@@ -32,14 +32,15 @@ export const DatasetExploreHeader = ({
       </div>
       <div className="space-x-2">
         {onLoad && (
-          <Button 
+          <Button
             variant="outline"
             size="sm"
             onClick={onLoad}
             disabled={isLoading}
-            className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+            className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
           >
-            Load
+            <Database className="h-4 w-4 mr-2" />
+            Retrieve
           </Button>
         )}
         <Button 
@@ -47,8 +48,9 @@ export const DatasetExploreHeader = ({
           size="sm"
           onClick={onExport}
           disabled={isLoading}
-          className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+          className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
         >
+          <Download className="h-4 w-4 mr-2" />
           Export
         </Button>
         <Button
@@ -58,6 +60,7 @@ export const DatasetExploreHeader = ({
           disabled={isLoading}
           className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
         >
+          <Code className="h-4 w-4 mr-2" />
           Show Query
         </Button>
       </div>

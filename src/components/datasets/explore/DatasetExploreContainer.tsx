@@ -29,7 +29,7 @@ export const DatasetExploreContainer = ({
   const { user } = useAuth();
   const { setExploreState, getExploreState } = useDatasetStore();
 
-  // Initialize state from store
+  // Initialize state from store or defaults
   const savedState = getExploreState();
   const [filters, setFilters] = useState<Filter[]>(
     savedState?.filters || [
@@ -45,9 +45,7 @@ export const DatasetExploreContainer = ({
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
     savedState?.selectedColumns || []
   );
-  const [currentPage, setCurrentPage] = useState(0);
   const [filteredData, setFilteredData] = useState<any[]>(savedState?.data || []);
-  const [pageSize] = useState(20);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
 
   const {
@@ -59,7 +57,7 @@ export const DatasetExploreContainer = ({
     loadData
   } = useDatasetData(selectedDataset as TableNames | null);
 
-  // Save state to store whenever it changes
+  // Save state to store whenever relevant state changes
   useEffect(() => {
     if (selectedDataset) {
       setExploreState({
@@ -70,8 +68,9 @@ export const DatasetExploreContainer = ({
         timestamp: Date.now()
       });
     }
-  }, [selectedDataset, selectedColumns, filters, filteredData]);
+  }, [selectedDataset, selectedColumns, filters, filteredData, setExploreState]);
 
+  // Update columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -79,6 +78,7 @@ export const DatasetExploreContainer = ({
     }
   }, [columns, onColumnsChange]);
 
+  // Update filtered data when source data changes
   useEffect(() => {
     if (data) {
       setFilteredData(data);
@@ -91,6 +91,10 @@ export const DatasetExploreContainer = ({
       if (onLoad) {
         onLoad(selectedDataset);
       }
+      toast({
+        title: "Dataset Loaded",
+        description: `Successfully loaded ${selectedDataset}`
+      });
     }
   };
 
