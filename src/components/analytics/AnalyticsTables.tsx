@@ -6,12 +6,14 @@ interface AnalyticsTablesProps {
   exportsData: any[];
   storageData: any[];
   queryData: any[];
+  chatData: any[];
   isLoading: {
     analytics: boolean;
     developer: boolean;
     exports: boolean;
     storage: boolean;
     queries: boolean;
+    chat: boolean;
   };
 }
 
@@ -21,8 +23,12 @@ export const AnalyticsTables = ({
   exportsData,
   storageData,
   queryData,
+  chatData,
   isLoading
 }: AnalyticsTablesProps) => {
+  console.log('Chat data:', chatData);
+  console.log('Exports data:', exportsData);
+  
   return (
     <div className="space-y-6">
       <DownloadsTable
@@ -53,6 +59,12 @@ export const AnalyticsTables = ({
         title="File Uploads"
         data={storageData || []}
         isLoading={isLoading.storage}
+      />
+
+      <DownloadsTable
+        title="Chat Messages"
+        data={chatData || []}
+        isLoading={isLoading.chat}
       />
     </div>
   );

@@ -14,13 +14,15 @@ interface DeveloperSearchProps {
   onTagChange: (tag: string) => void;
   onFavoriteChange: (showFavorites: boolean) => void;
   availableTags: string[];
+  title?: string;
 }
 
 export const DeveloperSearch = ({ 
   onSearchChange, 
   onTagChange, 
   onFavoriteChange,
-  availableTags 
+  availableTags,
+  title = "Search Material"
 }: DeveloperSearchProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -30,7 +32,7 @@ export const DeveloperSearch = ({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <FileSearch className="h-6 w-6" />
-            <h2 className="text-xl font-semibold">Search Material</h2>
+            <h2 className="text-xl font-semibold">{title}</h2>
           </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">

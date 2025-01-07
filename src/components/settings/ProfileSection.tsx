@@ -4,11 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AvatarSection } from "./profile/AvatarSection";
 import { PersonalInfoSection } from "./profile/PersonalInfoSection";
 import { ProfessionalInfoSection } from "./profile/ProfessionalInfoSection";
+import { SkillsAndSubscriptions } from "./profile/SkillsAndSubscriptions";
+import { SubscriptionsCard } from "./profile/SubscriptionsCard";
+import { TechStackCard } from "./profile/TechStackCard";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 
 interface Profile {
   first_name: string | null;
@@ -21,10 +25,11 @@ interface Profile {
   linkedin_url: string | null;
   avatar_url: string | null;
   level: string;
+  it_skills: string[] | null;
+  subscriptions: string[] | null;
 }
 
 const getLevelColor = (level: string) => {
-  // Normalize the level to match database values
   const normalizedLevel = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
   
   switch (normalizedLevel) {
@@ -41,20 +46,10 @@ export const ProfileSection = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<Profile>({
-    first_name: "",
-    last_name: "",
-    company: "",
-    role: "",
-    date_of_birth: null,
-    country: "",
-    github_url: "",
-    linkedin_url: "",
-    avatar_url: "",
-    level: "Basic", // Default value with proper casing
-  });
+  const queryClient = useQueryClient();
+  const [editedProfile, setEditedProfile] = useState<Profile | null>(null);
 
-  const { refetch } = useQuery({
+  const { data: profile, isLoading, error, refetch } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -64,29 +59,46 @@ export const ProfileSection = () => {
         .single();
 
       if (error) throw error;
-      
-      if (data) {
-        setProfile(data);
-      }
-      
       return data as Profile;
     },
     enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    placeholderData: {
+      first_name: "",
+      last_name: "",
+      company: "",
+      role: "",
+      date_of_birth: null,
+      country: "",
+      github_url: "",
+      linkedin_url: "",
+      avatar_url: "",
+      level: "Basic",
+      it_skills: [],
+      subscriptions: [],
+    },
   });
 
-  const handleProfileChange = (field: string, value: string | null) => {
-    setProfile((prev) => ({
-      ...prev,
+  // Initialize editedProfile when entering edit mode
+  const handleEditClick = () => {
+    setEditedProfile(profile);
+    setIsEditing(true);
+  };
+
+  const handleProfileChange = (field: keyof Profile, value: string | string[] | null) => {
+    if (!editedProfile) return;
+    setEditedProfile({
+      ...editedProfile,
       [field]: value,
-    }));
+    });
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || !editedProfile) return;
 
     const updatedProfile = {
-      ...profile,
-      date_of_birth: profile.date_of_birth || null,
+      ...editedProfile,
+      date_of_birth: editedProfile.date_of_birth || null,
     };
 
     const { error } = await supabase
@@ -104,15 +116,51 @@ export const ProfileSection = () => {
     }
 
     setIsEditing(false);
-    refetch();
+    queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
     toast({
       title: "Profile updated successfully",
       description: "Your profile information has been saved.",
     });
   };
 
+  if (isLoading) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
+        <CardContent className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
+        <CardContent className="p-8">
+          <div className="text-center text-red-500">
+            Error loading profile: {error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
+        <CardContent className="p-8">
+          <div className="text-center text-muted-foreground">
+            No profile data available
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const currentProfile = isEditing ? editedProfile : profile;
+
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Profile Information</CardTitle>
@@ -147,7 +195,7 @@ export const ProfileSection = () => {
                 if (isEditing) {
                   handleSave();
                 } else {
-                  setIsEditing(true);
+                  handleEditClick();
                 }
               }}
             >
@@ -157,15 +205,36 @@ export const ProfileSection = () => {
 
           <PersonalInfoSection
             isEditing={isEditing}
-            profile={profile}
+            profile={currentProfile!}
             onProfileChange={handleProfileChange}
           />
 
           <ProfessionalInfoSection
             isEditing={isEditing}
-            profile={profile}
+            profile={currentProfile!}
             onProfileChange={handleProfileChange}
           />
+
+          {isEditing && (
+            <SkillsAndSubscriptions
+              isEditing={isEditing}
+              subscriptions={currentProfile!.subscriptions}
+              itSkills={currentProfile!.it_skills}
+              onSubscriptionsChange={(subscriptions) => 
+                handleProfileChange("subscriptions", subscriptions)
+              }
+              onSkillsChange={(skills) => 
+                handleProfileChange("it_skills", skills)
+              }
+            />
+          )}
+
+          {!isEditing && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <SubscriptionsCard subscriptions={profile.subscriptions} />
+              <TechStackCard skills={profile.it_skills} />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

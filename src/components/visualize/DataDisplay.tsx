@@ -1,6 +1,6 @@
 import { DataGrid } from "@/components/datasets/query/DataGrid";
 import { Button } from "@/components/ui/button";
-import { Download, ChartBar, Table, FileText, Code } from "lucide-react";
+import { Download, ChartBar, Table, FileText, Code, Grid, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -13,6 +13,7 @@ import { DataSummary } from "./DataSummary";
 import { useToast } from "@/hooks/use-toast";
 import theme from "@/integrations/highcharts/highchartsConfig";
 import { CodeSnippetModal } from "./code-display/CodeSnippetModal";
+import { PivotGrid } from "./pivot/PivotGrid";
 
 interface DataDisplayProps {
   plotData: Options;
@@ -97,6 +98,17 @@ export const DataDisplay = ({
     });
   };
 
+  if (isLoading) {
+    return (
+      <Card className="p-6 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-xl metallic-card">
+        <div className="flex flex-col items-center justify-center h-[600px] space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-lg text-muted-foreground">Loading data...</p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card className="p-6 bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-xl metallic-card">
@@ -111,6 +123,10 @@ export const DataDisplay = ({
                 <ChartBar className="h-4 w-4" />
                 Plot
               </TabsTrigger>
+              <TabsTrigger value="pivot" className="flex items-center gap-2">
+                <Grid className="h-4 w-4" />
+                Pivot
+              </TabsTrigger>
               <TabsTrigger value="table" className="flex items-center gap-2">
                 <Table className="h-4 w-4" />
                 Table
@@ -120,7 +136,7 @@ export const DataDisplay = ({
               <Button
                 variant="outline"
                 onClick={handleExport}
-                disabled={!filteredData.length}
+                disabled={!filteredData.length || isLoading}
                 className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -129,6 +145,7 @@ export const DataDisplay = ({
               <Button
                 variant="outline"
                 onClick={exportChartAsHTML}
+                disabled={isLoading}
                 className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -137,6 +154,7 @@ export const DataDisplay = ({
               <Button
                 variant="outline"
                 onClick={() => setShowCodeModal(true)}
+                disabled={isLoading}
                 className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
               >
                 <Code className="h-4 w-4 mr-2" />
@@ -158,6 +176,10 @@ export const DataDisplay = ({
                 containerProps={{ style: { height: '100%' } }}
               />
             </div>
+          </TabsContent>
+
+          <TabsContent value="pivot">
+            <PivotGrid data={filteredData} columns={columns} />
           </TabsContent>
 
           <TabsContent value="table">

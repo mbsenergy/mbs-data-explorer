@@ -109,7 +109,7 @@ const Login = () => {
           <div className="space-y-6">
             <div className="flex flex-col items-center space-y-2">
               <img 
-                src="/brand/flux_logo_01.png" 
+                src="/brand/flux_logo_02.png" 
                 alt="Flux Logo" 
                 className="h-16 mb-4 animate-float"
               />

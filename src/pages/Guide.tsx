@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { 
-  Mail, 
-  Database, 
-  LineChart, 
-  Key, 
-  User, 
-  Bell, 
+import {
+  Mail,
+  Database,
+  LineChart,
+  Key,
+  User,
+  Bell,
   Search,
   FileText,
   Download,
@@ -17,10 +17,11 @@ import {
   HelpCircle,
   MessageSquare,
   Users,
-  Lock
+  Lock,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { VideoTutorials } from "@/components/guide/VideoTutorials";
 
 const Guide = () => {
   const { toast } = useToast();
@@ -33,13 +34,21 @@ const Guide = () => {
     });
   };
 
+  const iframeVideos = [
+    "https://embed.app.guidde.com/playbooks/6anAsRXVUCMorYJmk8CgHK",
+    "https://embed.app.guidde.com/playbooks/smwH1MDbyPttyxQ6F6vjyo",
+    "https://embed.app.guidde.com/playbooks/oG359QZE31iGMgsD41FRXY",
+    "https://embed.app.guidde.com/playbooks/uCdRB1eZVfjEEUdzWNmkzG",
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Header Section */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-green-500">
           How to use Flux
         </h1>
-        <Button 
+        <Button
           onClick={handleMailClick}
           variant="outline"
           className="flex items-center gap-2"
@@ -49,8 +58,12 @@ const Guide = () => {
         </Button>
       </div>
 
+      {/* Main Content */}
       <div className="grid gap-6">
-        {/* Data Access Section */}
+        {/* Video Tutorials Section */}
+        <VideoTutorials videos={iframeVideos} />
+
+        {/* Other Sections */}
         <CollapsibleCard
           title="Data Access & Query"
           icon={<Database className="h-6 w-6" />}
