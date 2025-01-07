@@ -24,5 +24,4 @@ RUN npm install -g eslint prettier
 # Expose the default React app development port
 EXPOSE 3000
 
-# Default command to keep the container alive
 CMD ["sleep", "infinity"]
