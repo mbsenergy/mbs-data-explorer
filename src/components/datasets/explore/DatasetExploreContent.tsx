@@ -3,6 +3,7 @@ import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetQueryModal } from "./DatasetQueryModal";
 import { Button } from "@/components/ui/button";
+import { compareValues } from "@/utils/datasetUtils";
 import type { Filter } from "./types";
 
 interface DatasetExploreContentProps {
