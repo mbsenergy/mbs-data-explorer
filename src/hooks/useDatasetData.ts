@@ -116,6 +116,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     isLoading,
     loadingProgress,
     loadData,
-    fetchPage // Add the fetchPage function to the returned object
+    fetchPage
   };
 };
