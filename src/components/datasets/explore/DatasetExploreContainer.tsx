@@ -3,9 +3,7 @@ import { Card } from "@/components/ui/card";
 import { DatasetStats } from "./DatasetStats";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
-import { useDatasetStore } from "@/stores/datasetStore";
+import { useExploreState } from "@/hooks/useExploreState";
 import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { DatasetExploreContent } from "./DatasetExploreContent";
 import type { Filter } from "./types";
@@ -25,27 +23,21 @@ export const DatasetExploreContainer = ({
   onLoad
 }: DatasetExploreContainerProps) => {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const { setExploreState, getExploreState } = useDatasetStore();
-
-  // Initialize state from store or defaults
-  const savedState = getExploreState();
-  const [filters, setFilters] = useState<Filter[]>(
-    savedState?.filters || [
-      { 
-        id: crypto.randomUUID(), 
-        searchTerm: "", 
-        selectedColumn: "", 
-        operator: "AND",
-        comparisonOperator: "=" 
-      }
-    ]
-  );
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    savedState?.selectedColumns || []
-  );
-  const [filteredData, setFilteredData] = useState<any[]>(savedState?.data || []);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedColumn, setSelectedColumn] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [paginatedData, setPaginatedData] = useState<any[]>([]);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
+  const itemsPerPage = 10;
+
+  const {
+    selectedColumns,
+    setSelectedColumns,
+    filteredData,
+    setFilteredData,
+    filters,
+    setFilters
+  } = useExploreState(selectedDataset as TableNames);
 
   const {
     data,
@@ -53,20 +45,7 @@ export const DatasetExploreContainer = ({
     totalRowCount,
     isLoading,
     loadData
-  } = useDatasetData(selectedDataset as TableNames | null);
-
-  // Save state to store whenever relevant state changes
-  useEffect(() => {
-    if (selectedDataset) {
-      setExploreState({
-        selectedDataset: selectedDataset as TableNames,
-        selectedColumns,
-        filters,
-        data: filteredData,
-        timestamp: Date.now()
-      });
-    }
-  }, [selectedDataset, selectedColumns, filters, filteredData, setExploreState]);
+  } = useDatasetData(selectedDataset as TableNames);
 
   // Update columns when they change
   useEffect(() => {
@@ -74,15 +53,22 @@ export const DatasetExploreContainer = ({
       setSelectedColumns(columns);
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange]);
+  }, [columns, onColumnsChange, setSelectedColumns]);
 
-  // Update filtered data when source data changes
+  // Update filtered data when main data changes
   useEffect(() => {
-    if (data) {
+    if (data && data.length > 0) {
       console.log("Setting filtered data:", data);
       setFilteredData(data);
     }
-  }, [data]);
+  }, [data, setFilteredData]);
+
+  // Update paginated data when filtered data changes
+  useEffect(() => {
+    const start = currentPage * itemsPerPage;
+    const end = start + itemsPerPage;
+    setPaginatedData(filteredData.slice(start, end));
+  }, [filteredData, currentPage]);
 
   const handleLoad = async () => {
     if (!selectedDataset) return;
@@ -108,40 +94,8 @@ export const DatasetExploreContainer = ({
     }
   };
 
-  const handleExport = async () => {
-    if (!selectedDataset || !user?.id || !selectedColumns.length) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select at least one column to export.",
-      });
-      return;
-    }
-
-    try {
-      const { error: analyticsError } = await supabase
-        .from("analytics")
-        .insert({
-          user_id: user.id,
-          dataset_name: selectedDataset,
-          is_custom_query: false,
-        });
-
-      if (analyticsError) {
-        console.error("Error tracking export:", analyticsError);
-      }
-
-      toast({
-        title: "Success",
-        description: "Dataset exported successfully"
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to export dataset"
-      });
-    }
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
   };
 
   return (
@@ -149,7 +103,6 @@ export const DatasetExploreContainer = ({
       <DatasetExploreHeader
         selectedDataset={selectedDataset}
         onLoad={handleLoad}
-        onExport={handleExport}
         onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
@@ -169,10 +122,15 @@ export const DatasetExploreContainer = ({
         <DatasetExploreContent
           columns={columns}
           selectedColumns={selectedColumns}
-          filters={filters}
-          setFilters={setFilters}
-          filteredData={filteredData}
-          setFilteredData={setFilteredData}
+          onColumnsChange={onColumnsChange}
+          searchTerm={searchTerm}
+          selectedColumn={selectedColumn}
+          onSearchChange={setSearchTerm}
+          onColumnChange={setSelectedColumn}
+          paginatedData={paginatedData}
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredData.length / itemsPerPage)}
+          onPageChange={handlePageChange}
           onColumnSelect={(column) => {
             const newColumns = selectedColumns.includes(column)
               ? selectedColumns.filter(col => col !== column)
@@ -181,10 +139,14 @@ export const DatasetExploreContainer = ({
             setSelectedColumns(newColumns);
             onColumnsChange(newColumns);
           }}
-          data={data || []}
+          filters={filters}
+          setFilters={setFilters}
+          filteredData={filteredData}
+          setFilteredData={setFilteredData}
+          data={data}
+          selectedDataset={selectedDataset}
           isQueryModalOpen={isQueryModalOpen}
           setIsQueryModalOpen={setIsQueryModalOpen}
-          selectedDataset={selectedDataset}
         />
       )}
     </Card>
