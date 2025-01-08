@@ -17,6 +17,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     queryKey: ['columns', selectedDataset],
     queryFn: async () => {
       if (!selectedDataset) return [];
+      
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: `SELECT * FROM "${selectedDataset}" LIMIT 1`
       });
@@ -49,9 +50,12 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     queryFn: async () => {
       if (!selectedDataset) return [];
 
+      console.log("Loading data for dataset:", selectedDataset);
+
       // Check cache first
       const cachedResult = getQueryResult(selectedDataset);
       if (cachedResult) {
+        console.log("Using cached data:", cachedResult);
         return cachedResult.data;
       }
 
@@ -61,6 +65,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         .limit(1000);
 
       if (error) throw error;
+
+      console.log("Fetched new data:", sampleData);
 
       // Create columns definition
       const cols: ColumnDef<any>[] = Object.keys(sampleData?.[0] || {}).map(key => ({
@@ -73,29 +79,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
       return sampleData || [];
     },
-    enabled: false
+    enabled: false // Don't auto-fetch, wait for manual trigger
   });
-
-  const fetchPage = async (page: number, itemsPerPage: number) => {
-    if (!selectedDataset) return [];
-    
-    try {
-      const { data: pageData, error } = await supabase
-        .from(selectedDataset)
-        .select('*')
-        .range(page * itemsPerPage, (page + 1) * itemsPerPage - 1);
-      
-      if (error) throw error;
-      return pageData || [];
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error fetching page",
-        description: error.message
-      });
-      return [];
-    }
-  };
 
   return {
     data,
@@ -103,7 +88,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     totalRowCount,
     isLoading,
     loadingProgress,
-    fetchPage,
     loadData
   };
 };

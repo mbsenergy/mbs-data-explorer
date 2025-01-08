@@ -10,7 +10,6 @@ import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { DatasetExploreContent } from "./DatasetExploreContent";
 import type { Filter } from "./types";
 import type { Database } from "@/integrations/supabase/types";
-import { v4 as uuidv4 } from 'uuid';
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -34,7 +33,7 @@ export const DatasetExploreContainer = ({
   const [filters, setFilters] = useState<Filter[]>(
     savedState?.filters || [
       { 
-        id: uuidv4(), 
+        id: crypto.randomUUID(), 
         searchTerm: "", 
         selectedColumn: "", 
         operator: "AND",
@@ -53,7 +52,6 @@ export const DatasetExploreContainer = ({
     columns,
     totalRowCount,
     isLoading,
-    fetchPage,
     loadData
   } = useDatasetData(selectedDataset as TableNames | null);
 
@@ -81,29 +79,41 @@ export const DatasetExploreContainer = ({
   // Update filtered data when source data changes
   useEffect(() => {
     if (data) {
+      console.log("Setting filtered data:", data);
       setFilteredData(data);
     }
   }, [data]);
 
   const handleLoad = async () => {
-    if (selectedDataset && loadData) {
+    if (!selectedDataset) return;
+
+    try {
       await loadData();
+      
       if (onLoad) {
         onLoad(selectedDataset);
       }
+
       toast({
-        title: "Dataset Loaded",
-        description: `Successfully loaded ${selectedDataset}`
+        title: "Dataset Retrieved",
+        description: `Successfully retrieved ${selectedDataset}`
+      });
+    } catch (error: any) {
+      console.error("Error loading dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to retrieve dataset"
       });
     }
   };
 
   const handleExport = async () => {
-    if (!selectedDataset || !user?.id) {
+    if (!selectedDataset || !user?.id || !selectedColumns.length) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a dataset and ensure you're logged in."
+        description: "Please select at least one column to export.",
       });
       return;
     }
@@ -134,23 +144,6 @@ export const DatasetExploreContainer = ({
     }
   };
 
-  const handleColumnSelect = (column: string) => {
-    const newColumns = selectedColumns.includes(column)
-      ? selectedColumns.filter(col => col !== column)
-      : [...selectedColumns, column];
-    
-    setSelectedColumns(newColumns);
-    onColumnsChange(newColumns);
-  };
-
-  const getLastUpdate = (data: any[]) => {
-    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
-      const item = data[0] as Record<string, unknown>;
-      return item.md_last_update as string | null;
-    }
-    return null;
-  };
-
   return (
     <Card className="p-6 space-y-6 metallic-card">
       <DatasetExploreHeader
@@ -165,7 +158,7 @@ export const DatasetExploreContainer = ({
         totalRows={totalRowCount}
         columnsCount={columns.length}
         filteredRows={filteredData.length}
-        lastUpdate={getLastUpdate(data)}
+        lastUpdate={data?.[0]?.md_last_update}
       />
 
       {isLoading ? (
@@ -180,8 +173,15 @@ export const DatasetExploreContainer = ({
           setFilters={setFilters}
           filteredData={filteredData}
           setFilteredData={setFilteredData}
-          onColumnSelect={handleColumnSelect}
-          data={data}
+          onColumnSelect={(column) => {
+            const newColumns = selectedColumns.includes(column)
+              ? selectedColumns.filter(col => col !== column)
+              : [...selectedColumns, column];
+            
+            setSelectedColumns(newColumns);
+            onColumnsChange(newColumns);
+          }}
+          data={data || []}
           isQueryModalOpen={isQueryModalOpen}
           setIsQueryModalOpen={setIsQueryModalOpen}
           selectedDataset={selectedDataset}
