@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DatasetPagination } from "./DatasetPagination";
 import { DatasetStats } from "./DatasetStats";
-import { DatasetTable } from "./DatasetTable";
-import { DatasetControls } from "./DatasetControls";
-import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
-import { useDatasetStore } from "@/stores/datasetStore";
 import { useToast } from "@/hooks/use-toast";
+import { useExploreState } from "@/hooks/useExploreState";
+import { DatasetExploreContent } from "./DatasetExploreContent";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -31,17 +28,14 @@ export const DatasetExplore = ({
   const [paginatedData, setPaginatedData] = useState<any[]>([]);
   const itemsPerPage = 10;
 
-  // Get state management functions from Zustand store
-  const { setExploreState, getExploreState } = useDatasetStore();
-  
-  // Initialize state from store or defaults
-  const savedState = getExploreState();
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    savedState?.selectedColumns || []
-  );
-  const [filteredData, setFilteredData] = useState<any[]>(
-    savedState?.data || []
-  );
+  const {
+    selectedColumns,
+    setSelectedColumns,
+    filteredData,
+    setFilteredData,
+    filters,
+    setFilters
+  } = useExploreState(selectedDataset);
 
   const {
     data,
@@ -58,25 +52,15 @@ export const DatasetExplore = ({
       setSelectedColumns(columns);
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange]);
+  }, [columns, onColumnsChange, setSelectedColumns]);
 
-  // Update filtered and paginated data when main data changes
+  // Update filtered data when main data changes
   useEffect(() => {
     if (data && data.length > 0) {
       console.log("Setting filtered data:", data);
       setFilteredData(data);
-      
-      // Save to store
-      if (selectedDataset) {
-        setExploreState({
-          selectedDataset,
-          selectedColumns,
-          data: data,
-          timestamp: Date.now()
-        });
-      }
     }
-  }, [data, selectedDataset, selectedColumns, setExploreState]);
+  }, [data, setFilteredData]);
 
   // Update paginated data when filtered data changes
   useEffect(() => {
@@ -98,44 +82,13 @@ export const DatasetExplore = ({
     }
   };
 
-  const filteredDataset = filteredData.filter((item) =>
-    selectedColumn
-      ? String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      : Object.entries(item)
-          .filter(([key]) => !key.startsWith('md_'))
-          .some(([_, value]) => 
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
-          )
-  );
-
-  const totalPages = Math.ceil(filteredDataset.length / itemsPerPage);
-
-  const handleColumnSelect = (column: string) => {
-    const newColumns = selectedColumns.includes(column)
-      ? selectedColumns.filter(col => col !== column)
-      : [...selectedColumns, column];
-    
-    setSelectedColumns(newColumns);
-    onColumnsChange(newColumns);
-
-    // Save to store when columns change
-    if (selectedDataset) {
-      setExploreState({
-        selectedDataset,
-        selectedColumns: newColumns,
-        data: filteredData,
-        timestamp: Date.now()
-      });
-    }
-  };
-
   const handlePageChange = async (newPage: number) => {
-    const pageData = await fetchPage(newPage, itemsPerPage);
-    if (pageData) {
-      setPaginatedData(pageData);
-      setCurrentPage(newPage);
+    if (fetchPage) {
+      const pageData = await fetchPage(newPage, itemsPerPage);
+      if (pageData) {
+        setPaginatedData(pageData);
+        setCurrentPage(newPage);
+      }
     }
   };
 
@@ -183,43 +136,32 @@ export const DatasetExplore = ({
       <DatasetStats 
         totalRows={totalRowCount}
         columnsCount={columns.length}
-        filteredRows={filteredDataset.length}
+        filteredRows={filteredData.length}
         lastUpdate={getLastUpdate(data)}
       />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <p>Loading dataset...</p>
-        </div>
-      ) : (
-        <>
-          <DatasetControls
-            columns={columns}
-            searchTerm={searchTerm}
-            selectedColumn={selectedColumn}
-            onSearchChange={setSearchTerm}
-            onColumnChange={setSelectedColumn}
-          />
-
-          <DatasetColumnSelect
-            columns={columns}
-            selectedColumns={selectedColumns}
-            onColumnSelect={handleColumnSelect}
-          />
-
-          <DatasetTable
-            columns={columns}
-            data={paginatedData}
-            selectedColumns={selectedColumns}
-          />
-
-          <DatasetPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </>
-      )}
+      <DatasetExploreContent
+        isLoading={isLoading}
+        columns={columns}
+        selectedColumns={selectedColumns}
+        onColumnsChange={onColumnsChange}
+        searchTerm={searchTerm}
+        selectedColumn={selectedColumn}
+        onSearchChange={setSearchTerm}
+        onColumnChange={setSelectedColumn}
+        paginatedData={paginatedData}
+        currentPage={currentPage}
+        totalPages={Math.ceil(filteredData.length / itemsPerPage)}
+        onPageChange={handlePageChange}
+        onColumnSelect={(column) => {
+          const newColumns = selectedColumns.includes(column)
+            ? selectedColumns.filter(col => col !== column)
+            : [...selectedColumns, column];
+          
+          setSelectedColumns(newColumns);
+          onColumnsChange(newColumns);
+        }}
+      />
     </Card>
   );
 };

@@ -21,7 +21,7 @@ interface SavedQuery {
 }
 
 interface ExploreState {
-  selectedDataset: TableNames | null;
+  selectedDataset: TableNames;
   selectedColumns: string[];
   filters: Filter[];
   data: any[];
