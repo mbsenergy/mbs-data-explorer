@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type RefetchOptions, type QueryObserverResult } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDatasetStore } from "@/stores/datasetStore";
@@ -82,12 +82,40 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     enabled: false // Don't auto-fetch, wait for manual trigger
   });
 
+  const fetchPage = async (page: number, pageSize: number) => {
+    if (!selectedDataset) return null;
+
+    try {
+      const start = page * pageSize;
+      const { data: pageData, error } = await supabase
+        .from(selectedDataset)
+        .select('*')
+        .range(start, start + pageSize - 1);
+
+      if (error) {
+        console.error("Error fetching page:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch data page"
+        });
+        return null;
+      }
+
+      return pageData;
+    } catch (error) {
+      console.error("Error in fetchPage:", error);
+      return null;
+    }
+  };
+
   return {
     data,
     columns,
     totalRowCount,
     isLoading,
     loadingProgress,
-    loadData
+    loadData,
+    fetchPage // Add the fetchPage function to the returned object
   };
 };

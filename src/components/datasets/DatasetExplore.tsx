@@ -26,6 +26,7 @@ export const DatasetExplore = ({
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [paginatedData, setPaginatedData] = useState<any[]>([]);
   const itemsPerPage = 10;
 
   const {
@@ -43,6 +44,13 @@ export const DatasetExplore = ({
       onColumnsChange(columns);
     }
   }, [columns, onColumnsChange]);
+
+  useEffect(() => {
+    // Update paginated data when main data changes
+    const start = currentPage * itemsPerPage;
+    const end = start + itemsPerPage;
+    setPaginatedData(data.slice(start, end));
+  }, [data, currentPage]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
@@ -66,10 +74,6 @@ export const DatasetExplore = ({
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = filteredData.slice(
-    currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage
-  );
 
   const handleColumnSelect = (column: string) => {
     const newColumns = selectedColumns.includes(column)
@@ -83,6 +87,7 @@ export const DatasetExplore = ({
   const handlePageChange = async (newPage: number) => {
     const pageData = await fetchPage(newPage, itemsPerPage);
     if (pageData) {
+      setPaginatedData(pageData);
       setCurrentPage(newPage);
     }
   };
@@ -112,18 +117,18 @@ export const DatasetExplore = ({
               variant="outline"
               size="sm"
               onClick={handleLoad}
-              className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+              className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
             >
-              Load
+              Retrieve
             </Button>
           )}
           <Button 
             variant="outline"
             size="sm"
             onClick={() => window.location.href = '#sample'}
-            className="bg-[#FEC6A1]/20 hover:bg-[#FEC6A1]/30"
+            className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
           >
-            Sample
+            Export
           </Button>
         </div>
       </div>
