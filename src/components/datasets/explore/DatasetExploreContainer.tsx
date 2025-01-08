@@ -80,8 +80,50 @@ export const DatasetExploreContainer = ({
   };
 
   const handleExport = () => {
-    // Export functionality
-    console.log("Exporting data...");
+    if (!selectedDataset || !data.length) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No data available to export"
+      });
+      return;
+    }
+
+    try {
+      const headers = selectedColumns.join(',');
+      const rows = data.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
+      const csv = [headers, ...rows].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedDataset}_export.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Data exported successfully"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to export data"
+      });
+    }
   };
 
   const handleShowQuery = () => {
@@ -144,6 +186,8 @@ export const DatasetExploreContainer = ({
         selectedDataset={selectedDataset}
         isQueryModalOpen={isQueryModalOpen}
         setIsQueryModalOpen={setIsQueryModalOpen}
+        onLoad={handleLoad}
+        onExport={handleExport}
       />
     </Card>
   );

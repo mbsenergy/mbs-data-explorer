@@ -4,8 +4,7 @@ import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetQueryModal } from "./DatasetQueryModal";
-import { Button } from "@/components/ui/button";
-import { Code } from "lucide-react";
+import { DatasetExploreActions } from "./DatasetExploreActions";
 import type { Filter } from "./types";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -84,17 +83,13 @@ export const DatasetExploreContent = ({
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleShowQuery}
-          className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-        >
-          <Code className="h-4 w-4 mr-2" />
-          Show Query
-        </Button>
-      </div>
+      <DatasetExploreActions
+        selectedDataset={selectedDataset}
+        onRetrieve={onLoad}
+        onExport={onExport}
+        onShowQuery={handleShowQuery}
+        isLoading={isLoading}
+      />
 
       <DatasetControls
         columns={columns}
