@@ -4,23 +4,22 @@ import { DatasetStats } from "./DatasetStats";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useExploreState } from "@/hooks/useExploreState";
-import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { DatasetExploreContent } from "./DatasetExploreContent";
-import type { Filter } from "./types";
+import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetExploreContainerProps {
-  selectedDataset: string | null;
+  selectedDataset: TableNames | null;
   onColumnsChange: (columns: string[]) => void;
   onLoad?: (tableName: string) => void;
 }
 
-export const DatasetExploreContainer = ({
-  selectedDataset,
+export const DatasetExploreContainer = ({ 
+  selectedDataset, 
   onColumnsChange,
-  onLoad
+  onLoad 
 }: DatasetExploreContainerProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,17 +36,17 @@ export const DatasetExploreContainer = ({
     setFilteredData,
     filters,
     setFilters
-  } = useExploreState(selectedDataset as TableNames);
+  } = useExploreState(selectedDataset);
 
   const {
     data,
     columns,
     totalRowCount,
     isLoading,
-    loadData
-  } = useDatasetData(selectedDataset as TableNames);
+    loadData,
+    fetchPage
+  } = useDatasetData(selectedDataset);
 
-  // Update columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -55,15 +54,12 @@ export const DatasetExploreContainer = ({
     }
   }, [columns, onColumnsChange, setSelectedColumns]);
 
-  // Update filtered data when main data changes
   useEffect(() => {
     if (data && data.length > 0) {
-      console.log("Setting filtered data:", data);
       setFilteredData(data);
     }
   }, [data, setFilteredData]);
 
-  // Update paginated data when filtered data changes
   useEffect(() => {
     const start = currentPage * itemsPerPage;
     const end = start + itemsPerPage;
@@ -71,39 +67,44 @@ export const DatasetExploreContainer = ({
   }, [filteredData, currentPage]);
 
   const handleLoad = async () => {
-    if (!selectedDataset) return;
-
-    try {
+    if (selectedDataset && loadData) {
       await loadData();
-      
-      if (onLoad) {
+      if (onLoad && selectedDataset) {
         onLoad(selectedDataset);
       }
-
       toast({
         title: "Dataset Retrieved",
-        description: `Successfully retrieved ${selectedDataset}`
-      });
-    } catch (error: any) {
-      console.error("Error loading dataset:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to retrieve dataset"
+        description: `Successfully loaded ${selectedDataset}`
       });
     }
   };
 
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
+  const handleExport = () => {
+    // Export functionality
+    console.log("Exporting data...");
+  };
+
+  const handleShowQuery = () => {
+    setIsQueryModalOpen(true);
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    if (fetchPage) {
+      const pageData = await fetchPage(newPage, itemsPerPage);
+      if (pageData) {
+        setPaginatedData(pageData);
+        setCurrentPage(newPage);
+      }
+    }
   };
 
   return (
-    <Card className="p-6 space-y-6 metallic-card">
-      <DatasetExploreHeader
+    <Card className="p-6 space-y-6">
+      <DatasetExploreHeader 
         selectedDataset={selectedDataset}
         onLoad={handleLoad}
-        onShowQuery={() => setIsQueryModalOpen(true)}
+        onExport={handleExport}
+        onShowQuery={handleShowQuery}
         isLoading={isLoading}
       />
 
@@ -114,41 +115,36 @@ export const DatasetExploreContainer = ({
         lastUpdate={data?.[0]?.md_last_update}
       />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <p>Loading dataset...</p>
-        </div>
-      ) : (
-        <DatasetExploreContent
-          columns={columns}
-          selectedColumns={selectedColumns}
-          onColumnsChange={onColumnsChange}
-          searchTerm={searchTerm}
-          selectedColumn={selectedColumn}
-          onSearchChange={setSearchTerm}
-          onColumnChange={setSelectedColumn}
-          paginatedData={paginatedData}
-          currentPage={currentPage}
-          totalPages={Math.ceil(filteredData.length / itemsPerPage)}
-          onPageChange={handlePageChange}
-          onColumnSelect={(column) => {
-            const newColumns = selectedColumns.includes(column)
-              ? selectedColumns.filter(col => col !== column)
-              : [...selectedColumns, column];
-            
-            setSelectedColumns(newColumns);
-            onColumnsChange(newColumns);
-          }}
-          filters={filters}
-          setFilters={setFilters}
-          filteredData={filteredData}
-          setFilteredData={setFilteredData}
-          data={data}
-          selectedDataset={selectedDataset}
-          isQueryModalOpen={isQueryModalOpen}
-          setIsQueryModalOpen={setIsQueryModalOpen}
-        />
-      )}
+      <DatasetExploreContent
+        isLoading={isLoading}
+        columns={columns}
+        selectedColumns={selectedColumns}
+        onColumnsChange={onColumnsChange}
+        searchTerm={searchTerm}
+        selectedColumn={selectedColumn}
+        onSearchChange={setSearchTerm}
+        onColumnChange={setSelectedColumn}
+        paginatedData={paginatedData}
+        currentPage={currentPage}
+        totalPages={Math.ceil(filteredData.length / itemsPerPage)}
+        onPageChange={handlePageChange}
+        onColumnSelect={(column) => {
+          const newColumns = selectedColumns.includes(column)
+            ? selectedColumns.filter(col => col !== column)
+            : [...selectedColumns, column];
+          
+          setSelectedColumns(newColumns);
+          onColumnsChange(newColumns);
+        }}
+        filters={filters}
+        setFilters={setFilters}
+        filteredData={filteredData}
+        setFilteredData={setFilteredData}
+        data={data}
+        selectedDataset={selectedDataset}
+        isQueryModalOpen={isQueryModalOpen}
+        setIsQueryModalOpen={setIsQueryModalOpen}
+      />
     </Card>
   );
 };

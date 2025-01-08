@@ -1,11 +1,10 @@
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Compass, Database, Download, Code } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
+import { Database, Download, Code } from "lucide-react";
+import type { Database as SupabaseDatabase } from "@/integrations/supabase/types";
 
-type TableNames = keyof Database['public']['Tables'];
+type TableNames = keyof SupabaseDatabase['public']['Tables'];
 
-interface DatasetExploreHeaderProps {
+export interface DatasetExploreHeaderProps {
   selectedDataset: TableNames | null;
   onLoad?: () => void;
   onExport: () => void;
@@ -24,12 +23,12 @@ export const DatasetExploreHeader = ({
     <div className="flex justify-between items-center">
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Compass className="h-6 w-6" />
+          <Database className="h-6 w-6" />
           <h2 className="text-2xl font-semibold">Explore</h2>
         </div>
         {selectedDataset && (
           <p className="text-muted-foreground">
-            Selected dataset: <span className="font-medium">{selectedDataset}</span>
+            Selected dataset: <span className="font-medium">{String(selectedDataset)}</span>
           </p>
         )}
       </div>

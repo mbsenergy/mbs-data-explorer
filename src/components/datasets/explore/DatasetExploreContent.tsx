@@ -1,18 +1,17 @@
+import { Dispatch, SetStateAction } from "react";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetQueryModal } from "./DatasetQueryModal";
-import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { Button } from "@/components/ui/button";
 import { Code } from "lucide-react";
-import { useState } from "react";
 import type { Filter } from "./types";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
-interface DatasetExploreContentProps {
+export interface DatasetExploreContentProps {
   isLoading: boolean;
   columns: string[];
   selectedColumns: string[];
@@ -33,9 +32,7 @@ interface DatasetExploreContentProps {
   data: any[];
   selectedDataset: TableNames | null;
   isQueryModalOpen: boolean;
-  setIsQueryModalOpen: (isOpen: boolean) => void;
-  onLoad?: () => void;
-  onExport: () => void;
+  setIsQueryModalOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const DatasetExploreContent = ({
@@ -59,20 +56,18 @@ export const DatasetExploreContent = ({
   data,
   selectedDataset,
   isQueryModalOpen,
-  setIsQueryModalOpen,
-  onLoad,
-  onExport
+  setIsQueryModalOpen
 }: DatasetExploreContentProps) => {
-  const [currentQuery, setCurrentQuery] = useState("");
-
   const handleShowQuery = () => {
+    setIsQueryModalOpen(true);
+  };
+
+  const getQueryString = () => {
+    if (!selectedDataset) return "";
     const columnsStr = selectedColumns.length > 0 
       ? selectedColumns.map(col => `"${col}"`).join(', ')
       : '*';
-    
-    const query = `SELECT ${columnsStr} FROM "${selectedDataset}"`;
-    setCurrentQuery(query);
-    setIsQueryModalOpen(true);
+    return `SELECT ${columnsStr} FROM "${selectedDataset}"`;
   };
 
   if (isLoading) {
@@ -85,13 +80,17 @@ export const DatasetExploreContent = ({
 
   return (
     <>
-      <DatasetExploreHeader
-        selectedDataset={selectedDataset}
-        onLoad={onLoad}
-        onExport={onExport}
-        onShowQuery={handleShowQuery}
-        isLoading={isLoading}
-      />
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleShowQuery}
+          className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+        >
+          <Code className="h-4 w-4 mr-2" />
+          Show Query
+        </Button>
+      </div>
 
       <DatasetControls
         columns={columns}
@@ -122,7 +121,7 @@ export const DatasetExploreContent = ({
       <DatasetQueryModal
         isOpen={isQueryModalOpen}
         onClose={() => setIsQueryModalOpen(false)}
-        query={currentQuery}
+        query={getQueryString()}
         apiCall={`await supabase
   .from('${selectedDataset}')
   .select('${selectedColumns.join(", ")}')`}
