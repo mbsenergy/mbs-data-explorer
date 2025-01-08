@@ -5,6 +5,7 @@ import { DatasetTable } from "./DatasetTable";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetQueryModal } from "./DatasetQueryModal";
 import { DatasetExploreActions } from "./DatasetExploreActions";
+import { DatasetFilters } from "./DatasetFilters";
 import type { Filter } from "./types";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -17,8 +18,8 @@ export interface DatasetExploreContentProps {
   onColumnsChange: (columns: string[]) => void;
   searchTerm: string;
   selectedColumn: string;
-  onSearchChange: (value: string) => void;
-  onColumnChange: (value: string) => void;
+  onSearchChange: Dispatch<SetStateAction<string>>;
+  onColumnChange: Dispatch<SetStateAction<string>>;
   paginatedData: any[];
   currentPage: number;
   totalPages: number;
@@ -89,6 +90,30 @@ export const DatasetExploreContent = ({
         onExport={onExport}
         onShowQuery={handleShowQuery}
         isLoading={isLoading}
+      />
+
+      <DatasetFilters
+        columns={columns}
+        filters={filters}
+        onFilterChange={(filterId, field, value) => {
+          setFilters(filters.map(filter => 
+            filter.id === filterId 
+              ? { ...filter, [field]: value }
+              : filter
+          ));
+        }}
+        onAddFilter={() => {
+          setFilters([...filters, {
+            id: crypto.randomUUID(),
+            searchTerm: "",
+            selectedColumn: "",
+            operator: "AND",
+            comparisonOperator: "="
+          }]);
+        }}
+        onRemoveFilter={(filterId) => {
+          setFilters(filters.filter(filter => filter.id !== filterId));
+        }}
       />
 
       <DatasetControls

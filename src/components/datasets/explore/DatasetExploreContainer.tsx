@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { DatasetStats } from "./DatasetStats";
-import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
+import { useDatasetData } from "@/hooks/useDatasetData";
 import { useExploreState } from "@/hooks/useExploreState";
 import { DatasetExploreContent } from "./DatasetExploreContent";
 import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import type { Database } from "@/integrations/supabase/types";
+import type { Filter } from "./types";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -57,30 +57,35 @@ export const DatasetExploreContainer = ({
   useEffect(() => {
     if (data && data.length > 0) {
       setFilteredData(data);
+      const start = currentPage * itemsPerPage;
+      const end = start + itemsPerPage;
+      setPaginatedData(data.slice(start, end));
     }
-  }, [data, setFilteredData]);
-
-  useEffect(() => {
-    const start = currentPage * itemsPerPage;
-    const end = start + itemsPerPage;
-    setPaginatedData(filteredData.slice(start, end));
-  }, [filteredData, currentPage]);
+  }, [data, currentPage, setFilteredData]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData();
-      if (onLoad && selectedDataset) {
-        onLoad(selectedDataset);
+      try {
+        await loadData();
+        if (onLoad) {
+          onLoad(selectedDataset);
+        }
+        toast({
+          title: "Success",
+          description: `Successfully loaded ${selectedDataset}`
+        });
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to load dataset"
+        });
       }
-      toast({
-        title: "Dataset Retrieved",
-        description: `Successfully loaded ${selectedDataset}`
-      });
     }
   };
 
   const handleExport = () => {
-    if (!selectedDataset || !data.length) {
+    if (!selectedDataset || !filteredData.length) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -91,7 +96,7 @@ export const DatasetExploreContainer = ({
 
     try {
       const headers = selectedColumns.join(',');
-      const rows = data.map(row => 
+      const rows = filteredData.map(row => 
         selectedColumns.map(col => {
           const value = row[col];
           if (value === null) return '';
@@ -148,13 +153,6 @@ export const DatasetExploreContainer = ({
         onExport={handleExport}
         onShowQuery={handleShowQuery}
         isLoading={isLoading}
-      />
-
-      <DatasetStats 
-        totalRows={totalRowCount}
-        columnsCount={columns.length}
-        filteredRows={filteredData.length}
-        lastUpdate={data?.[0]?.md_last_update}
       />
 
       <DatasetExploreContent
