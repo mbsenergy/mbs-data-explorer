@@ -33,6 +33,8 @@ export interface DatasetExploreContentProps {
   selectedDataset: TableNames | null;
   isQueryModalOpen: boolean;
   setIsQueryModalOpen: Dispatch<SetStateAction<boolean>>;
+  onLoad?: () => Promise<void>;
+  onExport: () => void;
 }
 
 export const DatasetExploreContent = ({
@@ -56,7 +58,9 @@ export const DatasetExploreContent = ({
   data,
   selectedDataset,
   isQueryModalOpen,
-  setIsQueryModalOpen
+  setIsQueryModalOpen,
+  onLoad,
+  onExport
 }: DatasetExploreContentProps) => {
   const handleShowQuery = () => {
     setIsQueryModalOpen(true);
