@@ -3,10 +3,14 @@ import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetPagination } from "./DatasetPagination";
 import { DatasetQueryModal } from "./DatasetQueryModal";
+import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { Button } from "@/components/ui/button";
 import { Code } from "lucide-react";
 import { useState } from "react";
 import type { Filter } from "./types";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetExploreContentProps {
   isLoading: boolean;
@@ -27,9 +31,11 @@ interface DatasetExploreContentProps {
   filteredData: any[];
   setFilteredData: (data: any[]) => void;
   data: any[];
-  selectedDataset: string | null;
+  selectedDataset: TableNames | null;
   isQueryModalOpen: boolean;
   setIsQueryModalOpen: (isOpen: boolean) => void;
+  onLoad?: () => void;
+  onExport: () => void;
 }
 
 export const DatasetExploreContent = ({
@@ -53,12 +59,13 @@ export const DatasetExploreContent = ({
   data,
   selectedDataset,
   isQueryModalOpen,
-  setIsQueryModalOpen
+  setIsQueryModalOpen,
+  onLoad,
+  onExport
 }: DatasetExploreContentProps) => {
   const [currentQuery, setCurrentQuery] = useState("");
 
   const handleShowQuery = () => {
-    // Construct the query based on selected columns and filters
     const columnsStr = selectedColumns.length > 0 
       ? selectedColumns.map(col => `"${col}"`).join(', ')
       : '*';
@@ -78,17 +85,13 @@ export const DatasetExploreContent = ({
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleShowQuery}
-          className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-        >
-          <Code className="h-4 w-4 mr-2" />
-          Show Query
-        </Button>
-      </div>
+      <DatasetExploreHeader
+        selectedDataset={selectedDataset}
+        onLoad={onLoad}
+        onExport={onExport}
+        onShowQuery={handleShowQuery}
+        isLoading={isLoading}
+      />
 
       <DatasetControls
         columns={columns}

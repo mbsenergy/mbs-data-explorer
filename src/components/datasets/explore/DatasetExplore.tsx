@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DatasetStats } from "./DatasetStats";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +25,7 @@ export const DatasetExplore = ({
   const [selectedColumn, setSelectedColumn] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [paginatedData, setPaginatedData] = useState<any[]>([]);
+  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const {
@@ -46,7 +46,6 @@ export const DatasetExplore = ({
     fetchPage
   } = useDatasetData(selectedDataset);
 
-  // Update columns when they change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -54,7 +53,6 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange, setSelectedColumns]);
 
-  // Update filtered data when main data changes
   useEffect(() => {
     if (data && data.length > 0) {
       console.log("Setting filtered data:", data);
@@ -62,7 +60,6 @@ export const DatasetExplore = ({
     }
   }, [data, setFilteredData]);
 
-  // Update paginated data when filtered data changes
   useEffect(() => {
     const start = currentPage * itemsPerPage;
     const end = start + itemsPerPage;
@@ -80,6 +77,11 @@ export const DatasetExplore = ({
         description: `Successfully loaded ${selectedDataset}`
       });
     }
+  };
+
+  const handleExport = () => {
+    // Export functionality
+    console.log("Exporting data...");
   };
 
   const handlePageChange = async (newPage: number) => {
@@ -102,37 +104,6 @@ export const DatasetExplore = ({
 
   return (
     <Card className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">Explore</h2>
-          {selectedDataset && (
-            <p className="text-muted-foreground">
-              Selected dataset: <span className="font-medium">{selectedDataset}</span>
-            </p>
-          )}
-        </div>
-        <div className="space-x-2">
-          {onLoad && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleLoad}
-              className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
-            >
-              Retrieve
-            </Button>
-          )}
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={() => window.location.href = '#sample'}
-            className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
-          >
-            Export
-          </Button>
-        </div>
-      </div>
-      
       <DatasetStats 
         totalRows={totalRowCount}
         columnsCount={columns.length}
@@ -161,6 +132,16 @@ export const DatasetExplore = ({
           setSelectedColumns(newColumns);
           onColumnsChange(newColumns);
         }}
+        filters={filters}
+        setFilters={setFilters}
+        filteredData={filteredData}
+        setFilteredData={setFilteredData}
+        data={data}
+        selectedDataset={selectedDataset}
+        isQueryModalOpen={isQueryModalOpen}
+        setIsQueryModalOpen={setIsQueryModalOpen}
+        onLoad={handleLoad}
+        onExport={handleExport}
       />
     </Card>
   );

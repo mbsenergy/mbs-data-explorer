@@ -1,9 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Compass, Database, Download, Code } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface DatasetExploreHeaderProps {
-  selectedDataset: string | null;
+  selectedDataset: TableNames | null;
   onLoad?: () => void;
   onExport: () => void;
   onShowQuery: () => void;
