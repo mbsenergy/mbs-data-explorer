@@ -2,7 +2,6 @@ import { Dispatch, SetStateAction } from "react";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetTable } from "./DatasetTable";
-import { DatasetPagination } from "./DatasetPagination";
 import { DatasetQueryModal } from "./DatasetQueryModal";
 import { DatasetExploreActions } from "./DatasetExploreActions";
 import { DatasetFilters } from "./DatasetFilters";
@@ -20,16 +19,12 @@ export interface DatasetExploreContentProps {
   selectedColumn: string;
   onSearchChange: Dispatch<SetStateAction<string>>;
   onColumnChange: Dispatch<SetStateAction<string>>;
-  paginatedData: any[];
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+  data: any[];
   onColumnSelect: (column: string) => void;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
   filteredData: any[];
   setFilteredData: (data: any[]) => void;
-  data: any[];
   selectedDataset: TableNames | null;
   isQueryModalOpen: boolean;
   setIsQueryModalOpen: Dispatch<SetStateAction<boolean>>;
@@ -47,16 +42,12 @@ export const DatasetExploreContent = ({
   selectedColumn,
   onSearchChange,
   onColumnChange,
-  paginatedData,
-  currentPage,
-  totalPages,
-  onPageChange,
+  data,
   onColumnSelect,
   filters,
   setFilters,
   filteredData,
   setFilteredData,
-  data,
   selectedDataset,
   isQueryModalOpen,
   setIsQueryModalOpen,
@@ -64,10 +55,6 @@ export const DatasetExploreContent = ({
   onExport,
   queryText
 }: DatasetExploreContentProps) => {
-  const handleShowQuery = () => {
-    setIsQueryModalOpen(true);
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -82,7 +69,7 @@ export const DatasetExploreContent = ({
         selectedDataset={selectedDataset}
         onRetrieve={onLoad}
         onExport={onExport}
-        onShowQuery={handleShowQuery}
+        onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
 
@@ -126,14 +113,8 @@ export const DatasetExploreContent = ({
 
       <DatasetTable
         columns={columns}
-        data={paginatedData}
+        data={data}
         selectedColumns={selectedColumns}
-      />
-
-      <DatasetPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
       />
 
       <DatasetQueryModal

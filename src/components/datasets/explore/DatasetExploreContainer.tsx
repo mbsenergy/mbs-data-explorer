@@ -24,10 +24,7 @@ export const DatasetExploreContainer = ({
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [paginatedData, setPaginatedData] = useState<any[]>([]);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
-  const itemsPerPage = 10;
 
   const {
     selectedColumns,
@@ -44,7 +41,6 @@ export const DatasetExploreContainer = ({
     totalRowCount,
     isLoading,
     loadData,
-    fetchPage,
     queryText
   } = useDatasetData(selectedDataset);
 
@@ -63,15 +59,12 @@ export const DatasetExploreContainer = ({
     }
   }, [selectedDataset, loadData]);
 
-  // Update filtered and paginated data when data changes
+  // Update filtered data when data changes
   useEffect(() => {
     if (data && data.length > 0) {
       setFilteredData(data);
-      const start = currentPage * itemsPerPage;
-      const end = start + itemsPerPage;
-      setPaginatedData(data.slice(start, end));
     }
-  }, [data, currentPage, setFilteredData]);
+  }, [data, setFilteredData]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
@@ -141,27 +134,13 @@ export const DatasetExploreContainer = ({
     }
   };
 
-  const handleShowQuery = () => {
-    setIsQueryModalOpen(true);
-  };
-
-  const handlePageChange = async (newPage: number) => {
-    if (fetchPage) {
-      const pageData = await fetchPage(newPage, itemsPerPage);
-      if (pageData) {
-        setPaginatedData(pageData);
-        setCurrentPage(newPage);
-      }
-    }
-  };
-
   return (
     <Card className="p-6 space-y-6">
       <DatasetExploreHeader 
         selectedDataset={selectedDataset}
         onLoad={handleLoad}
         onExport={handleExport}
-        onShowQuery={handleShowQuery}
+        onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
 
@@ -174,10 +153,7 @@ export const DatasetExploreContainer = ({
         selectedColumn={selectedColumn}
         onSearchChange={setSearchTerm}
         onColumnChange={setSelectedColumn}
-        paginatedData={paginatedData}
-        currentPage={currentPage}
-        totalPages={Math.ceil(filteredData.length / itemsPerPage)}
-        onPageChange={handlePageChange}
+        data={data}
         onColumnSelect={(column) => {
           const newColumns = selectedColumns.includes(column)
             ? selectedColumns.filter(col => col !== column)
@@ -190,7 +166,6 @@ export const DatasetExploreContainer = ({
         setFilters={setFilters}
         filteredData={filteredData}
         setFilteredData={setFilteredData}
-        data={data}
         selectedDataset={selectedDataset}
         isQueryModalOpen={isQueryModalOpen}
         setIsQueryModalOpen={setIsQueryModalOpen}
