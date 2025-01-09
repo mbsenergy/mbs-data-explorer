@@ -23,7 +23,7 @@ export const DatasetExplore = ({
   onLoad 
 }: DatasetExploreProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedColumn, setSelectedColumn] = useState("");
+  const [selectedColumn, setSelectedColumn] = useState("all_columns");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
   const {
@@ -51,15 +51,15 @@ export const DatasetExplore = ({
   };
 
   const filteredData = data.filter((item) =>
-    selectedColumn
-      ? String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      : Object.entries(item)
+    selectedColumn === "all_columns"
+      ? Object.entries(item)
           .filter(([key]) => !key.startsWith('md_'))
           .some(([_, value]) => 
             String(value).toLowerCase().includes(searchTerm.toLowerCase())
           )
+      : String(item[selectedColumn])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
   );
 
   const handleColumnSelect = (column: string) => {

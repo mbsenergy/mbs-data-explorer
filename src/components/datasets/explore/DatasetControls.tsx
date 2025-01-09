@@ -33,16 +33,17 @@ export const DatasetControls = ({
         </div>
         <div className="space-y-2">
           <Label htmlFor="column">Filter by column</Label>
-          <Select value={selectedColumn} onValueChange={onColumnChange}>
+          <Select 
+            value={selectedColumn || "all_columns"} 
+            onValueChange={onColumnChange}
+          >
             <SelectTrigger id="column" className="w-full">
               <SelectValue placeholder="Select a column" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All columns</SelectItem>
-              {columns.map((column) => (
-                <SelectItem key={column} value={column}>
-                  {column}
-                </SelectItem>
+              <SelectItem value="all_columns">All columns</SelectItem>
+              {columns.map((col) => (
+                <SelectItem key={col} value={col}>{col}</SelectItem>
               ))}
             </SelectContent>
           </Select>
