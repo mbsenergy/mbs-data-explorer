@@ -10,7 +10,6 @@ type TableNames = keyof Database['public']['Tables'];
 type DataRow = Record<string, any>;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
-  const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [queryText, setQueryText] = useState<string>("");
   const { toast } = useToast();
   const { addQueryResult, getQueryResult } = useDatasetStore();
@@ -33,31 +32,53 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     queryFn: async () => {
       if (!selectedDataset) return [];
       
-      const { data: queryResult, error } = await supabase.rpc('execute_query', {
-        query_text: `SELECT * FROM "${selectedDataset}" LIMIT 1`
-      });
-      
-      if (error) throw error;
-      
-      if (queryResult && Array.isArray(queryResult) && queryResult.length > 0) {
-        return Object.keys(queryResult[0]).filter(col => !col.startsWith('md_'));
+      try {
+        const { data: queryResult, error } = await supabase.rpc('execute_query', {
+          query_text: `SELECT * FROM "${selectedDataset}" LIMIT 1`
+        });
+        
+        if (error) throw error;
+        
+        if (queryResult && Array.isArray(queryResult) && queryResult.length > 0) {
+          return Object.keys(queryResult[0]).filter(col => !col.startsWith('md_'));
+        }
+        return [];
+      } catch (error: any) {
+        console.error("Error fetching columns:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to fetch columns"
+        });
+        return [];
       }
-      return [];
     },
-    enabled: !!selectedDataset
+    enabled: !!selectedDataset,
+    retry: 3
   });
 
   const { data: totalRowCount = 0 } = useQuery({
     queryKey: ['rowCount', selectedDataset],
     queryFn: async () => {
       if (!selectedDataset) return 0;
-      const { data: count, error } = await supabase.rpc('get_table_row_count', {
-        table_name: selectedDataset
-      });
-      if (error) throw error;
-      return count || 0;
+      try {
+        const { data: count, error } = await supabase.rpc('get_table_row_count', {
+          table_name: selectedDataset
+        });
+        if (error) throw error;
+        return count || 0;
+      } catch (error: any) {
+        console.error("Error fetching row count:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to fetch row count"
+        });
+        return 0;
+      }
     },
-    enabled: !!selectedDataset
+    enabled: !!selectedDataset,
+    retry: 3
   });
 
   const { data = [], isLoading, refetch } = useQuery({
@@ -75,43 +96,54 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         return cachedResult.data as DataRow[];
       }
 
-      const query = buildQuery(selectedDataset);
-      setQueryText(query);
-      console.log("Executing query:", query);
+      try {
+        const query = buildQuery(selectedDataset);
+        setQueryText(query);
+        console.log("Executing query:", query);
 
-      const { data: queryResult, error } = await supabase.rpc('execute_query', {
-        query_text: query
-      });
+        const { data: queryResult, error } = await supabase.rpc('execute_query', {
+          query_text: query
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const resultArray = queryResult as DataRow[] || [];
-      console.log("Fetched new data:", resultArray);
+        const resultArray = queryResult as DataRow[] || [];
+        console.log("Fetched new data:", resultArray);
 
-      // Convert string[] columns to ColumnDef[]
-      const columnDefs: ColumnDef<any>[] = columns.map(col => ({
-        accessorKey: col,
-        header: col
-      }));
+        // Convert string[] columns to ColumnDef[]
+        const columnDefs: ColumnDef<any>[] = columns.map(col => ({
+          accessorKey: col,
+          header: col
+        }));
 
-      // Store in cache
-      addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
+        // Store in cache
+        addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
 
-      return resultArray;
+        return resultArray;
+      } catch (error: any) {
+        console.error("Error loading data:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to load data"
+        });
+        return [];
+      }
     },
-    enabled: !!selectedDataset
+    enabled: !!selectedDataset,
+    retry: 3
   });
 
   const loadDataWithFilters = async (filterConditions?: string) => {
-    if (!selectedDataset) return;
+    if (!selectedDataset) return [];
 
     console.log("Loading data with filters:", filterConditions);
     
-    const query = buildQuery(selectedDataset, filterConditions);
-    setQueryText(query);
-    console.log("Executing filtered query:", query);
-
     try {
+      const query = buildQuery(selectedDataset, filterConditions);
+      setQueryText(query);
+      console.log("Executing filtered query:", query);
+
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: query
       });
@@ -131,8 +163,13 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
 
       return resultArray;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error loading filtered data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to load filtered data"
+      });
       throw error;
     }
   };

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, GridReadyEvent } from 'ag-grid-community';
+import type { ColDef } from 'ag-grid-community';
 import '@ag-grid-community/styles/ag-grid.css';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
 
@@ -22,17 +22,13 @@ export const DatasetTable = ({ columns, data, selectedColumns }: DatasetTablePro
     }));
   }, [selectedColumns]);
 
-  const defaultColDef = useMemo(() => ({
+  const defaultColDef = useMemo<ColDef>(() => ({
     sortable: true,
     filter: true,
     resizable: true,
     minWidth: 100,
     flex: 1,
   }), []);
-
-  const onGridReady = (params: GridReadyEvent) => {
-    params.api.sizeColumnsToFit();
-  };
 
   console.log("Data being passed to AG Grid:", data);
   console.log("Columns configuration:", tableColumns);
@@ -43,7 +39,6 @@ export const DatasetTable = ({ columns, data, selectedColumns }: DatasetTablePro
         rowData={data}
         columnDefs={tableColumns}
         defaultColDef={defaultColDef}
-        onGridReady={onGridReady}
         pagination={true}
         paginationPageSize={20}
         suppressPaginationPanel={false}

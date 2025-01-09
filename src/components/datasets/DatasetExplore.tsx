@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DatasetPagination } from "./explore/DatasetPagination";
 import { DatasetStats } from "./explore/DatasetStats";
 import { DatasetTable } from "./explore/DatasetTable";
 import { DatasetControls } from "./explore/DatasetControls";
@@ -25,16 +24,12 @@ export const DatasetExplore = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [paginatedData, setPaginatedData] = useState<any[]>([]);
-  const itemsPerPage = 10;
 
   const {
     data,
     columns,
     totalRowCount,
     isLoading,
-    fetchPage,
     loadData
   } = useDatasetData(selectedDataset);
 
@@ -44,13 +39,6 @@ export const DatasetExplore = ({
       onColumnsChange(columns);
     }
   }, [columns, onColumnsChange]);
-
-  useEffect(() => {
-    // Update paginated data when main data changes
-    const start = currentPage * itemsPerPage;
-    const end = start + itemsPerPage;
-    setPaginatedData(data.slice(start, end));
-  }, [data, currentPage]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
@@ -73,8 +61,6 @@ export const DatasetExplore = ({
           )
   );
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
   const handleColumnSelect = (column: string) => {
     const newColumns = selectedColumns.includes(column)
       ? selectedColumns.filter(col => col !== column)
@@ -82,14 +68,6 @@ export const DatasetExplore = ({
     
     setSelectedColumns(newColumns);
     onColumnsChange(newColumns);
-  };
-
-  const handlePageChange = async (newPage: number) => {
-    const pageData = await fetchPage(newPage, itemsPerPage);
-    if (pageData) {
-      setPaginatedData(pageData);
-      setCurrentPage(newPage);
-    }
   };
 
   const getLastUpdate = (data: any[]) => {
@@ -162,14 +140,8 @@ export const DatasetExplore = ({
 
           <DatasetTable
             columns={columns}
-            data={paginatedData}
+            data={filteredData}
             selectedColumns={selectedColumns}
-          />
-
-          <DatasetPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
           />
         </>
       )}
