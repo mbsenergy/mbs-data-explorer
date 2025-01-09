@@ -15,6 +15,15 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const { toast } = useToast();
   const { addQueryResult, getQueryResult } = useDatasetStore();
 
+  const buildQuery = (tableName: string, filterConditions?: string) => {
+    let query = `SELECT * FROM "${tableName}"`;
+    if (filterConditions && filterConditions.trim()) {
+      query += ` WHERE ${filterConditions}`;
+    }
+    query += ' LIMIT 1000';
+    return query;
+  };
+
   const { data: columns = [] } = useQuery({
     queryKey: ['columns', selectedDataset],
     queryFn: async () => {
@@ -49,7 +58,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   const { data = [], isLoading, refetch } = useQuery({
     queryKey: ['tableData', selectedDataset],
-    queryFn: async ({ queryKey }) => {
+    queryFn: async () => {
       if (!selectedDataset) return [];
 
       console.log("Loading data for dataset:", selectedDataset);
@@ -62,12 +71,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         return cachedResult.data as DataRow[];
       }
 
-      const baseQuery = `SELECT * FROM "${selectedDataset}"`;
-      const whereClause = queryKey[2] ? ` WHERE ${queryKey[2]}` : '';
-      const limitClause = ' LIMIT 1000';
-      
-      const query = baseQuery + whereClause + limitClause;
+      const query = buildQuery(selectedDataset);
       setQueryText(query);
+      console.log("Executing query:", query);
 
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: query
@@ -89,7 +95,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
       return resultArray;
     },
-    enabled: false // Don't auto-fetch, wait for manual trigger
+    enabled: !!selectedDataset // Enable auto-fetching when dataset is selected
   });
 
   const fetchPage = async (page: number, pageSize: number): Promise<DataRow[] | null> => {
@@ -123,7 +129,38 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   };
 
   const loadDataWithFilters = async (filterConditions?: string) => {
-    return refetch();
+    if (!selectedDataset) return;
+
+    console.log("Loading data with filters:", filterConditions);
+    
+    const query = buildQuery(selectedDataset, filterConditions);
+    setQueryText(query);
+    console.log("Executing filtered query:", query);
+
+    try {
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
+        query_text: query
+      });
+
+      if (error) throw error;
+
+      const resultArray = queryResult as DataRow[] || [];
+      console.log("Fetched filtered data:", resultArray);
+
+      // Convert string[] columns to ColumnDef[]
+      const columnDefs: ColumnDef<any>[] = columns.map(col => ({
+        accessorKey: col,
+        header: col
+      }));
+
+      // Store in cache
+      addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
+
+      return resultArray;
+    } catch (error) {
+      console.error("Error loading filtered data:", error);
+      throw error;
+    }
   };
 
   return {
