@@ -43,7 +43,8 @@ export const DatasetExplore = ({
     totalRowCount,
     isLoading,
     loadData,
-    fetchPage
+    fetchPage,
+    queryText
   } = useDatasetData(selectedDataset);
 
   useEffect(() => {
@@ -142,6 +143,7 @@ export const DatasetExplore = ({
         setIsQueryModalOpen={setIsQueryModalOpen}
         onLoad={handleLoad}
         onExport={handleExport}
+        queryText={queryText}
       />
     </Card>
   );
