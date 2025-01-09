@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDatasetStore } from "@/stores/datasetStore";
 import type { Database } from "@/integrations/supabase/types";
+import type { ColumnDef } from "@tanstack/react-table";
 
 type TableNames = keyof Database['public']['Tables'];
 type DataRow = Record<string, any>;
@@ -77,8 +78,14 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const resultArray = queryResult as DataRow[] || [];
       console.log("Fetched new data:", resultArray);
 
+      // Convert string[] columns to ColumnDef[]
+      const columnDefs: ColumnDef<any>[] = columns.map(col => ({
+        accessorKey: col,
+        header: col
+      }));
+
       // Store in cache
-      addQueryResult(selectedDataset, resultArray, columns, totalRowCount, query);
+      addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
 
       return resultArray;
     },
@@ -117,7 +124,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   // Modified loadData to accept filter conditions
   const loadDataWithFilters = async (filterConditions?: string) => {
-    return refetch({ queryKey: ['tableData', selectedDataset, filterConditions] });
+    return refetch({
+      refetchPage: (_, index) => index === 0
+    });
   };
 
   return {
