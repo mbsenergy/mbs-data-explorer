@@ -18,7 +18,11 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const buildQuery = (tableName: string, filterConditions?: string) => {
     let query = `SELECT * FROM "${tableName}"`;
     if (filterConditions && filterConditions.trim()) {
-      query += ` WHERE ${filterConditions}`;
+      // Convert column names to uppercase for the WHERE clause
+      const upperCaseFilter = filterConditions.replace(/\b(\w+)\b\s*(=|>|<|>=|<=|LIKE|IN)/gi, (match, column, operator) => {
+        return `"${column.toUpperCase()}"${operator}`;
+      });
+      query += ` WHERE ${upperCaseFilter}`;
     }
     query += ' LIMIT 1000';
     return query;
@@ -95,7 +99,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
       return resultArray;
     },
-    enabled: !!selectedDataset // Enable auto-fetching when dataset is selected
+    enabled: !!selectedDataset
   });
 
   const fetchPage = async (page: number, pageSize: number): Promise<DataRow[] | null> => {
