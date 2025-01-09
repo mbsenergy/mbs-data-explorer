@@ -58,49 +58,93 @@ export const DatasetExplore = ({
     if (data && data.length > 0) {
       console.log("Setting filtered data:", data);
       setFilteredData(data);
+      const start = currentPage * itemsPerPage;
+      const end = start + itemsPerPage;
+      setPaginatedData(data.slice(start, end));
     }
-  }, [data, setFilteredData]);
-
-  useEffect(() => {
-    const start = currentPage * itemsPerPage;
-    const end = start + itemsPerPage;
-    setPaginatedData(filteredData.slice(start, end));
-  }, [filteredData, currentPage]);
+  }, [data, currentPage, setFilteredData]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData();
-      if (onLoad) {
-        onLoad(selectedDataset);
+      try {
+        // Build the query based on filters
+        const filterConditions = filters
+          .filter(f => f.selectedColumn && f.searchTerm)
+          .map(f => {
+            const value = isNaN(Number(f.searchTerm)) 
+              ? `'${f.searchTerm}'` 
+              : f.searchTerm;
+            return `${f.selectedColumn} ${f.comparisonOperator} ${value}`;
+          })
+          .join(' AND ');
+
+        // Pass the filter conditions to loadData
+        await loadData(filterConditions);
+        
+        if (onLoad) {
+          onLoad(selectedDataset);
+        }
+        
+        toast({
+          title: "Dataset Retrieved",
+          description: `Successfully loaded ${selectedDataset} with filters`
+        });
+      } catch (error: any) {
+        console.error("Error loading dataset:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to load dataset"
+        });
       }
-      toast({
-        title: "Dataset Retrieved",
-        description: `Successfully loaded ${selectedDataset}`
-      });
     }
   };
 
   const handleExport = () => {
-    // Export functionality
-    console.log("Exporting data...");
-  };
-
-  const handlePageChange = async (newPage: number) => {
-    if (fetchPage) {
-      const pageData = await fetchPage(newPage, itemsPerPage);
-      if (pageData) {
-        setPaginatedData(pageData);
-        setCurrentPage(newPage);
-      }
+    if (!selectedDataset || !filteredData.length) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No data available to export"
+      });
+      return;
     }
-  };
 
-  const getLastUpdate = (data: any[]) => {
-    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
-      const item = data[0] as Record<string, unknown>;
-      return item.md_last_update as string | null;
+    try {
+      const headers = selectedColumns.join(',');
+      const rows = filteredData.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
+      const csv = [headers, ...rows].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedDataset}_export.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Data exported successfully"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to export data"
+      });
     }
-    return null;
   };
 
   return (
@@ -109,7 +153,7 @@ export const DatasetExplore = ({
         totalRows={totalRowCount}
         columnsCount={columns.length}
         filteredRows={filteredData.length}
-        lastUpdate={getLastUpdate(data)}
+        lastUpdate={data[0]?.md_last_update || null}
       />
 
       <DatasetExploreContent

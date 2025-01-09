@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useQuery, type RefetchOptions, type QueryObserverResult } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDatasetStore } from "@/stores/datasetStore";
 import type { Database } from "@/integrations/supabase/types";
-import type { ColumnDef } from "@tanstack/react-table";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -48,7 +47,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   const { data = [], isLoading, refetch: loadData } = useQuery({
     queryKey: ['tableData', selectedDataset],
-    queryFn: async () => {
+    queryFn: async ({ queryKey }) => {
       if (!selectedDataset) return [];
 
       console.log("Loading data for dataset:", selectedDataset);
@@ -61,28 +60,25 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         return cachedResult.data;
       }
 
-      const query = `SELECT * FROM "${selectedDataset}" LIMIT 1000`;
+      const baseQuery = `SELECT * FROM "${selectedDataset}"`;
+      const whereClause = queryKey[2] ? ` WHERE ${queryKey[2]}` : '';
+      const limitClause = ' LIMIT 1000';
+      
+      const query = baseQuery + whereClause + limitClause;
       setQueryText(query);
 
-      const { data: sampleData, error } = await supabase
-        .from(selectedDataset)
-        .select('*')
-        .limit(1000);
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
+        query_text: query
+      });
 
       if (error) throw error;
 
-      console.log("Fetched new data:", sampleData);
-
-      // Create columns definition
-      const cols: ColumnDef<any>[] = Object.keys(sampleData?.[0] || {}).map(key => ({
-        accessorKey: key,
-        header: key,
-      }));
+      console.log("Fetched new data:", queryResult);
 
       // Store in cache
-      addQueryResult(selectedDataset, sampleData || [], cols, totalRowCount, query);
+      addQueryResult(selectedDataset, queryResult || [], columns, totalRowCount, query);
 
-      return sampleData || [];
+      return queryResult || [];
     },
     enabled: false // Don't auto-fetch, wait for manual trigger
   });
@@ -117,13 +113,18 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     }
   };
 
+  // Modified loadData to accept filter conditions
+  const loadDataWithFilters = async (filterConditions?: string) => {
+    return refetch({ queryKey: ['tableData', selectedDataset, filterConditions] });
+  };
+
   return {
     data,
     columns,
     totalRowCount,
     isLoading,
     loadingProgress,
-    loadData,
+    loadData: loadDataWithFilters,
     fetchPage,
     queryText
   };
