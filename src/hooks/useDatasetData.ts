@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -124,9 +123,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   // Modified loadData to accept filter conditions
   const loadDataWithFilters = async (filterConditions?: string) => {
-    return refetch({
-      refetchPage: (_, index) => index === 0
-    });
+    return refetch();
   };
 
   return {
