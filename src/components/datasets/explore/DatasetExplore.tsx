@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DatasetStats } from "./DatasetStats";
+import { DatasetTable } from "./DatasetTable";
+import { DatasetControls } from "./DatasetControls";
+import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
-import { useToast } from "@/hooks/use-toast";
-import { useExploreState } from "@/hooks/useExploreState";
-import { DatasetExploreContent } from "./DatasetExploreContent";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
-type DataRow = Record<string, any>;
 
 interface DatasetExploreProps {
   selectedDataset: TableNames | null;
@@ -21,31 +21,16 @@ export const DatasetExplore = ({
   onColumnsChange,
   onLoad 
 }: DatasetExploreProps) => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [paginatedData, setPaginatedData] = useState<DataRow[]>([]);
-  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
-  const itemsPerPage = 10;
-
-  const {
-    selectedColumns,
-    setSelectedColumns,
-    filteredData,
-    setFilteredData,
-    filters,
-    setFilters
-  } = useExploreState(selectedDataset);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
   const {
     data,
     columns,
     totalRowCount,
     isLoading,
-    loadData,
-    fetchPage,
-    queryText
+    loadData
   } = useDatasetData(selectedDataset);
 
   useEffect(() => {
@@ -53,153 +38,113 @@ export const DatasetExplore = ({
       setSelectedColumns(columns);
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange, setSelectedColumns]);
-
-  useEffect(() => {
-    if (Array.isArray(data) && data.length > 0) {
-      console.log("Setting filtered data:", data);
-      setFilteredData(data);
-      const start = currentPage * itemsPerPage;
-      const end = start + itemsPerPage;
-      setPaginatedData(data.slice(start, end));
-    }
-  }, [data, currentPage, setFilteredData]);
+  }, [columns, onColumnsChange]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      try {
-        // Build the query based on filters
-        const filterConditions = filters
-          .filter(f => f.selectedColumn && f.searchTerm)
-          .map(f => {
-            const value = isNaN(Number(f.searchTerm)) 
-              ? `'${f.searchTerm}'` 
-              : f.searchTerm;
-            return `${f.selectedColumn} ${f.comparisonOperator} ${value}`;
-          })
-          .join(' AND ');
-
-        // Pass the filter conditions to loadData
-        await loadData(filterConditions);
-        
-        if (onLoad) {
-          onLoad(selectedDataset);
-        }
-        
-        toast({
-          title: "Dataset Retrieved",
-          description: `Successfully loaded ${selectedDataset} with filters`
-        });
-      } catch (error: any) {
-        console.error("Error loading dataset:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to load dataset"
-        });
+      await loadData();
+      if (onLoad) {
+        onLoad(selectedDataset);
       }
     }
   };
 
-  const handleExport = () => {
-    if (!selectedDataset || !filteredData.length) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No data available to export"
-      });
-      return;
-    }
+  const filteredData = data.filter((item) =>
+    selectedColumn
+      ? String(item[selectedColumn])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : Object.entries(item)
+          .filter(([key]) => !key.startsWith('md_'))
+          .some(([_, value]) => 
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+          )
+  );
 
-    try {
-      const headers = selectedColumns.join(',');
-      const rows = filteredData.map(row => 
-        selectedColumns.map(col => {
-          const value = row[col];
-          if (value === null) return '';
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value;
-        }).join(',')
-      );
-      const csv = [headers, ...rows].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset}_export.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Success",
-        description: "Data exported successfully"
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to export data"
-      });
-    }
+  const handleColumnSelect = (column: string) => {
+    const newColumns = selectedColumns.includes(column)
+      ? selectedColumns.filter(col => col !== column)
+      : [...selectedColumns, column];
+    
+    setSelectedColumns(newColumns);
+    onColumnsChange(newColumns);
   };
 
-  const handlePageChange = async (newPage: number) => {
-    if (fetchPage) {
-      const pageData = await fetchPage(newPage, itemsPerPage);
-      if (pageData) {
-        setPaginatedData(pageData);
-        setCurrentPage(newPage);
-      }
+  const getLastUpdate = (data: any[]) => {
+    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
+      const item = data[0] as Record<string, unknown>;
+      return item.md_last_update as string | null;
     }
+    return null;
   };
 
   return (
     <Card className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold">Explore</h2>
+          {selectedDataset && (
+            <p className="text-muted-foreground">
+              Selected dataset: <span className="font-medium">{selectedDataset}</span>
+            </p>
+          )}
+        </div>
+        <div className="space-x-2">
+          {onLoad && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleLoad}
+              className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
+            >
+              Retrieve
+            </Button>
+          )}
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.href = '#sample'}
+            className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
+          >
+            Export
+          </Button>
+        </div>
+      </div>
+      
       <DatasetStats 
         totalRows={totalRowCount}
         columnsCount={columns.length}
         filteredRows={filteredData.length}
-        lastUpdate={data[0]?.md_last_update || null}
+        lastUpdate={getLastUpdate(data)}
       />
 
-      <DatasetExploreContent
-        isLoading={isLoading}
-        columns={columns}
-        selectedColumns={selectedColumns}
-        onColumnsChange={onColumnsChange}
-        searchTerm={searchTerm}
-        selectedColumn={selectedColumn}
-        onSearchChange={setSearchTerm}
-        onColumnChange={setSelectedColumn}
-        paginatedData={paginatedData}
-        currentPage={currentPage}
-        totalPages={Math.ceil(filteredData.length / itemsPerPage)}
-        onPageChange={handlePageChange}
-        onColumnSelect={(column) => {
-          const newColumns = selectedColumns.includes(column)
-            ? selectedColumns.filter(col => col !== column)
-            : [...selectedColumns, column];
-          
-          setSelectedColumns(newColumns);
-          onColumnsChange(newColumns);
-        }}
-        filters={filters}
-        setFilters={setFilters}
-        filteredData={filteredData}
-        setFilteredData={setFilteredData}
-        data={data}
-        selectedDataset={selectedDataset}
-        isQueryModalOpen={isQueryModalOpen}
-        setIsQueryModalOpen={setIsQueryModalOpen}
-        onLoad={handleLoad}
-        onExport={handleExport}
-        queryText={queryText}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <p>Loading dataset...</p>
+        </div>
+      ) : (
+        <>
+          <DatasetControls
+            columns={columns}
+            searchTerm={searchTerm}
+            selectedColumn={selectedColumn}
+            onSearchChange={setSearchTerm}
+            onColumnChange={setSelectedColumn}
+          />
+
+          <DatasetColumnSelect
+            columns={columns}
+            selectedColumns={selectedColumns}
+            onColumnSelect={handleColumnSelect}
+          />
+
+          <DatasetTable
+            columns={columns}
+            data={filteredData}
+            selectedColumns={selectedColumns}
+          />
+        </>
+      )}
     </Card>
   );
 };

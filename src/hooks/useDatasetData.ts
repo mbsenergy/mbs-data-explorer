@@ -102,36 +102,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     enabled: !!selectedDataset
   });
 
-  const fetchPage = async (page: number, pageSize: number): Promise<DataRow[] | null> => {
-    if (!selectedDataset) return null;
-
-    try {
-      const start = page * pageSize;
-      const query = `SELECT * FROM "${selectedDataset}" LIMIT ${pageSize} OFFSET ${start}`;
-      setQueryText(query);
-
-      const { data: pageData, error } = await supabase
-        .from(selectedDataset)
-        .select('*')
-        .range(start, start + pageSize - 1);
-
-      if (error) {
-        console.error("Error fetching page:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch data page"
-        });
-        return null;
-      }
-
-      return pageData as DataRow[];
-    } catch (error) {
-      console.error("Error in fetchPage:", error);
-      return null;
-    }
-  };
-
   const loadDataWithFilters = async (filterConditions?: string) => {
     if (!selectedDataset) return;
 
@@ -173,7 +143,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     totalRowCount,
     isLoading,
     loadData: loadDataWithFilters,
-    fetchPage,
     queryText
   };
 };
