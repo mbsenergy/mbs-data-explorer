@@ -7,6 +7,7 @@ import { DatasetControls } from "./explore/DatasetControls";
 import { DatasetColumnSelect } from "./explore/DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
+import { Download, Database as DatabaseIcon } from "lucide-react";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -92,11 +93,12 @@ export const DatasetExplore = ({
         <div className="space-x-2">
           {onLoad && (
             <Button 
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={handleLoad}
               className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
             >
+              <DatabaseIcon className="h-4 w-4 mr-2" />
               Retrieve
             </Button>
           )}
@@ -106,6 +108,7 @@ export const DatasetExplore = ({
             onClick={() => window.location.href = '#sample'}
             className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
           >
+            <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
         </div>
