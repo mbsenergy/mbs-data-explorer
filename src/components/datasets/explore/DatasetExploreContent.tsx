@@ -35,6 +35,7 @@ export interface DatasetExploreContentProps {
   setIsQueryModalOpen: Dispatch<SetStateAction<boolean>>;
   onLoad?: () => Promise<void>;
   onExport: () => void;
+  queryText: string;
 }
 
 export const DatasetExploreContent = ({
@@ -60,18 +61,11 @@ export const DatasetExploreContent = ({
   isQueryModalOpen,
   setIsQueryModalOpen,
   onLoad,
-  onExport
+  onExport,
+  queryText
 }: DatasetExploreContentProps) => {
   const handleShowQuery = () => {
     setIsQueryModalOpen(true);
-  };
-
-  const getQueryString = () => {
-    if (!selectedDataset) return "";
-    const columnsStr = selectedColumns.length > 0 
-      ? selectedColumns.map(col => `"${col}"`).join(', ')
-      : '*';
-    return `SELECT ${columnsStr} FROM "${selectedDataset}"`;
   };
 
   if (isLoading) {
@@ -145,7 +139,7 @@ export const DatasetExploreContent = ({
       <DatasetQueryModal
         isOpen={isQueryModalOpen}
         onClose={() => setIsQueryModalOpen(false)}
-        query={getQueryString()}
+        query={queryText}
         apiCall={`await supabase
   .from('${selectedDataset}')
   .select('${selectedColumns.join(", ")}')`}
