@@ -6,6 +6,7 @@ import { useDatasetStore } from "@/stores/datasetStore";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
+type DataRow = Record<string, any>;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
@@ -45,7 +46,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     enabled: !!selectedDataset
   });
 
-  const { data = [], isLoading, refetch: loadData } = useQuery({
+  const { data = [], isLoading, refetch } = useQuery({
     queryKey: ['tableData', selectedDataset],
     queryFn: async ({ queryKey }) => {
       if (!selectedDataset) return [];
@@ -57,7 +58,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (cachedResult) {
         console.log("Using cached data:", cachedResult);
         setQueryText(cachedResult.queryText || "");
-        return cachedResult.data;
+        return cachedResult.data as DataRow[];
       }
 
       const baseQuery = `SELECT * FROM "${selectedDataset}"`;
@@ -73,17 +74,18 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
       if (error) throw error;
 
-      console.log("Fetched new data:", queryResult);
+      const resultArray = queryResult as DataRow[] || [];
+      console.log("Fetched new data:", resultArray);
 
       // Store in cache
-      addQueryResult(selectedDataset, queryResult || [], columns, totalRowCount, query);
+      addQueryResult(selectedDataset, resultArray, columns, totalRowCount, query);
 
-      return queryResult || [];
+      return resultArray;
     },
     enabled: false // Don't auto-fetch, wait for manual trigger
   });
 
-  const fetchPage = async (page: number, pageSize: number) => {
+  const fetchPage = async (page: number, pageSize: number): Promise<DataRow[] | null> => {
     if (!selectedDataset) return null;
 
     try {
@@ -106,7 +108,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         return null;
       }
 
-      return pageData;
+      return pageData as DataRow[];
     } catch (error) {
       console.error("Error in fetchPage:", error);
       return null;
@@ -119,7 +121,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   };
 
   return {
-    data,
+    data: Array.isArray(data) ? data : [],
     columns,
     totalRowCount,
     isLoading,

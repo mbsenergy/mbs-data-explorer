@@ -8,6 +8,7 @@ import { DatasetExploreContent } from "./DatasetExploreContent";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
+type DataRow = Record<string, any>;
 
 interface DatasetExploreProps {
   selectedDataset: TableNames | null;
@@ -24,7 +25,7 @@ export const DatasetExplore = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [paginatedData, setPaginatedData] = useState<any[]>([]);
+  const [paginatedData, setPaginatedData] = useState<DataRow[]>([]);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const itemsPerPage = 10;
 
@@ -55,7 +56,7 @@ export const DatasetExplore = ({
   }, [columns, onColumnsChange, setSelectedColumns]);
 
   useEffect(() => {
-    if (data && data.length > 0) {
+    if (Array.isArray(data) && data.length > 0) {
       console.log("Setting filtered data:", data);
       setFilteredData(data);
       const start = currentPage * itemsPerPage;
@@ -144,6 +145,16 @@ export const DatasetExplore = ({
         title: "Error",
         description: "Failed to export data"
       });
+    }
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    if (fetchPage) {
+      const pageData = await fetchPage(newPage, itemsPerPage);
+      if (pageData) {
+        setPaginatedData(pageData);
+        setCurrentPage(newPage);
+      }
     }
   };
 
