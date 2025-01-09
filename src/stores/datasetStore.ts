@@ -11,6 +11,7 @@ interface QueryResult {
   columns: ColumnDef<any>[];
   totalRowCount: number;
   timestamp: number;
+  queryText?: string;
 }
 
 interface SavedQuery {
@@ -36,13 +37,10 @@ interface DatasetState {
     tableName: TableNames, 
     data: any[], 
     columns: ColumnDef<any>[], 
-    totalRowCount: number
+    totalRowCount: number,
+    queryText?: string
   ) => void;
-  getQueryResult: (tableName: TableNames) => {
-    data: any[];
-    columns: ColumnDef<any>[];
-    totalRowCount: number;
-  } | null;
+  getQueryResult: (tableName: TableNames) => QueryResult | null;
   setCurrentQuery: (query: SavedQuery) => void;
   getCurrentQuery: () => SavedQuery | null;
   setExploreState: (state: ExploreState) => void;
@@ -59,7 +57,7 @@ export const useDatasetStore = create<DatasetState>()(
       currentQuery: null,
       exploreState: null,
       
-      addQueryResult: (tableName, data, columns, totalRowCount) => {
+      addQueryResult: (tableName, data, columns, totalRowCount, queryText) => {
         set((state) => ({
           queries: {
             ...state.queries,
@@ -67,6 +65,7 @@ export const useDatasetStore = create<DatasetState>()(
               data,
               columns,
               totalRowCount,
+              queryText,
               timestamp: Date.now(),
             },
           },
@@ -82,11 +81,7 @@ export const useDatasetStore = create<DatasetState>()(
           return null;
         }
 
-        return {
-          data: query.data,
-          columns: query.columns,
-          totalRowCount: query.totalRowCount,
-        };
+        return query;
       },
 
       setCurrentQuery: (query) => {

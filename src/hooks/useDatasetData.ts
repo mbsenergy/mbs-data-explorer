@@ -10,6 +10,7 @@ type TableNames = keyof Database['public']['Tables'];
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  const [queryText, setQueryText] = useState<string>("");
   const { toast } = useToast();
   const { addQueryResult, getQueryResult } = useDatasetStore();
 
@@ -56,8 +57,12 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const cachedResult = getQueryResult(selectedDataset);
       if (cachedResult) {
         console.log("Using cached data:", cachedResult);
+        setQueryText(cachedResult.queryText || "");
         return cachedResult.data;
       }
+
+      const query = `SELECT * FROM "${selectedDataset}" LIMIT 1000`;
+      setQueryText(query);
 
       const { data: sampleData, error } = await supabase
         .from(selectedDataset)
@@ -75,7 +80,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       }));
 
       // Store in cache
-      addQueryResult(selectedDataset, sampleData || [], cols, totalRowCount);
+      addQueryResult(selectedDataset, sampleData || [], cols, totalRowCount, query);
 
       return sampleData || [];
     },
@@ -87,6 +92,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
     try {
       const start = page * pageSize;
+      const query = `SELECT * FROM "${selectedDataset}" LIMIT ${pageSize} OFFSET ${start}`;
+      setQueryText(query);
+
       const { data: pageData, error } = await supabase
         .from(selectedDataset)
         .select('*')
@@ -116,6 +124,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     isLoading,
     loadingProgress,
     loadData,
-    fetchPage
+    fetchPage,
+    queryText
   };
 };

@@ -44,9 +44,11 @@ export const DatasetExploreContainer = ({
     totalRowCount,
     isLoading,
     loadData,
-    fetchPage
+    fetchPage,
+    queryText
   } = useDatasetData(selectedDataset);
 
+  // Update selected columns when columns change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -54,6 +56,14 @@ export const DatasetExploreContainer = ({
     }
   }, [columns, onColumnsChange, setSelectedColumns]);
 
+  // Load initial data when dataset changes
+  useEffect(() => {
+    if (selectedDataset && loadData) {
+      loadData();
+    }
+  }, [selectedDataset, loadData]);
+
+  // Update filtered and paginated data when data changes
   useEffect(() => {
     if (data && data.length > 0) {
       setFilteredData(data);
@@ -186,6 +196,7 @@ export const DatasetExploreContainer = ({
         setIsQueryModalOpen={setIsQueryModalOpen}
         onLoad={handleLoad}
         onExport={handleExport}
+        queryText={queryText}
       />
     </Card>
   );
