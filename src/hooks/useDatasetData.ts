@@ -11,6 +11,7 @@ type DataRow = Record<string, any>;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [queryText, setQueryText] = useState<string>("");
+  const [apiCall, setApiCall] = useState<string>("");
   const [localData, setLocalData] = useState<DataRow[]>([]);
   const { toast } = useToast();
   const { addQueryResult, getQueryResult } = useDatasetStore();
@@ -97,6 +98,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       try {
         const query = buildQuery(selectedDataset);
         setQueryText(query);
+        setApiCall(`const { data, error } = await supabase.rpc('execute_query', {
+          query_text: \`${query}\`
+        });`);
         console.log("Executing query:", query);
 
         const { data: queryResult, error } = await supabase.rpc('execute_query', {
@@ -181,6 +185,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     totalRowCount,
     isLoading,
     loadData: loadDataWithFilters,
-    queryText
+    queryText,
+    apiCall
   };
 };

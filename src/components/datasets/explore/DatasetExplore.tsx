@@ -6,7 +6,7 @@ import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { DatasetFilters } from "./DatasetFilters";
-import { DatasetQueryModal } from "../DatasetQueryModal";
+import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
