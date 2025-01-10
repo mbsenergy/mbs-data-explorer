@@ -56,23 +56,24 @@ export const DatasetExplore = ({
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       try {
-        let filterConditions = "";
-        if (filters.length > 0) {
-          filterConditions = filters
-            .filter(f => f.searchTerm && f.selectedColumn)
-            .map(f => {
-              const value = isNaN(Number(f.searchTerm)) 
-                ? `'${f.searchTerm}'` 
-                : f.searchTerm;
-              return `${f.selectedColumn} ${f.comparisonOperator} ${value}`;
-            })
-            .join(' AND ');
-        }
+        // Build filter conditions from the filters array
+        const filterConditions = filters
+          .filter(f => f.searchTerm && f.selectedColumn)
+          .map((filter, index) => {
+            const value = isNaN(Number(filter.searchTerm)) 
+              ? `'${filter.searchTerm}'` 
+              : filter.searchTerm;
+            const condition = `${filter.selectedColumn} ${filter.comparisonOperator} ${value}`;
+            return index === 0 ? condition : `${filter.operator} ${condition}`;
+          })
+          .join(' ');
 
         await loadData(filterConditions);
+        
         if (onLoad) {
           onLoad(selectedDataset);
         }
+        
         toast({
           title: "Success",
           description: "Dataset loaded successfully"
