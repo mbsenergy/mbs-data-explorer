@@ -10,7 +10,6 @@ import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
-import type { Filter } from "./types";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -65,11 +64,24 @@ export const DatasetExplore = ({
         const filterConditions = filters
           .filter(f => f.searchTerm && f.selectedColumn)
           .map((filter, index) => {
-            // Ensure column names are in uppercase
+            // Always use uppercase for column names and wrap in quotes
             const columnName = `"${filter.selectedColumn.toUpperCase()}"`;
-            const value = isNaN(Number(filter.searchTerm)) 
-              ? `'${filter.searchTerm}'` 
-              : filter.searchTerm;
+            
+            // Handle value based on type and operator
+            let value;
+            if (filter.comparisonOperator === 'IN' || filter.comparisonOperator === 'NOT IN') {
+              // For IN/NOT IN, wrap each value in quotes and combine with commas
+              const values = filter.searchTerm.split(',').map(v => 
+                isNaN(Number(v.trim())) ? `'${v.trim()}'` : v.trim()
+              );
+              value = `(${values.join(', ')})`;
+            } else {
+              // For other operators, handle single values
+              value = isNaN(Number(filter.searchTerm)) 
+                ? `'${filter.searchTerm}'` 
+                : filter.searchTerm;
+            }
+
             const condition = `${columnName} ${filter.comparisonOperator} ${value}`;
             return index === 0 ? condition : `${filter.operator} ${condition}`;
           })
