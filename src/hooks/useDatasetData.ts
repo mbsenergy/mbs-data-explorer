@@ -11,17 +11,14 @@ type DataRow = Record<string, any>;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [queryText, setQueryText] = useState<string>("");
+  const [localData, setLocalData] = useState<DataRow[]>([]);
   const { toast } = useToast();
   const { addQueryResult, getQueryResult } = useDatasetStore();
 
   const buildQuery = (tableName: string, filterConditions?: string) => {
     let query = `SELECT * FROM "${tableName}"`;
     if (filterConditions && filterConditions.trim()) {
-      // Convert column names to uppercase for the WHERE clause
-      const upperCaseFilter = filterConditions.replace(/\b(\w+)\b\s*(=|>|<|>=|<=|LIKE|IN)/gi, (match, column, operator) => {
-        return `"${column.toUpperCase()}"${operator}`;
-      });
-      query += ` WHERE ${upperCaseFilter}`;
+      query += ` WHERE ${filterConditions}`;
     }
     query += ' LIMIT 1000';
     return query;
@@ -93,6 +90,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (cachedResult) {
         console.log("Using cached data:", cachedResult);
         setQueryText(cachedResult.queryText || "");
+        setLocalData(cachedResult.data as DataRow[]);
         return cachedResult.data as DataRow[];
       }
 
@@ -118,6 +116,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
         // Store in cache
         addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
+        setLocalData(resultArray);
 
         return resultArray;
       } catch (error: any) {
@@ -159,8 +158,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
         header: col
       }));
 
-      // Store in cache
+      // Store in cache and update local data
       addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
+      setLocalData(resultArray);
 
       return resultArray;
     } catch (error: any) {
@@ -175,7 +175,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   };
 
   return {
-    data: Array.isArray(data) ? data : [],
+    data: localData,
+    setData: setLocalData,
     columns,
     totalRowCount,
     isLoading,

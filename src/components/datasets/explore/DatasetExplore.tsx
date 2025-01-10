@@ -39,6 +39,7 @@ export const DatasetExplore = ({
 
   const {
     data,
+    setData, // Add this to update the table data
     columns,
     totalRowCount,
     isLoading,
@@ -56,6 +57,8 @@ export const DatasetExplore = ({
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       try {
+        console.log("Current filters:", filters); // Debug log
+
         // Build filter conditions from the filters array
         const filterConditions = filters
           .filter(f => f.searchTerm && f.selectedColumn)
@@ -68,7 +71,13 @@ export const DatasetExplore = ({
           })
           .join(' ');
 
-        await loadData(filterConditions);
+        console.log("Generated filter conditions:", filterConditions); // Debug log
+
+        const filteredData = await loadData(filterConditions);
+        console.log("Filtered data received:", filteredData); // Debug log
+
+        // Update the table data with the filtered results
+        setData(filteredData);
         
         if (onLoad) {
           onLoad(selectedDataset);
@@ -76,9 +85,10 @@ export const DatasetExplore = ({
         
         toast({
           title: "Success",
-          description: "Dataset loaded successfully"
+          description: `Dataset loaded successfully with ${filteredData.length} rows`
         });
       } catch (error: any) {
+        console.error("Error loading data:", error);
         toast({
           variant: "destructive",
           title: "Error",
