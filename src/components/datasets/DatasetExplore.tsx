@@ -7,8 +7,6 @@ import { DatasetControls } from "./explore/DatasetControls";
 import { DatasetColumnSelect } from "./explore/DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
-import { Download, Database as DatabaseIcon, Code } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -23,19 +21,16 @@ export const DatasetExplore = ({
   onColumnsChange,
   onLoad 
 }: DatasetExploreProps) => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedColumn, setSelectedColumn] = useState("all_columns");
+  const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [showQueryModal, setShowQueryModal] = useState(false);
 
   const {
     data,
     columns,
     totalRowCount,
     isLoading,
-    loadData,
-    queryText
+    loadData
   } = useDatasetData(selectedDataset);
 
   useEffect(() => {
@@ -47,100 +42,23 @@ export const DatasetExplore = ({
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      try {
-        // Build filter conditions based on search term and selected column
-        let filterConditions = "";
-        if (searchTerm) {
-          if (selectedColumn === "all_columns") {
-            // For all columns, we need to create an OR condition for each column
-            filterConditions = columns
-              .filter(col => !col.startsWith('md_'))
-              .map(col => `${col}::text ILIKE '%${searchTerm}%'`)
-              .join(' OR ');
-            if (filterConditions) {
-              filterConditions = `(${filterConditions})`;
-            }
-          } else {
-            // For a specific column
-            filterConditions = `${selectedColumn}::text ILIKE '%${searchTerm}%'`;
-          }
-        }
-
-        await loadData(filterConditions);
-        if (onLoad) {
-          onLoad(selectedDataset);
-        }
-        toast({
-          title: "Success",
-          description: "Data retrieved successfully"
-        });
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to load data"
-        });
+      await loadData();
+      if (onLoad) {
+        onLoad(selectedDataset);
       }
     }
   };
 
-  const handleExport = async () => {
-    if (!data.length) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No data available to export"
-      });
-      return;
-    }
-
-    try {
-      const headers = selectedColumns.join(',');
-      const rows = data.map(row => 
-        selectedColumns.map(col => {
-          const value = row[col];
-          if (value === null) return '';
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value;
-        }).join(',')
-      );
-      const csv = [headers, ...rows].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset}_export.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Success",
-        description: "Data exported successfully"
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to export data"
-      });
-    }
-  };
-
   const filteredData = data.filter((item) =>
-    selectedColumn === "all_columns"
-      ? Object.entries(item)
+    selectedColumn
+      ? String(item[selectedColumn])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : Object.entries(item)
           .filter(([key]) => !key.startsWith('md_'))
           .some(([_, value]) => 
             String(value).toLowerCase().includes(searchTerm.toLowerCase())
           )
-      : String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
   );
 
   const handleColumnSelect = (column: string) => {
@@ -174,35 +92,21 @@ export const DatasetExplore = ({
         <div className="space-x-2">
           {onLoad && (
             <Button 
-              variant="default"
+              variant="outline"
               size="sm"
               onClick={handleLoad}
-              disabled={isLoading}
               className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
             >
-              <DatabaseIcon className="h-4 w-4 mr-2" />
               Retrieve
             </Button>
           )}
           <Button 
             variant="outline"
             size="sm"
-            onClick={handleExport}
-            disabled={!data.length || isLoading}
+            onClick={() => window.location.href = '#sample'}
             className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
           >
-            <Download className="h-4 w-4 mr-2" />
             Export
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowQueryModal(true)}
-            disabled={isLoading}
-            className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-          >
-            <Code className="h-4 w-4 mr-2" />
-            Show Query
           </Button>
         </div>
       </div>
