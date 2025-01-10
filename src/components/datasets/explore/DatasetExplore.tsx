@@ -6,6 +6,7 @@ import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { DatasetFilters } from "./DatasetFilters";
+import { DatasetQueryModal } from "../DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
@@ -44,7 +45,8 @@ export const DatasetExplore = ({
     totalRowCount,
     isLoading,
     loadData,
-    queryText
+    queryText,
+    apiCall
   } = useDatasetData(selectedDataset);
 
   useEffect(() => {
@@ -221,23 +223,13 @@ export const DatasetExplore = ({
         />
       )}
 
-      {isQueryModalOpen && queryText && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl p-6 space-y-4">
-            <h3 className="text-lg font-semibold">SQL Query</h3>
-            <pre className="bg-muted p-4 rounded-md overflow-x-auto">
-              <code>{queryText}</code>
-            </pre>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsQueryModalOpen(false)}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
-              >
-                Close
-              </button>
-            </div>
-          </Card>
-        </div>
+      {isQueryModalOpen && (
+        <DatasetQueryModal
+          isOpen={isQueryModalOpen}
+          onClose={() => setIsQueryModalOpen(false)}
+          query={queryText || ''}
+          apiCall={apiCall || ''}
+        />
       )}
     </Card>
   );
