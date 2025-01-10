@@ -10,6 +10,7 @@ import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
+import type { Filter } from "@/components/datasets/explore/types";
 
 type TableNames = keyof Database['public']['Tables'];
 
