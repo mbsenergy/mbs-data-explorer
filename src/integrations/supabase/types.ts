@@ -1489,6 +1489,7 @@ export type Database = {
           BID_OFFER_DATE_DT_PARSED: string | null
           BILATERAL_IN: string | null
           ENERGY_PRICE_NO: number | null
+          GRANULARITY: string | null
           GRID_SUPPLY_POINT_NO: string | null
           INTERVAL_NO: number | null
           MARKET_CD: string | null
@@ -1498,6 +1499,7 @@ export type Database = {
           MERIT_ORDER_NO: number | null
           OPERATORE: string | null
           PARTIAL_QTY_ACCEPTED_IN: string | null
+          PERIOD: string | null
           PURPOSE_CD: string | null
           QUANTITY_NO: number | null
           SCOPE: string | null
@@ -1518,6 +1520,7 @@ export type Database = {
           BID_OFFER_DATE_DT_PARSED?: string | null
           BILATERAL_IN?: string | null
           ENERGY_PRICE_NO?: number | null
+          GRANULARITY?: string | null
           GRID_SUPPLY_POINT_NO?: string | null
           INTERVAL_NO?: number | null
           MARKET_CD?: string | null
@@ -1527,6 +1530,7 @@ export type Database = {
           MERIT_ORDER_NO?: number | null
           OPERATORE?: string | null
           PARTIAL_QTY_ACCEPTED_IN?: string | null
+          PERIOD?: string | null
           PURPOSE_CD?: string | null
           QUANTITY_NO?: number | null
           SCOPE?: string | null
@@ -1547,6 +1551,7 @@ export type Database = {
           BID_OFFER_DATE_DT_PARSED?: string | null
           BILATERAL_IN?: string | null
           ENERGY_PRICE_NO?: number | null
+          GRANULARITY?: string | null
           GRID_SUPPLY_POINT_NO?: string | null
           INTERVAL_NO?: number | null
           MARKET_CD?: string | null
@@ -1556,6 +1561,7 @@ export type Database = {
           MERIT_ORDER_NO?: number | null
           OPERATORE?: string | null
           PARTIAL_QTY_ACCEPTED_IN?: string | null
+          PERIOD?: string | null
           PURPOSE_CD?: string | null
           QUANTITY_NO?: number | null
           SCOPE?: string | null
