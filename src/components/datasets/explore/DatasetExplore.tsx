@@ -39,7 +39,7 @@ export const DatasetExplore = ({
 
   const {
     data,
-    setData, // Add this to update the table data
+    setData,
     columns,
     totalRowCount,
     isLoading,
@@ -57,24 +57,26 @@ export const DatasetExplore = ({
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       try {
-        console.log("Current filters:", filters); // Debug log
+        console.log("Current filters:", filters);
 
         // Build filter conditions from the filters array
         const filterConditions = filters
           .filter(f => f.searchTerm && f.selectedColumn)
           .map((filter, index) => {
+            // Ensure column names are in uppercase
+            const columnName = `"${filter.selectedColumn.toUpperCase()}"`;
             const value = isNaN(Number(filter.searchTerm)) 
               ? `'${filter.searchTerm}'` 
               : filter.searchTerm;
-            const condition = `${filter.selectedColumn} ${filter.comparisonOperator} ${value}`;
+            const condition = `${columnName} ${filter.comparisonOperator} ${value}`;
             return index === 0 ? condition : `${filter.operator} ${condition}`;
           })
           .join(' ');
 
-        console.log("Generated filter conditions:", filterConditions); // Debug log
+        console.log("Generated filter conditions:", filterConditions);
 
         const filteredData = await loadData(filterConditions);
-        console.log("Filtered data received:", filteredData); // Debug log
+        console.log("Filtered data received:", filteredData);
 
         // Update the table data with the filtered results
         setData(filteredData);
