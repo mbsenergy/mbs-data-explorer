@@ -23,13 +23,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     let query = `SELECT * FROM "${tableName}"`;
     
     // Add WHERE clause if there are filter conditions
-    if (filterConditions && filterConditions.trim() && !filterConditions.toLowerCase().includes('limit')) {
+    if (filterConditions && filterConditions.trim()) {
       query += ` WHERE ${filterConditions}`;
-    }
-    
-    // Add LIMIT if it's in the filter conditions
-    if (filterConditions && filterConditions.toLowerCase().includes('limit')) {
-      query += ` ${filterConditions}`;
     }
     
     return query;
@@ -111,14 +106,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const resultArray = queryResult as DataRow[] || [];
       console.log("Fetched data:", resultArray);
 
-      // Convert string[] columns to ColumnDef[]
-      const columnDefs: ColumnDef<any>[] = columns.map(col => ({
-        accessorKey: col,
-        header: col
-      }));
-
-      // Store in cache and update local data
-      addQueryResult(selectedDataset, resultArray, columnDefs, totalRowCount, query);
+      // Update local data state
       setLocalData(resultArray);
 
       return resultArray;

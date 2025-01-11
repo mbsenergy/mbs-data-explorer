@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { DatasetExploreHeader } from "./DatasetExploreHeader";
+import { DatasetFilters } from "./DatasetFilters";
+import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useDatasetStore } from "@/stores/datasetStore";
@@ -25,12 +26,11 @@ export const DatasetExplore = ({
   onLoad 
 }: DatasetExploreProps) => {
   const { toast } = useToast();
+  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const { addQueryResult, getQueryResult } = useDatasetStore();
-  
+
   // Initialize state from store or defaults
   const savedState = selectedDataset ? getQueryResult(selectedDataset) : null;
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
     savedState?.columns?.map(col => (col as any).accessorKey) || []
   );
@@ -45,7 +45,6 @@ export const DatasetExplore = ({
       }
     ]
   );
-  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
 
   const {
     data,
@@ -53,16 +52,11 @@ export const DatasetExplore = ({
     totalRowCount,
     isLoading,
     loadData,
-    queryText
+    queryText,
+    setData
   } = useDatasetData(selectedDataset);
 
-  // Load initial data when dataset changes
-  useEffect(() => {
-    if (selectedDataset) {
-      loadData("LIMIT 1000");
-    }
-  }, [selectedDataset]);
-
+  // Update selected columns when columns change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -98,24 +92,20 @@ export const DatasetExplore = ({
     if (selectedDataset) {
       try {
         const filterConditions = buildFilterConditions(filters);
-        console.log("Filter conditions:", filterConditions);
-
-        const data = await loadData(filterConditions || undefined);
+        const data = await loadData(filterConditions);
         
         // Store in cache with filters
-        if (selectedDataset) {
-          addQueryResult(
-            selectedDataset,
-            data,
-            columns.map(col => ({ 
-              accessorKey: col, 
-              header: col 
-            })),
-            totalRowCount,
-            queryText,
-            filters
-          );
-        }
+        addQueryResult(
+          selectedDataset,
+          data,
+          columns.map(col => ({ 
+            accessorKey: col, 
+            header: col 
+          })),
+          totalRowCount,
+          queryText,
+          filters
+        );
 
         if (onLoad) {
           onLoad(selectedDataset);
@@ -192,48 +182,66 @@ export const DatasetExplore = ({
         onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
-      
-      <DatasetStats 
-        totalRows={totalRowCount}
-        columnsCount={columns.length}
-        filteredRows={data.length}
-        lastUpdate={data[0]?.md_last_update}
+
+      <DatasetFilters
+        columns={columns}
+        filters={filters}
+        onFilterChange={(filterId, field, value) => {
+          setFilters(filters.map(filter => 
+            filter.id === filterId 
+              ? { ...filter, [field]: value }
+              : filter
+          ));
+        }}
+        onAddFilter={() => {
+          setFilters([...filters, {
+            id: crypto.randomUUID(),
+            searchTerm: "",
+            selectedColumn: "",
+            operator: "AND",
+            comparisonOperator: "="
+          }]);
+        }}
+        onRemoveFilter={(filterId) => {
+          setFilters(filters.filter(filter => filter.id !== filterId));
+        }}
       />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <p>Loading dataset...</p>
-        </div>
-      ) : (
-        <>
-          <DatasetControls
-            columns={columns}
-            searchTerm={searchTerm}
-            selectedColumn={selectedColumn}
-            onSearchChange={setSearchTerm}
-            onColumnChange={setSelectedColumn}
-          />
+      <DatasetControls
+        columns={columns}
+        searchTerm=""
+        selectedColumn=""
+        onSearchChange={() => {}}
+        onColumnChange={() => {}}
+      />
 
-          <DatasetColumnSelect
-            columns={columns}
-            selectedColumns={selectedColumns}
-            onColumnSelect={(column) => {
-              const newColumns = selectedColumns.includes(column)
-                ? selectedColumns.filter(col => col !== column)
-                : [...selectedColumns, column];
-              
-              setSelectedColumns(newColumns);
-              onColumnsChange(newColumns);
-            }}
-          />
+      <DatasetColumnSelect
+        columns={columns}
+        selectedColumns={selectedColumns}
+        onColumnSelect={(column) => {
+          const newColumns = selectedColumns.includes(column)
+            ? selectedColumns.filter(col => col !== column)
+            : [...selectedColumns, column];
+          
+          setSelectedColumns(newColumns);
+          onColumnsChange(newColumns);
+        }}
+      />
 
-          <DatasetTable
-            columns={columns}
-            data={data}
-            selectedColumns={selectedColumns}
-          />
-        </>
-      )}
+      <DatasetTable
+        columns={columns}
+        data={data}
+        selectedColumns={selectedColumns}
+      />
+
+      <DatasetQueryModal
+        isOpen={isQueryModalOpen}
+        onClose={() => setIsQueryModalOpen(false)}
+        query={queryText}
+        apiCall={`await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.join(", ")}')`}
+      />
     </Card>
   );
 };
