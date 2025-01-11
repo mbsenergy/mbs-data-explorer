@@ -10,11 +10,14 @@ type TableNames = keyof Database['public']['Tables'];
 type DataRow = Record<string, any>;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
-  const [queryText, setQueryText] = useState<string>("");
-  const [apiCall, setApiCall] = useState<string>("");
-  const [localData, setLocalData] = useState<DataRow[]>([]);
   const { toast } = useToast();
   const { addQueryResult, getQueryResult } = useDatasetStore();
+  
+  // Initialize state from store or defaults
+  const savedState = selectedDataset ? getQueryResult(selectedDataset) : null;
+  const [queryText, setQueryText] = useState<string>(savedState?.queryText || "");
+  const [apiCall, setApiCall] = useState<string>("");
+  const [localData, setLocalData] = useState<DataRow[]>(savedState?.data || []);
 
   const buildQuery = (tableName: string, filterConditions?: string) => {
     let query = `SELECT * FROM "${tableName}"`;
