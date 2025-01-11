@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
@@ -9,6 +10,7 @@ import { DatasetFilters } from "./DatasetFilters";
 import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
+import { useDatasetStore } from "@/stores/datasetStore";
 import type { Database } from "@/integrations/supabase/types";
 import type { Filter } from "@/components/datasets/explore/types";
 
@@ -26,16 +28,25 @@ export const DatasetExplore = ({
   onLoad 
 }: DatasetExploreProps) => {
   const { toast } = useToast();
+  const { addQueryResult, getQueryResult } = useDatasetStore();
+
+  // Initialize state from store or defaults
+  const savedState = selectedDataset ? getQueryResult(selectedDataset) : null;
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [filters, setFilters] = useState<Filter[]>([{
-    id: crypto.randomUUID(),
-    searchTerm: "",
-    selectedColumn: "",
-    operator: "AND",
-    comparisonOperator: "="
-  }]);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>(
+    savedState?.columns?.map(col => col.accessorKey as string) || []
+  );
+  const [filters, setFilters] = useState<Filter[]>([
+    { 
+      id: crypto.randomUUID(), 
+      searchTerm: "", 
+      selectedColumn: "", 
+      operator: "AND",
+      comparisonOperator: "=" 
+    }
+  ]);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
 
   const {
@@ -49,6 +60,18 @@ export const DatasetExplore = ({
     apiCall
   } = useDatasetData(selectedDataset);
 
+  // Load saved data if available
+  useEffect(() => {
+    if (selectedDataset && savedState?.data) {
+      setData(savedState.data);
+      if (savedState.columns) {
+        const columnNames = savedState.columns.map(col => col.accessorKey as string);
+        setSelectedColumns(columnNames);
+        onColumnsChange(columnNames);
+      }
+    }
+  }, [selectedDataset, savedState]);
+
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
@@ -61,23 +84,20 @@ export const DatasetExplore = ({
       try {
         console.log("Current filters:", filters);
 
-        // Build filter conditions from the filters array
-        const filterConditions = filters
+        // Only build filter conditions if there are valid filters
+        const hasValidFilters = filters.some(f => f.searchTerm && f.selectedColumn);
+        const filterConditions = hasValidFilters ? filters
           .filter(f => f.searchTerm && f.selectedColumn)
           .map((filter, index) => {
-            // Always use uppercase for column names and wrap in quotes
             const columnName = `"${filter.selectedColumn.toUpperCase()}"`;
             
-            // Handle value based on type and operator
             let value;
             if (filter.comparisonOperator === 'IN' || filter.comparisonOperator === 'NOT IN') {
-              // For IN/NOT IN, wrap each value in quotes and combine with commas
               const values = filter.searchTerm.split(',').map(v => 
                 isNaN(Number(v.trim())) ? `'${v.trim()}'` : v.trim()
               );
               value = `(${values.join(', ')})`;
             } else {
-              // For other operators, handle single values
               value = isNaN(Number(filter.searchTerm)) 
                 ? `'${filter.searchTerm}'` 
                 : filter.searchTerm;
@@ -86,12 +106,21 @@ export const DatasetExplore = ({
             const condition = `${columnName} ${filter.comparisonOperator} ${value}`;
             return index === 0 ? condition : `${filter.operator} ${condition}`;
           })
-          .join(' ');
+          .join(' ') : '';
 
         console.log("Generated filter conditions:", filterConditions);
 
         const filteredData = await loadData(filterConditions);
         console.log("Filtered data received:", filteredData);
+
+        // Store in cache
+        addQueryResult(
+          selectedDataset,
+          filteredData,
+          columns.map(col => ({ accessorKey: col, header: col })),
+          totalRowCount,
+          queryText || ''
+        );
 
         // Update the table data with the filtered results
         setData(filteredData);
@@ -171,7 +200,7 @@ export const DatasetExplore = ({
         onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
-
+      
       <DatasetStats 
         totalRows={totalRowCount}
         columnsCount={columns.length}
