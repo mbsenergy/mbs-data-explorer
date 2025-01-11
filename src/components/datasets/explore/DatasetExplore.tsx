@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
@@ -105,7 +104,6 @@ export const DatasetExplore = ({
         const columnName = `"${filter.selectedColumn}"`;
         let value = filter.searchTerm;
         
-        // Handle different comparison operators
         if (filter.comparisonOperator === 'IN' || filter.comparisonOperator === 'NOT IN') {
           const values = value.split(',').map(v => 
             isNaN(Number(v.trim())) ? `'${v.trim()}'` : v.trim()
@@ -161,11 +159,59 @@ export const DatasetExplore = ({
     }
   };
 
+  const handleExport = () => {
+    if (!data.length) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No data available to export"
+      });
+      return;
+    }
+
+    try {
+      const headers = selectedColumns.join(',');
+      const rows = data.map(row => 
+        selectedColumns.map(col => {
+          const value = row[col];
+          if (value === null) return '';
+          if (typeof value === 'string' && value.includes(',')) {
+            return `"${value}"`;
+          }
+          return value;
+        }).join(',')
+      );
+      const csv = [headers, ...rows].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedDataset}_export.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Data exported successfully"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to export data"
+      });
+    }
+  };
+
   return (
     <Card className="p-6 space-y-6">
       <DatasetExploreHeader 
         selectedDataset={selectedDataset}
         onLoad={handleLoad}
+        onExport={handleExport}
         onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />

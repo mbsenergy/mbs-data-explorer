@@ -18,13 +18,17 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   const buildQuery = (tableName: string, filterConditions?: string) => {
     let query = `SELECT * FROM "${tableName}"`;
-    if (filterConditions && filterConditions.trim()) {
-      if (filterConditions.toLowerCase().includes('limit')) {
-        query += ` WHERE ${filterConditions}`;
-      } else {
-        query += ` WHERE ${filterConditions}`;
-      }
+    
+    // Add WHERE clause if there are filter conditions
+    if (filterConditions && filterConditions.trim() && !filterConditions.toLowerCase().includes('limit')) {
+      query += ` WHERE ${filterConditions}`;
     }
+    
+    // Add LIMIT if it's in the filter conditions
+    if (filterConditions && filterConditions.toLowerCase().includes('limit')) {
+      query += ` ${filterConditions}`;
+    }
+    
     return query;
   };
 
