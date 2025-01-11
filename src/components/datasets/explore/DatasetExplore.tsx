@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDatasetStore } from "@/stores/datasetStore";
 import type { Database } from "@/integrations/supabase/types";
 import type { Filter } from "@/components/datasets/explore/types";
+import type { ColumnDef } from "@tanstack/react-table";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -36,7 +37,7 @@ export const DatasetExplore = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    savedState?.columns?.map(col => col.accessorKey as string) || []
+    savedState?.columns?.map(col => (col as ColumnDef<any> & { accessorKey: string }).accessorKey) || []
   );
   const [filters, setFilters] = useState<Filter[]>([
     { 
@@ -65,7 +66,9 @@ export const DatasetExplore = ({
     if (selectedDataset && savedState?.data) {
       setData(savedState.data);
       if (savedState.columns) {
-        const columnNames = savedState.columns.map(col => col.accessorKey as string);
+        const columnNames = savedState.columns.map(col => 
+          (col as ColumnDef<any> & { accessorKey: string }).accessorKey
+        );
         setSelectedColumns(columnNames);
         onColumnsChange(columnNames);
       }
@@ -117,7 +120,10 @@ export const DatasetExplore = ({
         addQueryResult(
           selectedDataset,
           filteredData,
-          columns.map(col => ({ accessorKey: col, header: col })),
+          columns.map(col => ({ 
+            accessorKey: col, 
+            header: col 
+          } as ColumnDef<any> & { accessorKey: string })),
           totalRowCount,
           queryText || ''
         );
