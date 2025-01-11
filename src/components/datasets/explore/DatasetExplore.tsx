@@ -4,6 +4,7 @@ import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
+import { DatasetExploreHeader } from "./DatasetExploreHeader";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import { useToast } from "@/hooks/use-toast";
 import { useDatasetStore } from "@/stores/datasetStore";
