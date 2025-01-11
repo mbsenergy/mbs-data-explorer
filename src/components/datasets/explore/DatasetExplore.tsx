@@ -61,6 +61,20 @@ export const DatasetExplore = ({
     apiCall
   } = useDatasetData(selectedDataset);
 
+  // Load initial data when dataset changes (first 1000 rows)
+  useEffect(() => {
+    if (selectedDataset) {
+      const loadInitialData = async () => {
+        try {
+          await loadData("LIMIT 1000");
+        } catch (error) {
+          console.error("Error loading initial data:", error);
+        }
+      };
+      loadInitialData();
+    }
+  }, [selectedDataset]);
+
   // Load saved data if available
   useEffect(() => {
     if (selectedDataset && savedState?.data) {
@@ -82,39 +96,39 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange]);
 
+  const buildFilterConditions = (filters: Filter[]): string => {
+    const validFilters = filters.filter(f => f.searchTerm && f.selectedColumn);
+    if (validFilters.length === 0) return "";
+
+    return validFilters
+      .map((filter, index) => {
+        const columnName = `"${filter.selectedColumn}"`;
+        let value = filter.searchTerm;
+        
+        // Handle different comparison operators
+        if (filter.comparisonOperator === 'IN' || filter.comparisonOperator === 'NOT IN') {
+          const values = value.split(',').map(v => 
+            isNaN(Number(v.trim())) ? `'${v.trim()}'` : v.trim()
+          );
+          value = `(${values.join(', ')})`;
+        } else {
+          value = isNaN(Number(value)) ? `'${value}'` : value;
+        }
+
+        const condition = `${columnName} ${filter.comparisonOperator} ${value}`;
+        return index === 0 ? condition : `${filter.operator} ${condition}`;
+      })
+      .join(' ');
+  };
+
   const handleLoad = async () => {
-    if (selectedDataset && loadData) {
+    if (selectedDataset) {
       try {
-        console.log("Current filters:", filters);
-
-        // Only build filter conditions if there are valid filters
-        const hasValidFilters = filters.some(f => f.searchTerm && f.selectedColumn);
-        const filterConditions = hasValidFilters ? filters
-          .filter(f => f.searchTerm && f.selectedColumn)
-          .map((filter, index) => {
-            const columnName = `"${filter.selectedColumn.toUpperCase()}"`;
-            
-            let value;
-            if (filter.comparisonOperator === 'IN' || filter.comparisonOperator === 'NOT IN') {
-              const values = filter.searchTerm.split(',').map(v => 
-                isNaN(Number(v.trim())) ? `'${v.trim()}'` : v.trim()
-              );
-              value = `(${values.join(', ')})`;
-            } else {
-              value = isNaN(Number(filter.searchTerm)) 
-                ? `'${filter.searchTerm}'` 
-                : filter.searchTerm;
-            }
-
-            const condition = `${columnName} ${filter.comparisonOperator} ${value}`;
-            return index === 0 ? condition : `${filter.operator} ${condition}`;
-          })
-          .join(' ') : '';
-
-        console.log("Generated filter conditions:", filterConditions);
+        const filterConditions = buildFilterConditions(filters);
+        console.log("Filter conditions:", filterConditions);
 
         const filteredData = await loadData(filterConditions);
-        console.log("Filtered data received:", filteredData);
+        console.log("Loaded data:", filteredData);
 
         // Store in cache
         addQueryResult(
@@ -127,9 +141,6 @@ export const DatasetExplore = ({
           totalRowCount,
           queryText || ''
         );
-
-        // Update the table data with the filtered results
-        setData(filteredData);
         
         if (onLoad) {
           onLoad(selectedDataset);
@@ -150,59 +161,11 @@ export const DatasetExplore = ({
     }
   };
 
-  const handleExport = () => {
-    if (!data.length) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No data available to export"
-      });
-      return;
-    }
-
-    try {
-      const headers = selectedColumns.join(',');
-      const rows = data.map(row => 
-        selectedColumns.map(col => {
-          const value = row[col];
-          if (value === null) return '';
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value;
-        }).join(',')
-      );
-      const csv = [headers, ...rows].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset}_export.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Success",
-        description: "Data exported successfully"
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to export data"
-      });
-    }
-  };
-
   return (
     <Card className="p-6 space-y-6">
       <DatasetExploreHeader 
         selectedDataset={selectedDataset}
         onLoad={handleLoad}
-        onExport={handleExport}
         onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
