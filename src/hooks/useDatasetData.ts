@@ -22,7 +22,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const buildQuery = (tableName: string, filterConditions?: string) => {
     let query = `SELECT * FROM "${tableName}"`;
     
-    // Add WHERE clause if there are filter conditions
     if (filterConditions && filterConditions.trim()) {
       query += ` WHERE ${filterConditions}`;
     }
@@ -86,8 +85,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   const loadDataWithFilters = async (filterConditions?: string) => {
     if (!selectedDataset) return [];
-
-    console.log("Loading data with filters:", filterConditions);
     
     try {
       const query = buildQuery(selectedDataset, filterConditions);
@@ -95,7 +92,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       setApiCall(`await supabase.rpc('execute_query', {
         query_text: \`${query}\`
       });`);
-      console.log("Executing query:", query);
 
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: query
@@ -104,10 +100,24 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (error) throw error;
 
       const resultArray = queryResult as DataRow[] || [];
-      console.log("Fetched data:", resultArray);
 
-      // Update local data state
+      // Update local data state and store
       setLocalData(resultArray);
+      addQueryResult(
+        selectedDataset,
+        resultArray,
+        columns.map(col => ({ 
+          accessorKey: col, 
+          header: col 
+        })),
+        totalRowCount,
+        query
+      );
+
+      toast({
+        title: "Success",
+        description: `Loaded ${resultArray.length} rows of data`
+      });
 
       return resultArray;
     } catch (error: any) {

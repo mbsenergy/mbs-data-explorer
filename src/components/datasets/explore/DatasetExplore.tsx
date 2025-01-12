@@ -64,6 +64,13 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange]);
 
+  // Load initial data when dataset changes
+  useEffect(() => {
+    if (selectedDataset) {
+      loadData();
+    }
+  }, [selectedDataset]);
+
   const buildFilterConditions = (filters: Filter[]): string => {
     const validFilters = filters.filter(f => f.searchTerm && f.selectedColumn);
     if (validFilters.length === 0) return "";
@@ -94,27 +101,9 @@ export const DatasetExplore = ({
         const filterConditions = buildFilterConditions(filters);
         const data = await loadData(filterConditions);
         
-        // Store in cache with filters
-        addQueryResult(
-          selectedDataset,
-          data,
-          columns.map(col => ({ 
-            accessorKey: col, 
-            header: col 
-          })),
-          totalRowCount,
-          queryText,
-          filters
-        );
-
         if (onLoad) {
           onLoad(selectedDataset);
         }
-
-        toast({
-          title: "Success",
-          description: `Dataset loaded with ${data.length} rows`
-        });
       } catch (error: any) {
         console.error("Error loading data:", error);
         toast({
@@ -126,59 +115,11 @@ export const DatasetExplore = ({
     }
   };
 
-  const handleExport = () => {
-    if (!data.length) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No data available to export"
-      });
-      return;
-    }
-
-    try {
-      const headers = selectedColumns.join(',');
-      const rows = data.map(row => 
-        selectedColumns.map(col => {
-          const value = row[col];
-          if (value === null) return '';
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value;
-        }).join(',')
-      );
-      const csv = [headers, ...rows].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset}_export.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Success",
-        description: "Data exported successfully"
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to export data"
-      });
-    }
-  };
-
   return (
     <Card className="p-6 space-y-6">
       <DatasetExploreHeader 
         selectedDataset={selectedDataset}
         onLoad={handleLoad}
-        onExport={handleExport}
         onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
