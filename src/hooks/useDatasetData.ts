@@ -21,14 +21,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
   const buildQuery = (tableName: string, filterConditions?: string) => {
     let query = `SELECT * FROM "${tableName}"`;
-    
-    // Add WHERE clause if there are filter conditions
     if (filterConditions && filterConditions.trim()) {
       query += ` WHERE ${filterConditions}`;
-    } else {
-      query += ` LIMIT 1000`; // Add LIMIT when no filters are applied
     }
-    
     return query;
   };
 
@@ -86,50 +81,42 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     retry: 3
   });
 
-  // Load initial data when dataset is selected
-  useQuery({
-    queryKey: ['initialData', selectedDataset],
-    queryFn: async () => {
-      if (!selectedDataset) return null;
-      try {
-        const query = buildQuery(selectedDataset);
-        setQueryText(query);
-        
-        const { data: queryResult, error } = await supabase.rpc('execute_query', {
-          query_text: query
-        });
+  const loadInitialData = async () => {
+    if (!selectedDataset) return null;
+    try {
+      const query = `SELECT * FROM "${selectedDataset}" LIMIT 1000`;
+      setQueryText(query);
+      
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
+        query_text: query
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const resultArray = queryResult as DataRow[] || [];
-        
-        // Update local data state and store
-        setLocalData(resultArray);
-        addQueryResult(
-          selectedDataset,
-          resultArray,
-          columns.map(col => ({ 
-            accessorKey: col, 
-            header: col 
-          })),
-          totalRowCount,
-          query
-        );
+      const resultArray = queryResult as DataRow[] || [];
+      
+      // Update local data state and store
+      setLocalData(resultArray);
+      addQueryResult(
+        selectedDataset,
+        resultArray,
+        columns.map(col => ({ 
+          accessorKey: col, 
+          header: col 
+        })),
+        totalRowCount,
+        query
+      );
 
-        return resultArray;
-      } catch (error: any) {
-        console.error("Error loading initial data:", error);
-        return null;
-      }
-    },
-    enabled: !!selectedDataset && !savedState,
-    retry: 3
-  });
+      return resultArray;
+    } catch (error: any) {
+      console.error("Error loading initial data:", error);
+      return null;
+    }
+  };
 
   const loadDataWithFilters = async (filterConditions?: string) => {
     if (!selectedDataset) return [];
-
-    console.log("Loading data with filters:", filterConditions);
     
     try {
       const query = buildQuery(selectedDataset, filterConditions);
@@ -137,7 +124,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       setApiCall(`await supabase.rpc('execute_query', {
         query_text: \`${query}\`
       });`);
-      console.log("Executing query:", query);
 
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: query
@@ -146,7 +132,6 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (error) throw error;
 
       const resultArray = queryResult as DataRow[] || [];
-      console.log("Fetched data:", resultArray);
 
       // Update local data state
       setLocalData(resultArray);
@@ -182,6 +167,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     totalRowCount,
     isLoading: false,
     loadData: loadDataWithFilters,
+    loadInitialData,
     queryText,
     apiCall
   };
