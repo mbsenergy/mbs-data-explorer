@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
@@ -28,7 +30,7 @@ export const DatasetExplore = ({
   const { toast } = useToast();
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const { addQueryResult, getQueryResult } = useDatasetStore();
-
+  
   // Initialize state from store or defaults
   const savedState = selectedDataset ? getQueryResult(selectedDataset) : null;
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
@@ -48,28 +50,59 @@ export const DatasetExplore = ({
 
   const {
     data,
+    setData,
     columns,
     totalRowCount,
     isLoading,
     loadData,
     queryText,
-    setData
+    apiCall
   } = useDatasetData(selectedDataset);
 
-  // Update selected columns when columns change
+  // Load initial data from store
   useEffect(() => {
-    if (columns.length > 0) {
-      setSelectedColumns(columns);
-      onColumnsChange(columns);
+    if (selectedDataset && savedState?.data) {
+      setData(savedState.data);
     }
-  }, [columns, onColumnsChange]);
+  }, [selectedDataset, savedState?.data, setData]);
 
-  // Load initial data when dataset changes
-  useEffect(() => {
-    if (selectedDataset) {
-      loadData();
+  const handleLoad = async () => {
+    if (selectedDataset && loadData) {
+      try {
+        const filterConditions = buildFilterConditions(filters);
+        const data = await loadData(filterConditions);
+        
+        // Store in cache with filters
+        addQueryResult(
+          selectedDataset,
+          data,
+          columns.map(col => ({ 
+            accessorKey: col, 
+            header: col 
+          })),
+          data.length,
+          queryText,
+          filters
+        );
+
+        if (onLoad) {
+          onLoad(selectedDataset);
+        }
+
+        toast({
+          title: "Success",
+          description: `Retrieved ${data.length} rows of data`
+        });
+      } catch (error: any) {
+        console.error("Error loading data:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to load dataset"
+        });
+      }
     }
-  }, [selectedDataset]);
+  };
 
   const buildFilterConditions = (filters: Filter[]): string => {
     const validFilters = filters.filter(f => f.searchTerm && f.selectedColumn);
@@ -95,142 +128,80 @@ export const DatasetExplore = ({
       .join(' ');
   };
 
-  const handleLoad = async () => {
-    if (selectedDataset) {
-      try {
-        const filterConditions = buildFilterConditions(filters);
-        const data = await loadData(filterConditions);
-        
-        if (onLoad) {
-          onLoad(selectedDataset);
-        }
-      } catch (error: any) {
-        console.error("Error loading data:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to load dataset"
-        });
-      }
-    }
-  };
-
-  const handleExport = () => {
-    if (!data.length) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No data available to export"
-      });
-      return;
-    }
-
-    try {
-      const headers = selectedColumns.join(',');
-      const rows = data.map(row => 
-        selectedColumns.map(col => {
-          const value = row[col];
-          if (value === null) return '';
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value}"`;
-          }
-          return value;
-        }).join(',')
-      );
-      const csv = [headers, ...rows].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${selectedDataset}_export.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Success",
-        description: "Data exported successfully"
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to export data"
-      });
-    }
-  };
-
   return (
     <Card className="p-6 space-y-6">
       <DatasetExploreHeader 
         selectedDataset={selectedDataset}
         onLoad={handleLoad}
-        onExport={handleExport}
+        onExport={() => window.location.href = '#sample'}
         onShowQuery={() => setIsQueryModalOpen(true)}
         isLoading={isLoading}
       />
 
-      <DatasetFilters
-        columns={columns}
-        filters={filters}
-        onFilterChange={(filterId, field, value) => {
-          setFilters(filters.map(filter => 
-            filter.id === filterId 
-              ? { ...filter, [field]: value }
-              : filter
-          ));
-        }}
-        onAddFilter={() => {
-          setFilters([...filters, {
-            id: crypto.randomUUID(),
-            searchTerm: "",
-            selectedColumn: "",
-            operator: "AND",
-            comparisonOperator: "="
-          }]);
-        }}
-        onRemoveFilter={(filterId) => {
-          setFilters(filters.filter(filter => filter.id !== filterId));
-        }}
+      <DatasetStats 
+        totalRows={totalRowCount}
+        columnsCount={columns.length}
+        filteredRows={data.length}
+        lastUpdate={data[0]?.md_last_update}
       />
 
-      <DatasetControls
-        columns={columns}
-        searchTerm=""
-        selectedColumn=""
-        onSearchChange={() => {}}
-        onColumnChange={() => {}}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <p>Loading dataset...</p>
+        </div>
+      ) : (
+        <>
+          <DatasetFilters
+            columns={columns}
+            filters={filters}
+            onFilterChange={(filterId, field, value) => {
+              setFilters(filters.map(filter => 
+                filter.id === filterId 
+                  ? { ...filter, [field]: value }
+                  : filter
+              ));
+            }}
+            onAddFilter={() => {
+              setFilters([...filters, {
+                id: crypto.randomUUID(),
+                searchTerm: "",
+                selectedColumn: "",
+                operator: "AND",
+                comparisonOperator: "="
+              }]);
+            }}
+            onRemoveFilter={(filterId) => {
+              setFilters(filters.filter(filter => filter.id !== filterId));
+            }}
+          />
 
-      <DatasetColumnSelect
-        columns={columns}
-        selectedColumns={selectedColumns}
-        onColumnSelect={(column) => {
-          const newColumns = selectedColumns.includes(column)
-            ? selectedColumns.filter(col => col !== column)
-            : [...selectedColumns, column];
-          
-          setSelectedColumns(newColumns);
-          onColumnsChange(newColumns);
-        }}
-      />
+          <DatasetColumnSelect
+            columns={columns}
+            selectedColumns={selectedColumns}
+            onColumnSelect={(column) => {
+              const newColumns = selectedColumns.includes(column)
+                ? selectedColumns.filter(col => col !== column)
+                : [...selectedColumns, column];
+              
+              setSelectedColumns(newColumns);
+              onColumnsChange(newColumns);
+            }}
+          />
 
-      <DatasetTable
-        columns={columns}
-        data={data}
-        selectedColumns={selectedColumns}
-      />
+          <DatasetTable
+            columns={columns}
+            data={data}
+            selectedColumns={selectedColumns}
+          />
 
-      <DatasetQueryModal
-        isOpen={isQueryModalOpen}
-        onClose={() => setIsQueryModalOpen(false)}
-        query={queryText}
-        apiCall={`await supabase
-  .from('${selectedDataset}')
-  .select('${selectedColumns.join(", ")}')`}
-      />
+          <DatasetQueryModal
+            isOpen={isQueryModalOpen}
+            onClose={() => setIsQueryModalOpen(false)}
+            query={queryText}
+            apiCall={apiCall}
+          />
+        </>
+      )}
     </Card>
   );
 };
