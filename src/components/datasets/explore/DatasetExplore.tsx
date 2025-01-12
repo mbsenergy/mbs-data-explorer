@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
+import { DatasetExploreActions } from "./DatasetExploreActions";
+import { DatasetQueryModal } from "./DatasetQueryModal";
+import { DatasetFilters } from "./DatasetFilters";
 import { useDatasetData } from "@/hooks/useDatasetData";
 import type { Database } from "@/integrations/supabase/types";
+import type { Filter } from "./types";
 
 type TableNames = keyof Database['public']['Tables'];
 
@@ -24,6 +27,14 @@ export const DatasetExplore = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
+  const [filters, setFilters] = useState<Filter[]>([{
+    id: crypto.randomUUID(),
+    searchTerm: "",
+    selectedColumn: "",
+    operator: "AND",
+    comparisonOperator: "="
+  }]);
 
   const {
     data,
@@ -31,7 +42,9 @@ export const DatasetExplore = ({
     totalRowCount,
     isLoading,
     loadData,
-    loadInitialData
+    loadInitialData,
+    queryText,
+    apiCall
   } = useDatasetData(selectedDataset);
 
   // Load initial data when dataset changes
@@ -39,7 +52,7 @@ export const DatasetExplore = ({
     if (selectedDataset) {
       loadInitialData();
     }
-  }, [selectedDataset]);
+  }, [selectedDataset, loadInitialData]);
 
   useEffect(() => {
     if (columns.length > 0) {
@@ -97,26 +110,13 @@ export const DatasetExplore = ({
             </p>
           )}
         </div>
-        <div className="space-x-2">
-          {onLoad && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleLoad}
-              className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
-            >
-              Retrieve
-            </Button>
-          )}
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={() => window.location.href = '#sample'}
-            className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
-          >
-            Export
-          </Button>
-        </div>
+        <DatasetExploreActions
+          selectedDataset={selectedDataset}
+          onRetrieve={handleLoad}
+          onExport={() => window.location.href = '#sample'}
+          onShowQuery={() => setIsQueryModalOpen(true)}
+          isLoading={isLoading}
+        />
       </div>
       
       <DatasetStats 
@@ -132,6 +132,30 @@ export const DatasetExplore = ({
         </div>
       ) : (
         <>
+          <DatasetFilters
+            columns={columns}
+            filters={filters}
+            onFilterChange={(filterId, field, value) => {
+              setFilters(filters.map(filter => 
+                filter.id === filterId 
+                  ? { ...filter, [field]: value }
+                  : filter
+              ));
+            }}
+            onAddFilter={() => {
+              setFilters([...filters, {
+                id: crypto.randomUUID(),
+                searchTerm: "",
+                selectedColumn: "",
+                operator: "AND",
+                comparisonOperator: "="
+              }]);
+            }}
+            onRemoveFilter={(filterId) => {
+              setFilters(filters.filter(filter => filter.id !== filterId));
+            }}
+          />
+
           <DatasetControls
             columns={columns}
             searchTerm={searchTerm}
@@ -150,6 +174,13 @@ export const DatasetExplore = ({
             columns={columns}
             data={filteredData}
             selectedColumns={selectedColumns}
+          />
+
+          <DatasetQueryModal
+            isOpen={isQueryModalOpen}
+            onClose={() => setIsQueryModalOpen(false)}
+            query={queryText}
+            apiCall={apiCall}
           />
         </>
       )}
