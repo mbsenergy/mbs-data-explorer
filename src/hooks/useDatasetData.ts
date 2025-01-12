@@ -25,6 +25,8 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     // Add WHERE clause if there are filter conditions
     if (filterConditions && filterConditions.trim()) {
       query += ` WHERE ${filterConditions}`;
+    } else {
+      query += ` LIMIT 1000`; // Add LIMIT when no filters are applied
     }
     
     return query;
@@ -84,6 +86,46 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     retry: 3
   });
 
+  // Load initial data when dataset is selected
+  useQuery({
+    queryKey: ['initialData', selectedDataset],
+    queryFn: async () => {
+      if (!selectedDataset) return null;
+      try {
+        const query = buildQuery(selectedDataset);
+        setQueryText(query);
+        
+        const { data: queryResult, error } = await supabase.rpc('execute_query', {
+          query_text: query
+        });
+
+        if (error) throw error;
+
+        const resultArray = queryResult as DataRow[] || [];
+        
+        // Update local data state and store
+        setLocalData(resultArray);
+        addQueryResult(
+          selectedDataset,
+          resultArray,
+          columns.map(col => ({ 
+            accessorKey: col, 
+            header: col 
+          })),
+          totalRowCount,
+          query
+        );
+
+        return resultArray;
+      } catch (error: any) {
+        console.error("Error loading initial data:", error);
+        return null;
+      }
+    },
+    enabled: !!selectedDataset && !savedState,
+    retry: 3
+  });
+
   const loadDataWithFilters = async (filterConditions?: string) => {
     if (!selectedDataset) return [];
 
@@ -108,6 +150,18 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
 
       // Update local data state
       setLocalData(resultArray);
+
+      // Store in cache
+      addQueryResult(
+        selectedDataset,
+        resultArray,
+        columns.map(col => ({ 
+          accessorKey: col, 
+          header: col 
+        })),
+        totalRowCount,
+        query
+      );
 
       return resultArray;
     } catch (error: any) {
