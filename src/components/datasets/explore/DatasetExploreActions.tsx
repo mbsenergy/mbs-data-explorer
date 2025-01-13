@@ -24,7 +24,7 @@ export const DatasetExploreActions = ({
   const [showRetrieveDialog, setShowRetrieveDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
 
-  const handleRetrieve = async () => {
+  const handleRetrieve = () => {
     if (!selectedDataset) {
       toast({
         title: "No dataset selected",
@@ -33,7 +33,6 @@ export const DatasetExploreActions = ({
       });
       return;
     }
-
     setShowRetrieveDialog(true);
   };
 
@@ -65,6 +64,14 @@ export const DatasetExploreActions = ({
   };
 
   const handleExport = () => {
+    if (!selectedDataset) {
+      toast({
+        title: "No dataset selected",
+        description: "Please select a dataset first",
+        variant: "destructive"
+      });
+      return;
+    }
     setShowExportDialog(true);
   };
 
