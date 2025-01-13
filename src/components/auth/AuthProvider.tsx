@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { User, AuthError } from "@supabase/supabase-js";
+import type { User, AuthError, AuthChangeEvent } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
 
 interface AuthContextType {
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: AuthChangeEvent, session) => {
         console.log("Auth state change:", event);
         
         if (session?.user) {
@@ -96,13 +96,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             toast({
               title: "Signed Out",
               description: "You have been signed out successfully.",
-            });
-            break;
-          case 'USER_DELETED':
-            toast({
-              title: "Account Deleted",
-              description: "Your account has been deleted.",
-              variant: "destructive"
             });
             break;
         }
