@@ -26,10 +26,16 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     if (filterConditions && filterConditions.trim()) {
       query += ` WHERE ${filterConditions}`;
     }
+
+    // Add LIMIT clause for initial load
+    if (!filterConditions) {
+      query += ` LIMIT 1000`;
+    }
     
     return query;
   };
 
+  // Query for columns
   const { data: columns = [] } = useQuery({
     queryKey: ['columns', selectedDataset],
     queryFn: async () => {
@@ -60,6 +66,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     retry: 3
   });
 
+  // Query for row count
   const { data: totalRowCount = 0 } = useQuery({
     queryKey: ['rowCount', selectedDataset],
     queryFn: async () => {
@@ -81,6 +88,42 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       }
     },
     enabled: !!selectedDataset,
+    retry: 3
+  });
+
+  // Load initial data when dataset changes
+  useQuery({
+    queryKey: ['initialData', selectedDataset],
+    queryFn: async () => {
+      if (!selectedDataset) return [];
+      const query = buildQuery(selectedDataset);
+      console.log("Loading initial data with query:", query);
+      
+      const { data: queryResult, error } = await supabase.rpc('execute_query', {
+        query_text: query
+      });
+
+      if (error) throw error;
+
+      const resultArray = queryResult as DataRow[] || [];
+      
+      // Store in cache
+      addQueryResult(
+        selectedDataset,
+        resultArray,
+        columns.map(col => ({ 
+          accessorKey: col, 
+          header: col 
+        })),
+        totalRowCount,
+        query
+      );
+
+      setLocalData(resultArray);
+      setQueryText(query);
+      return resultArray;
+    },
+    enabled: !!selectedDataset && columns.length > 0,
     retry: 3
   });
 
@@ -106,8 +149,18 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const resultArray = queryResult as DataRow[] || [];
       console.log("Fetched data:", resultArray);
 
-      // Update local data state
+      // Update local data state and store
       setLocalData(resultArray);
+      addQueryResult(
+        selectedDataset,
+        resultArray,
+        columns.map(col => ({ 
+          accessorKey: col, 
+          header: col 
+        })),
+        totalRowCount,
+        query
+      );
 
       return resultArray;
     } catch (error: any) {
