@@ -75,54 +75,56 @@ export const DatasetExploreActions = ({
 
   return (
     <>
-    <div className="space-x-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleRetrieve}
-        disabled={isLoading}
-        className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
-      >
-        <Database className="h-4 w-4 mr-2" />
-        Retrieve
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleExport}
-        disabled={isLoading}
-        className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
-      >
-        <Download className="h-4 w-4 mr-2" />
-        Export
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onShowQuery}
-        disabled={isLoading}
-        className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-      >
-        <Code className="h-4 w-4 mr-2" />
-        Show Query
-      </Button>
-    </div>
-    <DatasetActionDialog
-      isOpen={showRetrieveDialog}
-      onClose={() => setShowRetrieveDialog(false)}
-      onConfirm={handleConfirmRetrieve}
-      title="Retrieve Dataset"
-      description="Are you sure you want to retrieve this dataset? This may take some time depending on the size of the data."
-      actionLabel="Retrieve"
-    />
-    <DatasetActionDialog
-      isOpen={showExportDialog}
-      onClose={() => setShowExportDialog(false)}
-      onConfirm={handleConfirmExport}
-      title="Export Dataset"
-      description="Are you sure you want to export this dataset?"
-      actionLabel="Export"
-    />
+      <div className="space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRetrieve}
+          disabled={isLoading}
+          className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
+        >
+          <Database className="h-4 w-4 mr-2" />
+          Retrieve
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          disabled={isLoading}
+          className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onShowQuery}
+          disabled={isLoading}
+          className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+        >
+          <Code className="h-4 w-4 mr-2" />
+          Show Query
+        </Button>
+      </div>
+
+      <DatasetActionDialog
+        isOpen={showRetrieveDialog}
+        onClose={() => setShowRetrieveDialog(false)}
+        onConfirm={handleConfirmRetrieve}
+        title="Retrieve Dataset"
+        description="Are you sure you want to retrieve this dataset? This may take some time depending on the size of the data."
+        actionLabel="Retrieve"
+      />
+
+      <DatasetActionDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        onConfirm={handleConfirmExport}
+        title="Export Dataset"
+        description="Are you sure you want to export this dataset?"
+        actionLabel="Export"
+      />
     </>
   );
 };
