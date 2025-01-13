@@ -37,30 +37,44 @@ export const DatasetExploreActions = ({
   };
 
   const handleConfirmRetrieve = async () => {
-    // Check row count
-    const { data: countData, error: countError } = await supabase
-      .rpc('get_table_row_count', { table_name: selectedDataset });
-    
-    if (countError) {
-      toast({
-        title: "Error",
-        description: "Failed to check dataset size",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (countData > 500000) {
-      toast({
-        title: "Dataset too large",
-        description: "Cannot retrieve datasets with more than 500,000 rows. Please use the export feature instead.",
-        variant: "destructive"
-      });
-      return;
-    }
+    try {
+      // Check row count
+      const { data: countData, error: countError } = await supabase
+        .rpc('get_table_row_count', { table_name: selectedDataset });
+      
+      if (countError) {
+        toast({
+          title: "Error",
+          description: "Failed to check dataset size",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (countData > 500000) {
+        toast({
+          title: "Dataset too large",
+          description: "Cannot retrieve datasets with more than 500,000 rows. Please use the export feature instead.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-    onRetrieve();
-    setShowRetrieveDialog(false);
+      onRetrieve();
+      setShowRetrieveDialog(false);
+      
+      toast({
+        title: "Success",
+        description: "Dataset retrieval initiated"
+      });
+    } catch (error: any) {
+      console.error("Error retrieving dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to retrieve dataset"
+      });
+    }
   };
 
   const handleExport = () => {
@@ -76,8 +90,22 @@ export const DatasetExploreActions = ({
   };
 
   const handleConfirmExport = () => {
-    onExport();
-    setShowExportDialog(false);
+    try {
+      onExport();
+      setShowExportDialog(false);
+      
+      toast({
+        title: "Success",
+        description: "Export initiated"
+      });
+    } catch (error: any) {
+      console.error("Error exporting dataset:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to export dataset"
+      });
+    }
   };
 
   return (
