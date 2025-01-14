@@ -22,14 +22,9 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const buildQuery = (tableName: string, filterConditions?: string) => {
     let query = `SELECT * FROM "${tableName}"`;
     
-    // Add WHERE clause if there are filter conditions
+    // Only add WHERE clause if there are actual filter conditions
     if (filterConditions && filterConditions.trim()) {
       query += ` WHERE ${filterConditions}`;
-    }
-
-    // Add LIMIT clause for initial load
-    if (!filterConditions) {
-      query += ` LIMIT 1000`;
     }
     
     return query;
@@ -133,6 +128,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     console.log("Loading data with filters:", filterConditions);
     
     try {
+      // Build query - if no filters, it will just be SELECT * FROM table
       const query = buildQuery(selectedDataset, filterConditions);
       setQueryText(query);
       setApiCall(`await supabase.rpc('execute_query', {
