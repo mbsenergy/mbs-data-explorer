@@ -11,7 +11,7 @@ type DataRow = Record<string, any>;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const { toast } = useToast();
-  const { addQueryResult, getQueryResult } = useDatasetStore();
+  const { addQueryResult, getQueryResult, setCurrentQuery, getCurrentQuery } = useDatasetStore();
   
   // Initialize state from store or defaults
   const savedState = selectedDataset ? getQueryResult(selectedDataset) : null;
@@ -91,6 +91,16 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     queryKey: ['initialData', selectedDataset],
     queryFn: async () => {
       if (!selectedDataset) return [];
+      
+      // Check if we have cached data first
+      const cachedData = getQueryResult(selectedDataset);
+      if (cachedData) {
+        console.log("Using cached data for", selectedDataset);
+        setLocalData(cachedData.data);
+        setQueryText(cachedData.queryText || "");
+        return cachedData.data;
+      }
+
       const query = buildQuery(selectedDataset);
       console.log("Loading initial data with query:", query);
       
