@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
@@ -44,7 +43,8 @@ export const DatasetExplore = ({
     totalRowCount,
     isLoading,
     loadData,
-    queryText
+    queryText,
+    loadInitialData
   } = useDatasetData(selectedDataset);
 
   // Update selected columns when columns change
@@ -55,6 +55,14 @@ export const DatasetExplore = ({
     }
   }, [columns, onColumnsChange, setSelectedColumns]);
 
+  // Load initial 1000 rows when dataset changes
+  useEffect(() => {
+    if (selectedDataset) {
+      console.log("Loading initial data for dataset:", selectedDataset);
+      loadInitialData();
+    }
+  }, [selectedDataset, loadInitialData]);
+
   // Update filtered data when data changes
   useEffect(() => {
     if (data && data.length > 0) {
@@ -63,18 +71,16 @@ export const DatasetExplore = ({
     }
   }, [data, setFilteredData]);
 
-  // Load initial data when dataset changes
-  useEffect(() => {
-    if (selectedDataset && loadData) {
-      console.log("Loading initial data for dataset:", selectedDataset);
-      loadData();
-    }
-  }, [selectedDataset, loadData]);
-
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       try {
-        await loadData();
+        // If no filters are applied, use a simple SELECT * query
+        const hasActiveFilters = filters.some(filter => 
+          filter.searchTerm && filter.selectedColumn
+        );
+
+        await loadData(hasActiveFilters ? undefined : `SELECT * FROM "${selectedDataset}"`);
+        
         if (onLoad) {
           onLoad(selectedDataset);
         }

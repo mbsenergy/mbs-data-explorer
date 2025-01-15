@@ -86,22 +86,12 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     retry: 3
   });
 
-  // Load initial data when dataset changes
-  useQuery({
-    queryKey: ['initialData', selectedDataset],
-    queryFn: async () => {
-      if (!selectedDataset) return [];
-      
-      // Check if we have cached data first
-      const cachedData = getQueryResult(selectedDataset);
-      if (cachedData) {
-        console.log("Using cached data for", selectedDataset);
-        setLocalData(cachedData.data);
-        setQueryText(cachedData.queryText || "");
-        return cachedData.data;
-      }
+  // Load initial 1000 rows
+  const loadInitialData = async () => {
+    if (!selectedDataset) return;
 
-      const query = buildQuery(selectedDataset);
+    try {
+      const query = `SELECT * FROM "${selectedDataset}" LIMIT 1000`;
       console.log("Loading initial data with query:", query);
       
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
@@ -127,19 +117,23 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       setLocalData(resultArray);
       setQueryText(query);
       return resultArray;
-    },
-    enabled: !!selectedDataset && columns.length > 0,
-    retry: 3
-  });
+    } catch (error: any) {
+      console.error("Error loading initial data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to load initial data"
+      });
+      throw error;
+    }
+  };
 
-  const loadDataWithFilters = async (filterConditions?: string) => {
+  const loadDataWithFilters = async (customQuery?: string) => {
     if (!selectedDataset) return [];
 
-    console.log("Loading data with filters:", filterConditions);
-    
     try {
-      // Build query - if no filters, it will just be SELECT * FROM table
-      const query = buildQuery(selectedDataset, filterConditions);
+      // Use custom query if provided, otherwise build from filters
+      const query = customQuery || buildQuery(selectedDataset);
       setQueryText(query);
       setApiCall(`await supabase.rpc('execute_query', {
         query_text: \`${query}\`
@@ -187,6 +181,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     totalRowCount,
     isLoading: false,
     loadData: loadDataWithFilters,
+    loadInitialData,
     queryText,
     apiCall
   };
