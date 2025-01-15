@@ -6,7 +6,6 @@ import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
 import { useDatasetData } from "@/hooks/useDatasetData";
-import { useExploreState } from "@/hooks/useExploreState";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -24,60 +23,51 @@ export const DatasetExplore = ({
 }: DatasetExploreProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-
-  const {
-    selectedColumns,
-    setSelectedColumns,
-    filteredData,
-    setFilteredData,
-    filters,
-    setFilters
-  } = useExploreState(selectedDataset);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
   const {
     data,
     columns,
     totalRowCount,
     isLoading,
-    loadData,
-    queryText
+    loadData
   } = useDatasetData(selectedDataset);
 
-  // Update selected columns when columns change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange, setSelectedColumns]);
-
-  // Update filtered data when data changes
-  useEffect(() => {
-    if (data && data.length > 0) {
-      console.log("Setting filtered data from data update:", data.length);
-      setFilteredData(data);
-    }
-  }, [data, setFilteredData]);
-
-  // Load initial data when dataset changes
-  useEffect(() => {
-    if (selectedDataset && loadData) {
-      console.log("Loading initial data for dataset:", selectedDataset);
-      loadData();
-    }
-  }, [selectedDataset, loadData]);
+  }, [columns, onColumnsChange]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      try {
-        await loadData();
-        if (onLoad) {
-          onLoad(selectedDataset);
-        }
-      } catch (error: any) {
-        console.error("Error loading data:", error);
+      await loadData();
+      if (onLoad) {
+        onLoad(selectedDataset);
       }
     }
+  };
+
+  const filteredData = data.filter((item) =>
+    selectedColumn
+      ? String(item[selectedColumn])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : Object.entries(item)
+          .filter(([key]) => !key.startsWith('md_'))
+          .some(([_, value]) => 
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
+          )
+  );
+
+  const handleColumnSelect = (column: string) => {
+    const newColumns = selectedColumns.includes(column)
+      ? selectedColumns.filter(col => col !== column)
+      : [...selectedColumns, column];
+    
+    setSelectedColumns(newColumns);
+    onColumnsChange(newColumns);
   };
 
   const getLastUpdate = (data: any[]) => {
@@ -145,14 +135,7 @@ export const DatasetExplore = ({
           <DatasetColumnSelect
             columns={columns}
             selectedColumns={selectedColumns}
-            onColumnSelect={(column) => {
-              const newColumns = selectedColumns.includes(column)
-                ? selectedColumns.filter(col => col !== column)
-                : [...selectedColumns, column];
-              
-              setSelectedColumns(newColumns);
-              onColumnsChange(newColumns);
-            }}
+            onColumnSelect={handleColumnSelect}
           />
 
           <DatasetTable
