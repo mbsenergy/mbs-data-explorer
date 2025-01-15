@@ -5,7 +5,11 @@ import { DatasetStats } from "./DatasetStats";
 import { DatasetTable } from "./DatasetTable";
 import { DatasetControls } from "./DatasetControls";
 import { DatasetColumnSelect } from "./DatasetColumnSelect";
+import { DatasetExploreActions } from "./DatasetExploreActions";
+import { DatasetFilters } from "./DatasetFilters";
+import { DatasetQueryModal } from "./DatasetQueryModal";
 import { useDatasetData } from "@/hooks/useDatasetData";
+import { useExploreState } from "@/hooks/useExploreState";
 import type { Database } from "@/integrations/supabase/types";
 
 type TableNames = keyof Database['public']['Tables'];
@@ -23,51 +27,66 @@ export const DatasetExplore = ({
 }: DatasetExploreProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
+
+  const {
+    selectedColumns,
+    setSelectedColumns,
+    filteredData,
+    setFilteredData,
+    filters,
+    setFilters
+  } = useExploreState(selectedDataset);
 
   const {
     data,
     columns,
     totalRowCount,
     isLoading,
-    loadData
+    loadData,
+    queryText
   } = useDatasetData(selectedDataset);
 
+  // Update selected columns when columns change
   useEffect(() => {
     if (columns.length > 0) {
       setSelectedColumns(columns);
       onColumnsChange(columns);
     }
-  }, [columns, onColumnsChange]);
+  }, [columns, onColumnsChange, setSelectedColumns]);
+
+  // Update filtered data when data changes
+  useEffect(() => {
+    if (data && data.length > 0) {
+      console.log("Setting filtered data from data update:", data.length);
+      setFilteredData(data);
+    }
+  }, [data, setFilteredData]);
+
+  // Load initial data when dataset changes
+  useEffect(() => {
+    if (selectedDataset && loadData) {
+      console.log("Loading initial data for dataset:", selectedDataset);
+      loadData();
+    }
+  }, [selectedDataset, loadData]);
 
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
-      await loadData();
-      if (onLoad) {
-        onLoad(selectedDataset);
+      try {
+        await loadData();
+        if (onLoad) {
+          onLoad(selectedDataset);
+        }
+      } catch (error: any) {
+        console.error("Error loading data:", error);
       }
     }
   };
 
-  const filteredData = data.filter((item) =>
-    selectedColumn
-      ? String(item[selectedColumn])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      : Object.entries(item)
-          .filter(([key]) => !key.startsWith('md_'))
-          .some(([_, value]) => 
-            String(value).toLowerCase().includes(searchTerm.toLowerCase())
-          )
-  );
-
-  const handleColumnSelect = (column: string) => {
-    const newColumns = selectedColumns.includes(column)
-      ? selectedColumns.filter(col => col !== column)
-      : [...selectedColumns, column];
-    
-    setSelectedColumns(newColumns);
-    onColumnsChange(newColumns);
+  const handleExport = () => {
+    // Export functionality will be implemented here
+    console.log("Export clicked");
   };
 
   const getLastUpdate = (data: any[]) => {
@@ -89,26 +108,13 @@ export const DatasetExplore = ({
             </p>
           )}
         </div>
-        <div className="space-x-2">
-          {onLoad && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleLoad}
-              className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
-            >
-              Retrieve
-            </Button>
-          )}
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={() => window.location.href = '#sample'}
-            className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
-          >
-            Export
-          </Button>
-        </div>
+        <DatasetExploreActions
+          selectedDataset={selectedDataset}
+          onRetrieve={handleLoad}
+          onExport={handleExport}
+          onShowQuery={() => setIsQueryModalOpen(true)}
+          isLoading={isLoading}
+        />
       </div>
       
       <DatasetStats 
@@ -124,6 +130,30 @@ export const DatasetExplore = ({
         </div>
       ) : (
         <>
+          <DatasetFilters
+            columns={columns}
+            filters={filters}
+            onFilterChange={(filterId, field, value) => {
+              setFilters(filters.map(filter => 
+                filter.id === filterId 
+                  ? { ...filter, [field]: value }
+                  : filter
+              ));
+            }}
+            onAddFilter={() => {
+              setFilters([...filters, {
+                id: crypto.randomUUID(),
+                searchTerm: "",
+                selectedColumn: "",
+                operator: "AND",
+                comparisonOperator: "="
+              }]);
+            }}
+            onRemoveFilter={(filterId) => {
+              setFilters(filters.filter(filter => filter.id !== filterId));
+            }}
+          />
+
           <DatasetControls
             columns={columns}
             searchTerm={searchTerm}
@@ -135,7 +165,14 @@ export const DatasetExplore = ({
           <DatasetColumnSelect
             columns={columns}
             selectedColumns={selectedColumns}
-            onColumnSelect={handleColumnSelect}
+            onColumnSelect={(column) => {
+              const newColumns = selectedColumns.includes(column)
+                ? selectedColumns.filter(col => col !== column)
+                : [...selectedColumns, column];
+              
+              setSelectedColumns(newColumns);
+              onColumnsChange(newColumns);
+            }}
           />
 
           <DatasetTable
@@ -145,6 +182,15 @@ export const DatasetExplore = ({
           />
         </>
       )}
+
+      <DatasetQueryModal
+        isOpen={isQueryModalOpen}
+        onClose={() => setIsQueryModalOpen(false)}
+        query={queryText}
+        apiCall={`await supabase
+  .from('${selectedDataset}')
+  .select('${selectedColumns.join(", ")}')`}
+      />
     </Card>
   );
 };
