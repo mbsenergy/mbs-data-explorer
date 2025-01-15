@@ -128,11 +128,10 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     }
   };
 
-  const loadDataWithFilters = async (customQuery?: string) => {
+  const loadData = async (customQuery?: string) => {
     if (!selectedDataset) return [];
 
     try {
-      // Use custom query if provided, otherwise build from filters
       const query = customQuery || buildQuery(selectedDataset);
       setQueryText(query);
       setApiCall(`await supabase.rpc('execute_query', {
@@ -147,7 +146,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (error) throw error;
 
       const resultArray = queryResult as DataRow[] || [];
-      console.log("Fetched data:", resultArray);
+      console.log("Fetched data:", resultArray.length, "rows");
 
       // Update local data state and store
       setLocalData(resultArray);
@@ -180,7 +179,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     columns,
     totalRowCount,
     isLoading: false,
-    loadData: loadDataWithFilters,
+    loadData,
     loadInitialData,
     queryText,
     apiCall

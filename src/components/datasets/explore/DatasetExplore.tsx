@@ -43,8 +43,8 @@ export const DatasetExplore = ({
     totalRowCount,
     isLoading,
     loadData,
-    queryText,
-    loadInitialData
+    loadInitialData,
+    queryText
   } = useDatasetData(selectedDataset);
 
   // Update selected columns when columns change
@@ -90,11 +90,6 @@ export const DatasetExplore = ({
     }
   };
 
-  const handleExport = () => {
-    // Export functionality will be implemented here
-    console.log("Export clicked");
-  };
-
   const getLastUpdate = (data: any[]) => {
     if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
       const item = data[0] as Record<string, unknown>;
@@ -117,7 +112,7 @@ export const DatasetExplore = ({
         <DatasetExploreActions
           selectedDataset={selectedDataset}
           onRetrieve={handleLoad}
-          onExport={handleExport}
+          onExport={() => {}} // Implement export functionality
           onShowQuery={() => setIsQueryModalOpen(true)}
           isLoading={isLoading}
         />
