@@ -74,12 +74,12 @@ export const DatasetExplore = ({
   const handleLoad = async () => {
     if (selectedDataset && loadData) {
       try {
-        // If no filters are applied, use a simple SELECT * query
-        const hasActiveFilters = filters.some(filter => 
-          filter.searchTerm && filter.selectedColumn
-        );
-
-        await loadData(hasActiveFilters ? undefined : `SELECT * FROM "${selectedDataset}"`);
+        // Check if there are any active filters
+        const activeFilters = filters.filter(f => f.searchTerm && f.selectedColumn);
+        console.log("Active filters for query:", activeFilters);
+        
+        // Execute query with filters
+        await loadData(activeFilters);
         
         if (onLoad) {
           onLoad(selectedDataset);

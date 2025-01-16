@@ -4,14 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDatasetStore } from "@/stores/datasetStore";
 import type { Database } from "@/integrations/supabase/types";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { Filter } from "@/components/datasets/explore/types";
 
 type TableNames = keyof Database['public']['Tables'];
 type DataRow = Record<string, any>;
 
 export const useDatasetData = (selectedDataset: TableNames | null) => {
   const { toast } = useToast();
-  const { addQueryResult, getQueryResult, setCurrentQuery, getCurrentQuery } = useDatasetStore();
+  const { addQueryResult, getQueryResult } = useDatasetStore();
   
   // Initialize state from store or defaults
   const savedState = selectedDataset ? getQueryResult(selectedDataset) : null;
@@ -19,12 +19,38 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
   const [apiCall, setApiCall] = useState<string>("");
   const [localData, setLocalData] = useState<DataRow[]>(savedState?.data || []);
 
-  const buildQuery = (tableName: string, filterConditions?: string) => {
+  const buildQuery = (tableName: string, filters?: Filter[]) => {
     let query = `SELECT * FROM "${tableName}"`;
     
-    // Only add WHERE clause if there are actual filter conditions
-    if (filterConditions && filterConditions.trim()) {
-      query += ` WHERE ${filterConditions}`;
+    if (filters && filters.length > 0) {
+      const filterConditions = filters
+        .filter(f => f.searchTerm && f.selectedColumn) // Only include filters with both terms
+        .map((filter, index) => {
+          const { selectedColumn, searchTerm, operator, comparisonOperator } = filter;
+          let condition = '';
+          
+          // Add AND/OR operator except for first condition
+          if (index > 0) {
+            condition += ` ${operator} `;
+          }
+
+          // Handle different comparison operators
+          switch (comparisonOperator) {
+            case 'IN':
+            case 'NOT IN':
+              const values = searchTerm.split(',').map(v => `'${v.trim()}'`).join(',');
+              condition += `"${selectedColumn}" ${comparisonOperator} (${values})`;
+              break;
+            default:
+              condition += `"${selectedColumn}" ${comparisonOperator} '${searchTerm}'`;
+          }
+          
+          return condition;
+        });
+
+      if (filterConditions.length > 0) {
+        query += ` WHERE ${filterConditions.join(' ')}`;
+      }
     }
     
     return query;
@@ -101,6 +127,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       if (error) throw error;
 
       const resultArray = queryResult as DataRow[] || [];
+      console.log("Initial data loaded:", resultArray.length, "rows");
       
       // Store in cache
       addQueryResult(
@@ -128,16 +155,16 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
     }
   };
 
-  const loadData = async (customQuery?: string) => {
+  const loadData = async (filters?: Filter[]) => {
     if (!selectedDataset) return [];
 
     try {
-      const query = customQuery || buildQuery(selectedDataset);
+      const query = buildQuery(selectedDataset, filters);
+      console.log("Executing query with filters:", query);
       setQueryText(query);
       setApiCall(`await supabase.rpc('execute_query', {
         query_text: \`${query}\`
       });`);
-      console.log("Executing query:", query);
 
       const { data: queryResult, error } = await supabase.rpc('execute_query', {
         query_text: query
