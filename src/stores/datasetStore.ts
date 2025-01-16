@@ -60,7 +60,6 @@ export const useDatasetStore = create<DatasetState>()(
       exploreState: null,
       
       addQueryResult: (tableName, data, columns, totalRowCount, queryText, filters) => {
-        console.log("Adding query result to store:", { tableName, data: data.length });
         set((state) => ({
           queries: {
             ...state.queries,
@@ -78,18 +77,13 @@ export const useDatasetStore = create<DatasetState>()(
 
       getQueryResult: (tableName) => {
         const query = get().queries[tableName];
-        if (!query) {
-          console.log("No cached data found for:", tableName);
-          return null;
-        }
+        if (!query) return null;
 
         // Check if cache is still valid (less than 1 hour old)
         if (Date.now() - query.timestamp > CACHE_DURATION) {
-          console.log("Cache expired for:", tableName);
           return null;
         }
 
-        console.log("Returning cached data for:", tableName);
         return query;
       },
 
@@ -111,30 +105,23 @@ export const useDatasetStore = create<DatasetState>()(
       },
 
       setExploreState: (state) => {
-        console.log("Setting explore state:", state);
         set({ exploreState: { ...state, timestamp: Date.now() } });
       },
 
       getExploreState: () => {
         const state = get().exploreState;
-        if (!state) {
-          console.log("No explore state found");
-          return null;
-        }
+        if (!state) return null;
 
         // Check if cache is still valid
         if (Date.now() - state.timestamp > CACHE_DURATION) {
-          console.log("Explore state cache expired");
           set({ exploreState: null });
           return null;
         }
 
-        console.log("Returning cached explore state");
         return state;
       },
 
       clearCache: () => {
-        console.log("Clearing dataset store cache");
         set({ queries: {}, currentQuery: null, exploreState: null });
       },
     }),
