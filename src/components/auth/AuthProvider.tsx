@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { User, AuthError, AuthChangeEvent } from "@supabase/supabase-js";
-import { useToast } from "@/components/ui/use-toast";
+import type { User, AuthError } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
@@ -20,19 +19,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
 
   useEffect(() => {
     // Check active sessions
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Session error:", error);
-          throw error;
-        }
-
         if (session?.user) {
           setUser(session.user);
           // Only redirect if on public routes
@@ -41,25 +34,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         } else {
           setUser(null);
-          // Clear any stale auth data
-          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
-          
           if (location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/resetpassword') {
             navigate('/login', { replace: true });
           }
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error checking session:", error);
-        // Clear any stale auth data
-        localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
         setUser(null);
-        
-        toast({
-          title: "Session Error",
-          description: "Your session has expired. Please log in again.",
-          variant: "destructive"
-        });
-        
         navigate('/login', { replace: true });
       } finally {
         setLoading(false);
@@ -70,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session) => {
+      async (event, session) => {
         console.log("Auth state change:", event);
         
         if (session?.user) {
@@ -80,24 +61,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         } else {
           setUser(null);
-          if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          if (event === 'SIGNED_OUT') {
             // Clear auth-related items from localStorage
             localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
             navigate('/login', { replace: true });
           }
-        }
-        
-        // Handle specific auth events
-        switch (event) {
-          case 'TOKEN_REFRESHED':
-            console.log('Token was refreshed successfully');
-            break;
-          case 'SIGNED_OUT':
-            toast({
-              title: "Signed Out",
-              description: "You have been signed out successfully.",
-            });
-            break;
         }
         
         setLoading(false);
@@ -107,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, location.pathname, toast]);
+  }, [navigate, location.pathname]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>

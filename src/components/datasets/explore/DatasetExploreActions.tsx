@@ -24,7 +24,7 @@ export const DatasetExploreActions = ({
   const [showRetrieveDialog, setShowRetrieveDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
 
-  const handleRetrieve = () => {
+  const handleRetrieve = async () => {
     if (!selectedDataset) {
       toast({
         title: "No dataset selected",
@@ -33,133 +33,96 @@ export const DatasetExploreActions = ({
       });
       return;
     }
+
     setShowRetrieveDialog(true);
   };
 
   const handleConfirmRetrieve = async () => {
-    try {
-      // Check row count
-      const { data: countData, error: countError } = await supabase
-        .rpc('get_table_row_count', { table_name: selectedDataset });
-      
-      if (countError) {
-        toast({
-          title: "Error",
-          description: "Failed to check dataset size",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (countData > 500000) {
-        toast({
-          title: "Dataset too large",
-          description: "Cannot retrieve datasets with more than 500,000 rows. Please use the export feature instead.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      onRetrieve();
-      setShowRetrieveDialog(false);
-      
+    // Check row count
+    const { data: countData, error: countError } = await supabase
+      .rpc('get_table_row_count', { table_name: selectedDataset });
+    
+    if (countError) {
       toast({
-        title: "Success",
-        description: "Dataset retrieval initiated"
-      });
-    } catch (error: any) {
-      console.error("Error retrieving dataset:", error);
-      toast({
-        variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to retrieve dataset"
-      });
-    }
-  };
-
-  const handleExport = () => {
-    if (!selectedDataset) {
-      toast({
-        title: "No dataset selected",
-        description: "Please select a dataset first",
+        description: "Failed to check dataset size",
         variant: "destructive"
       });
       return;
     }
+    
+    if (countData > 500000) {
+      toast({
+        title: "Dataset too large",
+        description: "Cannot retrieve datasets with more than 500,000 rows. Please use the export feature instead.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    onRetrieve();
+    setShowRetrieveDialog(false);
+  };
+
+  const handleExport = () => {
     setShowExportDialog(true);
   };
 
   const handleConfirmExport = () => {
-    try {
-      onExport();
-      setShowExportDialog(false);
-      
-      toast({
-        title: "Success",
-        description: "Export initiated"
-      });
-    } catch (error: any) {
-      console.error("Error exporting dataset:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to export dataset"
-      });
-    }
+    onExport();
+    setShowExportDialog(false);
   };
 
   return (
     <>
-      <div className="space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRetrieve}
-          disabled={isLoading}
-          className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
-        >
-          <Database className="h-4 w-4 mr-2" />
-          Retrieve
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExport}
-          disabled={isLoading}
-          className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onShowQuery}
-          disabled={isLoading}
-          className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
-        >
-          <Code className="h-4 w-4 mr-2" />
-          Show Query
-        </Button>
-      </div>
-
-      <DatasetActionDialog
-        isOpen={showRetrieveDialog}
-        onClose={() => setShowRetrieveDialog(false)}
-        onConfirm={handleConfirmRetrieve}
-        title="Retrieve Dataset"
-        description="Are you sure you want to retrieve this dataset? This may take some time depending on the size of the data."
-        actionLabel="Retrieve"
-      />
-
-      <DatasetActionDialog
-        isOpen={showExportDialog}
-        onClose={() => setShowExportDialog(false)}
-        onConfirm={handleConfirmExport}
-        title="Export Dataset"
-        description="Are you sure you want to export this dataset?"
-        actionLabel="Export"
-      />
+    <div className="space-x-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleRetrieve}
+        disabled={isLoading}
+        className="bg-[#F97316] hover:bg-[#F97316]/90 text-white"
+      >
+        <Database className="h-4 w-4 mr-2" />
+        Retrieve
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleExport}
+        disabled={isLoading}
+        className="bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-black border-[#F2C94C]"
+      >
+        <Download className="h-4 w-4 mr-2" />
+        Export
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onShowQuery}
+        disabled={isLoading}
+        className="bg-[#4fd9e8]/20 hover:bg-[#4fd9e8]/30"
+      >
+        <Code className="h-4 w-4 mr-2" />
+        Show Query
+      </Button>
+    </div>
+    <DatasetActionDialog
+      isOpen={showRetrieveDialog}
+      onClose={() => setShowRetrieveDialog(false)}
+      onConfirm={handleConfirmRetrieve}
+      title="Retrieve Dataset"
+      description="Are you sure you want to retrieve this dataset? This may take some time depending on the size of the data."
+      actionLabel="Retrieve"
+    />
+    <DatasetActionDialog
+      isOpen={showExportDialog}
+      onClose={() => setShowExportDialog(false)}
+      onConfirm={handleConfirmExport}
+      title="Export Dataset"
+      description="Are you sure you want to export this dataset?"
+      actionLabel="Export"
+    />
     </>
   );
 };

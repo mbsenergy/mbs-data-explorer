@@ -1,3 +1,4 @@
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +31,9 @@ export const DatasetActionDialog = ({
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogTitle>
+            <VisuallyHidden>{title}</VisuallyHidden>
+          </AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
