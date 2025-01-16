@@ -53,6 +53,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       }
     }
     
+    console.log("Built query:", query);
     return query;
   };
 
@@ -129,7 +130,7 @@ export const useDatasetData = (selectedDataset: TableNames | null) => {
       const resultArray = queryResult as DataRow[] || [];
       console.log("Initial data loaded:", resultArray.length, "rows");
       
-      // Store in cache
+      // Store in cache and update local state
       addQueryResult(
         selectedDataset,
         resultArray,

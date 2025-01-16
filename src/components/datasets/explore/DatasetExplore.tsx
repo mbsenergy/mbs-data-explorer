@@ -79,7 +79,8 @@ export const DatasetExplore = ({
         console.log("Active filters for query:", activeFilters);
         
         // Execute query with filters
-        await loadData(activeFilters);
+        const newData = await loadData(activeFilters);
+        console.log("Query executed, received data:", newData?.length);
         
         if (onLoad) {
           onLoad(selectedDataset);
