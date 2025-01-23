@@ -1941,6 +1941,42 @@ export type Database = {
         }
         Relationships: []
       }
+      SC01_Grafici_report: {
+        Row: {
+          md_source: string | null
+          md_table: string | null
+          md_update: string | null
+          SCENARIO: string | null
+          UNIT: string | null
+          VALUE: number | null
+          VARIABLE: string | null
+          YEAR: number | null
+          ZONE: string | null
+        }
+        Insert: {
+          md_source?: string | null
+          md_table?: string | null
+          md_update?: string | null
+          SCENARIO?: string | null
+          UNIT?: string | null
+          VALUE?: number | null
+          VARIABLE?: string | null
+          YEAR?: number | null
+          ZONE?: string | null
+        }
+        Update: {
+          md_source?: string | null
+          md_table?: string | null
+          md_update?: string | null
+          SCENARIO?: string | null
+          UNIT?: string | null
+          VALUE?: number | null
+          VARIABLE?: string | null
+          YEAR?: number | null
+          ZONE?: string | null
+        }
+        Relationships: []
+      }
       scripts: {
         Row: {
           created_at: string
