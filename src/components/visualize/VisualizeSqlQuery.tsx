@@ -145,7 +145,7 @@ export const VisualizeSqlQuery = ({ onDataReceived }: VisualizeSqlQueryProps) =>
   return (
     <SqlQueryBox 
       onExecute={handleExecuteQuery} 
-      defaultValue="SELECT * FROM \"gdp_eurozone\" LIMIT 100" 
+      defaultValue={'SELECT * FROM "gdp_eurozone" LIMIT 100'} 
       isLoading={isLoading}
     />
   );
